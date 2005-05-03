@@ -9,3 +9,9 @@ libgstbuzztard_la_LIBADD = \
         $(BASE_DEPS_LIBS)
 
 libgstbuzztard_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS) -version-info @GST_PLUGINS_LIBVERSION@
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libgstbuzztard.pc
+
+EXTRA_DIST = \
+	libgstbuzztard.pc.in

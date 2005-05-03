@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.2 2005-04-30 13:51:27 ensonic Exp $
+# $Id: configure.ac,v 1.3 2005-05-03 22:12:01 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -96,7 +96,8 @@ AC_SUBST(GSTBT_ORIGIN)
 AC_SUBST(BASE_DEPS_LIBS)
 AC_SUBST(BASE_DEPS_CFLAGS)
 
-AC_CONFIG_FILES(\
+AC_CONFIG_FILES( \
+	libgstbuzztard.pc \
 	Makefile \
 	childbin/Makefile \
 )
