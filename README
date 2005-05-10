@@ -1,4 +1,4 @@
-$Id: README,v 1.1.1.1 2005-04-30 13:25:45 ensonic Exp $
+$Id: README,v 1.2 2005-05-10 14:12:51 ensonic Exp $
 
 = quick info =
 Please turn you browser to http://www.buzztard.org to learn what this project
@@ -7,3 +7,14 @@ is about. Buzztard is free software and distributed under the LGPL.
 = intro =
 This module contains experimental code that extends gstreamer. The extensions
 may be required to build a CVS version of buzztard.
+
+= installing locally =
+You can install this module locally too.
+Use following option for ./autogen.sh or ./configure
+  --prefix=/home/ensonic/buzztard
+When installing the package to e.g. $HOME/buzztard remember to set these
+environment options:
+devhelp:
+  export DEVHELP_SEARCH_PATH="$DEVHELP_SEARCH_PATH:$HOME/buzztard/share/gtk-doc/html"
+pkg-config:
+  export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOME/buzztard/lib/pkgconfig"
