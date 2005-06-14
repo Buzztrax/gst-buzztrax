@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.3 2005-05-03 22:12:01 ensonic Exp $
+# $Id: configure.ac,v 1.4 2005-06-14 08:24:30 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -68,6 +68,66 @@ AC_ISC_POSIX
 AC_PROG_LIBTOOL
 AM_PROG_CC_STDC
 
+# enable runtime debugging code
+AC_MSG_CHECKING(whether to enable runtime debugging code)
+AC_ARG_ENABLE(
+  debug,
+  AC_HELP_STRING([--enable-debug],[enable runtime debugging code (default=no)]),
+  ,
+  [enable_debug="no"])
+AC_MSG_RESULT($enable_debug)
+if test "$enable_debug" = "yes"; then
+  AC_DEFINE(APP_DEBUG, [1], [enable runtime debugging code])
+  DEBUG_CFLAGS="-O0 -Wall -Werror -g"
+else
+  AC_DEFINE(G_DISABLE_ASSERT, [1], [if no runtime debugging, do not enable g_asserts])
+  AC_DEFINE(G_DISABLE_CHECKS, [1], [if no runtime debugging, do not enable g_return_if_fail variants])
+  AC_DEFINE(G_DISABLE_CAST_CHECKS, [1], [if no runtime debugging, do not enable dynamic type checks])
+  DEBUG_CFLAGS=""
+fi
+
+
+# compile with disable-deprecated switches
+AC_MSG_CHECKING([whether to disable deprecated glib/gtk+/gst/etc. features])
+AC_ARG_ENABLE(deprecated,
+	AC_HELP_STRING([--disable-deprecated],[disable deprecated glib/gtk+/gst/etc. features]),
+	set_enable_deprecated="$enableval",[
+		if test -f $srcdir/autogen.sh; then
+			is_cvs_version=true
+			set_enable_deprecated=no
+		else
+			set_enable_deprecated=yes
+		fi
+	]
+)
+if test "$set_enable_deprecated" != "yes"; then
+	AC_MSG_RESULT(yes)
+	BT_DISABLE_DEPRECATED="-DG_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DGST_DISABLE_DEPRECATED"
+else
+	AC_MSG_RESULT(no)
+	BT_DISABLE_DEPRECATED=""
+fi
+AC_SUBST(BT_DISABLE_DEPRECATED)
+
+
+# enable coverage analysis
+AC_MSG_CHECKING(whether to enable coverage analysis)
+AC_ARG_ENABLE(
+  coverage,
+  AC_HELP_STRING([--enable-coverage],[enable coverage analysis (default=no)]),
+  ,
+  [enable_coverage="no"])
+AC_MSG_RESULT($enable_coverage)
+if test "$enable_coverage" = "yes"; then
+  #AC_DEFINE(APP_COVERAGE, [1], [enable coverage analysis])
+  AM_CONDITIONAL(USE_COVERAGE, true)
+  COVERAGE_CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+else
+  AM_CONDITIONAL(USE_COVERAGE, false)
+  COVERAGE_CFLAGS=""
+fi
+
+
 # Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= 2.2.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
@@ -76,6 +136,9 @@ PKG_CHECK_MODULES(BASE_DEPS, \
 
 plugindir="\$(libdir)/gstreamer-$GST_MAJORMINOR"
 AC_SUBST(plugindir)
+
+GST_PLUGIN_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS $BT_DISABLE_DEPRECATED"
+AC_SUBST(GST_PLUGIN_CFLAGS)
 
 GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*'"
 AC_SUBST(GST_PLUGIN_LDFLAGS)
