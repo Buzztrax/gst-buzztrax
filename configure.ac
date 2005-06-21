@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.4 2005-06-14 08:24:30 ensonic Exp $
+# $Id: configure.ac,v 1.5 2005-06-21 20:38:02 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -132,7 +132,7 @@ fi
 PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= 2.2.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
   gstreamer-0.8 >= 0.8 gstreamer-interfaces-0.8 >= 0.8 \
-	)
+)
 
 plugindir="\$(libdir)/gstreamer-$GST_MAJORMINOR"
 AC_SUBST(plugindir)
@@ -163,5 +163,7 @@ AC_CONFIG_FILES( \
 	libgstbuzztard.pc \
 	Makefile \
 	childbin/Makefile \
+	parametermeta/Makefile \
+	tempo/Makefile \
 )
 AC_OUTPUT
