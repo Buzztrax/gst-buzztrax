@@ -1,4 +1,4 @@
-SUBDIRS = childbin parametermeta tempo
+SUBDIRS = childbin propertymeta tempo
 
 lib_LTLIBRARIES = libgstbuzztard.la
 
@@ -6,7 +6,7 @@ libgstbuzztard_la_SOURCES =
 
 libgstbuzztard_la_LIBADD = \
     childbin/libgstchildbin.la \
-    parametermeta/libgstparametermeta.la \
+    propertymeta/libgstpropertymeta.la \
     tempo/libgsttempo.la \
     $(BASE_DEPS_LIBS)
 

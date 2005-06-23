@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.5 2005-06-21 20:38:02 ensonic Exp $
+# $Id: configure.ac,v 1.6 2005-06-23 20:48:55 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -163,7 +163,7 @@ AC_CONFIG_FILES( \
 	libgstbuzztard.pc \
 	Makefile \
 	childbin/Makefile \
-	parametermeta/Makefile \
+	propertymeta/Makefile \
 	tempo/Makefile \
 )
 AC_OUTPUT
