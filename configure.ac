@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.6 2005-06-23 20:48:55 ensonic Exp $
+# $Id: configure.ac,v 1.7 2005-06-29 09:20:17 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -131,7 +131,7 @@ fi
 # Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= 2.2.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
-  gstreamer-0.8 >= 0.8 gstreamer-interfaces-0.8 >= 0.8 \
+  gstreamer-0.8 >= 0.8.10 gstreamer-interfaces-0.8 >= 0.8 \
 )
 
 plugindir="\$(libdir)/gstreamer-$GST_MAJORMINOR"
