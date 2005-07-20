@@ -10,7 +10,7 @@ libgstbuzztard_la_LIBADD = \
     tempo/libgsttempo.la \
     $(BASE_DEPS_LIBS)
 
-libgstbuzztard_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstbuzztard_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgstbuzztard.pc

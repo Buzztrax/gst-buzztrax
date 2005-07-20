@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.7 2005-06-29 09:20:17 ensonic Exp $
+# $Id: configure.ac,v 1.8 2005-07-20 16:58:48 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -133,27 +133,6 @@ PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= 2.2.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
   gstreamer-0.8 >= 0.8.10 gstreamer-interfaces-0.8 >= 0.8 \
 )
-
-plugindir="\$(libdir)/gstreamer-$GST_MAJORMINOR"
-AC_SUBST(plugindir)
-
-GST_PLUGIN_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS $BT_DISABLE_DEPRECATED"
-AC_SUBST(GST_PLUGIN_CFLAGS)
-
-GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*'"
-AC_SUBST(GST_PLUGIN_LDFLAGS)
-
-# forward some setting to config.h
-#AC_DEFINE_UNQUOTED(GSTBT_MAJOR_VERSION, $GSTBT_MAJOR_VERSION, [BuzzMachine loader major version])
-#AC_DEFINE_UNQUOTED(GSTBT_MINOR_VERSION, $GSTBT_MINOR_VERSION, [BuzzMachine loader minor version])
-
-dnl set license and copyright notice
-AC_DEFINE(GSTBT_LICENSE, "LGPL", [Buzztard gstreamer extension module license])
-AC_SUBST(GSTBT_LICENSE)
-
-dnl set license and copyright notice
-AC_DEFINE(GSTBT_ORIGIN, "http://www.buzztard.org", [Buzztard gstreamer extension module origin])
-AC_SUBST(GSTBT_ORIGIN)
 
 # Substitutes
 AC_SUBST(BASE_DEPS_LIBS)
