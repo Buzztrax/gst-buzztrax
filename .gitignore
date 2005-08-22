@@ -27,3 +27,5 @@ mkinstalldirs
 coverage
 *.log
 *.cache
+*.la
+*.pc
