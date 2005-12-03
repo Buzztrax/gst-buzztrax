@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.9 2005-08-22 21:05:19 ensonic Exp $
+# $Id: configure.ac,v 1.10 2005-12-03 16:28:05 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -25,10 +25,10 @@ GSTBT_VERSION_NUMBER=`expr $GSTBT_MAJOR_VERSION \* 10000 + $GSTBT_MINOR_VERSION 
 dnl our libraries and install dirs use major.minor as a version
 GSTBT_MAJORMINOR=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION
 dnl we override it here for release candidates
-#GSTBT_MAJORMINOR=0.9
+#GSTBT_MAJORMINOR=0.10
 
 dnl that is needed to figure the directory name, where the plugin goes to
-GST_MAJORMINOR=0.9
+GST_MAJORMINOR=0.10
 AC_SUBST(GST_MAJORMINOR)
 
 AC_SUBST(GSTBT_MAJOR_VERSION)
@@ -131,7 +131,7 @@ fi
 # Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= 2.2.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
-  gstreamer-0.9 >= 0.9
+  gstreamer-0.10 >= 0.9.7
 )
 
 # Substitutes
