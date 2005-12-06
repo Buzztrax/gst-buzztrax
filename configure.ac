@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.10 2005-12-03 16:28:05 ensonic Exp $
+# $Id: configure.ac,v 1.11 2005-12-06 10:39:45 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -131,7 +131,7 @@ fi
 # Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= 2.2.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
-  gstreamer-0.10 >= 0.9.7
+  gstreamer-0.10 >= 0.10.0
 )
 
 # Substitutes
