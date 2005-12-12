@@ -1,0 +1,7 @@
+#include <childbin/childbin.h>
+#include <propertymeta/propertymeta.h>
+#include <tempo/tempo.h>
+
+gst_child_bin_get_type
+gst_property_meta_get_type
+gst_tempo_get_type

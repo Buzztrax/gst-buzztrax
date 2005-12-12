@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.11 2005-12-06 10:39:45 ensonic Exp $
+# $Id: configure.ac,v 1.12 2005-12-12 22:22:19 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -127,12 +127,57 @@ else
   COVERAGE_CFLAGS=""
 fi
 
+# valgrind integration for tests
+AC_MSG_CHECKING(where Valgrind is installed on your system)
+AC_ARG_WITH([valgrind],
+        AC_HELP_STRING([--with-valgrind],
+        [where Valgrind is installed on your system (default is no)]),
+        [ac_cv_use_valgrind=$withval], [ac_cv_use_valgrind=no])dnl
+AC_MSG_RESULT($ac_cv_use_valgrind)
+VALGRIND=$ac_cv_use_valgrind
+AC_SUBST(VALGRIND)dnl
+AM_CONDITIONAL(USE_VALGRIND, test x$VALGRIND != xno)dnl
+
+VALGRIND_CPPFLAGS=
+if test $ac_cv_use_valgrind != no; then
+   AC_DEFINE(HAVE_VALGRIND, 1, [Define to 1 if valgrind is to be used.])
+   if test -f $ac_cv_use_valgrind/valgrind.h; then
+      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind
+   elif test -f $ac_cv_use_valgrind/include/valgrind.h; then
+      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind/include
+   elif test -f $ac_cv_use_valgrind/valgrind/valgrind.h; then
+      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind/valgrind
+   elif test -f $ac_cv_use_valgrind/include/valgrind/valgrind.h; then
+      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind/include/valgrind
+   elif test -f $ac_cv_use_valgrind/valgrind/include/valgrind.h; then
+      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind/valgrind/include
+   fi
+fi
+AC_SUBST(VALGRIND_CFLAGS)dnl
 
 # Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
-  glib-2.0 >= 2.2.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
+  glib-2.0 >= 2.2.0 gobject-2.0  >= 2.6.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
   gstreamer-0.10 >= 0.10.0
 )
+
+glib_prefix="`pkg-config --variable=prefix glib-2.0`"
+gst_prefix="`pkg-config --variable=prefix gstreamer-0.10`"
+AC_SUBST(glib_prefix)
+AC_SUBST(gst_prefix)
+
+# test for availability of check unittest package (with a relative new function)
+# @todo: if we configure without --enable-debug most tests wont work
+AC_CHECK_HEADER( check.h, \
+  AC_CHECK_LIB( check, tcase_set_timeout, \
+    AM_CONDITIONAL(BUILD_CHECK_TESTS, true), \
+    AM_CONDITIONAL(BUILD_CHECK_TESTS, false) \
+  ), \
+  AM_CONDITIONAL(BUILD_CHECK_TESTS, false) \
+)
+
+# Check for gtk-doc.
+GTK_DOC_CHECK(1.4)
 
 # Substitutes
 AC_SUBST(BASE_DEPS_LIBS)
@@ -144,5 +189,7 @@ AC_CONFIG_FILES( \
 	childbin/Makefile \
 	propertymeta/Makefile \
 	tempo/Makefile \
+	docs/Makefile \
+	docs/reference/Makefile
 )
 AC_OUTPUT

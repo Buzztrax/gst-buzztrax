@@ -1,4 +1,4 @@
-SUBDIRS = childbin propertymeta tempo
+SUBDIRS = childbin propertymeta tempo docs
 
 lib_LTLIBRARIES = libgstbuzztard.la
 

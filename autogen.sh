@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autogen.sh,v 1.1 2005-04-30 13:51:27 ensonic Exp $
+# $Id: autogen.sh,v 1.2 2005-12-12 22:22:19 ensonic Exp $
 # Run this to generate all the initial makefiles, etc.
 
 DIE=0
@@ -318,6 +318,8 @@ version_check "automake" "$AUTOMAKE automake automake-1.7 automake17 automake-1.
               "ftp://ftp.gnu.org/pub/gnu/automake/" 1 6 || DIE=1
 #version_check "autopoint" "autopoint" \
 #              "ftp://ftp.gnu.org/pub/gnu/gettext/" 0 12 1 || DIE=1
+version_check "gtkdocize" "" \
+              "ftp://ftp.gnome.org/pub/gnome/sources/gtk-doc/" 1 4
 version_check "libtoolize" "libtoolize" \
               "ftp://ftp.gnu.org/pub/gnu/libtool/" 1 5 0 || DIE=1
 version_check "pkg-config" "" \
@@ -352,6 +354,9 @@ if test -f acinclude.m4; then rm acinclude.m4; fi
 tool_run "$aclocal" "$ACLOCAL_FLAGS"
 
 tool_run "$libtoolize" "--copy --force"
+if test -n "$gtkdocize"; then
+  tool_run "$gtkdocize" "--copy"
+fi
 tool_run "$autoheader"
 
 # touch the stamp-h.in build stamp so we don't re-run autoheader in maintainer mode -- wingo
