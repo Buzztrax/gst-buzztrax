@@ -1,35 +1,32 @@
 <SECTION>
 <FILE>tempo</FILE>
-GST_TEMPO_GET_INTERFACE
-GstTempo
-GstTempoInterface
 gst_tempo_change_tempo
 <SUBSECTION Standard>
+GstTempo
+GstTempoInterface
 GST_TEMPO
 GST_IS_TEMPO
 GST_TYPE_TEMPO
+GST_TEMPO_GET_INTERFACE
 gst_tempo_get_type
 </SECTION>
 
 <SECTION>
 <FILE>childbin</FILE>
-GST_CHILD_BIN_GET_INTERFACE
-GstChildBin
-GstChildBinInterface
 gst_child_bin_add_child
 gst_child_bin_remove_child
 <SUBSECTION Standard>
+GstChildBin
+GstChildBinInterface
 GST_CHILD_BIN
 GST_IS_CHILD_BIN
 GST_TYPE_CHILD_BIN
+GST_CHILD_BIN_GET_INTERFACE
 gst_child_bin_get_type
 </SECTION>
 
 <SECTION>
 <FILE>propertymeta</FILE>
-GST_PROPERTY_META_GET_INTERFACE
-GstPropertyMeta
-GstPropertyMetaInterface
 gst_property_meta_describe_property
 gst_property_meta_quark_min_val
 gst_property_meta_quark_max_val
@@ -37,9 +34,11 @@ gst_property_meta_quark_def_val
 gst_property_meta_quark_no_val
 gst_property_meta_quark_flags
 <SUBSECTION Standard>
+GstPropertyMeta
+GstPropertyMetaInterface
 GST_PROPERTY_META
 GST_IS_PROPERTY_META
 GST_TYPE_PROPERTY_META
+GST_PROPERTY_META_GET_INTERFACE
 gst_property_meta_get_type
 </SECTION>
-
