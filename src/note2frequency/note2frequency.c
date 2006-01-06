@@ -22,3 +22,11 @@
  * SECTION:note2frequency
  * @short_description: helper class for unit conversion
  */
+
+/*
+
+GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning);
+
+double gst_note_2_frequency_translate(GstNote2Frequency *self,gchar *note);
+
+*/

@@ -26,6 +26,11 @@
 
 G_BEGIN_DECLS
 
+enum GstNote2FrequencyTuning {
+  GST_NOTE_2_FREQUENCY_CROMATIC=0,
+  /* @todo: add more */
+}
+
 G_END_DECLS
 
 #endif /* __GST_NOTE_2_FREQUENCY_H__ */
