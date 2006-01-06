@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.12 2005-12-12 22:22:19 ensonic Exp $
+# $Id: configure.ac,v 1.13 2006-01-06 17:28:32 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -186,10 +186,12 @@ AC_SUBST(BASE_DEPS_CFLAGS)
 AC_CONFIG_FILES( \
 	libgstbuzztard.pc \
 	Makefile \
-	childbin/Makefile \
-	propertymeta/Makefile \
-	tempo/Makefile \
 	docs/Makefile \
-	docs/reference/Makefile
+	docs/reference/Makefile \
+	src/Makefile \
+	src/childbin/Makefile \
+	src/note2frequency/Makefile \
+	src/propertymeta/Makefile \
+	src/tempo/Makefile
 )
 AC_OUTPUT
