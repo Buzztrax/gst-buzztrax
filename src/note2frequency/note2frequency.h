@@ -22,14 +22,53 @@
 #ifndef __GST_NOTE_2_FREQUENCY_H__
 #define __GST_NOTE_2_FREQUENCY_H__
 
+#include <glib.h>
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-enum GstNote2FrequencyTuning {
+#define GST_TYPE_NOTE_2_FREQUENCY_TUNING     (gst_note_2_frequency_tuning_get_type())
+
+typedef enum {
+  /* 12 tones with equal distance */
   GST_NOTE_2_FREQUENCY_CROMATIC=0,
   /* @todo: add more */
-}
+} GstNote2FrequencyTuning;
+
+#define GST_TYPE_NOTE_2_FREQUENCY            (gst_note_2_frequency_get_type ())
+#define GST_NOTE_2_FREQUENCY(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_NOTE_2_FREQUENCY, GstNote2Frequency))
+#define GST_NOTE_2_FREQUENCY_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GST_TYPE_NOTE_2_FREQUENCY, GstNote2FrequencyClass))
+#define GST_IS_NOTE_2_FREQUENCY(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_NOTE_2_FREQUENCY))
+#define GST_IS_NOTE_2_FREQUENCY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GST_TYPE_NOTE_2_FREQUENCY))
+#define GST_NOTE_2_FREQUENCY_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), GST_TYPE_NOTE_2_FREQUENCY, GstNote2FrequencyClass))
+
+typedef struct _GstNote2Frequency GstNote2Frequency;
+typedef struct _GstNote2FrequencyClass GstNote2FrequencyClass;
+
+/**
+ * GstNote2Frequency:
+ */
+struct _GstNote2Frequency {
+  GObject parent;
+  
+  /*< private >*/
+  GstNote2FrequencyTuning tuning;
+  /* used to validate if dispose has run */
+  gboolean dispose_has_run;
+  /* translate callback */
+  gdouble (*translate)(GstNote2Frequency*, gchar *);
+};
+
+struct _GstNote2FrequencyClass {
+  GObjectClass parent;
+  
+};
+
+GType gst_note_2_frequency_get_type(void) G_GNUC_CONST;
+GType gst_note_2_frequency_tuning_get_type(void) G_GNUC_CONST;
+
+GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning);
+gdouble gst_note_2_frequency_translate(GstNote2Frequency *self,gchar *note);
 
 G_END_DECLS
 

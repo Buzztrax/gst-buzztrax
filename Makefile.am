@@ -1,4 +1,4 @@
-SUBDIRS = src docs
+SUBDIRS = src docs tests
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgstbuzztard.pc

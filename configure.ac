@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.13 2006-01-06 17:28:32 ensonic Exp $
+# $Id: configure.ac,v 1.14 2006-01-07 16:50:04 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -192,6 +192,7 @@ AC_CONFIG_FILES( \
 	src/childbin/Makefile \
 	src/note2frequency/Makefile \
 	src/propertymeta/Makefile \
-	src/tempo/Makefile
+	src/tempo/Makefile \
+	tests/Makefile
 )
 AC_OUTPUT

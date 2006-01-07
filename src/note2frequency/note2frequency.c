@@ -23,10 +23,226 @@
  * @short_description: helper class for unit conversion
  */
 
-/*
+#include "note2frequency.h"
+#include "math.h"
+#include "string.h"
 
-GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning);
+//-- signal ids
 
-double gst_note_2_frequency_translate(GstNote2Frequency *self,gchar *note);
+//-- property ids
 
-*/
+enum {
+  GST_NOTE_2_FREQUENCY_TUNING=1
+};
+
+static GObjectClass *parent_class=NULL;
+
+//-- enums
+
+GType gst_note_2_frequency_tuning_get_type(void) {
+  static GType type = 0;
+  if(type==0) {
+    static GEnumValue values[] = {
+      { GST_NOTE_2_FREQUENCY_CROMATIC,"GST_NOTE_2_FREQUENCY_CROMATIC","cromatic tuning" },
+      { 0, NULL, NULL},
+    };
+    type = g_enum_register_static("GstNote2FrequencyTuning", values);
+  }
+  return type;
+}
+
+//-- constructor methods
+
+GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning) {
+  GstNote2Frequency *self;
+  
+  if(!(self=GST_NOTE_2_FREQUENCY(g_object_new(GST_TYPE_NOTE_2_FREQUENCY,"tuning",tuning,NULL)))) {
+    goto Error;
+  }  
+  return(self);
+Error:
+  return(NULL);
+}
+
+//-- methods
+
+static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,gchar *note) {
+  gdouble frequency=0.0, step;
+  gint tone=-1, octave, steps, i;
+  
+  g_return_val_if_fail(note,0.0);
+  g_return_val_if_fail((strlen(note)==3),0.0);
+  g_return_val_if_fail((note[1]=='-' || note[1]=='#'),0.0);
+  
+  // parse note
+  switch(note[0]) {
+	case 'c':
+	case 'C':
+	  tone=(note[2]=='-')?0:1;
+	  break;
+	case 'd':
+	case 'D':
+	  tone=(note[2]=='-')?2:3;
+	  break;
+	case 'e':
+	case 'E':
+	  tone=4;
+	  break;
+	case 'f':
+	case 'F':
+	  tone=(note[2]=='-')?5:6;
+	  break;
+	case 'g':
+	case 'G':
+	  tone=(note[2]=='-')?7:8;
+	  break;
+	case 'a':
+	case 'A':
+	  tone=(note[2]=='-')?9:10;
+	  break;
+	case 'b':
+	case 'B':
+	case 'h':
+	case 'H':
+	  tone=11;
+	  break;
+  }
+  g_return_val_if_fail(tone!=-1,0.0);
+  octave=atoi(&note[2]);
+  /* calculated base frequency A-0=55 Hz*/
+  frequency=(gdouble)(55<<octave);
+  /* do tone stepping */
+  step=pow(2.0,(1.0/12.0));
+  if(tone<=9) {
+	// go down
+	steps=9-tone;
+	for(i=0;i<steps;i++) frequency/=step;
+  }
+  else {
+	// go up
+	steps=tone-9;
+	for(i=0;i<steps;i++) frequency*=step;
+  }
+  return(frequency);
+}
+
+static gst_note_2_frequency_change_tuning(GstNote2Frequency *self) {
+  switch(self->tuning) {
+	case GST_NOTE_2_FREQUENCY_CROMATIC:
+	  self->translate=gst_note_2_frequency_translate_cromatic;
+	  break;
+  }
+}
+
+gdouble gst_note_2_frequency_translate(GstNote2Frequency *self,gchar *note) {
+  return(self->translate(self,note));
+}
+
+//-- wrapper
+
+//-- class internals
+
+/* returns a property for the given property_id for this object */
+static void gst_note_2_frequency_get_property(GObject      *object,
+                               guint         property_id,
+                               GValue       *value,
+                               GParamSpec   *pspec)
+{
+  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(object);
+  
+  if(self->dispose_has_run) return;
+	
+  switch (property_id) {
+    case GST_NOTE_2_FREQUENCY_TUNING: {
+      g_value_set_enum(value, self->tuning);
+    } break;
+    default: {
+       G_OBJECT_WARN_INVALID_PROPERTY_ID(object,property_id,pspec);
+    } break;
+  }
+}
+
+/* sets the given properties for this object */
+static void gst_note_2_frequency_set_property(GObject      *object,
+                              guint         property_id,
+                              const GValue *value,
+                              GParamSpec   *pspec)
+{
+  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(object);
+  
+  if(self->dispose_has_run) return;
+	
+  switch (property_id) {
+    case GST_NOTE_2_FREQUENCY_TUNING: {
+      self->tuning = g_value_get_enum(value);
+	  gst_note_2_frequency_change_tuning(self);
+    } break;
+    default: {
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object,property_id,pspec);
+    } break;
+  }
+}
+
+static void gst_note_2_frequency_dispose(GObject *object) {
+  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(object);
+
+  if(self->dispose_has_run) return;
+  self->dispose_has_run = TRUE;
+  
+  if(G_OBJECT_CLASS(parent_class)->dispose) {
+    (G_OBJECT_CLASS(parent_class)->dispose)(object);
+  }
+}
+
+static void gst_note_2_frequency_finalize(GObject *object) {
+  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(object);
+
+  if(G_OBJECT_CLASS(parent_class)->finalize) {
+    (G_OBJECT_CLASS(parent_class)->finalize)(object);
+  }
+}
+
+static void gst_note_2_frequency_init(GTypeInstance *instance, gpointer g_class) {
+  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(instance);
+  self->dispose_has_run = FALSE;
+}
+
+static void gst_note_2_frequency_class_init(GstNote2FrequencyClass *klass) {
+  GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+  parent_class=g_type_class_ref(G_TYPE_OBJECT);
+  
+  gobject_class->set_property = gst_note_2_frequency_set_property;
+  gobject_class->get_property = gst_note_2_frequency_get_property;
+  gobject_class->dispose      = gst_note_2_frequency_dispose;
+  gobject_class->finalize     = gst_note_2_frequency_finalize;
+
+  g_object_class_install_property(gobject_class,GST_NOTE_2_FREQUENCY_TUNING,
+                                  g_param_spec_enum("tuning",
+                                    "tuning prop",
+                                    "selection frequency tuning table",
+                                    GST_TYPE_NOTE_2_FREQUENCY_TUNING,
+									GST_NOTE_2_FREQUENCY_CROMATIC,
+                                    G_PARAM_READWRITE));
+
+}
+
+GType gst_note_2_frequency_get_type(void) {
+  static GType type = 0;
+  if (type == 0) {
+    static const GTypeInfo info = {
+      sizeof(GstNote2FrequencyClass),
+      NULL, // base_init
+      NULL, // base_finalize
+      (GClassInitFunc)gst_note_2_frequency_class_init, // class_init
+      NULL, // class_finalize
+      NULL, // class_data
+      sizeof(GstNote2Frequency),
+      0,   // n_preallocs
+      (GInstanceInitFunc)gst_note_2_frequency_init, // instance_init
+      NULL // value_table
+    };
+    type = g_type_register_static(G_TYPE_OBJECT,"GstNote2Frequency",&info,0);
+  }
+  return type;
+}
