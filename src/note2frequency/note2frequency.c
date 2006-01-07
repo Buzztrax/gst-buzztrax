@@ -78,11 +78,11 @@ static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,g
   switch(note[0]) {
 	case 'c':
 	case 'C':
-	  tone=(note[2]=='-')?0:1;
+	  tone=(note[1]=='-')?0:1;
 	  break;
 	case 'd':
 	case 'D':
-	  tone=(note[2]=='-')?2:3;
+	  tone=(note[1]=='-')?2:3;
 	  break;
 	case 'e':
 	case 'E':
@@ -90,15 +90,15 @@ static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,g
 	  break;
 	case 'f':
 	case 'F':
-	  tone=(note[2]=='-')?5:6;
+	  tone=(note[1]=='-')?5:6;
 	  break;
 	case 'g':
 	case 'G':
-	  tone=(note[2]=='-')?7:8;
+	  tone=(note[1]=='-')?7:8;
 	  break;
 	case 'a':
 	case 'A':
-	  tone=(note[2]=='-')?9:10;
+	  tone=(note[1]=='-')?9:10;
 	  break;
 	case 'b':
 	case 'B':

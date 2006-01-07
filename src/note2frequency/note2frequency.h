@@ -29,8 +29,11 @@ G_BEGIN_DECLS
 
 #define GST_TYPE_NOTE_2_FREQUENCY_TUNING     (gst_note_2_frequency_tuning_get_type())
 
+/*
+ * see http://en.wikipedia.org/wiki/Musical_tuning
+ */
 typedef enum {
-  /* 12 tones with equal distance */
+  /* 12 tones with equal distance (equal temperament) */
   GST_NOTE_2_FREQUENCY_CROMATIC=0,
   /* @todo: add more */
 } GstNote2FrequencyTuning;

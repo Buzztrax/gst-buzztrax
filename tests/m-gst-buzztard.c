@@ -1,4 +1,4 @@
-/* $Id: m-gst-buzztard.c,v 1.1 2006-01-07 16:50:05 ensonic Exp $
+/* $Id: m-gst-buzztard.c,v 1.2 2006-01-07 17:33:28 ensonic Exp $
  * package unit tests
  */
 
@@ -8,8 +8,10 @@
 #include <unistd.h>
 #include "check.h"
 #include "glib.h"
+#include "gst/gst.h"
 
-//GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
+#define GST_CAT_DEFAULT gst_buzztard_debug
+GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
 
 extern Suite *gst_buzztard_note2frequency_suite(void);
 
@@ -20,15 +22,13 @@ gchar **test_argvptr;
 
 /* common setup and teardown code */
 void gst_buzztard_setup(void) {
-  /*
   gst_init(&test_argc,&test_argvptr);
   GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "bt-check", 0, "music production environment / unit tests");
   // set this to e.g. DEBUG to see more from gst in the log
   gst_debug_set_threshold_for_name("GST_*",GST_LEVEL_WARNING);
-  gst_debug_category_set_threshold(bt_check_debug,GST_LEVEL_DEBUG);
+  gst_debug_category_set_threshold(gst_buzztard_debug,GST_LEVEL_DEBUG);
   // no ansi color codes in logfiles please
   gst_debug_set_colored(FALSE);
-  */
 }
 
 void gst_buzztard_teardown(void) {

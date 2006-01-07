@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.1 2006-01-07 16:50:05 ensonic Exp $
+## $Id: Makefile.am,v 1.2 2006-01-07 17:33:28 ensonic Exp $
 
 if BUILD_CHECK_TESTS
   TESTS_BIN = gst_buzztard
@@ -20,7 +20,7 @@ gst_buzztard_LDADD = \
 	$(top_builddir)/src/libgstbuzztard.la \
     $(BASE_DEPS_LIBS) -lcheck
 gst_buzztard_SOURCES= m-gst-buzztard.c m-gst-buzztard.h \
-	s-gst-note2frequency.c e-gst-note2frequency.c
+	s-gst-note2frequency.c e-gst-note2frequency.c t-gst-note2frequency.c
 	
 INCLUDES = \
 	-I@srcdir@ -I$(top_srcdir)/src \

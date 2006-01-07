@@ -1,14 +1,15 @@
-/* $Id: m-gst-buzztard.h,v 1.1 2006-01-07 16:50:05 ensonic Exp $ */
+/* $Id: m-gst-buzztard.h,v 1.2 2006-01-07 17:33:28 ensonic Exp $ */
 
 #include <signal.h>
 #include "check.h"
 #include "glib.h"
+#include "gst/gst.h"
 
 #include "note2frequency/note2frequency.h"
 
 //-- globals
 
-//GST_DEBUG_CATEGORY_EXTERN(bt_core_debug);
+GST_DEBUG_CATEGORY_EXTERN(gst_buzztard_debug);
 
 //-- prototypes
 
