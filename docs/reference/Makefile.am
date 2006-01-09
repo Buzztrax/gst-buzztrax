@@ -3,11 +3,6 @@
 # We require automake 1.6 at least.
 AUTOMAKE_OPTIONS = 1.6
 
-# This is a blank Makefile.am for using gtk-doc.
-# Copy this to your project's API docs directory and modify the variables to
-# suit your project. See the GTK+ Makefiles in gtk+/docs/reference for examples
-# of using the various options.
-
 # The name of the module, e.g. 'glib'.
 DOC_MODULE=gst-buzztard
 
@@ -17,7 +12,6 @@ DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.sgml
 # The directory containing the source code. Relative to $(srcdir).
 # gtk-doc will search all .c & .h files beneath here for inline comments
 # documenting the functions and macros.
-# e.g. DOC_SOURCE_DIR=../../../gtk
 DOC_SOURCE_DIR=$(top_srcdir)/src
 
 # Extra options to pass to gtkdoc-scangobj. Not normally needed.
@@ -42,8 +36,6 @@ FIXXREF_OPTIONS=--extra-dir=$(glib_prefix)/share/gtk-doc/html/gobject \
 	--extra-dir=$(gst_prefix)/share/gtk-doc/html/gstreamer-libs
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
-# e.g. HFILE_GLOB=$(top_srcdir)/gtk/*.h
-# e.g. CFILE_GLOB=$(top_srcdir)/gtk/*.c
 HFILE_GLOB=$(top_srcdir)/src/*/*.h
 CFILE_GLOB=$(top_srcdir)/src/*/*.c
 

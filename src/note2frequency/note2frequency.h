@@ -29,7 +29,11 @@ G_BEGIN_DECLS
 
 #define GST_TYPE_NOTE_2_FREQUENCY_TUNING     (gst_note_2_frequency_tuning_get_type())
 
-/*
+/**
+ * GstNote2FrequencyTuning:
+ * @GST_NOTE_2_FREQUENCY_CROMATIC: 12 tones with equal distance (equal temperament)
+ *
+ * Supported tuning types.
  * see http://en.wikipedia.org/wiki/Musical_tuning
  */
 typedef enum {
@@ -59,7 +63,7 @@ struct _GstNote2Frequency {
   /* used to validate if dispose has run */
   gboolean dispose_has_run;
   /* translate callback */
-  gdouble (*translate)(GstNote2Frequency*, gchar *);
+  gdouble (*translate)(GstNote2Frequency*, guint, guint);
 };
 
 struct _GstNote2FrequencyClass {
@@ -71,7 +75,8 @@ GType gst_note_2_frequency_get_type(void) G_GNUC_CONST;
 GType gst_note_2_frequency_tuning_get_type(void) G_GNUC_CONST;
 
 GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning);
-gdouble gst_note_2_frequency_translate(GstNote2Frequency *self,gchar *note);
+gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar *note);
+gdouble gst_note_2_frequency_translate_from_number(GstNote2Frequency *self,guint note);
 
 G_END_DECLS
 

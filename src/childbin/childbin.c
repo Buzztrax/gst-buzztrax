@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:childbin
+ * SECTION:gstchildbin
  * @short_description: helper interface for multi child gstreamer elements
  *
  * This interface provides an extension to the #GstChildProxy interface, which

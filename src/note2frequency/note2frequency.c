@@ -19,8 +19,11 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:note2frequency
+ * SECTION:gstnote2frequency
  * @short_description: helper class for unit conversion
+ *
+ * An instance of this class can translate a musical note to a frequency, while
+ * taking a specific tuning into account.
  */
 
 #include "note2frequency.h"
@@ -53,6 +56,15 @@ GType gst_note_2_frequency_tuning_get_type(void) {
 
 //-- constructor methods
 
+/**
+ * gst_note_2_frequency_new:
+ * @tuning: the #GstNote2FrequencyTuning to use
+ *
+ * Create a new instance of a note to frequency translator, that will use the
+ * given @tuning.
+ *
+ * Returns: a new #GstNote2Frequency translator
+ */
 GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning) {
   GstNote2Frequency *self;
   
@@ -66,14 +78,55 @@ Error:
 
 //-- methods
 
-static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,gchar *note) {
+static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,guint octave, guint tone) {
   gdouble frequency=0.0, step;
-  gint tone=-1, octave, steps, i;
+  guint steps, i;
+
+  g_assert(tone<12);
+  g_assert(octave<10);
+    
+  /* calculated base frequency A-0=55 Hz*/
+  frequency=(gdouble)(55<<octave);
+  /* do tone stepping */
+  step=pow(2.0,(1.0/12.0));
+  if(tone<=9) {
+	// go down
+	steps=9-tone;
+	for(i=0;i<steps;i++) frequency/=step;
+  }
+  else {
+	// go up
+	steps=tone-9;
+	for(i=0;i<steps;i++) frequency*=step;
+  }
+  return(frequency);
+}
+
+static gst_note_2_frequency_change_tuning(GstNote2Frequency *self) {
+  switch(self->tuning) {
+	case GST_NOTE_2_FREQUENCY_CROMATIC:
+	  self->translate=gst_note_2_frequency_translate_cromatic;
+	  break;
+  }
+}
+
+/**
+ * gst_note_2_frequency_translate_from_string:
+ * @self: a #GstNote2Frequency
+ * @note: a musical note in string representation
+ *
+ * Converts the string representation of a musical note such as 'C-3' or 'd#4'
+ * to a frequency in Hz.
+ *
+ * Returns: the frequency of the note or 0.0 in case of an error
+ */
+gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar *note) {
+  guint tone, octave;
   
   g_return_val_if_fail(note,0.0);
   g_return_val_if_fail((strlen(note)==3),0.0);
   g_return_val_if_fail((note[1]=='-' || note[1]=='#'),0.0);
-  
+
   // parse note
   switch(note[0]) {
 	case 'c':
@@ -106,38 +159,35 @@ static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,g
 	case 'H':
 	  tone=11;
 	  break;
+	default:
+	  g_return_val_if_reached(0.0);
   }
-  g_return_val_if_fail(tone!=-1,0.0);
   octave=atoi(&note[2]);
-  /* calculated base frequency A-0=55 Hz*/
-  frequency=(gdouble)(55<<octave);
-  /* do tone stepping */
-  step=pow(2.0,(1.0/12.0));
-  if(tone<=9) {
-	// go down
-	steps=9-tone;
-	for(i=0;i<steps;i++) frequency/=step;
-  }
-  else {
-	// go up
-	steps=tone-9;
-	for(i=0;i<steps;i++) frequency*=step;
-  }
-  return(frequency);
+
+  return(self->translate(self,octave,tone));
 }
 
-static gst_note_2_frequency_change_tuning(GstNote2Frequency *self) {
-  switch(self->tuning) {
-	case GST_NOTE_2_FREQUENCY_CROMATIC:
-	  self->translate=gst_note_2_frequency_translate_cromatic;
-	  break;
-  }
-}
+/**
+ * gst_note_2_frequency_translate_from_number:
+ * @self: a #GstNote2Frequency
+ * @note: a musical note as number
+ *
+ * Converts the numerical number of a note to a frequency in Hz. A value of 0
+ * for @note represents 'c-0'. The highes supported value is 'b-9' (or 'h-9')
+ * which is (10*12)-1.
+ *
+ * Returns: the frequency of the note or 0.0 in case of an error
+ */
+gdouble gst_note_2_frequency_translate_from_number(GstNote2Frequency *self,guint note) {
+  guint tone, octave;
+  
+  g_return_val_if_fail(note<(10*12),0.0);
+  
+  octave=note/12;
+  tone=note-(octave*12);
 
-gdouble gst_note_2_frequency_translate(GstNote2Frequency *self,gchar *note) {
-  return(self->translate(self,note));
+  return(self->translate(self,octave,tone));
 }
-
 //-- wrapper
 
 //-- class internals

@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:tempo
+ * SECTION:gsttempo
  * @short_description: helper interface for tempo synced gstreamer elements
  *
  * This interface offers three #GObject properties to specify a rythmic tempo of

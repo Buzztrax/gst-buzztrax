@@ -1,4 +1,4 @@
-/* $Id: t-gst-note2frequency.c,v 1.1 2006-01-07 17:33:28 ensonic Exp $ */
+/* $Id: t-gst-note2frequency.c,v 1.2 2006-01-09 20:13:42 ensonic Exp $ */
 
 #include "m-gst-buzztard.h"
 
@@ -17,7 +17,7 @@ static void test_teardown(void) {
 
 //-- tests
 
-START_TEST(test_translate_null) {
+START_TEST(test_translate_str_null) {
   GstNote2Frequency *n2f;
   gdouble frq;
   
@@ -25,7 +25,7 @@ START_TEST(test_translate_null) {
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
   
-  frq=gst_note_2_frequency_translate(n2f,NULL);
+  frq=gst_note_2_frequency_translate_from_string(n2f,NULL);
   fail_unless(frq == 0.0, NULL);
 
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
@@ -34,7 +34,7 @@ START_TEST(test_translate_null) {
 }
 END_TEST
 
-START_TEST(test_translate_length) {
+START_TEST(test_translate_str_length) {
   GstNote2Frequency *n2f;
   gdouble frq;
   
@@ -42,13 +42,13 @@ START_TEST(test_translate_length) {
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 
-  frq=gst_note_2_frequency_translate(n2f,"x");
+  frq=gst_note_2_frequency_translate_from_string(n2f,"x");
   fail_unless(frq == 0.0, NULL);
 
-  frq=gst_note_2_frequency_translate(n2f,"x-");
+  frq=gst_note_2_frequency_translate_from_string(n2f,"x-");
   fail_unless(frq == 0.0, NULL);
 
-  frq=gst_note_2_frequency_translate(n2f,"x-000");
+  frq=gst_note_2_frequency_translate_from_string(n2f,"x-000");
   fail_unless(frq == 0.0, NULL);
 
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
@@ -57,7 +57,7 @@ START_TEST(test_translate_length) {
 }
 END_TEST
 
-START_TEST(test_translate_delim) {
+START_TEST(test_translate_str_delim) {
   GstNote2Frequency *n2f;
   gdouble frq;
   
@@ -65,7 +65,24 @@ START_TEST(test_translate_delim) {
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 
-  frq=gst_note_2_frequency_translate(n2f,"C+3");
+  frq=gst_note_2_frequency_translate_from_string(n2f,"C+3");
+  fail_unless(frq == 0.0, NULL);
+
+  g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
+  // free object
+  g_object_checked_unref(n2f);
+}
+END_TEST
+
+START_TEST(test_translate_num_range) {
+  GstNote2Frequency *n2f;
+  gdouble frq;
+  
+  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  fail_unless(n2f != NULL, NULL);
+  g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
+
+  frq=gst_note_2_frequency_translate_from_number(n2f,12*10);
   fail_unless(frq == 0.0, NULL);
 
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
@@ -78,9 +95,10 @@ END_TEST
 TCase *gst_buzztard_note2frequency_test_case(void) {
   TCase *tc = tcase_create("GstNote2FrequencyTests");
 
-  tcase_add_test(tc,test_translate_null);
-  tcase_add_test(tc,test_translate_length);
-  tcase_add_test(tc,test_translate_delim);
+  tcase_add_test(tc,test_translate_str_null);
+  tcase_add_test(tc,test_translate_str_length);
+  tcase_add_test(tc,test_translate_str_delim);
+  tcase_add_test(tc,test_translate_num_range);
   tcase_add_unchecked_fixture(tc, test_setup, test_teardown);
   return(tc);
 }
