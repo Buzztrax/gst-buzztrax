@@ -32,7 +32,7 @@
 #include <string.h>
 #include <gst/controller/gstcontroller.h>
 
-#include "gstaudiotestsrc.h"
+#include "simsyn.h"
 
 #define M_PI_M2 ( M_PI + M_PI )
 
@@ -49,7 +49,7 @@ enum
   PROP_0,
   PROP_SAMPLES_PER_BUFFER,
   PROP_WAVE,
-  PROP_FREQ,
+  PROP_NOTE,
   PROP_VOLUME,
   PROP_IS_LIVE,
   PROP_TIMESTAMP_OFFSET,
@@ -99,6 +99,7 @@ static void gst_sim_syn_set_property (GObject * object,
     guint prop_id, const GValue * value, GParamSpec * pspec);
 static void gst_sim_syn_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
+static void gst_sim_syn_dispose (GObject *object);
 
 static gboolean gst_sim_syn_setcaps (GstBaseSrc * basesrc,
     GstCaps * caps);
@@ -139,25 +140,26 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
 
   gobject_class->set_property = gst_sim_syn_set_property;
   gobject_class->get_property = gst_sim_syn_get_property;
+  gobject_class->dispose      = gst_sim_syn_dispose;
 
   g_object_class_install_property (gobject_class, PROP_SAMPLES_PER_BUFFER,
       g_param_spec_int ("samplesperbuffer", "Samples per buffer",
           "Number of samples in each outgoing buffer",
           1, G_MAXINT, 1024, G_PARAM_READWRITE));
-  g_object_class_install_property (gobject_class, PROP_WAVE, g_param_spec_enum ("wave", "Waveform", "Oscillator waveform", GST_TYPE_SIM_SYN_WAVE,        /* enum type */
+  g_object_class_install_property (gobject_class, PROP_WAVE,
+      g_param_spec_enum ("wave", "Waveform", "Oscillator waveform", GST_TYPE_SIM_SYN_WAVE,        /* enum type */
           GST_SIM_SYN_WAVE_SINE, /* default value */
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
-  g_object_class_install_property (gobject_class, PROP_FREQ,
-      g_param_spec_double ("freq", "Frequency", "Frequency of test signal",
-          0.0, 20000.0, 440.0, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+  g_object_class_install_property (gobject_class, PROP_NOTE,
+      g_param_spec_string ("note", "Musical note", "Musical note ('c-3', 'd#4')",
+          NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
   g_object_class_install_property (gobject_class, PROP_VOLUME,
       g_param_spec_double ("volume", "Volume", "Volume of test signal",
           0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
   g_object_class_install_property (gobject_class, PROP_IS_LIVE,
       g_param_spec_boolean ("is-live", "Is Live",
           "Whether to act as a live source", FALSE, G_PARAM_READWRITE));
-  g_object_class_install_property (G_OBJECT_CLASS (klass),
-      PROP_TIMESTAMP_OFFSET,
+  g_object_class_install_property (G_OBJECT_CLASS (klass), PROP_TIMESTAMP_OFFSET,
       g_param_spec_int64 ("timestamp-offset", "Timestamp offset",
           "An offset added to timestamps set on buffers (in ns)", G_MININT64,
           G_MAXINT64, 0, G_PARAM_READWRITE));
@@ -181,7 +183,9 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
 
   src->samplerate = 44100;
   src->volume = 1.0;
-  src->freq = 440.0;
+  src->freq = 0.0;
+  src->note = NULL;
+  src->n2f = gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
   /* we operate in time */
   gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
   gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
@@ -658,7 +662,12 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   src->running_time = next_time;
   src->n_samples = n_samples;
 
-  src->process (src, (gint16 *) GST_BUFFER_DATA (buf));
+  if (src->freq != 0.0) {
+    /* @todo: also skip calculation on low volume */
+    src->process (src, (gint16 *) GST_BUFFER_DATA (buf));
+  } else {
+    memset (buf, 0, n_samples);
+  }
 
   *buffer = buf;
 
@@ -671,6 +680,8 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
 {
   GstSimSyn *src = GST_SIM_SYN (object);
 
+  if (src->dispose_has_run) return;
+
   switch (prop_id) {
     case PROP_SAMPLES_PER_BUFFER:
       src->samples_per_buffer = g_value_get_int (value);
@@ -679,8 +690,11 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       src->wave = g_value_get_enum (value);
       gst_sim_syn_change_wave (src);
       break;
-    case PROP_FREQ:
-      src->freq = g_value_get_double (value);
+    case PROP_NOTE:
+      g_free (src->note);
+      src->note = g_value_dup_string (value);
+      src->freq = gst_note2frequency_translate_from_string (src->n2f, src->note);
+      // TODO trigger envelope
       break;
     case PROP_VOLUME:
       src->volume = g_value_get_double (value);
@@ -704,6 +718,8 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
 {
   GstSimSyn *src = GST_SIM_SYN (object);
 
+  if (src->dispose_has_run) return;
+
   switch (prop_id) {
     case PROP_SAMPLES_PER_BUFFER:
       g_value_set_int (value, src->samples_per_buffer);
@@ -711,8 +727,8 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
     case PROP_WAVE:
       g_value_set_enum (value, src->wave);
       break;
-    case PROP_FREQ:
-      g_value_set_double (value, src->freq);
+    case PROP_NOTE:
+      g_value_set_string (value, src->note);
       break;
     case PROP_VOLUME:
       g_value_set_double (value, src->volume);
@@ -726,6 +742,21 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
+  }
+}
+
+static void
+gst_sim_syn_dispose (GObject *object)
+{
+  GstSimSyn *src = GST_SIM_SYN (object);
+
+  if (src->dispose_has_run) return;
+  src->dispose_has_run = TRUE;
+  
+  if (src->n2f) g_object_unref (src->n2f);
+  
+  if(G_OBJECT_CLASS(parent_class)->dispose) {
+    (G_OBJECT_CLASS(parent_class)->dispose)(object);
   }
 }
 

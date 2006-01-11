@@ -25,6 +25,7 @@
 
 #include <gst/gst.h>
 #include <gst/base/gstbasesrc.h>
+#include <note2frequency/note2frequency.h>
 
 G_BEGIN_DECLS
 
@@ -74,9 +75,10 @@ struct _GstSimSyn {
   /* parameters */
   GstSimSynWaves wave;
   gdouble volume;
-  gdouble freq;
+  gchar *note;
     
   /* audio parameters */
+  gdouble freq;
   gint samplerate;
   gint samples_per_buffer;
   
@@ -88,8 +90,10 @@ struct _GstSimSyn {
   gint64 n_samples_stop;
   gboolean check_seek_stop;
   gboolean eos_reached;
-  gint generate_samples_per_buffer;	/* used to generate a partial buffer */
-  
+  gint generate_samples_per_buffer;	/* generate a partial buffer */
+  GstNote2Frequency *n2f;
+  gboolean dispose_has_run;		/* validate if dispose has run */
+ 
   /* waveform specific context data */
   gdouble accumulator;			/* phase angle */
   GstPinkNoise pink;

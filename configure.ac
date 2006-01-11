@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.14 2006-01-07 16:50:04 ensonic Exp $
+# $Id: configure.ac,v 1.15 2006-01-11 19:16:34 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -158,9 +158,27 @@ AC_SUBST(VALGRIND_CFLAGS)dnl
 # Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= 2.2.0 gobject-2.0  >= 2.6.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
-  gstreamer-0.10 >= 0.10.0
+  gstreamer-0.10 >= 0.10.0 gstreamer-base-0.10 >= 0.10.0 \
+  gstreamer-controller-0.10 >= 0.10.0 \
 )
 
+plugindir="\$(libdir)/gstreamer-$GST_MAJORMINOR"
+AC_SUBST(plugindir)
+
+GST_PLUGIN_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS"
+AC_SUBST(GST_PLUGIN_CFLAGS)
+
+GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*'"
+AC_SUBST(GST_PLUGIN_LDFLAGS)
+
+dnl set license and copyright notice
+AC_DEFINE(GST_PACKAGE_ORIGIN, "http://www.buzztard.org", [Plugin package origin])
+AC_SUBST(GST_PACKAGE_ORIGIN)
+AC_DEFINE(GST_PACKAGE_NAME, "gst-buzztard", [Plugin package name])
+AC_SUBST(GST_PACKAGE_NAME)
+
+
+# variable fro gtkdoc-fixxref
 glib_prefix="`pkg-config --variable=prefix glib-2.0`"
 gst_prefix="`pkg-config --variable=prefix gstreamer-0.10`"
 AC_SUBST(glib_prefix)
@@ -192,6 +210,7 @@ AC_CONFIG_FILES( \
 	src/childbin/Makefile \
 	src/note2frequency/Makefile \
 	src/propertymeta/Makefile \
+	src/simsyn/Makefile \
 	src/tempo/Makefile \
 	tests/Makefile
 )
