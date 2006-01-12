@@ -73,16 +73,14 @@ struct _GstSimSyn {
   void (*process)(GstSimSyn*, gint16 *);
 
   /* parameters */
-  GstSimSynWaves wave;
-  gdouble volume;
-  gchar *note;
-    
-  /* audio parameters */
-  gdouble freq;
-  gint samplerate;
   gint samples_per_buffer;
+  GstSimSynWaves wave;
+  gchar *note;
+  gdouble volume;
+  gdouble decay;
   
   /* < private > */
+  gint samplerate;
   gboolean tags_pushed;			/* send tags just once ? */
   GstClockTimeDiff timestamp_offset;    /* base offset */
   GstClockTime running_time;            /* total running time */
@@ -93,6 +91,8 @@ struct _GstSimSyn {
   gint generate_samples_per_buffer;	/* generate a partial buffer */
   GstNote2Frequency *n2f;
   gboolean dispose_has_run;		/* validate if dispose has run */
+  gdouble freq;
+  gdouble current_volume;
  
   /* waveform specific context data */
   gdouble accumulator;			/* phase angle */

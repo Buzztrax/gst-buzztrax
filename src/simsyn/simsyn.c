@@ -21,6 +21,16 @@
 /**
  * SECTION:element-audiotestsrc
  * @short_description: simple audio synthesizer for gstreamer
+ *
+ */
+/* @todo:
+ * - implement property-meta iface (see gstbml)
+ * - implement tempo iface (needed to calculate decay steps)
+ * - make decay sample-rate independent (specify as ticks)
+ *
+ * - add polyphonic element
+ *   - simsyn-mono, simsyn-poly
+ * - add svf filter
  */
 
 #ifdef HAVE_CONFIG_H
@@ -51,6 +61,7 @@ enum
   PROP_WAVE,
   PROP_NOTE,
   PROP_VOLUME,
+  PROP_DECAY,
   PROP_IS_LIVE,
   PROP_TIMESTAMP_OFFSET,
 };
@@ -147,15 +158,19 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
           "Number of samples in each outgoing buffer",
           1, G_MAXINT, 1024, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_WAVE,
-      g_param_spec_enum ("wave", "Waveform", "Oscillator waveform", GST_TYPE_SIM_SYN_WAVE,        /* enum type */
+      g_param_spec_enum ("wave", "Waveform", "Oscillator waveform",
+          GST_TYPE_SIM_SYN_WAVE, /* enum type */
           GST_SIM_SYN_WAVE_SINE, /* default value */
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
   g_object_class_install_property (gobject_class, PROP_NOTE,
       g_param_spec_string ("note", "Musical note", "Musical note ('c-3', 'd#4')",
           NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
   g_object_class_install_property (gobject_class, PROP_VOLUME,
-      g_param_spec_double ("volume", "Volume", "Volume of test signal",
+      g_param_spec_double ("volume", "Volume", "Volume of tone",
           0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+  g_object_class_install_property (gobject_class, PROP_DECAY,
+      g_param_spec_double ("decay", "Decay", "Volume decay of the tone",
+          0.9, 0.999999, 0.9999, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
   g_object_class_install_property (gobject_class, PROP_IS_LIVE,
       g_param_spec_boolean ("is-live", "Is Live",
           "Whether to act as a live source", FALSE, G_PARAM_READWRITE));
@@ -185,6 +200,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->volume = 1.0;
   src->freq = 0.0;
   src->note = NULL;
+  src->decay = 0.9999;
   src->n2f = gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
   /* we operate in time */
   gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
@@ -289,9 +305,11 @@ gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
   gdouble step, amp;
 
   step = M_PI_M2 * src->freq / src->samplerate;
-  amp = src->volume * 32767.0;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
+    amp = src->current_volume * 32767.0;
+    src->current_volume *= src->decay;
+
     src->accumulator += step;
     if (src->accumulator >= M_PI_M2)
       src->accumulator -= M_PI_M2;
@@ -307,9 +325,11 @@ gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
   gdouble step, amp;
 
   step = M_PI_M2 * src->freq / src->samplerate;
-  amp = src->volume * 32767.0;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
+    amp = src->current_volume * 32767.0;
+    src->current_volume *= src->decay;
+
     src->accumulator += step;
     if (src->accumulator >= M_PI_M2)
       src->accumulator -= M_PI_M2;
@@ -322,12 +342,15 @@ static void
 gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
 {
   gint i;
-  gdouble step, amp;
+  gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
-  amp = (src->volume * 32767.0) / M_PI;
+  ampf = 32767.0 / M_PI;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
+    amp = src->current_volume * ampf;
+    src->current_volume *= src->decay;
+
     src->accumulator += step;
     if (src->accumulator >= M_PI_M2)
       src->accumulator -= M_PI_M2;
@@ -344,12 +367,15 @@ static void
 gst_sim_syn_create_triangle (GstSimSyn * src, gint16 * samples)
 {
   gint i;
-  gdouble step, amp;
+  gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
-  amp = (src->volume * 32767.0) / M_PI_2;
+  ampf = 32767.0 / M_PI_2;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
+    amp = src->current_volume * ampf;
+    src->current_volume *= src->decay;
+
     src->accumulator += step;
     if (src->accumulator >= M_PI_M2)
       src->accumulator -= M_PI_M2;
@@ -376,9 +402,10 @@ gst_sim_syn_create_white_noise (GstSimSyn * src, gint16 * samples)
   gint i;
   gdouble amp;
 
-  amp = src->volume * 65535.0;
-
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
+    amp = src->current_volume * 65535.0;
+    src->current_volume *= src->decay;
+    
     samples[i] = (gint16) (32768 - (amp * rand () / (RAND_MAX + 1.0)));
   }
 }
@@ -454,9 +481,10 @@ gst_sim_syn_create_pink_noise (GstSimSyn * src, gint16 * samples)
   gint i;
   gdouble amp;
 
-  amp = src->volume * 32767.0;
-
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
+    amp = src->current_volume * 32767.0;
+    src->current_volume *= src->decay;
+
     samples[i] =
         (gint16) (gst_sim_syn_generate_pink_noise_value (&src->pink) *
         amp);
@@ -487,11 +515,12 @@ gst_sim_syn_create_sine_table (GstSimSyn * src, gint16 * samples)
   scl = 1024.0 /  M_PI_M2;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
+    /* @todo: add envelope */
     src->accumulator += step;
     if (src->accumulator >= M_PI_M2)
       src->accumulator -= M_PI_M2;
 
-    samples[i] = (gint16) src->wave_table[(gint) (src->accumulator * scl)];
+    samples[i] = src->wave_table[(gint) (src->accumulator * scl)];
   }
 }
 
@@ -662,11 +691,12 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   src->running_time = next_time;
   src->n_samples = n_samples;
 
-  if (src->freq != 0.0) {
-    /* @todo: also skip calculation on low volume */
+  //GST_INFO ("current_volume=%8.6lf\n",src->current_volume);
+  
+  if ((src->freq != 0.0) && (src->current_volume > 0.0001)) {
     src->process (src, (gint16 *) GST_BUFFER_DATA (buf));
   } else {
-    memset (buf, 0, n_samples);
+    gst_sim_syn_create_silence (src, (gint16 *) GST_BUFFER_DATA (buf));
   }
 
   *buffer = buf;
@@ -693,12 +723,16 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
     case PROP_NOTE:
       g_free (src->note);
       src->note = g_value_dup_string (value);
-      src->freq = gst_note2frequency_translate_from_string (src->n2f, src->note);
-      // TODO trigger envelope
+      src->freq = gst_note_2_frequency_translate_from_string (src->n2f, src->note);
+      /* trigger volume 'envelope' */
+      src->current_volume = src->volume;
       break;
     case PROP_VOLUME:
       src->volume = g_value_get_double (value);
       gst_sim_syn_change_volume (src);
+      break;
+    case PROP_DECAY:
+      src->decay = g_value_get_double (value);
       break;
     case PROP_IS_LIVE:
       gst_base_src_set_live (GST_BASE_SRC (src), g_value_get_boolean (value));
@@ -732,6 +766,9 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
       break;
     case PROP_VOLUME:
       g_value_set_double (value, src->volume);
+      break;
+    case PROP_DECAY:
+      g_value_set_double (value, src->decay);
       break;
     case PROP_IS_LIVE:
       g_value_set_boolean (value, gst_base_src_is_live (GST_BASE_SRC (src)));
