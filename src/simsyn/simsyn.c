@@ -42,6 +42,10 @@
 #include <string.h>
 #include <gst/controller/gstcontroller.h>
 
+//#include <gst/childbin/childbin.h>
+#include "propertymeta/propertymeta.h"
+//#include <gst/tempo/tempo.h>
+
 #include "simsyn.h"
 
 #define M_PI_M2 ( M_PI + M_PI )
@@ -78,10 +82,6 @@ GST_STATIC_PAD_TEMPLATE ("src",
         "depth = (int) 16, " "rate = (int) [ 1, MAX ], " "channels = (int) 1")
     );
 
-
-GST_BOILERPLATE (GstSimSyn, gst_sim_syn, GstBaseSrc,
-    GST_TYPE_BASE_SRC);
-
 #define GST_TYPE_SIM_SYN_WAVE (gst_audiostestsrc_wave_get_type())
 static GType
 gst_audiostestsrc_wave_get_type (void)
@@ -106,6 +106,12 @@ gst_audiostestsrc_wave_get_type (void)
   return audiostestsrc_wave_type;
 }
 
+static GstBaseSrcClass *parent_class = NULL;
+
+static void gst_sim_syn_base_init (gpointer klass);
+static void gst_sim_syn_class_init (GstSimSynClass *klass);
+static void gst_sim_syn_init (GstSimSyn *object, GstSimSynClass *klass);
+
 static void gst_sim_syn_set_property (GObject * object,
     guint prop_id, const GValue * value, GParamSpec * pspec);
 static void gst_sim_syn_get_property (GObject * object,
@@ -129,6 +135,7 @@ static void gst_sim_syn_get_times (GstBaseSrc * basesrc,
 static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
+//-- simsyn implementation
 
 static void
 gst_sim_syn_base_init (gpointer g_class)
@@ -145,6 +152,9 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
 {
   GObjectClass *gobject_class;
   GstBaseSrcClass *gstbasesrc_class;
+  GParamSpec *paramspec;
+  
+  parent_class = (GstBaseSrcClass *) g_type_class_peek_parent (klass);
 
   gobject_class = (GObjectClass *) klass;
   gstbasesrc_class = (GstBaseSrcClass *) klass;
@@ -157,23 +167,31 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
       g_param_spec_int ("samplesperbuffer", "Samples per buffer",
           "Number of samples in each outgoing buffer",
           1, G_MAXINT, 1024, G_PARAM_READWRITE));
+
   g_object_class_install_property (gobject_class, PROP_WAVE,
       g_param_spec_enum ("wave", "Waveform", "Oscillator waveform",
           GST_TYPE_SIM_SYN_WAVE, /* enum type */
           GST_SIM_SYN_WAVE_SINE, /* default value */
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
-  g_object_class_install_property (gobject_class, PROP_NOTE,
-      g_param_spec_string ("note", "Musical note", "Musical note ('c-3', 'd#4')",
-          NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+
+  paramspec=g_param_spec_string("note", "Musical note", "Musical note ('c-3', 'd#4')",
+          NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
+  g_object_class_install_property(gobject_class, PROP_NOTE,paramspec);
+  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,  GINT_TO_POINTER(0x0));
+
+
   g_object_class_install_property (gobject_class, PROP_VOLUME,
       g_param_spec_double ("volume", "Volume", "Volume of tone",
           0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+
   g_object_class_install_property (gobject_class, PROP_DECAY,
       g_param_spec_double ("decay", "Decay", "Volume decay of the tone",
           0.9, 0.999999, 0.9999, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+
   g_object_class_install_property (gobject_class, PROP_IS_LIVE,
       g_param_spec_boolean ("is-live", "Is Live",
           "Whether to act as a live source", FALSE, G_PARAM_READWRITE));
+
   g_object_class_install_property (G_OBJECT_CLASS (klass), PROP_TIMESTAMP_OFFSET,
       g_param_spec_int64 ("timestamp-offset", "Timestamp offset",
           "An offset added to timestamps set on buffers (in ns)", G_MININT64,
@@ -723,9 +741,15 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
     case PROP_NOTE:
       g_free (src->note);
       src->note = g_value_dup_string (value);
-      src->freq = gst_note_2_frequency_translate_from_string (src->n2f, src->note);
-      /* trigger volume 'envelope' */
-      src->current_volume = src->volume;
+      if(src->note) {
+        GST_WARNING("new note -> '%s'",src->note);
+        src->freq = gst_note_2_frequency_translate_from_string (src->n2f, src->note);
+        /* trigger volume 'envelope' */
+        src->current_volume = src->volume;
+      }
+      else {
+        GST_WARNING("new NULL note");
+      }
       break;
     case PROP_VOLUME:
       src->volume = g_value_get_double (value);
@@ -795,6 +819,32 @@ gst_sim_syn_dispose (GObject *object)
   if(G_OBJECT_CLASS(parent_class)->dispose) {
     (G_OBJECT_CLASS(parent_class)->dispose)(object);
   }
+}
+
+GType gst_sim_syn_get_type (void)
+{
+  static GType type = 0;
+  if (type == 0) {
+    static const GTypeInfo element_type_info = {
+      sizeof (GstSimSynClass),
+      (GBaseInitFunc)gst_sim_syn_base_init,
+      NULL,		  /* base_finalize */
+      (GClassInitFunc)gst_sim_syn_class_init,
+      NULL,		  /* class_finalize */
+      NULL,               /* class_data */
+      sizeof (GstSimSyn),
+      0,                  /* n_preallocs */
+      (GInstanceInitFunc) gst_sim_syn_init
+    };
+    static const GInterfaceInfo property_meta_interface_info = {
+      NULL,               /* interface_init */
+      NULL,               /* interface_finalize */
+      NULL                /* interface_data */
+    };
+    type = g_type_register_static(GST_TYPE_BASE_SRC, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
+    g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
+  }
+  return type;
 }
 
 static gboolean

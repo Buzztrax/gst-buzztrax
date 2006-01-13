@@ -71,6 +71,7 @@ GQuark gst_property_meta_quark_flags=0;
  *
  * Formats the gives value as a human readable string. The method is useful to
  * display a property value in a user interface.
+ * It privides a default implementation.
  *
  * Returns: a string with the value in humand readable form, free memory when
  * done
@@ -81,7 +82,12 @@ gst_property_meta_describe_property (GstPropertyMeta *self, glong index, GValue 
 {
   g_return_val_if_fail (GST_IS_PROPERTY_META (self), FALSE);
 
-  return (GST_PROPERTY_META_GET_INTERFACE (self)->describe_property (self, index, value));  
+  if(GST_PROPERTY_META_GET_INTERFACE (self)->describe_property) {
+    return (GST_PROPERTY_META_GET_INTERFACE (self)->describe_property (self, index, value));
+  }
+  else {
+    return(g_strdup_value_contents(value));
+  }
 }
 
 static void
