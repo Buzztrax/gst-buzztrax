@@ -1,4 +1,8 @@
-$ID$
+$Id: TODO,v 1.2 2006-01-14 21:59:13 ensonic Exp $
 
 = naming =
 should we rename 'tempo' to 'tempo_sync' or 'song_tempo'?
+
+= simsyn
+add an own debug category
+

@@ -32,7 +32,6 @@ G_BEGIN_DECLS
 #define GST_IS_PROPERTY_META(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_PROPERTY_META))
 #define GST_PROPERTY_META_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GST_TYPE_PROPERTY_META, GstPropertyMetaInterface))
 
-
 typedef struct _GstPropertyMeta GstPropertyMeta; /* dummy object */
 typedef struct _GstPropertyMetaInterface GstPropertyMetaInterface;
 
@@ -54,5 +53,12 @@ extern GQuark gst_property_meta_quark_no_val;
 extern GQuark gst_property_meta_quark_flags;
 
 G_END_DECLS
+
+typedef enum {
+  GST_PROPERTY_META_NONE=0,
+  GST_PROPERTY_META_WAVE=1,		/* parameter value references a wavetable slot */
+  GST_PROPERTY_META_STATE=2,		/* parameter is continuously changing (not used for notes and triggers) */
+  GST_PROPERTY_META_TICK_ON_EDIT=4
+} GstGstPropertyMetaFlags;
 
 #endif /* __GST_PROPERTY_META_H__ */

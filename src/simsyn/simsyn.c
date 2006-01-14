@@ -44,7 +44,7 @@
 
 //#include <gst/childbin/childbin.h>
 #include "propertymeta/propertymeta.h"
-//#include <gst/tempo/tempo.h>
+#include "tempo/tempo.h"
 
 #include "simsyn.h"
 
@@ -58,9 +58,12 @@ GstElementDetails gst_sim_syn_details = {
 };
 
 
-enum
-{
-  PROP_0,
+enum {
+  // tempo iface
+  PROP_BPM=1,
+  PROP_TPB,
+  PROP_STPT,
+  // class properties
   PROP_SAMPLES_PER_BUFFER,
   PROP_WAVE,
   PROP_NOTE,
@@ -135,6 +138,55 @@ static void gst_sim_syn_get_times (GstBaseSrc * basesrc,
 static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
+//-- property meta interface implementations
+
+//-- tempo interface implementations
+
+static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
+  self->samples_per_buffer=((self->samplerate*60)/(self->beats_per_minute*self->ticks_per_beat));
+  self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
+  g_object_notify(G_OBJECT(self),"samplesperbuffer");
+}
+
+static void gst_sim_syn_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
+  GstSimSyn *self=GST_SIM_SYN(tempo);
+  gboolean changed=FALSE;
+
+  if(beats_per_minute>=0) {
+    if(self->beats_per_minute!=beats_per_minute) {
+      self->beats_per_minute=(gulong)beats_per_minute;
+      g_object_notify(G_OBJECT(self),"beats-per-minute");
+      changed=TRUE;
+    }
+  }
+  if(ticks_per_beat>=0) {
+    if(self->ticks_per_beat!=ticks_per_beat) {
+      self->ticks_per_beat=(gulong)ticks_per_beat;
+      g_object_notify(G_OBJECT(self),"ticks-per-beat");
+      changed=TRUE;
+    }
+  }
+  if(subticks_per_tick>=0) {
+    if(self->subticks_per_tick!=subticks_per_tick) {
+      self->subticks_per_tick=(gulong)subticks_per_tick;
+      g_object_notify(G_OBJECT(self),"subticks-per-tick");
+      changed=TRUE;
+    }
+  }
+  if(changed) {
+    GST_WARNING("changing tempo to %d BPM  %d TPB  %d STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
+    gst_sim_syn_calculate_buffer_frames(self);
+  }
+}
+
+static void gst_sim_syn_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
+  GstTempoInterface *iface = g_iface;
+  
+  GST_INFO("initializing iface");
+  
+  iface->change_tempo = gst_sim_syn_tempo_change_tempo;
+}
+
 //-- simsyn implementation
 
 static void
@@ -163,30 +215,40 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
   gobject_class->get_property = gst_sim_syn_get_property;
   gobject_class->dispose      = gst_sim_syn_dispose;
 
-  g_object_class_install_property (gobject_class, PROP_SAMPLES_PER_BUFFER,
-      g_param_spec_int ("samplesperbuffer", "Samples per buffer",
+  // override interface properties
+  g_object_class_override_property(gobject_class, PROP_BPM, "beats-per-minute");
+  g_object_class_override_property(gobject_class, PROP_TPB, "ticks-per-beat");
+  g_object_class_override_property(gobject_class, PROP_STPT, "subticks-per-tick");
+  
+  // register own properties
+
+  g_object_class_install_property(gobject_class, PROP_SAMPLES_PER_BUFFER,
+  	g_param_spec_int("samplesperbuffer", "Samples per buffer",
           "Number of samples in each outgoing buffer",
           1, G_MAXINT, 1024, G_PARAM_READWRITE));
 
-  g_object_class_install_property (gobject_class, PROP_WAVE,
-      g_param_spec_enum ("wave", "Waveform", "Oscillator waveform",
+  paramspec=g_param_spec_enum("wave", "Waveform", "Oscillator waveform",
           GST_TYPE_SIM_SYN_WAVE, /* enum type */
           GST_SIM_SYN_WAVE_SINE, /* default value */
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
+  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
+  g_object_class_install_property(gobject_class, PROP_WAVE,paramspec);
 
   paramspec=g_param_spec_string("note", "Musical note", "Musical note ('c-3', 'd#4')",
           NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_object_class_install_property(gobject_class, PROP_NOTE,paramspec);
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,  GINT_TO_POINTER(0x0));
+  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_NONE));
+  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_no_val,NULL);
+  g_object_class_install_property(gobject_class,PROP_NOTE,paramspec);
+  
+  paramspec=g_param_spec_double("volume", "Volume", "Volume of tone",
+          0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
+  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
+  g_object_class_install_property(gobject_class, PROP_VOLUME,paramspec);
 
-
-  g_object_class_install_property (gobject_class, PROP_VOLUME,
-      g_param_spec_double ("volume", "Volume", "Volume of tone",
-          0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
-
-  g_object_class_install_property (gobject_class, PROP_DECAY,
-      g_param_spec_double ("decay", "Decay", "Volume decay of the tone",
-          0.9, 0.999999, 0.9999, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+  paramspec=g_param_spec_double("decay", "Decay", "Volume decay of the tone",
+          0.9, 0.999999, 0.9999, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
+  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
+  g_object_class_install_property(gobject_class, PROP_DECAY,paramspec);
 
   g_object_class_install_property (gobject_class, PROP_IS_LIVE,
       g_param_spec_boolean ("is-live", "Is Live",
@@ -214,7 +276,16 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
 
   gst_pad_set_fixatecaps_function (pad, gst_sim_syn_src_fixate);
 
+  src->samples_per_buffer = 1024;
+  src->generate_samples_per_buffer = src->samples_per_buffer;
+  src->timestamp_offset = G_GINT64_CONSTANT (0);
+
   src->samplerate = 44100;
+  src->beats_per_minute=120;
+  src->ticks_per_beat=4;
+  src->subticks_per_tick=1;
+  gst_sim_syn_calculate_buffer_frames(src);
+
   src->volume = 1.0;
   src->freq = 0.0;
   src->note = NULL;
@@ -223,10 +294,6 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   /* we operate in time */
   gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
   gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
-
-  src->samples_per_buffer = 1024;
-  src->generate_samples_per_buffer = src->samples_per_buffer;
-  src->timestamp_offset = G_GINT64_CONSTANT (0);
 
   src->wave = GST_SIM_SYN_WAVE_SINE;
   gst_sim_syn_change_wave (src);
@@ -731,6 +798,18 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
   if (src->dispose_has_run) return;
 
   switch (prop_id) {
+    case PROP_BPM:
+      src->beats_per_minute=g_value_get_ulong(value);
+      // @todo should these props be readonly, as now we have gst_bml_tempo_change_tempo ?
+      break;
+    case PROP_TPB:
+      src->ticks_per_beat=g_value_get_ulong(value);
+      // @todo should these props be readonly, as now we have gst_bml_tempo_change_tempo ?
+      break;
+    case PROP_STPT:
+      src->subticks_per_tick=g_value_get_ulong(value);
+      // @todo should these props be readonly, as now we have gst_bml_tempo_change_tempo ?
+      break;
     case PROP_SAMPLES_PER_BUFFER:
       src->samples_per_buffer = g_value_get_int (value);
       break;
@@ -746,9 +825,6 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
         src->freq = gst_note_2_frequency_translate_from_string (src->n2f, src->note);
         /* trigger volume 'envelope' */
         src->current_volume = src->volume;
-      }
-      else {
-        GST_WARNING("new NULL note");
       }
       break;
     case PROP_VOLUME:
@@ -779,6 +855,15 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
   if (src->dispose_has_run) return;
 
   switch (prop_id) {
+    case PROP_BPM:
+      g_value_set_ulong(value, src->beats_per_minute);
+      break;
+    case PROP_TPB:
+      g_value_set_ulong(value, src->ticks_per_beat);
+      break;
+    case PROP_STPT:
+      g_value_set_ulong(value, src->subticks_per_tick);
+      break;
     case PROP_SAMPLES_PER_BUFFER:
       g_value_set_int (value, src->samples_per_buffer);
       break;
@@ -841,8 +926,14 @@ GType gst_sim_syn_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
+    static const GInterfaceInfo tempo_interface_info = {
+      (GInterfaceInitFunc) gst_sim_syn_tempo_interface_init,          /* interface_init */
+      NULL,               /* interface_finalize */
+      NULL                /* interface_data */
+    };
     type = g_type_register_static(GST_TYPE_BASE_SRC, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
+    g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
   }
   return type;
 }

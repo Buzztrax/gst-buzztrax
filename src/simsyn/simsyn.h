@@ -93,7 +93,13 @@ struct _GstSimSyn {
   gboolean dispose_has_run;		/* validate if dispose has run */
   gdouble freq;
   gdouble current_volume;
- 
+
+  /* tempo handling */
+  gulong beats_per_minute;
+  gulong ticks_per_beat;
+  gulong subticks_per_tick;
+  GstClockTime ticktime;
+
   /* waveform specific context data */
   gdouble accumulator;			/* phase angle */
   GstPinkNoise pink;

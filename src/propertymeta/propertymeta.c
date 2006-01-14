@@ -97,11 +97,11 @@ gst_property_meta_base_init(gpointer g_class)
 
   if (!initialized) {
     // create quarks for use with g_param_spect_{g,s}et_qdata()
-  gst_property_meta_quark_min_val=g_quark_from_string("GstPropertyMeta::min-val");
-  gst_property_meta_quark_max_val=g_quark_from_string("GstPropertyMeta::max-val");
-  gst_property_meta_quark_def_val=g_quark_from_string("GstPropertyMeta::def-val");
-  gst_property_meta_quark_no_val=g_quark_from_string("GstPropertyMeta::no-val");
-  gst_property_meta_quark_flags=g_quark_from_string("GstPropertyMeta::flags");
+    gst_property_meta_quark_min_val=g_quark_from_string("GstPropertyMeta::min-val");
+    gst_property_meta_quark_max_val=g_quark_from_string("GstPropertyMeta::max-val");
+    gst_property_meta_quark_def_val=g_quark_from_string("GstPropertyMeta::def-val");
+    gst_property_meta_quark_no_val=g_quark_from_string("GstPropertyMeta::no-val");
+    gst_property_meta_quark_flags=g_quark_from_string("GstPropertyMeta::flags");
 
     initialized = TRUE;
   }
