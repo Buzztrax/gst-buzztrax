@@ -50,6 +50,9 @@
 
 #define M_PI_M2 ( M_PI + M_PI )
 
+#define GST_CAT_DEFAULT sim_syn_debug
+GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
+
 GstElementDetails gst_sim_syn_details = {
   "Simple Synth",
   "Source/Audio",
@@ -146,6 +149,7 @@ static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
   self->samples_per_buffer=((self->samplerate*60)/(self->beats_per_minute*self->ticks_per_beat));
   self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
+  GST_DEBUG("samples_per_buffer=%ld",self->samples_per_buffer);
 }
 
 static void gst_sim_syn_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
@@ -174,7 +178,7 @@ static void gst_sim_syn_tempo_change_tempo(GstTempo *tempo, glong beats_per_minu
     }
   }
   if(changed) {
-    GST_WARNING("changing tempo to %d BPM  %d TPB  %d STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
+    GST_DEBUG("changing tempo to %d BPM  %d TPB  %d STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
     gst_sim_syn_calculate_buffer_frames(self);
   }
 }
@@ -725,32 +729,23 @@ static GstFlowReturn
 gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     guint length, GstBuffer ** buffer)
 {
-  GstSimSyn *src;
+  GstSimSyn *src = GST_SIM_SYN (basesrc);
   GstBuffer *buf;
   GstClockTime next_time;
   gint64 n_samples;
-
-  src = GST_SIM_SYN (basesrc);
+  guint samples_per_buffer;
   
   if (src->eos_reached) return GST_FLOW_UNEXPECTED;
 
-  if (!src->tags_pushed) {
-    GstTagList *taglist;
-    GstEvent *event;
-
-    taglist = gst_tag_list_new ();
-
-    gst_tag_list_add (taglist, GST_TAG_MERGE_APPEND,
-        GST_TAG_DESCRIPTION, "audiotest wave", NULL);
-
-    event = gst_event_new_tag (taglist);
-    gst_pad_push_event (basesrc->srcpad, event);
-    src->tags_pushed = TRUE;
-  }
-
+  // the amount of samples to produce (handle rounding errors by collecting left over fractions)
+  //GST_DEBUG("rounding correction : %ld <> %"G_GUINT64_FORMAT,(glong)(((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND),src->n_samples);
+  //samples_per_buffer=src->samples_per_buffer+(((src->running_time*src->samplerate)/GST_SECOND)-src->timestamp_offset);
+  samples_per_buffer=src->samples_per_buffer+(gint)((((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND)-src->n_samples);
+  //GST_DEBUG("  samplers-per-buffer = %ld (%ld)",samples_per_buffer,src->samples_per_buffer);
+  
   if (src->check_seek_stop &&
     (src->n_samples_stop > src->n_samples) &&
-    (src->n_samples_stop < src->n_samples + src->samples_per_buffer)
+    (src->n_samples_stop < src->n_samples + samples_per_buffer)
   ) {
     /* calculate only partial buffer */
     src->generate_samples_per_buffer = src->n_samples_stop - src->n_samples;
@@ -758,8 +753,8 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     src->eos_reached = TRUE;
   } else {
     /* calculate full buffer */
-    src->generate_samples_per_buffer = src->samples_per_buffer;
-    n_samples = src->n_samples + src->samples_per_buffer;
+    src->generate_samples_per_buffer = samples_per_buffer;
+    n_samples = src->n_samples + samples_per_buffer;
   }
   next_time = n_samples * GST_SECOND / src->samplerate;
   
@@ -773,10 +768,13 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
 
   gst_object_sync_values (G_OBJECT (src), src->running_time);
 
+  GST_DEBUG("running_time %"G_GUINT64_FORMAT", next_time %"G_GUINT64_FORMAT", duration %"G_GUINT64_FORMAT,src->running_time,next_time,(next_time - src->running_time));
+  
   src->running_time = next_time;
   src->n_samples = n_samples;
 
   //GST_INFO ("current_volume=%8.6lf\n",src->current_volume);
+  //GST_DEBUG("sync_values @ timestamp %"G_GUINT64_FORMAT,src->running_time);
   
   if ((src->freq != 0.0) && (src->current_volume > 0.0001)) {
     src->process (src, (gint16 *) GST_BUFFER_DATA (buf));
@@ -821,7 +819,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       g_free (src->note);
       src->note = g_value_dup_string (value);
       if(src->note) {
-        GST_WARNING("new note -> '%s'",src->note);
+        GST_DEBUG("new note -> '%s'",src->note);
         src->freq = gst_note_2_frequency_translate_from_string (src->n2f, src->note);
         /* trigger volume 'envelope' */
         src->current_volume = src->volume;
@@ -941,6 +939,8 @@ GType gst_sim_syn_get_type (void)
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
+  GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "simsyn", GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
+
   return gst_element_register (plugin, "simsyn",
       GST_RANK_NONE, GST_TYPE_SIM_SYN);
 }

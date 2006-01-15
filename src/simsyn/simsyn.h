@@ -81,7 +81,6 @@ struct _GstSimSyn {
   
   /* < private > */
   gint samplerate;
-  gboolean tags_pushed;			/* send tags just once ? */
   GstClockTimeDiff timestamp_offset;    /* base offset */
   GstClockTime running_time;            /* total running time */
   gint64 n_samples;                     /* total samples sent */
