@@ -1,4 +1,2 @@
-.libs
-*.la
 Makefile
 Makefile.in
