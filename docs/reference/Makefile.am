@@ -61,7 +61,7 @@ expand_content_files=
 # signals and properties.
 # e.g. INCLUDES=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
-INCLUDES=-I$(top_builddir)/src $(BASE_DEPS_CFLAGS)
+INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src $(BASE_DEPS_CFLAGS)
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) $(top_builddir)/src/libgstbuzztard.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
@@ -69,4 +69,4 @@ include $(top_srcdir)/gtk-doc.make
 
 # Other files to distribute
 # e.g. EXTRA_DIST += version.xml.in
-EXTRA_DIST +=
+EXTRA_DIST += $(DOC_MODULE).types

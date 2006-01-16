@@ -1,4 +1,4 @@
-SUBDIRS = childbin note2frequency propertymeta simsyn tempo
+SUBDIRS = childbin note2frequency propertymeta tempo . simsyn
 
 lib_LTLIBRARIES = libgstbuzztard.la
 
