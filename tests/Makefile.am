@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.3 2006-01-11 19:16:36 ensonic Exp $
+## $Id: Makefile.am,v 1.4 2006-01-16 19:48:41 ensonic Exp $
 
 if BUILD_CHECK_TESTS
   TESTS_BIN = gst_buzztard
@@ -28,3 +28,6 @@ INCLUDES = \
 	$(BASE_DEPS_CFLAGS) \
 	@VALGRIND_CFLAGS@
 endif
+
+EXTRA_DIST = gtkdoccomplete.sh
+
