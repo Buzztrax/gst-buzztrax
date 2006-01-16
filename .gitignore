@@ -31,3 +31,4 @@ coverage
 *.la
 *.pc
 *.tar.gz
+.libs
