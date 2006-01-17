@@ -741,7 +741,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   //GST_DEBUG("rounding correction : %ld <> %"G_GUINT64_FORMAT,(glong)(((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND),src->n_samples);
   //samples_per_buffer=src->samples_per_buffer+(((src->running_time*src->samplerate)/GST_SECOND)-src->timestamp_offset);
   samples_per_buffer=src->samples_per_buffer+(gint)((((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND)-src->n_samples);
-  //GST_DEBUG("  samplers-per-buffer = %ld (%ld)",samples_per_buffer,src->samples_per_buffer);
+  GST_DEBUG("  samplers-per-buffer = %7ld (%7ld)",samples_per_buffer,src->samples_per_buffer);
   
   if (src->check_seek_stop &&
     (src->n_samples_stop > src->n_samples) &&
@@ -756,7 +756,8 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     src->generate_samples_per_buffer = samples_per_buffer;
     n_samples = src->n_samples + samples_per_buffer;
   }
-  next_time = n_samples * GST_SECOND / src->samplerate;
+  //next_time = n_samples * GST_SECOND / src->samplerate;
+  next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)src->samplerate);
   
   buf = gst_buffer_new_and_alloc (src->generate_samples_per_buffer * sizeof (gint16));
   gst_buffer_set_caps (buf, GST_PAD_CAPS (basesrc->srcpad));
@@ -768,7 +769,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
 
   gst_object_sync_values (G_OBJECT (src), src->running_time);
 
-  GST_DEBUG("running_time %"G_GUINT64_FORMAT", next_time %"G_GUINT64_FORMAT", duration %"G_GUINT64_FORMAT,src->running_time,next_time,(next_time - src->running_time));
+  GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", running_time %12"G_GUINT64_FORMAT", next_time %12"G_GUINT64_FORMAT", duration %12"G_GUINT64_FORMAT,src->n_samples,src->running_time,next_time,(next_time - src->running_time));
   
   src->running_time = next_time;
   src->n_samples = n_samples;
