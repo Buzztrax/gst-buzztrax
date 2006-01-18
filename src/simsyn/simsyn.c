@@ -742,7 +742,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   //samples_per_buffer=src->samples_per_buffer+(((src->running_time*src->samplerate)/GST_SECOND)-src->timestamp_offset);
   samples_done = gst_util_uint64_scale((src->timestamp_offset+src->running_time),(guint64)src->samplerate,GST_SECOND);
   samples_per_buffer=(gint)(src->samples_per_buffer+(gdouble)(src->n_samples-samples_done));
-  GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf)",samples_per_buffer,src->samples_per_buffer);
+  //GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf)",samples_per_buffer,src->samples_per_buffer);
   
   if (src->check_seek_stop &&
     (src->n_samples_stop > src->n_samples) &&
@@ -770,7 +770,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
 
   gst_object_sync_values (G_OBJECT (src), src->running_time);
 
-  GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", running_time %12"G_GUINT64_FORMAT", next_time %12"G_GUINT64_FORMAT", duration %12"G_GUINT64_FORMAT,src->n_samples,src->running_time,next_time,(next_time - src->running_time));
+  //GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", running_time %12"G_GUINT64_FORMAT", next_time %12"G_GUINT64_FORMAT", duration %12"G_GUINT64_FORMAT,src->n_samples,src->running_time,next_time,(next_time - src->running_time));
   
   src->running_time = next_time;
   src->n_samples = n_samples;
