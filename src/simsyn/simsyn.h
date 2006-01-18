@@ -73,7 +73,7 @@ struct _GstSimSyn {
   void (*process)(GstSimSyn*, gint16 *);
 
   /* parameters */
-  gint samples_per_buffer;
+  gdouble samples_per_buffer;
   GstSimSynWaves wave;
   gchar *note;
   gdouble volume;

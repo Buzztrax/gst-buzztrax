@@ -146,10 +146,10 @@ static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
 //-- tempo interface implementations
 
 static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
-  self->samples_per_buffer=((self->samplerate*60)/(self->beats_per_minute*self->ticks_per_beat));
+  self->samples_per_buffer=((self->samplerate*60.0)/(gdouble)(self->beats_per_minute*self->ticks_per_beat));
   self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
-  GST_DEBUG("samples_per_buffer=%ld",self->samples_per_buffer);
+  GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
 }
 
 static void gst_sim_syn_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
@@ -280,8 +280,8 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
 
   gst_pad_set_fixatecaps_function (pad, gst_sim_syn_src_fixate);
 
-  src->samples_per_buffer = 1024;
-  src->generate_samples_per_buffer = src->samples_per_buffer;
+  src->samples_per_buffer = 1024.0;
+  src->generate_samples_per_buffer = (gint)src->samples_per_buffer;
   src->timestamp_offset = G_GINT64_CONSTANT (0);
 
   src->samplerate = 44100;
@@ -732,7 +732,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   GstSimSyn *src = GST_SIM_SYN (basesrc);
   GstBuffer *buf;
   GstClockTime next_time;
-  gint64 n_samples;
+  gint64 n_samples,samples_done;
   guint samples_per_buffer;
   
   if (src->eos_reached) return GST_FLOW_UNEXPECTED;
@@ -740,8 +740,9 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   //GST_DEBUG("rounding correction : %ld <> %"G_GUINT64_FORMAT,(glong)(((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND),src->n_samples);
   //samples_per_buffer=src->samples_per_buffer+(((src->running_time*src->samplerate)/GST_SECOND)-src->timestamp_offset);
-  samples_per_buffer=src->samples_per_buffer+(gint)((((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND)-src->n_samples);
-  GST_DEBUG("  samplers-per-buffer = %7ld (%7ld)",samples_per_buffer,src->samples_per_buffer);
+  samples_done = gst_util_uint64_scale((src->timestamp_offset+src->running_time),(guint64)src->samplerate,GST_SECOND);
+  samples_per_buffer=(gint)(src->samples_per_buffer+(gdouble)(src->n_samples-samples_done));
+  GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf)",samples_per_buffer,src->samples_per_buffer);
   
   if (src->check_seek_stop &&
     (src->n_samples_stop > src->n_samples) &&
@@ -810,7 +811,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       // @todo should these props be readonly, as now we have gst_bml_tempo_change_tempo ?
       break;
     case PROP_SAMPLES_PER_BUFFER:
-      src->samples_per_buffer = g_value_get_int (value);
+      src->samples_per_buffer = (gdouble)g_value_get_int (value);
       break;
     case PROP_WAVE:
       src->wave = g_value_get_enum (value);
@@ -864,7 +865,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
       g_value_set_ulong(value, src->subticks_per_tick);
       break;
     case PROP_SAMPLES_PER_BUFFER:
-      g_value_set_int (value, src->samples_per_buffer);
+      g_value_set_int (value, (gint)src->samples_per_buffer);
       break;
     case PROP_WAVE:
       g_value_set_enum (value, src->wave);
