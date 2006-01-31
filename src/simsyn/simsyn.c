@@ -943,6 +943,9 @@ plugin_init (GstPlugin * plugin)
 {
   GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "simsyn", GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
 
+  /* initialize gst controller library */
+  gst_controller_init(NULL,NULL);
+
   return gst_element_register (plugin, "simsyn",
       GST_RANK_NONE, GST_TYPE_SIM_SYN);
 }
