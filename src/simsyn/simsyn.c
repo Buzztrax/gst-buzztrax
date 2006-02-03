@@ -136,8 +136,6 @@ static gboolean gst_sim_syn_query (GstBaseSrc * basesrc,
 
 static void gst_sim_syn_change_wave (GstSimSyn * src);
 
-static void gst_sim_syn_get_times (GstBaseSrc * basesrc,
-    GstBuffer * buffer, GstClockTime * start, GstClockTime * end);
 static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
@@ -268,8 +266,6 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
       GST_DEBUG_FUNCPTR (gst_sim_syn_is_seekable);
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_sim_syn_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_sim_syn_query);
-  gstbasesrc_class->get_times =
-      GST_DEBUG_FUNCPTR (gst_sim_syn_get_times);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_sim_syn_create);
 }
 
@@ -669,29 +665,6 @@ gst_sim_syn_change_volume (GstSimSyn * src)
   }
 }
 
-static void
-gst_sim_syn_get_times (GstBaseSrc * basesrc, GstBuffer * buffer,
-    GstClockTime * start, GstClockTime * end)
-{
-  /* for live sources, sync on the timestamp of the buffer */
-  if (gst_base_src_is_live (basesrc)) {
-    GstClockTime timestamp = GST_BUFFER_TIMESTAMP (buffer);
-
-    if (GST_CLOCK_TIME_IS_VALID (timestamp)) {
-      /* get duration to calculate end time */
-      GstClockTime duration = GST_BUFFER_DURATION (buffer);
-
-      if (GST_CLOCK_TIME_IS_VALID (duration)) {
-        *end = timestamp + duration;
-      }
-      *start = timestamp;
-    }
-  } else {
-    *start = -1;
-    *end = -1;
-  }
-}
-
 static gboolean
 gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
 {
@@ -729,6 +702,7 @@ static GstFlowReturn
 gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     guint length, GstBuffer ** buffer)
 {
+  GstFlowReturn res;
   GstSimSyn *src = GST_SIM_SYN (basesrc);
   GstBuffer *buf;
   GstClockTime next_time;
@@ -743,7 +717,8 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   samples_done = gst_util_uint64_scale((src->timestamp_offset+src->running_time),(guint64)src->samplerate,GST_SECOND);
   samples_per_buffer=(gint)(src->samples_per_buffer+(gdouble)(src->n_samples-samples_done));
   //GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf)",samples_per_buffer,src->samples_per_buffer);
-  
+    
+  /* check for eos */
   if (src->check_seek_stop &&
     (src->n_samples_stop > src->n_samples) &&
     (src->n_samples_stop < src->n_samples + samples_per_buffer)
@@ -760,11 +735,16 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   //next_time = n_samples * GST_SECOND / src->samplerate;
   next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)src->samplerate);
   
-  buf = gst_buffer_new_and_alloc (src->generate_samples_per_buffer * sizeof (gint16));
-  gst_buffer_set_caps (buf, GST_PAD_CAPS (basesrc->srcpad));
-  
+  /* allocate a new buffer suitable for this pad */
+  if ((res = gst_pad_alloc_buffer (basesrc->srcpad, src->n_samples,
+      src->generate_samples_per_buffer * sizeof (gint16),
+      GST_PAD_CAPS (basesrc->srcpad),
+      &buf)) != GST_FLOW_OK
+  ) {
+    return res;
+  }
+
   GST_BUFFER_TIMESTAMP (buf) = src->timestamp_offset + src->running_time;
-  GST_BUFFER_OFFSET (buf) = src->n_samples;
   GST_BUFFER_OFFSET_END (buf) = n_samples;
   GST_BUFFER_DURATION (buf) = next_time - src->running_time;
 
