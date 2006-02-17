@@ -1,0 +1,245 @@
+2006-02-03 22:18  Stefan Kost <ensonic@users.sf.net>
+
+	* src/simsyn/simsyn.c:
+	use gst_pad_alloc()
+	remove _get_times() override
+
+2006-01-31 19:10  Stefan Kost <ensonic@users.sf.net>
+
+	* src/simsyn/simsyn.c:
+	initialize gst-controller
+
+2006-01-18 11:34  Stefan Kost <ensonic@users.sf.net>
+
+	* src/simsyn/simsyn.c:
+	commented debugs logs
+
+2006-01-18 09:37  Stefan Kost <ensonic@users.sf.net>
+
+	* src/simsyn/: simsyn.c, simsyn.h:
+	fixed #1408500
+
+2006-01-17 22:08  Stefan Kost <ensonic@users.sf.net>
+
+	* src/simsyn/simsyn.c:
+	better debugging
+
+2006-01-16 20:52  Stefan Kost <ensonic@users.sf.net>
+
+	* .cvsignore, docs/reference/.cvsignore:
+	more cvs maintainance
+
+2006-01-16 20:48  Stefan Kost <ensonic@users.sf.net>
+
+	* .cvsignore, docs/reference/.cvsignore, tests/Makefile.am:
+	more make distcheck fixes
+	cvs maintainance
+
+2006-01-16 20:41  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, docs/reference/Makefile.am, src/Makefile.am:
+	make distcheck fixes
+
+2006-01-15 20:23  Stefan Kost <ensonic@users.sf.net>
+
+	* docs/.cvsignore, docs/reference/.cvsignore, src/.cvsignore,
+	src/simsyn/.cvsignore:
+	added more cvsignore files
+
+2006-01-15 18:31  Stefan Kost <ensonic@users.sf.net>
+
+	* TODO, src/simsyn/simsyn.c, src/simsyn/simsyn.h:
+	added debug category
+	removed tag-sending
+	more debug info for buffer-frame size
+
+2006-01-14 22:59  Stefan Kost <ensonic@users.sf.net>
+
+	* TODO, src/propertymeta/propertymeta.c,
+	src/propertymeta/propertymeta.h, src/simsyn/simsyn.c,
+	src/simsyn/simsyn.h:
+	implement tempo iface (needs more debugging)
+	fix property meta data in simsyn
+	add flag enum to property-meta
+
+2006-01-13 18:36  Stefan Kost <ensonic@users.sf.net>
+
+	* src/: propertymeta/propertymeta.c, simsyn/simsyn.c:
+	only retrigger envelope for note!=NULL
+
+2006-01-12 22:59  Stefan Kost <ensonic@users.sf.net>
+
+	* README, src/simsyn/Makefile.am, src/simsyn/simsyn.c,
+	src/simsyn/simsyn.h:
+	updating the readme (local install)
+	add simple decay envelope to simsyn
+
+2006-01-11 20:16  Stefan Kost <ensonic@users.sf.net>
+
+	* configure.ac, src/Makefile.am, src/simsyn/Makefile.am,
+	src/simsyn/simsyn.c, src/simsyn/simsyn.h, tests/Makefile.am:
+	build the simsyn plugin (still some linker problems left)
+
+2006-01-10 18:23  Stefan Kost <ensonic@users.sf.net>
+
+	* docs/reference/: gst-buzztard-sections.txt, gst-buzztard.types:
+	doc fixes
+
+2006-01-09 21:13  Stefan Kost <ensonic@users.sf.net>
+
+	* docs/reference/Makefile.am,
+	docs/reference/gst-buzztard-docs.sgml,
+	docs/reference/gst-buzztard-sections.txt, src/childbin/childbin.c,
+	src/note2frequency/note2frequency.c,
+	src/note2frequency/note2frequency.h,
+	src/propertymeta/propertymeta.c, src/simsyn/Makefile.am,
+	src/simsyn/simsyn.c, src/simsyn/simsyn.h, src/tempo/tempo.c,
+	tests/e-gst-note2frequency.c, tests/t-gst-note2frequency.c:
+	note2frequency can transform from string and from number
+	more doc cleanups
+	added boilerplate for synth
+
+2006-01-07 18:33  Stefan Kost <ensonic@users.sf.net>
+
+	* src/note2frequency/note2frequency.c,
+	src/note2frequency/note2frequency.h, tests/Makefile.am,
+	tests/e-gst-note2frequency.c, tests/m-gst-buzztard.c,
+	tests/m-gst-buzztard.h, tests/s-gst-note2frequency.c,
+	tests/t-gst-note2frequency.c:
+	more tests adn fixes
+
+2006-01-07 17:50  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, configure.ac, src/note2frequency/note2frequency.c,
+	src/note2frequency/note2frequency.h, tests/.cvsignore,
+	tests/Makefile.am, tests/e-gst-note2frequency.c,
+	tests/gtkdoccomplete.sh, tests/m-gst-buzztard.c,
+	tests/m-gst-buzztard.h, tests/s-gst-note2frequency.c:
+	created testsuite
+	added implementation for note2frequency
+
+2006-01-06 18:33  Stefan Kost <ensonic@users.sf.net>
+
+	* src/note2frequency/: note2frequency.c, note2frequency.h:
+	added missing files
+
+2006-01-06 18:30  Stefan Kost <ensonic@users.sf.net>
+
+	* src/: .cvsignore, Makefile.am:
+	added missing files
+
+2006-01-06 18:28  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, configure.ac, docs/reference/Makefile.am,
+	src/childbin/.cvsignore, src/childbin/Makefile.am,
+	src/childbin/childbin.c, src/childbin/childbin.h,
+	src/note2frequency/.cvsignore, src/note2frequency/Makefile.am,
+	src/note2frequency/note2frequency.c,
+	src/note2frequency/note2frequency.h, src/propertymeta/.cvsignore,
+	src/propertymeta/Makefile.am, src/propertymeta/propertymeta.c,
+	src/propertymeta/propertymeta.h, src/tempo/.cvsignore,
+	src/tempo/Makefile.am, src/tempo/tempo.c, src/tempo/tempo.h:
+	cleanup of dir-structure, moved sources to src
+	added boilerplate for note2frequency
+
+2005-12-23 09:07  Stefan Kost <ensonic@users.sf.net>
+
+	* docs/reference/gst-buzztard-sections.txt:
+	documentation cleanup
+
+2005-12-12 23:22  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, autogen.sh, configure.ac, docs/Makefile.am,
+	docs/reference/Makefile.am, docs/reference/gst-buzztard-docs.sgml,
+	docs/reference/gst-buzztard-sections.txt,
+	docs/reference/gst-buzztard.types:
+	added docs ;)
+
+2005-12-06 11:39  Stefan Kost <ensonic@users.sf.net>
+
+	* configure.ac:
+	bumped gst to 0.10
+
+2005-12-03 17:28  Stefan Kost <ensonic@users.sf.net>
+
+	* configure.ac, libgstbuzztard.pc.in:
+	switched to 0.10 pre
+
+2005-08-22 23:05  Stefan Kost <ensonic@users.sf.net>
+
+	* .cvsignore, configure.ac, libgstbuzztard.pc.in:
+	now building against gstreamer 0.9
+
+2005-07-22 11:45  Stefan Kost <ensonic@users.sf.net>
+
+	* .cvsignore:
+	added cvsignore files
+
+2005-07-20 18:58  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, configure.ac:
+	turned package into a normal lib (not a plugin as before)
+
+2005-06-29 11:20  Stefan Kost <ensonic@users.sf.net>
+
+	* configure.ac:
+	added initial tempo iface code
+	added describe api to property iface (will change)
+
+2005-06-23 23:15  Stefan Kost <ensonic@users.sf.net>
+
+	* NEWS:
+	little distcheck fix
+
+2005-06-23 22:48  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, TODO, configure.ac:
+	renamed iface: parameter-meta to property-meta
+	added gquarks and iface code for property-meta
+
+2005-06-21 22:38  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, configure.ac:
+	prepared new iface files
+
+2005-06-14 10:24  Stefan Kost <ensonic@users.sf.net>
+
+	* configure.ac:
+	added more configure options
+	allow to build with -Wall
+
+2005-05-10 16:12  Stefan Kost <ensonic@users.sf.net>
+
+	* README:
+	better readme
+
+2005-05-09 18:50  Stefan Kost <ensonic@users.sf.net>
+
+	* libgstbuzztard.pc.in:
+	fixed include path in package config file
+
+2005-05-04 00:32  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am:
+	made it compile ;)
+
+2005-05-04 00:12  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, configure.ac, libgstbuzztard.pc.in:
+	added pkg-config file, so that we can detect the module
+
+2005-04-30 15:51  Stefan Kost <ensonic@users.sf.net>
+
+	* Makefile.am, NEWS, autogen.sh, configure.ac:
+	basic build setup
+
+2005-04-30 15:25  Stefan Kost <ensonic@users.sf.net>
+
+	* AUTHORS, ChangeLog, Makefile.am, README, configure.ac:
+	Imported sources
+
+2005-04-30 15:25  Stefan Kost <ensonic@users.sf.net>
+
+	* AUTHORS, ChangeLog, Makefile.am, README, configure.ac:
+	Initial revision
+
