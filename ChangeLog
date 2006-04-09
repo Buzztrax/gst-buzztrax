@@ -1,5 +1,20 @@
 2006-04-09  Stefan Kost  <ensonic@users.sf.net>
 
+	* configure.ac:
+	* src/Makefile.am:
+	* src/envelope/.cvsignore:
+	* src/envelope/Makefile.am:
+	* src/envelope/envelope.c: (gst_envelope_new),
+	(gst_envelope_set_property), (gst_envelope_get_property),
+	(gst_envelope_dispose), (gst_envelope_init),
+	(gst_envelope_class_init), (gst_envelope_get_type):
+	* src/envelope/envelope.h:
+	* src/simsyn/simsyn.c: (gst_sim_syn_init), (gst_sim_syn_dispose):
+	* src/simsyn/simsyn.h:
+	some g_object macro cleanups, prepare envelope object
+
+2006-04-09  Stefan Kost  <ensonic@users.sf.net>
+
 	reviewed by: <delete if not using a buddy>
 
 	* src/note2frequency/note2frequency.c:

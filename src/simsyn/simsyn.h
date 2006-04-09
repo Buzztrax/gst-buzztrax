@@ -1,7 +1,7 @@
 /* GStreamer
  * Copyright (C) 2005 Stefan Kost <ensonic@users.sf.net>
  *
- * simsyn.c: simple audio synthesizer for gstreamer
+ * simsyn.h: simple audio synthesizer for gstreamer
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -19,27 +19,24 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_AUDIO_TEST_SRC_H__
+#ifndef __GST_SIM_SYN_H__
 #define __GST_SIM_SYN_H__
 
 
 #include <gst/gst.h>
 #include <gst/base/gstbasesrc.h>
 #include <note2frequency/note2frequency.h>
+#include <envelope/envelope.h>
 
 G_BEGIN_DECLS
 
 
-#define GST_TYPE_SIM_SYN \
-  (gst_sim_syn_get_type())
-#define GST_SIM_SYN(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_SIM_SYN,GstSimSyn))
-#define GST_SIM_SYN_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_SIM_SYN,GstSimSynClass))
-#define GST_IS_SIM_SYN(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_SIM_SYN))
-#define GST_IS_SIM_SYN_CLASS(obj) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_SIM_SYN))
+#define GST_TYPE_SIM_SYN            (gst_sim_syn_get_type())
+#define GST_SIM_SYN(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_SIM_SYN,GstSimSyn))
+#define GST_IS_SIM_SYN(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_SIM_SYN))
+#define GST_SIM_SYN_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GST_TYPE_SIM_SYN,GstSimSynClass))
+#define GST_IS_SIM_SYN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GST_TYPE_SIM_SYN))
+#define GST_SIM_SYN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GST_TYPE_SIM_SYN,GstSimSynClass))
 
 typedef enum {
   GST_SIM_SYN_WAVE_SINE,
@@ -92,6 +89,8 @@ struct _GstSimSyn {
   gboolean dispose_has_run;		/* validate if dispose has run */
   gdouble freq;
   gdouble current_volume;
+  GstEnvelope *volenv;                  /* volume-envelope */
+  GstController *volenv_controller;     /* volume-envelope controller */
 
   /* tempo handling */
   gulong beats_per_minute;

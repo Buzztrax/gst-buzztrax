@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.15 2006-01-11 19:16:34 ensonic Exp $
+# $Id: configure.ac,v 1.16 2006-04-09 21:45:19 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -208,6 +208,7 @@ AC_CONFIG_FILES( \
 	docs/reference/Makefile \
 	src/Makefile \
 	src/childbin/Makefile \
+        src/envelope/Makefile \
 	src/note2frequency/Makefile \
 	src/propertymeta/Makefile \
 	src/simsyn/Makefile \

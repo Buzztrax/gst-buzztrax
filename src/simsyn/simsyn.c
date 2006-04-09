@@ -297,6 +297,9 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
 
   src->wave = GST_SIM_SYN_WAVE_SINE;
   gst_sim_syn_change_wave (src);
+  
+  src->volenv=gst_envelope_new();
+  src->volenv_controller=gst_controller_new(G_OBJECT(src->volenv), "volume", NULL);
 }
 
 static void
@@ -880,6 +883,8 @@ gst_sim_syn_dispose (GObject *object)
   src->dispose_has_run = TRUE;
   
   if (src->n2f) g_object_unref (src->n2f);
+  if (src->volenv_controller) g_object_unref (src->volenv_controller);
+  if (src->volenv) g_object_unref (src->volenv);
   
   if(G_OBJECT_CLASS(parent_class)->dispose) {
     (G_OBJECT_CLASS(parent_class)->dispose)(object);
