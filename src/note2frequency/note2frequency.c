@@ -260,7 +260,7 @@ static void gst_note_2_frequency_init(GTypeInstance *instance, gpointer g_class)
 static void gst_note_2_frequency_class_init(GstNote2FrequencyClass *klass) {
   GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
-  parent_class=g_type_class_ref(G_TYPE_OBJECT);
+  parent_class=g_type_class_peek_parent(klass);
   
   gobject_class->set_property = gst_note_2_frequency_set_property;
   gobject_class->get_property = gst_note_2_frequency_get_property;
