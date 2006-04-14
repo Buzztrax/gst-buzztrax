@@ -35,7 +35,7 @@ GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
 
 enum {
   // class properties
-  PROP_VALUE,
+  PROP_VALUE=1,
 };
 
 static GObjectClass *parent_class = NULL;
@@ -159,4 +159,3 @@ GType gst_envelope_get_type (void)
   }
   return type;
 }
-

@@ -49,6 +49,14 @@ typedef enum {
   GST_SIM_SYN_WAVE_SINE_TAB
 } GstSimSynWaves; 
 
+typedef enum {
+  GST_SIM_SYN_FILTER_NONE,
+  GST_SIM_SYN_FILTER_LOWPASS,
+  GST_SIM_SYN_FILTER_HIPASS,
+  GST_SIM_SYN_FILTER_BANDPASS,
+  GST_SIM_SYN_FILTER_BANDSTOP
+} GstSimSynFilter;
+
 #define PINK_MAX_RANDOM_ROWS   (30)
 #define PINK_RANDOM_BITS       (16)
 #define PINK_RANDOM_SHIFT      ((sizeof(long)*8)-PINK_RANDOM_BITS)
@@ -68,6 +76,7 @@ struct _GstSimSyn {
   GstBaseSrc parent;
 
   void (*process)(GstSimSyn*, gint16 *);
+  void (*apply_filter)(GstSimSyn*, gint16 *);
 
   /* parameters */
   gdouble samples_per_buffer;
@@ -75,8 +84,13 @@ struct _GstSimSyn {
   gchar *note;
   gdouble volume;
   gdouble decay;
+  GstSimSynFilter filter;
+  gdouble cutoff;
+  gdouble resonance;
   
   /* < private > */
+  gboolean dispose_has_run;		/* validate if dispose has run */
+
   gint samplerate;
   GstClockTimeDiff timestamp_offset;    /* base offset */
   GstClockTime running_time;            /* total running time */
@@ -85,10 +99,10 @@ struct _GstSimSyn {
   gboolean check_seek_stop;
   gboolean eos_reached;
   gint generate_samples_per_buffer;	/* generate a partial buffer */
+
   GstNote2Frequency *n2f;
-  gboolean dispose_has_run;		/* validate if dispose has run */
   gdouble freq;
-  gdouble current_volume;
+  guint64 note_count;
   GstEnvelope *volenv;                  /* volume-envelope */
   GstController *volenv_controller;     /* volume-envelope controller */
 
@@ -102,6 +116,10 @@ struct _GstSimSyn {
   gdouble accumulator;			/* phase angle */
   GstPinkNoise pink;
   gint16 wave_table[1024];
+  
+  /* filter specific data */
+  gdouble flt_low, flt_mid, flt_high;
+  gdouble flt_res;
 };
 
 struct _GstSimSynClass {

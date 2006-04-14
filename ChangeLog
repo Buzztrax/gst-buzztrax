@@ -1,3 +1,20 @@
+2006-04-15  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/envelope/envelope.c: (gst_envelope_get_type):
+	* src/simsyn/simsyn.c: (gst_sim_syn_wave_get_type),
+	(gst_sim_syn_filter_get_type), (gst_sim_syn_class_init),
+	(gst_sim_syn_init), (gst_sim_syn_create_sine),
+	(gst_sim_syn_create_square), (gst_sim_syn_create_saw),
+	(gst_sim_syn_create_triangle), (gst_sim_syn_create_white_noise),
+	(gst_sim_syn_create_pink_noise), (gst_sim_syn_create_sine_table),
+	(gst_sim_syn_filter_lowpass), (gst_sim_syn_filter_hipass),
+	(gst_sim_syn_filter_bandpass), (gst_sim_syn_filter_bandstop),
+	(gst_sim_syn_change_filter), (gst_sim_syn_create),
+	(gst_sim_syn_set_property), (gst_sim_syn_get_property),
+	(gst_sim_syn_get_type):
+	* src/simsyn/simsyn.h:
+	added volume envelope, added state-variable filter
+
 2006-04-09  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
