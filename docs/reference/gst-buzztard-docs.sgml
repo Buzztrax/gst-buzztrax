@@ -12,11 +12,15 @@
 	  This module contains experimental code that extends gstreamer.
 	  The extensions may be required to build a CVS version of buzztard.
 	</para>
+        <para>
+          It also contains some nice audio elements.
+        </para>
   </preface>
 
   <chapter>
-    <title>GStreamer Buzztard classes </title>
-	<xi:include href="xml/gstnote2frequency.xml"/>
+    <title>GStreamer Buzztard classes</title>
+    <xi:include href="xml/gstenvelope.xml"/>
+    <xi:include href="xml/gstnote2frequency.xml"/>
   </chapter>
 
   <chapter>
@@ -24,6 +28,12 @@
     <xi:include href="xml/gstchildbin.xml"/>
     <xi:include href="xml/gstpropertymeta.xml"/>
     <xi:include href="xml/gsttempo.xml"/>
+  </chapter>
+
+  <chapter>
+    <title>GStreamer Buzztard elements</title>
+    <xi:include href="xml/gstaudiodelay.xml"/>
+    <xi:include href="xml/gstsimsyn.xml"/>
   </chapter>
 
   <chapter id="hierarchy">

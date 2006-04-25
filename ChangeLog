@@ -1,3 +1,24 @@
+2006-04-26  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* docs/reference/gst-buzztard-docs.sgml:
+	* docs/reference/gst-buzztard-sections.txt:
+	* src/Makefile.am:
+	* src/audiodelay/.cvsignore:
+	* src/audiodelay/Makefile.am:
+	* src/audiodelay/audiodelay.c: (gst_audiodelay_base_init),
+	(gst_audiodelay_class_init), (gst_audiodelay_init),
+	(gst_audiodelay_set_property), (gst_audiodelay_get_property),
+	(gst_audiodelay_dispose), (gst_audiodelay_set_caps),
+	(gst_audiodelay_start), (gst_audiodelay_transform_ip),
+	(gst_audiodelay_stop), (plugin_init):
+	* src/audiodelay/audiodelay.h:
+	* src/envelope/envelope.c:
+	* src/simsyn/Makefile.am:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	cleanups, docs and integration of the audiodelay element
+
 2006-04-16  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/simsyn/simsyn.c: (gst_sim_syn_wave_get_type),

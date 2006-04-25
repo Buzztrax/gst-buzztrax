@@ -1,4 +1,4 @@
-# $Id: gst-buzztard-sections.txt,v 1.4 2006-01-10 17:23:56 ensonic Exp $
+# $Id: gst-buzztard-sections.txt,v 1.5 2006-04-25 21:27:27 ensonic Exp $
 # :mode=html:
 
 # please add section in the alpahbetical order using the following template
@@ -8,6 +8,21 @@
 # <SUBSECTION Standard>
 # <SUBSECTION Private>
 # </SECTION>
+
+<SECTION>
+<FILE>gstaudiodelay</FILE>
+<TITLE>GstAudiodelay</TITLE>
+GstAudiodelay
+<SUBSECTION Standard>
+GstAudiodelayClass
+GST_AUDIODELAY
+GST_IS_AUDIODELAY
+GST_AUDIODELAY_CLASS
+GST_IS_AUDIODELAY_CLASS
+GST_AUDIODELAY_GET_CLASS
+GST_TYPE_AUDIODELAY
+gst_audiodelay_get_type
+</SECTION>
 
 <SECTION>
 <FILE>gstchildbin</FILE>
@@ -22,6 +37,22 @@ GST_IS_CHILD_BIN
 GST_TYPE_CHILD_BIN
 GST_CHILD_BIN_GET_INTERFACE
 gst_child_bin_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstenvelope</FILE>
+<TITLE>GstEnvelope</TITLE>
+GstEnvelope
+gst_envelope_new
+<SUBSECTION Standard>
+GstEnvelopeClass
+GST_ENVELOPE
+GST_IS_ENVELOPE
+GST_ENVELOPE_CLASS
+GST_IS_ENVELOPE_CLASS
+GST_ENVELOPE_GET_CLASS
+GST_TYPE_ENVELOPE
+gst_envelope_get_type
 </SECTION>
 
 <SECTION>
@@ -40,6 +71,7 @@ GST_NOTE_2_FREQUENCY_CLASS
 GST_IS_NOTE_2_FREQUENCY_CLASS
 GST_NOTE_2_FREQUENCY_GET_CLASS
 GST_TYPE_NOTE_2_FREQUENCY
+GST_TYPE_NOTE_2_FREQUENCY_TUNING
 gst_note_2_frequency_get_type
 gst_note_2_frequency_tuning_get_type
 </SECTION>
@@ -48,6 +80,7 @@ gst_note_2_frequency_tuning_get_type
 <FILE>gstpropertymeta</FILE>
 <TITLE>GstPropertyMeta</TITLE>
 GstPropertyMeta
+GstGstPropertyMetaFlags
 gst_property_meta_describe_property
 gst_property_meta_quark_min_val
 gst_property_meta_quark_max_val
@@ -61,6 +94,27 @@ GST_IS_PROPERTY_META
 GST_TYPE_PROPERTY_META
 GST_PROPERTY_META_GET_INTERFACE
 gst_property_meta_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstsimsyn</FILE>
+<TITLE>GstSimSyn</TITLE>
+GstSimSyn
+GstSimSynFilter
+GstSimSynWaves
+<SUBSECTION Standard>
+GstSimSynClass
+GstPinkNoise
+PINK_MAX_RANDOM_ROWS
+PINK_RANDOM_BITS
+PINK_RANDOM_SHIFT
+GST_SIM_SYN
+GST_IS_SIM_SYN
+GST_SIM_SYN_CLASS
+GST_IS_SIM_SYN_CLASS
+GST_SIM_SYN_GET_CLASS
+GST_TYPE_SIM_SYN
+gst_sim_syn_get_type
 </SECTION>
 
 <SECTION>

@@ -127,7 +127,6 @@ struct _GstSimSynClass {
 };
 
 GType gst_sim_syn_get_type(void);
-gboolean gst_sim_syn_factory_init (GstElementFactory *factory);
 
 G_END_DECLS
 

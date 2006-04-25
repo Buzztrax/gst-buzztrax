@@ -19,8 +19,8 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:element-simsyn
- * @short_description: simple audio synthesizer for gstreamer
+ * SECTION:gstsimsyn
+ * @short_description: simple monophonic audio synthesizer
  *
  * Simple monophonic audio synthesizer with a decay envelope and a 
  * state-variable filter.
@@ -54,7 +54,7 @@
 #define GST_CAT_DEFAULT sim_syn_debug
 GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
 
-GstElementDetails gst_sim_syn_details =
+static const GstElementDetails gst_sim_syn_details =
 GST_ELEMENT_DETAILS ("Simple Synth",
   "Source/Audio",
   "Simple audio synthesizer",
@@ -79,7 +79,6 @@ enum {
   PROP_CUTOFF,
   PROP_RESONANCE
 };
-
 
 static GstStaticPadTemplate gst_sim_syn_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",

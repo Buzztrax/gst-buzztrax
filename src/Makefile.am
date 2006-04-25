@@ -1,4 +1,4 @@
-SUBDIRS = childbin envelope note2frequency propertymeta tempo . simsyn
+SUBDIRS = childbin envelope note2frequency propertymeta tempo . audiodelay simsyn
 
 lib_LTLIBRARIES = libgstbuzztard.la
 
