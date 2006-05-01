@@ -18,25 +18,25 @@
  * Boston, MA 02111-1307, USA.
  */
  
-#ifndef __GST_AUDIODELAY_H__
-#define __GST_AUDIODELAY_H__
+#ifndef __GST_AUDIO_DELAY_H__
+#define __GST_AUDIO_DELAY_H__
 
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_AUDIODELAY            (gst_audiodelay_get_type())
-#define GST_AUDIODELAY(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_AUDIODELAY,GstAudiodelay))
-#define GST_IS_AUDIODELAY(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_AUDIODELAY))
-#define GST_AUDIODELAY_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GST_TYPE_AUDIODELAY,GstAudiodelayClass))
-#define GST_IS_AUDIODELAY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GST_TYPE_AUDIODELAY))
-#define GST_AUDIODELAY_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GST_TYPE_AUDIODELAY,GstAudiodelayClass))
+#define GST_TYPE_AUDIO_DELAY            (gst_audio_delay_get_type())
+#define GST_AUDIO_DELAY(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_AUDIO_DELAY,GstAudioDelay))
+#define GST_IS_AUDIO_DELAY(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_AUDIO_DELAY))
+#define GST_AUDIO_DELAY_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GST_TYPE_AUDIO_DELAY,GstAudioDelayClass))
+#define GST_IS_AUDIO_DELAY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GST_TYPE_AUDIO_DELAY))
+#define GST_AUDIO_DELAY_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GST_TYPE_AUDIO_DELAY,GstAudioDelayClass))
 
-typedef struct _GstAudiodelay      GstAudiodelay;
-typedef struct _GstAudiodelayClass GstAudiodelayClass;
+typedef struct _GstAudioDelay      GstAudioDelay;
+typedef struct _GstAudioDelayClass GstAudioDelayClass;
 
-struct _GstAudiodelay {
+struct _GstAudioDelay {
   GstBaseTransform element;
 
   guint drywet;
@@ -50,12 +50,12 @@ struct _GstAudiodelay {
   guint rb_ptr;
 };
 
-struct _GstAudiodelayClass {
+struct _GstAudioDelayClass {
   GstBaseTransformClass parent_class;
 };
 
-GType gst_audiodelay_get_type (void);
+GType gst_audio_delay_get_type (void);
 
 G_END_DECLS
 
-#endif /* __GST_AUDIODELAY_H__ */
+#endif /* __GST_AUDIO_DELAY_H__ */

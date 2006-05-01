@@ -161,7 +161,7 @@ static void gst_sim_syn_change_wave (GstSimSyn * src);
 static void gst_sim_syn_change_volume (GstSimSyn * src);
 static void gst_sim_syn_change_filter (GstSimSyn * src);
 
-static void gst_sim_syn_src_get_times (GstBaseSrc * basesrc,
+static void gst_sim_syn_get_times (GstBaseSrc * basesrc,
     GstBuffer * buffer, GstClockTime * start, GstClockTime * end);
 static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
@@ -249,8 +249,7 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
       GST_DEBUG_FUNCPTR (gst_sim_syn_is_seekable);
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_sim_syn_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_sim_syn_query);
-  gstbasesrc_class->get_times =
-      GST_DEBUG_FUNCPTR (gst_sim_syn_src_get_times);
+  gstbasesrc_class->get_times = GST_DEBUG_FUNCPTR (gst_sim_syn_get_times);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_sim_syn_create);
 
   // override interface properties
@@ -840,7 +839,7 @@ gst_sim_syn_change_filter (GstSimSyn * src)
 }
 
 static void
-gst_sim_syn_src_get_times (GstBaseSrc * basesrc, GstBuffer * buffer,
+gst_sim_syn_get_times (GstBaseSrc * basesrc, GstBuffer * buffer,
     GstClockTime * start, GstClockTime * end)
 {
   /* for live sources, sync on the timestamp of the buffer */

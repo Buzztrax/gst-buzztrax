@@ -20,7 +20,7 @@
 
 /**
  * SECTION:gstaudiodelay
- * @short_description: audioecho effect
+ * @short_description: audio echo effect
  *
  * <refsect2>
  * Echo effect with controllable effect-ratio, delay-time and feedback.
@@ -46,11 +46,11 @@
 
 #include "audiodelay.h"
 
-GST_DEBUG_CATEGORY_STATIC (gst_audiodelay_debug);
-#define GST_CAT_DEFAULT gst_audiodelay_debug
+GST_DEBUG_CATEGORY_STATIC (gst_audio_delay_debug);
+#define GST_CAT_DEFAULT gst_audio_delay_debug
 
 static const GstElementDetails element_details =
-GST_ELEMENT_DETAILS ("Audiodelay",
+GST_ELEMENT_DETAILS ("AudioDelay",
   "Filter/Effect/Audio",
   "Add echos to audio streams",
   "Stefan Kost <ensonic@users.sf.net>");
@@ -99,28 +99,28 @@ GST_STATIC_PAD_TEMPLATE (
 );
 
 #define DEBUG_INIT(bla) \
-  GST_DEBUG_CATEGORY_INIT (gst_audiodelay_debug, "audiodelay", 0, "audiodelay plugin");
+  GST_DEBUG_CATEGORY_INIT (gst_audio_delay_debug, "audiodelay", 0, "audiodelay plugin");
 
-GST_BOILERPLATE_FULL (GstAudiodelay, gst_audiodelay, GstBaseTransform,
+GST_BOILERPLATE_FULL (GstAudioDelay, gst_audio_delay, GstBaseTransform,
     GST_TYPE_BASE_TRANSFORM, DEBUG_INIT);
 
-static void gst_audiodelay_set_property (GObject * object, guint prop_id,
+static void gst_audio_delay_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec);
-static void gst_audiodelay_get_property (GObject * object, guint prop_id,
+static void gst_audio_delay_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec);
-static void gst_audiodelay_dispose (GObject * object);
+static void gst_audio_delay_dispose (GObject * object);
 
-static gboolean gst_audiodelay_set_caps (GstBaseTransform * base,
+static gboolean gst_audio_delay_set_caps (GstBaseTransform * base,
     GstCaps * incaps, GstCaps * outcaps);
-static gboolean gst_audiodelay_start (GstBaseTransform * base);
-static GstFlowReturn gst_audiodelay_transform_ip (GstBaseTransform * base,
+static gboolean gst_audio_delay_start (GstBaseTransform * base);
+static GstFlowReturn gst_audio_delay_transform_ip (GstBaseTransform * base,
     GstBuffer * outbuf);
-static gboolean gst_audiodelay_stop (GstBaseTransform * base);
+static gboolean gst_audio_delay_stop (GstBaseTransform * base);
 
 /* GObject vmethod implementations */
 
 static void
-gst_audiodelay_base_init (gpointer klass)
+gst_audio_delay_base_init (gpointer klass)
 {
   GstElementClass *element_class = GST_ELEMENT_CLASS (klass);
 
@@ -132,14 +132,14 @@ gst_audiodelay_base_init (gpointer klass)
 }
 
 static void
-gst_audiodelay_class_init (GstAudiodelayClass * klass)
+gst_audio_delay_class_init (GstAudioDelayClass * klass)
 {
   GObjectClass *gobject_class;
 
   gobject_class = (GObjectClass *) klass;
-  gobject_class->set_property = gst_audiodelay_set_property;
-  gobject_class->get_property = gst_audiodelay_get_property;
-  gobject_class->dispose = gst_audiodelay_dispose;
+  gobject_class->set_property = gst_audio_delay_set_property;
+  gobject_class->get_property = gst_audio_delay_get_property;
+  gobject_class->dispose = gst_audio_delay_dispose;
 
   g_object_class_install_property (gobject_class, PROP_DRYWET,
     g_param_spec_uint ("drywet", "Dry-Wet", "Intensity of effect (0 none -> 100 full)",
@@ -147,27 +147,27 @@ gst_audiodelay_class_init (GstAudiodelayClass * klass)
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   g_object_class_install_property (gobject_class, PROP_DELAYTIME,
-    g_param_spec_uint ("delaytime", "Delay time", "Time difference between two echos as milli seconds.",
+    g_param_spec_uint ("delaytime", "Delay time", "Time difference between two echos as milliseconds",
           1, DELAYTIME_MAX, 100,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   g_object_class_install_property (gobject_class, PROP_FEEDBACK,
-    g_param_spec_uint ("feedback", "Fedback", "Echo feedback in percent.",
+    g_param_spec_uint ("feedback", "Fedback", "Echo feedback in percent",
           0, 99, 50,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   GST_BASE_TRANSFORM_CLASS (klass)->set_caps =
-      GST_DEBUG_FUNCPTR (gst_audiodelay_set_caps);
+      GST_DEBUG_FUNCPTR (gst_audio_delay_set_caps);
   GST_BASE_TRANSFORM_CLASS (klass)->start =
-      GST_DEBUG_FUNCPTR (gst_audiodelay_start);
+      GST_DEBUG_FUNCPTR (gst_audio_delay_start);
   GST_BASE_TRANSFORM_CLASS (klass)->transform_ip =
-      GST_DEBUG_FUNCPTR (gst_audiodelay_transform_ip);
+      GST_DEBUG_FUNCPTR (gst_audio_delay_transform_ip);
   GST_BASE_TRANSFORM_CLASS (klass)->stop =
-      GST_DEBUG_FUNCPTR (gst_audiodelay_stop);
+      GST_DEBUG_FUNCPTR (gst_audio_delay_stop);
 }
 
 static void
-gst_audiodelay_init (GstAudiodelay *filter, GstAudiodelayClass * klass)
+gst_audio_delay_init (GstAudioDelay *filter, GstAudioDelayClass * klass)
 {
   filter->drywet = 50;
   filter->delaytime = 100;
@@ -178,10 +178,10 @@ gst_audiodelay_init (GstAudiodelay *filter, GstAudiodelayClass * klass)
 }
 
 static void
-gst_audiodelay_set_property (GObject * object, guint prop_id,
+gst_audio_delay_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstAudiodelay *filter = GST_AUDIODELAY (object);
+  GstAudioDelay *filter = GST_AUDIO_DELAY (object);
 
   switch (prop_id) {
     case PROP_DRYWET:
@@ -200,10 +200,10 @@ gst_audiodelay_set_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_audiodelay_get_property (GObject * object, guint prop_id,
+gst_audio_delay_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
-  GstAudiodelay *filter = GST_AUDIODELAY (object);
+  GstAudioDelay *filter = GST_AUDIO_DELAY (object);
 
   switch (prop_id) {
     case PROP_DRYWET:
@@ -222,9 +222,9 @@ gst_audiodelay_get_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_audiodelay_dispose (GObject * object)
+gst_audio_delay_dispose (GObject * object)
 {
-  GstAudiodelay *filter = GST_AUDIODELAY (object);
+  GstAudioDelay *filter = GST_AUDIO_DELAY (object);
 
   if (filter->ring_buffer) {
     g_free (filter->ring_buffer);
@@ -238,9 +238,9 @@ gst_audiodelay_dispose (GObject * object)
 /* GstBaseTransform vmethod implementations */
 
 static gboolean
-gst_audiodelay_set_caps (GstBaseTransform * base, GstCaps * incaps, GstCaps * outcaps)
+gst_audio_delay_set_caps (GstBaseTransform * base, GstCaps * incaps, GstCaps * outcaps)
 {
-  GstAudiodelay *filter = GST_AUDIODELAY (base);
+  GstAudioDelay *filter = GST_AUDIO_DELAY (base);
   const GstStructure *structure;
   gboolean ret;
 
@@ -253,9 +253,9 @@ gst_audiodelay_set_caps (GstBaseTransform * base, GstCaps * incaps, GstCaps * ou
 /* initialize processing
  */
 static gboolean
-gst_audiodelay_start (GstBaseTransform *base)
+gst_audio_delay_start (GstBaseTransform *base)
 {
-  GstAudiodelay *filter = GST_AUDIODELAY (base);
+  GstAudioDelay *filter = GST_AUDIO_DELAY (base);
 
   filter->max_delaytime=(2 + (DELAYTIME_MAX * filter->samplerate) / 100);
   filter->ring_buffer = (gint16 *) g_new0 (gint16, filter->max_delaytime);
@@ -272,9 +272,9 @@ gst_audiodelay_start (GstBaseTransform *base)
 /* this function does the actual processing
  */
 static GstFlowReturn
-gst_audiodelay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
+gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 {
-  GstAudiodelay *filter = GST_AUDIODELAY (base);
+  GstAudioDelay *filter = GST_AUDIO_DELAY (base);
   guint delaytime;
   gdouble feedback, dry, wet;
   gint16 *data = (gint16 *) GST_BUFFER_DATA (outbuf);
@@ -315,9 +315,9 @@ gst_audiodelay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 /* clean up after processing
  */
 static gboolean
-gst_audiodelay_stop (GstBaseTransform *base)
+gst_audio_delay_stop (GstBaseTransform *base)
 {
-  GstAudiodelay *filter = GST_AUDIODELAY (base);
+  GstAudioDelay *filter = GST_AUDIO_DELAY (base);
 
   if (filter->ring_buffer) {
     g_free (filter->ring_buffer);
@@ -342,7 +342,7 @@ plugin_init (GstPlugin * plugin)
   gst_controller_init(NULL, NULL);
 
   return gst_element_register (plugin, "audiodelay", GST_RANK_NONE,
-      GST_TYPE_AUDIODELAY);
+      GST_TYPE_AUDIO_DELAY);
 }
 
 /* this is the structure that gstreamer looks for to register plugins

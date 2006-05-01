@@ -1,3 +1,35 @@
+2006-05-02  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiodelay/audiodelay.c: (gst_audio_delay_base_init),
+	(gst_audio_delay_class_init), (gst_audio_delay_init),
+	(gst_audio_delay_set_property), (gst_audio_delay_get_property),
+	(gst_audio_delay_dispose), (gst_audio_delay_set_caps),
+	(gst_audio_delay_start), (gst_audio_delay_transform_ip),
+	(gst_audio_delay_stop), (plugin_init):
+	* src/audiodelay/audiodelay.h:
+	rename symbols (add '_')
+	
+	* configure.ac:
+	* src/Makefile.am:
+	* src/audiopanorama/.cvsignore:
+	* src/audiopanorama/Makefile.am:
+	* src/audiopanorama/audiopanorama.c:
+	(gst_audio_panorama_base_init), (gst_audio_panorama_class_init),
+	(gst_audio_panorama_init), (gst_audio_panorama_set_property),
+	(gst_audio_panorama_get_property),
+	(gst_audio_panorama_get_unit_size),
+	(gst_audio_panorama_transform_caps), (gst_audio_panorama_set_caps),
+	(gst_audio_panorama_transform_m2s),
+	(gst_audio_panorama_transform_s2s), (gst_audio_panorama_transform),
+	(plugin_init):
+	* src/audiopanorama/audiopanorama.h:
+	add new plugin for stereo-panorama/balance effect
+	
+	* src/simsyn/simsyn.c: (gst_sim_syn_class_init),
+	(gst_sim_syn_get_times):
+	* src/simsyn/simsyn.h:
+	fix typo in _get_times
+
 2006-04-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

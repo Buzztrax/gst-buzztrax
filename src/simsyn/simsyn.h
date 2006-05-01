@@ -75,9 +75,6 @@ typedef struct _GstSimSynClass GstSimSynClass;
 struct _GstSimSyn {
   GstBaseSrc parent;
 
-  void (*process)(GstSimSyn*, gint16 *);
-  void (*apply_filter)(GstSimSyn*, gint16 *);
-
   /* parameters */
   gdouble samples_per_buffer;
   GstSimSynWaves wave;
@@ -90,6 +87,9 @@ struct _GstSimSyn {
   
   /* < private > */
   gboolean dispose_has_run;		/* validate if dispose has run */
+
+  void (*process)(GstSimSyn*, gint16 *);
+  void (*apply_filter)(GstSimSyn*, gint16 *);
 
   gint samplerate;
   GstClockTimeDiff timestamp_offset;    /* base offset */
