@@ -45,7 +45,7 @@ static GObjectClass *parent_class=NULL;
 GType gst_note_2_frequency_tuning_get_type(void) {
   static GType type = 0;
   if(type==0) {
-    static GEnumValue values[] = {
+    static const GEnumValue values[] = {
       { GST_NOTE_2_FREQUENCY_CROMATIC,"GST_NOTE_2_FREQUENCY_CROMATIC","cromatic tuning" },
       { 0, NULL, NULL},
     };

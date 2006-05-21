@@ -1,3 +1,14 @@
+2006-05-21  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiodelay/audiodelay.c:
+	* src/audiopanorama/audiopanorama.c: (gst_audio_panorama_set_caps):
+	* src/envelope/envelope.c:
+	* src/note2frequency/note2frequency.c:
+	(gst_note_2_frequency_tuning_get_type):
+	* src/simsyn/simsyn.c: (gst_sim_syn_wave_get_type),
+	(gst_sim_syn_filter_get_type):
+	Make debug categories static
+
 2006-05-02  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/audiodelay.c: (gst_audio_delay_base_init),

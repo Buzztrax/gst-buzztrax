@@ -46,8 +46,8 @@
 
 #include "audiodelay.h"
 
-GST_DEBUG_CATEGORY_STATIC (gst_audio_delay_debug);
 #define GST_CAT_DEFAULT gst_audio_delay_debug
+GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
 static const GstElementDetails element_details =
 GST_ELEMENT_DETAILS ("AudioDelay",

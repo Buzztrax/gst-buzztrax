@@ -38,7 +38,7 @@
 #include "envelope.h"
 
 #define GST_CAT_DEFAULT envelope_debug
-GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
+GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
 enum {
   // class properties

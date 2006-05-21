@@ -52,7 +52,7 @@
 #define INNER_LOOP 32
 
 #define GST_CAT_DEFAULT sim_syn_debug
-GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
+GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
 static const GstElementDetails gst_sim_syn_details =
 GST_ELEMENT_DETAILS ("Simple Synth",
@@ -96,7 +96,7 @@ static GType
 gst_sim_syn_wave_get_type (void)
 {
   static GType type = 0;
-  static GEnumValue enums[] = {
+  static const GEnumValue enums[] = {
     {GST_SIM_SYN_WAVE_SINE, "Sine", "sine"},
     {GST_SIM_SYN_WAVE_SQUARE, "Square", "square"},
     {GST_SIM_SYN_WAVE_SAW, "Saw", "saw"},
@@ -119,7 +119,7 @@ static GType
 gst_sim_syn_filter_get_type (void)
 {
   static GType type = 0;
-  static GEnumValue enums[] = {
+  static const GEnumValue enums[] = {
     {GST_SIM_SYN_FILTER_NONE, "None", "none"},
     {GST_SIM_SYN_FILTER_LOWPASS, "LowPass", "lowpass"},
     {GST_SIM_SYN_FILTER_HIPASS, "HiPass", "hipass"},
