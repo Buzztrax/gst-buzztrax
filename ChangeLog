@@ -1,3 +1,8 @@
+2006-07-29  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiopanorama/audiopanorama.c: (gst_audio_panorama_set_caps):
+          c++ comment to c comment, lower debug level
+
 2006-05-21  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/audiodelay.c:
