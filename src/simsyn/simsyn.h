@@ -99,6 +99,7 @@ struct _GstSimSyn {
   gboolean check_seek_stop;
   gboolean eos_reached;
   gint generate_samples_per_buffer;	/* generate a partial buffer */
+  GstSeekFlags seek_flags;
 
   GstNote2Frequency *n2f;
   gdouble freq;

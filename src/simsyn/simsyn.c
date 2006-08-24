@@ -882,7 +882,11 @@ gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   } else {
     src->check_seek_stop = FALSE;
   }
+  src->seek_flags = segment->flags; 
   src->eos_reached = FALSE;
+
+  GST_DEBUG("seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT,
+    GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop));
 
   return TRUE;
 }
@@ -905,7 +909,10 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   gint64 n_samples,samples_done;
   guint samples_per_buffer;
   
-  if (src->eos_reached) return GST_FLOW_UNEXPECTED;
+  if (G_UNLIKELY(src->eos_reached)) {
+    GST_DEBUG("  EOS reached");
+    return GST_FLOW_UNEXPECTED;
+  }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   //GST_DEBUG("rounding correction : %ld <> %"G_GUINT64_FORMAT,(glong)(((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND),src->n_samples);
@@ -922,7 +929,9 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     /* calculate only partial buffer */
     src->generate_samples_per_buffer = src->n_samples_stop - src->n_samples;
     n_samples = src->n_samples_stop;
-    src->eos_reached = TRUE;
+    if (!(src->seek_flags&GST_SEEK_FLAG_SEGMENT)) {
+      src->eos_reached = TRUE;
+    }
   } else {
     /* calculate full buffer */
     src->generate_samples_per_buffer = samples_per_buffer;
@@ -946,7 +955,8 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
 
   gst_object_sync_values (G_OBJECT (src), src->running_time);
 
-  GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", running_time %12"G_GUINT64_FORMAT", next_time %12"G_GUINT64_FORMAT", duration %12"G_GUINT64_FORMAT,src->n_samples,src->running_time,next_time,(next_time - src->running_time));
+  GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", running_time %"GST_TIME_FORMAT", next_time %"GST_TIME_FORMAT", duration %"GST_TIME_FORMAT,
+    src->n_samples,GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
   
   src->running_time = next_time;
   src->n_samples = n_samples;

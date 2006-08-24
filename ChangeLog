@@ -1,3 +1,16 @@
+2006-08-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* src/Makefile.am:
+	* src/audiopanorama/.cvsignore:
+	* src/audiopanorama/Makefile.am:
+	* src/audiopanorama/audiopanorama.c:
+	* src/audiopanorama/audiopanorama.h:
+	* src/simsyn/simsyn.c: (gst_sim_syn_do_seek), (gst_sim_syn_create):
+	* src/simsyn/simsyn.h:
+          remove audiopanorame (is not in gst-plugins-god),
+          better loop/eos handling for simsynth
+
 2006-07-29  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiopanorama/audiopanorama.c: (gst_audio_panorama_set_caps):
