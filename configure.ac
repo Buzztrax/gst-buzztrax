@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.19 2006-08-24 18:32:51 ensonic Exp $
+# $Id: configure.ac,v 1.20 2006-08-27 14:44:16 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -11,13 +11,13 @@
 #
 
 # Initialise the autoconf/automake tool
-AC_INIT([gst-buzztard], [0.0.1], [buzztard-devel@lists.sourceforge.net])
+AC_INIT([gst-buzztard], [0.1.0], [buzztard-devel@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([ChangeLog])
 AC_CONFIG_HEADERS(config.h)
 
 GSTBT_MAJOR_VERSION=0
-GSTBT_MINOR_VERSION=0
-GSTBT_MICRO_VERSION=1
+GSTBT_MINOR_VERSION=1
+GSTBT_MICRO_VERSION=0
 GSTBT_VERSION=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION.$GSTBT_MICRO_VERSION
 GSTBT_VERSION_INFO=`expr $GSTBT_MAJOR_VERSION + $GSTBT_MINOR_VERSION`:$GSTBT_MICRO_VERSION:$GSTBT_MINOR_VERSION
 GSTBT_VERSION_NUMBER=`expr $GSTBT_MAJOR_VERSION \* 10000 + $GSTBT_MINOR_VERSION \* 100 + $GSTBT_MICRO_VERSION`

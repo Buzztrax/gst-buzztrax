@@ -1,3 +1,12 @@
+2006-08-27  Stefan Kost  <ensonic@users.sf.net>
+
+	* NEWS:
+	* configure.ac:
+	* docs/reference/Makefile.am:
+	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztard.types:
+	  prepare release 0.1.0, fix docs
+
 2006-08-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
@@ -8,7 +17,7 @@
 	* src/audiopanorama/audiopanorama.h:
 	* src/simsyn/simsyn.c: (gst_sim_syn_do_seek), (gst_sim_syn_create):
 	* src/simsyn/simsyn.h:
-          remove audiopanorame (is not in gst-plugins-god),
+          remove audiopanorama (it is now in gst-plugins-good),
           better loop/eos handling for simsynth
 
 2006-07-29  Stefan Kost  <ensonic@users.sf.net>

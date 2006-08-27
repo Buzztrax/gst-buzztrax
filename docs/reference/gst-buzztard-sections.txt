@@ -1,4 +1,4 @@
-# $Id: gst-buzztard-sections.txt,v 1.5 2006-04-25 21:27:27 ensonic Exp $
+# $Id: gst-buzztard-sections.txt,v 1.6 2006-08-27 14:44:16 ensonic Exp $
 # :mode=html:
 
 # please add section in the alpahbetical order using the following template
@@ -10,18 +10,18 @@
 # </SECTION>
 
 <SECTION>
-<FILE>gstaudiodelay</FILE>
-<TITLE>GstAudiodelay</TITLE>
-GstAudiodelay
+<FILE>gstaudioDelay</FILE>
+<TITLE>GstAudioDelay</TITLE>
+GstAudioDelay
 <SUBSECTION Standard>
-GstAudiodelayClass
-GST_AUDIODELAY
-GST_IS_AUDIODELAY
-GST_AUDIODELAY_CLASS
-GST_IS_AUDIODELAY_CLASS
-GST_AUDIODELAY_GET_CLASS
-GST_TYPE_AUDIODELAY
-gst_audiodelay_get_type
+GstAudioDelayClass
+GST_AUDIO_DELAY
+GST_IS_AUDIO_DELAY
+GST_AUDIO_DELAY_CLASS
+GST_IS_AUDIO_DELAY_CLASS
+GST_AUDIO_DELAY_GET_CLASS
+GST_TYPE_AUDIO_DELAY
+gst_audio_delay_get_type
 </SECTION>
 
 <SECTION>
