@@ -1,4 +1,4 @@
-$Id: README,v 1.3 2006-01-12 21:59:13 ensonic Exp $
+$Id: README,v 1.4 2006-09-07 08:21:11 ensonic Exp $
 
 = quick info =
 Please turn you browser to http://www.buzztard.org to learn what this project
@@ -11,7 +11,7 @@ may be required to build a CVS version of buzztard.
 = installing locally =
 You can install this module locally too.
 Use following option for ./autogen.sh or ./configure
-  --prefix=/home/ensonic/buzztard
+  --prefix=$HOME/buzztard
 When installing the package to e.g. $HOME/buzztard remember to set these
 environment options:
 devhelp:
