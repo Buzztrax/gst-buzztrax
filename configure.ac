@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.20 2006-08-27 14:44:16 ensonic Exp $
+# $Id: configure.ac,v 1.21 2006-09-11 13:34:01 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -122,9 +122,11 @@ if test "$enable_coverage" = "yes"; then
   #AC_DEFINE(APP_COVERAGE, [1], [enable coverage analysis])
   AM_CONDITIONAL(USE_COVERAGE, true)
   COVERAGE_CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
+  COVERAGE_LIBS="-lgcov"
 else
   AM_CONDITIONAL(USE_COVERAGE, false)
   COVERAGE_CFLAGS=""
+  COVERAGE_LIBS=""
 fi
 
 # valgrind integration for tests
@@ -168,7 +170,7 @@ AC_SUBST(plugindir)
 GST_PLUGIN_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS"
 AC_SUBST(GST_PLUGIN_CFLAGS)
 
-GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*'"
+GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*' $COVERAGE_LIBS"
 AC_SUBST(GST_PLUGIN_LDFLAGS)
 
 dnl set license and copyright notice
