@@ -59,6 +59,6 @@ typedef enum {
   GST_PROPERTY_META_WAVE=1,		/* parameter value references a wavetable slot */
   GST_PROPERTY_META_STATE=2,		/* parameter is continuously changing (not used for notes and triggers) */
   GST_PROPERTY_META_TICK_ON_EDIT=4
-} GstGstPropertyMetaFlags;
+} GstPropertyMetaFlags;
 
 #endif /* __GST_PROPERTY_META_H__ */

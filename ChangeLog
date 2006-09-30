@@ -1,3 +1,17 @@
+2006-09-30  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/note2frequency/note2frequency.c:
+	(gst_note_2_frequency_translate_cromatic),
+	(gst_note_2_frequency_change_tuning),
+	(gst_note_2_frequency_translate_from_string):
+	  indentation fixed
+
+	* src/propertymeta/propertymeta.h:
+	  typo fix
+
+	* src/simsyn/simsyn.c: (gst_sim_syn_class_init):
+	  tune the resonance param range
+
 2006-09-11  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

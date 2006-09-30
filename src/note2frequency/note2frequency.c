@@ -90,23 +90,23 @@ static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,g
   /* do tone stepping */
   step=pow(2.0,(1.0/12.0));
   if(tone<=9) {
-	// go down
-	steps=9-tone;
-	for(i=0;i<steps;i++) frequency/=step;
+    // go down
+    steps=9-tone;
+    for(i=0;i<steps;i++) frequency/=step;
   }
   else {
-	// go up
-	steps=tone-9;
-	for(i=0;i<steps;i++) frequency*=step;
+    // go up
+    steps=tone-9;
+    for(i=0;i<steps;i++) frequency*=step;
   }
   return(frequency);
 }
 
 static gst_note_2_frequency_change_tuning(GstNote2Frequency *self) {
   switch(self->tuning) {
-	case GST_NOTE_2_FREQUENCY_CROMATIC:
-	  self->translate=gst_note_2_frequency_translate_cromatic;
-	  break;
+    case GST_NOTE_2_FREQUENCY_CROMATIC:
+      self->translate=gst_note_2_frequency_translate_cromatic;
+      break;
   }
 }
 
@@ -129,38 +129,38 @@ gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar
 
   // parse note
   switch(note[0]) {
-	case 'c':
-	case 'C':
-	  tone=(note[1]=='-')?0:1;
-	  break;
-	case 'd':
-	case 'D':
-	  tone=(note[1]=='-')?2:3;
-	  break;
-	case 'e':
-	case 'E':
-	  tone=4;
-	  break;
-	case 'f':
-	case 'F':
-	  tone=(note[1]=='-')?5:6;
-	  break;
-	case 'g':
-	case 'G':
-	  tone=(note[1]=='-')?7:8;
-	  break;
-	case 'a':
-	case 'A':
-	  tone=(note[1]=='-')?9:10;
-	  break;
-	case 'b':
-	case 'B':
-	case 'h':
-	case 'H':
-	  tone=11;
-	  break;
-	default:
-	  g_return_val_if_reached(0.0);
+    case 'c':
+    case 'C':
+      tone=(note[1]=='-')?0:1;
+      break;
+    case 'd':
+    case 'D':
+      tone=(note[1]=='-')?2:3;
+      break;
+    case 'e':
+    case 'E':
+      tone=4;
+      break;
+    case 'f':
+    case 'F':
+      tone=(note[1]=='-')?5:6;
+      break;
+    case 'g':
+    case 'G':
+      tone=(note[1]=='-')?7:8;
+      break;
+    case 'a':
+    case 'A':
+      tone=(note[1]=='-')?9:10;
+      break;
+    case 'b':
+    case 'B':
+    case 'h':
+    case 'H':
+      tone=11;
+      break;
+    default:
+      g_return_val_if_reached(0.0);
   }
   octave=atoi(&note[2]);
 
