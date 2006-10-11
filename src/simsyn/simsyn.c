@@ -332,15 +332,16 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->ticks_per_beat=4;
   src->subticks_per_tick=1;
   gst_sim_syn_calculate_buffer_frames (src);
-
-  src->volume = 1.0;
-  src->freq = 0.0;
-  src->note = NULL;
-  src->decay = 0.9999;
-  src->n2f = gst_note_2_frequency_new (GST_NOTE_2_FREQUENCY_CROMATIC);
   /* we operate in time */
   gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
   gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
+
+  /* set base parameters */
+  src->volume = 1.0;
+  src->freq = 0.0;
+  src->note = NULL;
+  src->decay = 0.5;
+  src->n2f = gst_note_2_frequency_new (GST_NOTE_2_FREQUENCY_CROMATIC);
 
   /* set the waveform */
   src->wave = GST_SIM_SYN_WAVE_SINE;
@@ -352,9 +353,9 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   gst_controller_set_interpolation_mode (src->volenv_controller, "value", GST_INTERPOLATE_LINEAR);
   
   /* set filter */
-  src->filter = GST_SIM_SYN_FILTER_NONE;
-  src->cutoff = 0.0;
-  src->resonance = 0.0;
+  src->filter = GST_SIM_SYN_FILTER_LOWPASS;
+  src->cutoff = 0.8;
+  src->resonance = 0.8;
   gst_sim_syn_change_filter (src);
 }
 
