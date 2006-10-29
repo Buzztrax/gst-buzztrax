@@ -283,7 +283,9 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
   guint i, num_samples = GST_BUFFER_SIZE (outbuf) / sizeof (gint16);
   guint rb_in, rb_out;
   
-  if (!gst_buffer_is_writable (outbuf)) return GST_FLOW_OK;
+  /* don't process data in passthrough-mode */
+  if (gst_base_transform_is_passthrough (base))
+    return GST_FLOW_OK;
 
   if (GST_CLOCK_TIME_IS_VALID (GST_BUFFER_TIMESTAMP (outbuf)))
     gst_object_sync_values (G_OBJECT (filter), GST_BUFFER_TIMESTAMP (outbuf));

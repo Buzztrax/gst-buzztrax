@@ -1,3 +1,8 @@
+2006-10-29  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiodelay/audiodelay.c: (gst_audio_delay_transform_ip):
+	  use passthrough mode, instead of writable check
+
 2006-10-11  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/simsyn/simsyn.c: (gst_sim_syn_init):
