@@ -275,6 +275,7 @@ static GstFlowReturn
 gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 {
   GstAudioDelay *filter = GST_AUDIO_DELAY (base);
+  GstClockTime timestamp;
   guint delaytime;
   gdouble feedback, dry, wet;
   gint16 *data = (gint16 *) GST_BUFFER_DATA (outbuf);
@@ -287,8 +288,10 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
   if (gst_base_transform_is_passthrough (base))
     return GST_FLOW_OK;
 
-  if (GST_CLOCK_TIME_IS_VALID (GST_BUFFER_TIMESTAMP (outbuf)))
-    gst_object_sync_values (G_OBJECT (filter), GST_BUFFER_TIMESTAMP (outbuf));
+  timestamp = gst_segment_to_stream_time (&base->segment, GST_FORMAT_TIME,
+    GST_BUFFER_TIMESTAMP (outbuf));
+  if (GST_CLOCK_TIME_IS_VALID (timestamp))
+    gst_object_sync_values (G_OBJECT (filter), timestamp);
   
   delaytime = (filter->delaytime * filter->samplerate) / 100;
   feedback = (gdouble)filter->feedback / 100.0;

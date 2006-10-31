@@ -1,3 +1,10 @@
+2006-10-31  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiodelay/audiodelay.c: (gst_audio_delay_transform_ip):
+	  base timestamps on streamtime
+
+=== release 0.1.0 ===
+
 2006-10-29  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/audiodelay.c: (gst_audio_delay_transform_ip):
