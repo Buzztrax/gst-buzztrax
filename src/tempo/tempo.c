@@ -46,7 +46,7 @@ gst_tempo_change_tempo (GstTempo *self, glong beats_per_minute, glong ticks_per_
 {
   g_return_if_fail (GST_IS_TEMPO (self));
 
-  return (GST_TEMPO_GET_INTERFACE (self)->change_tempo (self, beats_per_minute, ticks_per_beat, subticks_per_tick));
+  GST_TEMPO_GET_INTERFACE (self)->change_tempo (self, beats_per_minute, ticks_per_beat, subticks_per_tick);
 }
 
 static void

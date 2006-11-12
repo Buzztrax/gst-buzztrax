@@ -10,11 +10,12 @@
     <title>Introduction</title>
 	<para>
 	  This module contains experimental code that extends gstreamer.
-	  The extensions may be required to build a CVS version of buzztard.
+	  The extensions are required to build a CVS version of buzztard.
 	</para>
-        <para>
-          It also contains some nice audio elements.
-        </para>
+	<para>
+	  It also contains some nice audio elements. These could be easily moves to
+	  gst-plugin modules, but only with some of the interfaces.
+	</para>
   </preface>
 
   <chapter>
@@ -26,6 +27,8 @@
   <chapter>
     <title>GStreamer Buzztard interfaces</title>
     <xi:include href="xml/gstchildbin.xml"/>
+	<xi:include href="xml/gsthelp.xml"/>
+	<xi:include href="xml/gstpreset.xml"/>
     <xi:include href="xml/gstpropertymeta.xml"/>
     <xi:include href="xml/gsttempo.xml"/>
   </chapter>

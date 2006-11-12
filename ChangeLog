@@ -1,3 +1,29 @@
+2006-11-12  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  APP_DEBUG -> USE_DEBUG
+
+	* docs/reference/gst-buzztard-docs.sgml:
+	* docs/reference/gst-buzztard-sections.txt:
+	* src/Makefile.am:
+	* src/help/.cvsignore:
+	* src/help/Makefile.am:
+	* src/help/help.c: (gst_help_get_documentation_uri),
+	(gst_help_base_init), (gst_help_get_type):
+	* src/help/help.h:
+	* src/preset/.cvsignore:
+	* src/preset/Makefile.am:
+	* src/preset/preset.c: (gst_preset_get_preset_names),
+	(gst_preset_load_preset), (gst_preset_save_preset),
+	(gst_preset_rename_preset), (gst_preset_delete_preset),
+	(gst_preset_create_preset), (gst_preset_base_init),
+	(gst_preset_get_type):
+	* src/preset/preset.h:
+	  add two new interfaces
+
+	* src/tempo/tempo.c: (gst_tempo_change_tempo):
+	  there is no return value here
+
 2006-10-31  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/audiodelay.c: (gst_audio_delay_transform_ip):

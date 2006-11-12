@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.21 2006-09-11 13:34:01 ensonic Exp $
+# $Id: configure.ac,v 1.22 2006-11-12 13:54:48 ensonic Exp $
 
 #
 # current  : the interface         : MAJOR + MINOR
@@ -77,7 +77,7 @@ AC_ARG_ENABLE(
   [enable_debug="no"])
 AC_MSG_RESULT($enable_debug)
 if test "$enable_debug" = "yes"; then
-  AC_DEFINE(APP_DEBUG, [1], [enable runtime debugging code])
+  AC_DEFINE(USE_DEBUG, [1], [enable runtime debugging code])
   DEBUG_CFLAGS="-O0 -Wall -Werror -g"
 else
   AC_DEFINE(G_DISABLE_ASSERT, [1], [if no runtime debugging, do not enable g_asserts])
@@ -212,7 +212,9 @@ AC_CONFIG_FILES( \
 	src/audiodelay/Makefile \
 	src/childbin/Makefile \
 	src/envelope/Makefile \
+	src/help/Makefile \
 	src/note2frequency/Makefile \
+	src/preset/Makefile \
 	src/propertymeta/Makefile \
 	src/simsyn/Makefile \
 	src/tempo/Makefile \

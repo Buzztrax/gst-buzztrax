@@ -1,4 +1,4 @@
-# $Id: gst-buzztard-sections.txt,v 1.6 2006-08-27 14:44:16 ensonic Exp $
+# $Id: gst-buzztard-sections.txt,v 1.7 2006-11-12 13:54:48 ensonic Exp $
 # :mode=html:
 
 # please add section in the alpahbetical order using the following template
@@ -56,6 +56,20 @@ gst_envelope_get_type
 </SECTION>
 
 <SECTION>
+<FILE>gsthelp</FILE>
+<TITLE>GstHelp</TITLE>
+GstHelp
+gst_help_get_documentation_uri
+<SUBSECTION Standard>
+GstHelpInterface
+GST_HELP
+GST_IS_HELP
+GST_TYPE_HELP
+GST_HELP_GET_INTERFACE
+gst_help_get_type
+</SECTION>
+
+<SECTION>
 <FILE>gstnote2frequency</FILE>
 <TITLE>GstNote2Frequency</TITLE>
 GstNote2Frequency
@@ -74,6 +88,25 @@ GST_TYPE_NOTE_2_FREQUENCY
 GST_TYPE_NOTE_2_FREQUENCY_TUNING
 gst_note_2_frequency_get_type
 gst_note_2_frequency_tuning_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstpreset</FILE>
+<TITLE>GstPreset</TITLE>
+GstPreset
+gst_preset_get_preset_names
+gst_preset_load_preset
+gst_preset_save_preset
+gst_preset_rename_preset
+gst_preset_delete_preset
+gst_preset_create_preset
+<SUBSECTION Standard>
+GstPresetInterface
+GST_PRESET
+GST_IS_PRESET
+GST_TYPE_PRESET
+GST_PRESET_GET_INTERFACE
+gst_preset_get_type
 </SECTION>
 
 <SECTION>
