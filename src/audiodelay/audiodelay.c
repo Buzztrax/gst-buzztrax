@@ -445,7 +445,7 @@ GType gst_audio_delay_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
-    type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
+    type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, "GstAudioDelay", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
 	g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
   }

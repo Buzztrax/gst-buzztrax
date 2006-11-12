@@ -1,5 +1,17 @@
 2006-11-12  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/audiodelay/audiodelay.c: (gst_audio_delay_get_type):
+	  fix objectname in audiodelay
+
+	* src/help/help.h:
+	  fix include-guard for help.h
+
+	* src/simsyn/simsyn.c: (gst_sim_syn_class_init),
+	(gst_sim_syn_get_type):
+	  add help iface
+
+2006-11-12  Stefan Kost  <ensonic@users.sf.net>
+
 	* docs/reference/gst-buzztard-sections.txt:
 	* src/audiodelay/Makefile.am:
 	* src/audiodelay/audiodelay.c:

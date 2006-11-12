@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_TEMPO_H__
+#ifndef __GST_HELP_H__
 #define __GST_HELP_H__
 
 #include <glib-object.h>

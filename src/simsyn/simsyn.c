@@ -260,6 +260,8 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
   g_object_class_override_property(gobject_class, PROP_TPB, "ticks-per-beat");
   g_object_class_override_property(gobject_class, PROP_STPT, "subticks-per-tick");
   
+  g_object_class_override_property(gobject_class, PROP_DOCU_URI, "documentation-uri");
+  
   // register own properties
 
   g_object_class_install_property(gobject_class, PROP_SAMPLES_PER_BUFFER,
@@ -1169,9 +1171,15 @@ GType gst_sim_syn_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
+    static const GInterfaceInfo help_interface_info = {
+      NULL,               /* interface_init */
+      NULL,               /* interface_finalize */
+      NULL                /* interface_data */
+    };
     type = g_type_register_static(GST_TYPE_BASE_SRC, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
     g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
+	g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
   }
   return type;
 }
