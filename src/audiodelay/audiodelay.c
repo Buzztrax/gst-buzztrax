@@ -44,6 +44,9 @@
 #include <gst/base/gstbasetransform.h>
 #include <gst/controller/gstcontroller.h>
 
+#include <help/help.h>
+#include <tempo/tempo.h>
+
 #include "audiodelay.h"
 
 #define GST_CAT_DEFAULT gst_audio_delay_debug
@@ -62,10 +65,17 @@ enum {
 };
 
 enum {
-  PROP_0,
-  PROP_DRYWET,
+  // static class properties
+  // dynamic class properties
+  PROP_DRYWET=1,
   PROP_DELAYTIME,
-  PROP_FEEDBACK
+  PROP_FEEDBACK,
+  // tempo iface
+  PROP_BPM,
+  PROP_TPB,
+  PROP_STPT,
+  // help iface
+  PROP_DOCU_URI
 };
 
 #define DELAYTIME_MAX 1000
@@ -98,11 +108,7 @@ GST_STATIC_PAD_TEMPLATE (
         "signed = (boolean) true")
 );
 
-#define DEBUG_INIT(bla) \
-  GST_DEBUG_CATEGORY_INIT (gst_audio_delay_debug, "audiodelay", 0, "audiodelay plugin");
-
-GST_BOILERPLATE_FULL (GstAudioDelay, gst_audio_delay, GstBaseTransform,
-    GST_TYPE_BASE_TRANSFORM, DEBUG_INIT);
+static GstBaseTransformClass *parent_class = NULL;
 
 static void gst_audio_delay_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec);
@@ -116,6 +122,53 @@ static gboolean gst_audio_delay_start (GstBaseTransform * base);
 static GstFlowReturn gst_audio_delay_transform_ip (GstBaseTransform * base,
     GstBuffer * outbuf);
 static gboolean gst_audio_delay_stop (GstBaseTransform * base);
+
+/* tempo interface implementations */
+
+static void gst_audio_delay_calculate_tick_time(GstAudioDelay *self) {
+  self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
+}
+
+static void gst_audio_delay_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
+  GstAudioDelay *self=GST_AUDIO_DELAY(tempo);
+  gboolean changed=FALSE;
+
+  if(beats_per_minute>=0) {
+    if(self->beats_per_minute!=beats_per_minute) {
+      self->beats_per_minute=(gulong)beats_per_minute;
+      g_object_notify(G_OBJECT(self),"beats-per-minute");
+      changed=TRUE;
+    }
+  }
+  if(ticks_per_beat>=0) {
+    if(self->ticks_per_beat!=ticks_per_beat) {
+      self->ticks_per_beat=(gulong)ticks_per_beat;
+      g_object_notify(G_OBJECT(self),"ticks-per-beat");
+      changed=TRUE;
+    }
+  }
+  if(subticks_per_tick>=0) {
+    if(self->subticks_per_tick!=subticks_per_tick) {
+      self->subticks_per_tick=(gulong)subticks_per_tick;
+      g_object_notify(G_OBJECT(self),"subticks-per-tick");
+      changed=TRUE;
+    }
+  }
+  if(changed) {
+    GST_DEBUG("changing tempo to %d BPM  %d TPB  %d STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
+    gst_audio_delay_calculate_tick_time(self);
+  }
+}
+
+static void gst_audio_delay_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
+  GstTempoInterface *iface = g_iface;
+  
+  GST_INFO("initializing iface");
+  
+  iface->change_tempo = gst_audio_delay_tempo_change_tempo;
+}
+
+/* help interface implementations */
 
 /* GObject vmethod implementations */
 
@@ -140,6 +193,15 @@ gst_audio_delay_class_init (GstAudioDelayClass * klass)
   gobject_class->set_property = gst_audio_delay_set_property;
   gobject_class->get_property = gst_audio_delay_get_property;
   gobject_class->dispose = gst_audio_delay_dispose;
+
+  // override interface properties
+  g_object_class_override_property(gobject_class, PROP_BPM, "beats-per-minute");
+  g_object_class_override_property(gobject_class, PROP_TPB, "ticks-per-beat");
+  g_object_class_override_property(gobject_class, PROP_STPT, "subticks-per-tick");
+  
+  g_object_class_override_property(gobject_class, PROP_DOCU_URI, "documentation-uri");
+  
+  // register own properties
 
   g_object_class_install_property (gobject_class, PROP_DRYWET,
     g_param_spec_uint ("drywet", "Dry-Wet", "Intensity of effect (0 none -> 100 full)",
@@ -174,6 +236,11 @@ gst_audio_delay_init (GstAudioDelay *filter, GstAudioDelayClass * klass)
   filter->feedback = 50;
   
   filter->samplerate = 44100;
+  filter->beats_per_minute=120;
+  filter->ticks_per_beat=4;
+  filter->subticks_per_tick=1;
+  gst_audio_delay_calculate_tick_time (filter);
+
   filter->ring_buffer = NULL;
 }
 
@@ -192,6 +259,12 @@ gst_audio_delay_set_property (GObject * object, guint prop_id,
       break;
     case PROP_FEEDBACK:
       filter->feedback = g_value_get_uint (value);
+      break;
+	// tempo iface
+    case PROP_BPM:
+    case PROP_TPB:
+    case PROP_STPT:
+	  GST_WARNING("use gst_tempo_change_tempo()");
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -215,6 +288,20 @@ gst_audio_delay_get_property (GObject * object, guint prop_id,
     case PROP_FEEDBACK:
       g_value_set_uint (value, filter->feedback);
       break;
+	// tempo iface
+    case PROP_BPM:
+      g_value_set_ulong(value, filter->beats_per_minute);
+      break;
+    case PROP_TPB:
+      g_value_set_ulong(value, filter->ticks_per_beat);
+      break;
+    case PROP_STPT:
+      g_value_set_ulong(value, filter->subticks_per_tick);
+      break;
+	// help iface
+	case PROP_DOCU_URI:
+	  g_value_set_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstAudioDelay.html");
+	  break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -333,6 +420,39 @@ gst_audio_delay_stop (GstBaseTransform *base)
 }
 
 
+GType gst_audio_delay_get_type (void)
+{
+  static GType type = 0;
+  if (type == 0) {
+    static const GTypeInfo element_type_info = {
+      sizeof (GstAudioDelayClass),
+      (GBaseInitFunc)gst_audio_delay_base_init,
+      NULL,		          /* base_finalize */
+      (GClassInitFunc)gst_audio_delay_class_init,
+      NULL,		          /* class_finalize */
+      NULL,               /* class_data */
+      sizeof (GstAudioDelay),
+      0,                  /* n_preallocs */
+      (GInstanceInitFunc) gst_audio_delay_init
+    };
+    static const GInterfaceInfo tempo_interface_info = {
+      (GInterfaceInitFunc) gst_audio_delay_tempo_interface_init,          /* interface_init */
+      NULL,               /* interface_finalize */
+      NULL                /* interface_data */
+    };
+    static const GInterfaceInfo help_interface_info = {
+      NULL,               /* interface_init */
+      NULL,               /* interface_finalize */
+      NULL                /* interface_data */
+    };
+    type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
+    g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
+	g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
+  }
+  return type;
+}
+
+
 /* entry point to initialize the plug-in
  * initialize the plug-in itself
  * register the element factories and pad templates
@@ -343,6 +463,8 @@ gst_audio_delay_stop (GstBaseTransform *base)
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
+  GST_DEBUG_CATEGORY_INIT (gst_audio_delay_debug, "audiodelay", 0, "audiodelay plugin");
+
   /* initialize gst controller library */
   gst_controller_init(NULL, NULL);
 

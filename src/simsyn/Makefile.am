@@ -7,6 +7,7 @@ libgstsimsyn_la_SOURCES = simsyn.c
 
 # flags used to compile this plugin
 libgstsimsyn_la_CFLAGS = -I@srcdir@ -I$(top_srcdir)/src \
+	-DDATADIR=\"$(datadir)\" \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstsimsyn_la_LIBADD = $(GST_BASE_LIBS) \
@@ -15,4 +16,3 @@ libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 
 # headers we need but don't want installed
 noinst_HEADERS = simsyn.h
-

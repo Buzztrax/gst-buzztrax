@@ -39,13 +39,9 @@ typedef struct _GstHelpInterface GstHelpInterface;
 struct _GstHelpInterface
 {
   GTypeInterface parent;
-
-  const gchar * (*get_documentation_uri) (GstHelp *self);
 };
 
 GType gst_help_get_type(void);
-
-const gchar *gst_help_get_documentation_uri (GstHelp *self);
 
 G_END_DECLS
 

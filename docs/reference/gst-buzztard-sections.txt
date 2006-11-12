@@ -1,4 +1,4 @@
-# $Id: gst-buzztard-sections.txt,v 1.7 2006-11-12 13:54:48 ensonic Exp $
+# $Id: gst-buzztard-sections.txt,v 1.8 2006-11-12 18:31:14 ensonic Exp $
 # :mode=html:
 
 # please add section in the alpahbetical order using the following template
@@ -10,7 +10,7 @@
 # </SECTION>
 
 <SECTION>
-<FILE>gstaudioDelay</FILE>
+<FILE>gstaudiodelay</FILE>
 <TITLE>GstAudioDelay</TITLE>
 GstAudioDelay
 <SUBSECTION Standard>

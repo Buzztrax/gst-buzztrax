@@ -1,5 +1,28 @@
 2006-11-12  Stefan Kost  <ensonic@users.sf.net>
 
+	* docs/reference/gst-buzztard-sections.txt:
+	* src/audiodelay/Makefile.am:
+	* src/audiodelay/audiodelay.c:
+	(gst_audio_delay_calculate_tick_time),
+	(gst_audio_delay_tempo_change_tempo),
+	(gst_audio_delay_tempo_interface_init),
+	(gst_audio_delay_class_init), (gst_audio_delay_init),
+	(gst_audio_delay_set_property), (gst_audio_delay_get_property),
+	(gst_audio_delay_get_type), (plugin_init):
+	* src/audiodelay/audiodelay.h:
+	  add tempo and help iface
+
+	* src/help/help.c: (gst_help_base_init):
+	* src/help/help.h:
+	  use property instead of method
+
+	* src/simsyn/Makefile.am:
+	* src/simsyn/simsyn.c: (gst_sim_syn_set_property),
+	(gst_sim_syn_get_property):
+	  implement help iface
+
+2006-11-12  Stefan Kost  <ensonic@users.sf.net>
+
 	* configure.ac:
 	  APP_DEBUG -> USE_DEBUG
 

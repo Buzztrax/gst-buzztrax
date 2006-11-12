@@ -27,22 +27,6 @@
 
 #include "help.h"
 
-/**
- * gst_help_get_documentation_uri:
- * @self: a #GObject that implements #GstHelp
- *
- * Get URI of the user documentation. Can be shown with e.g. gnome_url_show().
- *
- * Returns: The documentation uri. Do not modify!
- */
-const gchar *
-gst_help_get_documentation_uri (GstHelp *self)
-{
-  g_return_if_fail (GST_IS_HELP (self));
-
-  return (GST_HELP_GET_INTERFACE (self)->get_documentation_uri (self));
-}
-
 static void
 gst_help_base_init(gpointer g_class)
 {
@@ -50,7 +34,12 @@ gst_help_base_init(gpointer g_class)
 
   if (!initialized) {
     /* create interface signals and properties here. */
-
+    g_object_interface_install_property (g_class,
+      g_param_spec_string ("documentation-uri",
+      "documentation uri help property",
+      "uri of the user documentation",
+      NULL,
+      G_PARAM_READABLE));
     initialized = TRUE;
   }
 }

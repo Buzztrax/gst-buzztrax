@@ -48,6 +48,12 @@ struct _GstAudioDelay {
   gint16 *ring_buffer;
   guint max_delaytime;
   guint rb_ptr;
+  
+  /* tempo handling */
+  gulong beats_per_minute;
+  gulong ticks_per_beat;
+  gulong subticks_per_tick;
+  GstClockTime ticktime;
 };
 
 struct _GstAudioDelayClass {

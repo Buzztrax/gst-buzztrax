@@ -43,6 +43,7 @@
 #include <gst/controller/gstcontroller.h>
 
 //#include <gst/childbin/childbin.h>
+#include "help/help.h"
 #include "propertymeta/propertymeta.h"
 #include "tempo/tempo.h"
 
@@ -62,12 +63,8 @@ GST_ELEMENT_DETAILS ("Simple Synth",
 
 
 enum {
-  // tempo iface
-  PROP_BPM=1,
-  PROP_TPB,
-  PROP_STPT,
   // static class properties
-  PROP_SAMPLES_PER_BUFFER,
+  PROP_SAMPLES_PER_BUFFER=1,
   PROP_IS_LIVE,
   PROP_TIMESTAMP_OFFSET,
   // dynamic class properties
@@ -77,7 +74,13 @@ enum {
   PROP_DECAY,
   PROP_FILTER,
   PROP_CUTOFF,
-  PROP_RESONANCE
+  PROP_RESONANCE,
+  // tempo iface
+  PROP_BPM,
+  PROP_TPB,
+  PROP_STPT,
+  // help iface
+  PROP_DOCU_URI
 };
 
 static GstStaticPadTemplate gst_sim_syn_src_template =
@@ -986,18 +989,6 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
   if (src->dispose_has_run) return;
 
   switch (prop_id) {
-    case PROP_BPM:
-      src->beats_per_minute=g_value_get_ulong(value);
-      // @todo should these props be readonly, as now we have gst_bml_tempo_change_tempo ?
-      break;
-    case PROP_TPB:
-      src->ticks_per_beat=g_value_get_ulong(value);
-      // @todo should these props be readonly, as now we have gst_bml_tempo_change_tempo ?
-      break;
-    case PROP_STPT:
-      src->subticks_per_tick=g_value_get_ulong(value);
-      // @todo should these props be readonly, as now we have gst_bml_tempo_change_tempo ?
-      break;
     case PROP_SAMPLES_PER_BUFFER:
       src->samples_per_buffer = (gdouble)g_value_get_int (value);
       break;
@@ -1015,36 +1006,36 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       g_free (src->note);
       src->note = g_value_dup_string (value);
       if(src->note) {
-	guint64 attack,decay;
-	GValue val = { 0, };
+	    guint64 attack,decay;
+	    GValue val = { 0, };
 		  
         GST_DEBUG("new note -> '%s'",src->note);
         src->freq = gst_note_2_frequency_translate_from_string (src->n2f, src->note);
         /* trigger volume 'envelope' */
         src->volenv->value=0.001;
-	src->note_count=0L;
+        src->note_count=0L;
         src->flt_low=src->flt_mid=src->flt_high=0.0;
-	/* src->samplerate will be one second */
-	attack=src->samplerate/100;
-	decay=src->samplerate*src->decay;
-	if(attack>decay) attack=decay-1;
-	g_value_init (&val, G_TYPE_DOUBLE);
-	gst_controller_unset_all(src->volenv_controller,"value");
-        g_value_set_double(&val,0.001);
-	gst_controller_set(src->volenv_controller,"value",0,&val);
-        g_value_set_double(&val,1.0);
-	gst_controller_set(src->volenv_controller,"value",attack,&val);
-        g_value_set_double(&val,0.0);
-	gst_controller_set(src->volenv_controller,"value",decay,&val);
-		
-	/* @todo: more advanced envelope		  
-	if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
-	gst_controller_set(src->volenv_controller,"value",0,0.0);
-	gst_controller_set(src->volenv_controller,"value",attack_time,1.0);
-	gst_controller_set(src->volenv_controller,"value",attack_time+decay_time,sustain_level);
-	gst_controller_set(src->volenv_controller,"value",note_time,sustain_level);
-	gst_controller_set(src->volenv_controller,"value",note_time+release_time,0.0);
-	*/
+		/* src->samplerate will be one second */
+		attack=src->samplerate/100;
+		decay=src->samplerate*src->decay;
+		if(attack>decay) attack=decay-1;
+		g_value_init (&val, G_TYPE_DOUBLE);
+		gst_controller_unset_all(src->volenv_controller,"value");
+			g_value_set_double(&val,0.001);
+		gst_controller_set(src->volenv_controller,"value",0,&val);
+			g_value_set_double(&val,1.0);
+		gst_controller_set(src->volenv_controller,"value",attack,&val);
+			g_value_set_double(&val,0.0);
+		gst_controller_set(src->volenv_controller,"value",decay,&val);
+			
+		/* @todo: more advanced envelope		  
+		if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
+		gst_controller_set(src->volenv_controller,"value",0,0.0);
+		gst_controller_set(src->volenv_controller,"value",attack_time,1.0);
+		gst_controller_set(src->volenv_controller,"value",attack_time+decay_time,sustain_level);
+		gst_controller_set(src->volenv_controller,"value",note_time,sustain_level);
+		gst_controller_set(src->volenv_controller,"value",note_time+release_time,0.0);
+		*/
       }
       break;
     case PROP_VOLUME:
@@ -1065,6 +1056,12 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       src->resonance = g_value_get_double (value);
       src->flt_res=1.0/src->resonance;
       break;
+	// tempo iface
+    case PROP_BPM:
+    case PROP_TPB:
+    case PROP_STPT:
+	  GST_WARNING("use gst_tempo_change_tempo()");
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -1080,15 +1077,6 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
   if (src->dispose_has_run) return;
 
   switch (prop_id) {
-    case PROP_BPM:
-      g_value_set_ulong(value, src->beats_per_minute);
-      break;
-    case PROP_TPB:
-      g_value_set_ulong(value, src->ticks_per_beat);
-      break;
-    case PROP_STPT:
-      g_value_set_ulong(value, src->subticks_per_tick);
-      break;
     case PROP_SAMPLES_PER_BUFFER:
       g_value_set_int (value, (gint)src->samples_per_buffer);
       break;
@@ -1119,6 +1107,20 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
     case PROP_RESONANCE:
       g_value_set_double (value, src->resonance);
       break;
+	// tempo iface
+    case PROP_BPM:
+      g_value_set_ulong(value, src->beats_per_minute);
+      break;
+    case PROP_TPB:
+      g_value_set_ulong(value, src->ticks_per_beat);
+      break;
+    case PROP_STPT:
+      g_value_set_ulong(value, src->subticks_per_tick);
+      break;
+	// help iface
+	case PROP_DOCU_URI:
+	  g_value_set_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstSimSyn.html");
+	  break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
