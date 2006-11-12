@@ -25,6 +25,7 @@
 
 #include <gst/gst.h>
 #include <gst/base/gstbasesrc.h>
+#include <gst/controller/gstcontroller.h>
 #include <note2frequency/note2frequency.h>
 #include <envelope/envelope.h>
 
@@ -47,7 +48,7 @@ typedef enum {
   GST_SIM_SYN_WAVE_WHITE_NOISE,
   GST_SIM_SYN_WAVE_PINK_NOISE,
   GST_SIM_SYN_WAVE_SINE_TAB
-} GstSimSynWaves; 
+} GstSimSynWave; 
 
 typedef enum {
   GST_SIM_SYN_FILTER_NONE,
@@ -77,7 +78,7 @@ struct _GstSimSyn {
 
   /* parameters */
   gdouble samples_per_buffer;
-  GstSimSynWaves wave;
+  GstSimSynWave wave;
   gchar *note;
   gdouble volume;
   gdouble decay;

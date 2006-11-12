@@ -1,5 +1,12 @@
 2006-11-12  Stefan Kost  <ensonic@users.sf.net>
 
+	* docs/reference/gst-buzztard-sections.txt:
+	* src/audiodelay/audiodelay.h:
+	* src/simsyn/simsyn.h:
+	  more doc fixes
+
+2006-11-12  Stefan Kost  <ensonic@users.sf.net>
+
 	* docs/reference/Makefile.am:
 	* docs/reference/gst-buzztard.types:
 	* docs/reference/gst-buzztard-sections.txt:

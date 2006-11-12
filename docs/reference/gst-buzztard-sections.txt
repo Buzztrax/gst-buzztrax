@@ -1,4 +1,4 @@
-# $Id: gst-buzztard-sections.txt,v 1.9 2006-11-12 19:00:12 ensonic Exp $
+# $Id: gst-buzztard-sections.txt,v 1.10 2006-11-12 19:11:37 ensonic Exp $
 # :mode=html:
 
 # please add section in the alpahbetical order using the following template
@@ -133,7 +133,7 @@ gst_property_meta_get_type
 <TITLE>GstSimSyn</TITLE>
 GstSimSyn
 GstSimSynFilter
-GstSimSynWaves
+GstSimSynWave
 <SUBSECTION Standard>
 GstSimSynClass
 GstPinkNoise
