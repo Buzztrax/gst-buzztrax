@@ -1,4 +1,4 @@
-# $Id: gst-buzztard-sections.txt,v 1.8 2006-11-12 18:31:14 ensonic Exp $
+# $Id: gst-buzztard-sections.txt,v 1.9 2006-11-12 19:00:12 ensonic Exp $
 # :mode=html:
 
 # please add section in the alpahbetical order using the following template
@@ -59,7 +59,6 @@ gst_envelope_get_type
 <FILE>gsthelp</FILE>
 <TITLE>GstHelp</TITLE>
 GstHelp
-gst_help_get_documentation_uri
 <SUBSECTION Standard>
 GstHelpInterface
 GST_HELP

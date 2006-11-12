@@ -64,7 +64,8 @@ expand_content_files=
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src $(BASE_DEPS_CFLAGS)
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
   $(top_builddir)/src/libgstbuzztard.la \
-  $(top_builddir)/src/audiodelay/libgstaudiodelay.la
+  $(top_builddir)/src/audiodelay/libgstaudiodelay.la \
+  $(top_builddir)/src/simsyn/libgstsimsyn.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make

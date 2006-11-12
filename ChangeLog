@@ -1,5 +1,12 @@
 2006-11-12  Stefan Kost  <ensonic@users.sf.net>
 
+	* docs/reference/Makefile.am:
+	* docs/reference/gst-buzztard.types:
+	* docs/reference/gst-buzztard-sections.txt:
+	  doc fixes
+
+2006-11-12  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/audiodelay/audiodelay.c: (gst_audio_delay_get_type):
 	  fix objectname in audiodelay
 
