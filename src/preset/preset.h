@@ -42,6 +42,7 @@ struct _GstPresetInterface
 
   GList* (*get_preset_names) (GstPreset *self);
 
+  /* @todo: need to handle preset metadata (e.g. comment) */
   gboolean (*load_preset) (GstPreset *self, const gchar *name);
   gboolean (*save_preset) (GstPreset *self, const gchar *name);
   gboolean (*rename_preset) (GstPreset *self, const gchar *old_name, const gchar *new_name);
