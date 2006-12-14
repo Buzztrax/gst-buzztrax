@@ -27,6 +27,75 @@
  */
 
 #include "preset.h"
+#include "propertymeta/propertymeta.h"
+
+//-- methods
+
+void
+gst_preset_default_create_preset (GstPreset *self) {
+  GParamSpec **properties,*property;
+  guint i,number_of_properties;
+  GType param_type,base_type;
+
+  if((properties=g_object_class_list_properties(G_OBJECT_CLASS(GST_OBJECT_GET_CLASS(self)),&number_of_properties))) {
+    gdouble rnd;
+    guint flags=0;
+
+    // @todo: what about voice properties
+    
+    GST_INFO("nr of values : %d", number_of_properties);
+    for(i=0;i<number_of_properties;i++) {
+      property=properties[i];
+      if(GST_IS_PROPERTY_META(self)) {
+        flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
+      }
+
+      // skip non-controlable, trigger params & voice params
+      if(!(property->flags&GST_PARAM_CONTROLLABLE)) continue;
+      else if(!(flags&GST_PROPERTY_META_STATE)) continue;
+
+      GST_INFO("property '%s' (GType=%d)",property->name,property->value_type);
+
+      param_type=property->value_type;
+      while((base_type=g_type_parent(param_type))) param_type=base_type;
+      
+      //GST_INFO("GType=%d:'%s'",param_type,G_VALUE_TYPE_NAME(param_type));
+
+      rnd=((gdouble)rand()) / (RAND_MAX + 1.0);
+      switch(param_type) {
+        case G_TYPE_BOOLEAN: {
+          g_object_set(self,property->name,(gboolean)(2.0 * rnd),NULL);
+        } break;
+        case G_TYPE_INT: {
+          const GParamSpecInt *int_property=G_PARAM_SPEC_INT(property);
+          
+          g_object_set(self,property->name,(gint)(int_property->minimum+((int_property->maximum-int_property->minimum)*rnd)),NULL);
+        } break;
+        case G_TYPE_UINT: {
+          const GParamSpecUInt *uint_property=G_PARAM_SPEC_UINT(property);
+          
+          g_object_set(self,property->name,(guint)(uint_property->minimum+((uint_property->maximum-uint_property->minimum)*rnd)),NULL);
+        }  break;
+        case G_TYPE_DOUBLE: {
+          const GParamSpecDouble *double_property=G_PARAM_SPEC_DOUBLE(property);
+
+          g_object_set(self,property->name,(gdouble)(double_property->minimum+((double_property->maximum-double_property->minimum) * rnd)),NULL);
+        } break;
+        case G_TYPE_ENUM: {
+          const GParamSpecEnum *enum_property=G_PARAM_SPEC_ENUM(property);
+          const GEnumClass *enum_class=enum_property->enum_class;
+
+          g_object_set(self,property->name,(gulong)(enum_class->minimum+((enum_class->maximum-enum_class->minimum) * rnd)),NULL);
+        } break;
+        default:
+          //GST_WARNING("unhandled GType=%d:'%s'",param_type,G_VALUE_TYPE_NAME(param_type));
+          GST_WARNING("unhandled GType=%d",param_type);
+      }
+    }
+  }
+}
+
+//-- wrapper
 
 /**
  * gst_preset_get_preset_names:
@@ -121,20 +190,22 @@ void
 gst_preset_create_preset (GstPreset *self) {
   g_return_if_fail (GST_IS_PRESET (self));
 
-  if(GST_PRESET_GET_INTERFACE (self)->create_preset)
-	GST_PRESET_GET_INTERFACE (self)->create_preset (self);
-  else {
-	/* @todo: implementation default randomization */
-  }
+  GST_PRESET_GET_INTERFACE (self)->create_preset (self);
+}
+
+//-- class internals
+
+static void
+gst_preset_class_init(GstPresetInterface *iface) {
+  iface->create_preset = gst_preset_default_create_preset;
 }
 
 static void
-gst_preset_base_init(gpointer g_class)
-{
+gst_preset_base_init(gpointer g_class) {
   static gboolean initialized = FALSE;
 
   if (!initialized) {
-    /* create interface signals and properties here. */
+    /* set default implementations */
 
     initialized = TRUE;
   }
@@ -150,7 +221,7 @@ gst_preset_get_type (void)
       sizeof (GstPresetInterface),
       gst_preset_base_init,   /* base_init */
       NULL,   /* base_finalize */
-      NULL,   /* class_init */
+      gst_preset_class_init,   /* class_init */
       NULL,   /* class_finalize */
       NULL,   /* class_data */
       0,
