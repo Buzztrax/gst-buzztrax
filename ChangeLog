@@ -1,3 +1,8 @@
+2007-01-15  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/preset/preset.h:
+	  add idea for meta data methods
+
 2006-12-13  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/Makefile.am:
