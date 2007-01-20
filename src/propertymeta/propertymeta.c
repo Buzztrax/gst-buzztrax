@@ -115,7 +115,7 @@ gst_property_meta_get_type (void)
   if (type == 0) {
     static const GTypeInfo info = {
       sizeof (GstPropertyMetaInterface),
-      gst_property_meta_base_init,   /* base_init */
+      (GBaseInitFunc) gst_property_meta_base_init,   /* base_init */
       NULL,   /* base_finalize */
       NULL,   /* class_init */
       NULL,   /* class_finalize */

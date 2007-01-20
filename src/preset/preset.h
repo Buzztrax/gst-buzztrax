@@ -48,10 +48,8 @@ struct _GstPresetInterface
   gboolean (*rename_preset) (GstPreset *self, const gchar *old_name, const gchar *new_name);
   gboolean (*delete_preset) (GstPreset *self, const gchar *name);
   
-  /* @todo: need to handle preset metadata (e.g. comment)
-  gboolean (*set_meta) (GstPreset *self,const gchar *name, const *gchar tag, gchar *value);
-  gboolean (*get_meta) (GstPreset *self,const gchar *name, const *gchar tag, gchar **value);
-  */
+  gboolean (*set_meta) (GstPreset *self,const gchar *name, const gchar *tag, gchar *value);
+  gboolean (*get_meta) (GstPreset *self,const gchar *name, const gchar *tag, gchar **value);
 
   void (*create_preset) (GstPreset *self);
 };
@@ -65,10 +63,8 @@ gboolean gst_preset_save_preset (GstPreset *self, const gchar *name);
 gboolean gst_preset_rename_preset (GstPreset *self, const gchar *old_name, const gchar *new_name);
 gboolean gst_preset_delete_preset (GstPreset *self, const gchar *name);
 
-/*
-gboolean gst_preset_set_meta (GstPreset *self,const gchar *name, const *gchar tag, gchar *value);
-gboolean gst_preset_get_meta (GstPreset *self,const gchar *name, const *gchar tag, gchar **value);
-*/
+gboolean gst_preset_set_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar *value);
+gboolean gst_preset_get_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar **value);
 
 void gst_preset_create_preset (GstPreset *self);
 

@@ -1,3 +1,25 @@
+2007-01-20  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/gst-buzztard-sections.txt:
+	* src/childbin/childbin.c: (gst_child_bin_get_type):
+	* src/help/help.c: (gst_help_get_type):
+	* src/preset/preset.c: (gst_preset_default_get_preset_names),
+	(gst_preset_default_load_preset), (gst_preset_default_save_preset),
+	(gst_preset_default_rename_preset),
+	(gst_preset_default_delete_preset), (gst_preset_default_set_meta),
+	(gst_preset_default_get_meta), (gst_preset_default_create_preset),
+	(gst_preset_get_preset_names), (gst_preset_load_preset),
+	(gst_preset_save_preset), (gst_preset_rename_preset),
+	(gst_preset_delete_preset), (gst_preset_set_meta),
+	(gst_preset_get_meta), (gst_preset_create_preset),
+	(gst_preset_class_init), (gst_preset_base_init),
+	(gst_preset_get_type):
+	* src/preset/preset.h:
+	* src/propertymeta/propertymeta.c: (gst_property_meta_get_type):
+	* src/tempo/tempo.c: (gst_tempo_get_type):
+	  added (s|g)et_meta methods to preset iface. first comments for default
+	  implementation, added casts for type_info
+
 2007-01-15  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/preset.h:

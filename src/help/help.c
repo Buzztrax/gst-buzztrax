@@ -52,7 +52,7 @@ gst_help_get_type (void)
   if (type == 0) {
     static const GTypeInfo info = {
       sizeof (GstHelpInterface),
-      gst_help_base_init,   /* base_init */
+      (GBaseInitFunc) gst_help_base_init,   /* base_init */
       NULL,   /* base_finalize */
       NULL,   /* class_init */
       NULL,   /* class_finalize */

@@ -23,16 +23,80 @@
  * @short_description: helper interface for element presets
  *
  * This interface offers a methods to query and manipulate parameter preset
- * sets.
+ * sets. The name of a presets serves as key for subsequent method calls to 
+ * manipulate single presets.
  */
 
 #include "preset.h"
 #include "propertymeta/propertymeta.h"
 
-//-- methods
+/* default implementation */
 
-void
-gst_preset_default_create_preset (GstPreset *self) {
+static GList*
+gst_preset_default_get_preset_names (GstPreset *self)
+{
+  GST_WARNING("not yet implemented");
+#if 0
+  gchar *element_name = G_OBJECT_TYPE_NAME(self);
+  
+  // we need to add DATADIR=$prefix/share/gstreamer-0.10 to config.h
+  // and what about plugins not in $GST_PLUGIN_PATH ?
+  // $DATADIR/presets/<element_name>.xml
+  // $HOME/.gstreamer-0.10/presets/<element_name>.xml
+#endif
+}
+
+static gboolean
+gst_preset_default_load_preset (GstPreset *self, const gchar *name)
+{
+  GST_WARNING("not yet implemented");
+#if 0
+#endif
+}
+
+static gboolean
+gst_preset_default_save_preset (GstPreset *self, const gchar *name)
+{
+  GST_WARNING("not yet implemented");
+#if 0
+#endif
+}
+
+static gboolean
+gst_preset_default_rename_preset (GstPreset *self, const gchar *old_name, const gchar *new_name)
+{
+  GST_WARNING("not yet implemented");
+#if 0
+#endif
+}
+
+static gboolean
+gst_preset_default_delete_preset (GstPreset *self, const gchar *name)
+{
+  GST_WARNING("not yet implemented");
+#if 0
+#endif
+}
+
+static gboolean 
+gst_preset_default_set_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar *value)
+{
+  GST_WARNING("not yet implemented");
+#if 0
+#endif
+}
+
+static gboolean
+gst_preset_default_get_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar **value)
+{
+  GST_WARNING("not yet implemented");
+#if 0
+#endif
+}
+
+static void
+gst_preset_default_create_preset (GstPreset *self)
+{
   GParamSpec **properties,*property;
   guint i,number_of_properties;
   GType param_type,base_type;
@@ -41,7 +105,7 @@ gst_preset_default_create_preset (GstPreset *self) {
     gdouble rnd;
     guint flags=0;
 
-    // @todo: what about voice properties
+    /* @todo: what about voice properties */
     
     GST_INFO("nr of values : %d", number_of_properties);
     for(i=0;i<number_of_properties;i++) {
@@ -50,7 +114,7 @@ gst_preset_default_create_preset (GstPreset *self) {
         flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
       }
 
-      // skip non-controlable, trigger params & voice params
+      /* skip non-controlable, trigger params & voice params */
       if(!(property->flags&GST_PARAM_CONTROLLABLE)) continue;
       else if(!(flags&GST_PROPERTY_META_STATE)) continue;
 
@@ -59,8 +123,6 @@ gst_preset_default_create_preset (GstPreset *self) {
       param_type=property->value_type;
       while((base_type=g_type_parent(param_type))) param_type=base_type;
       
-      //GST_INFO("GType=%d:'%s'",param_type,G_VALUE_TYPE_NAME(param_type));
-
       rnd=((gdouble)rand()) / (RAND_MAX + 1.0);
       switch(param_type) {
         case G_TYPE_BOOLEAN: {
@@ -95,7 +157,7 @@ gst_preset_default_create_preset (GstPreset *self) {
   }
 }
 
-//-- wrapper
+/* wrapper */
 
 /**
  * gst_preset_get_preset_names:
@@ -106,8 +168,9 @@ gst_preset_default_create_preset (GstPreset *self) {
  * Returns: list with names
  */
 GList*
-gst_preset_get_preset_names (GstPreset *self) {
-  g_return_if_fail (GST_IS_PRESET (self));
+gst_preset_get_preset_names (GstPreset *self)
+{
+  g_return_val_if_fail (GST_IS_PRESET (self), NULL);
 
   return (GST_PRESET_GET_INTERFACE (self)->get_preset_names (self));  
 }
@@ -119,11 +182,13 @@ gst_preset_get_preset_names (GstPreset *self) {
  *
  * Load the given preset.
  *
- * Returns: %TRUE for success, %FALSE if e.g. there is no preset with that name
+ * Returns: %TRUE for success, %FALSE if e.g. there is no preset with that @name
  */
 gboolean
-gst_preset_load_preset (GstPreset *self, const gchar *name) {
-  g_return_if_fail (GST_IS_PRESET (self));
+gst_preset_load_preset (GstPreset *self, const gchar *name)
+{
+  g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
+  g_return_val_if_fail (name, FALSE);
 
   return (GST_PRESET_GET_INTERFACE (self)->load_preset (self, name));  
 }
@@ -139,8 +204,10 @@ gst_preset_load_preset (GstPreset *self, const gchar *name) {
  * Returns: %TRUE for success, %FALSE
  */
 gboolean
-gst_preset_save_preset (GstPreset *self, const gchar *name) {
-  g_return_if_fail (GST_IS_PRESET (self));
+gst_preset_save_preset (GstPreset *self, const gchar *name)
+{
+  g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
+  g_return_val_if_fail (name, FALSE);
 
   return (GST_PRESET_GET_INTERFACE (self)->save_preset (self, name));  
 }
@@ -157,8 +224,11 @@ gst_preset_save_preset (GstPreset *self, const gchar *name) {
  * Returns: %TRUE for success, %FALSE if e.g. there is no preset with @old_name
  */
 gboolean
-gst_preset_rename_preset (GstPreset *self, const gchar *old_name, const gchar *new_name) {
-  g_return_if_fail (GST_IS_PRESET (self));
+gst_preset_rename_preset (GstPreset *self, const gchar *old_name, const gchar *new_name)
+{
+  g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
+  g_return_val_if_fail (old_name, FALSE);
+  g_return_val_if_fail (new_name, FALSE);
 
   return (GST_PRESET_GET_INTERFACE (self)->rename_preset (self,old_name,new_name));  
 }
@@ -170,13 +240,62 @@ gst_preset_rename_preset (GstPreset *self, const gchar *old_name, const gchar *n
  *
  * Delete the given preset.
  *
- * Returns: %TRUE for success, %FALSE if e.g. there is no preset with that name
+ * Returns: %TRUE for success, %FALSE if e.g. there is no preset with that @name
  */
 gboolean
-gst_preset_delete_preset (GstPreset *self, const gchar *name) {
-  g_return_if_fail (GST_IS_PRESET (self));
+gst_preset_delete_preset (GstPreset *self, const gchar *name)
+{
+  g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
+  g_return_val_if_fail (name, FALSE);
 
   return (GST_PRESET_GET_INTERFACE (self)->delete_preset (self,name));  
+}
+
+/**
+ * gst_preset_set_meta:
+ * @self: a #GObject that implements #GstPreset
+ * @name: preset name
+ * @tag: meta data item name
+ * @value: new value
+ *
+ * Sets a new @value for an existing meta data item or adds a new item. Meta
+ * data @tag names can be something like e.g. "comment". Supplying %NULL for the
+ * @value will unset an existing value.
+ *
+ * Returns: %TRUE for success, %FALSE if e.g. there is no preset with that @name
+ */
+gboolean
+gst_preset_set_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar *value)
+{
+  g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
+  g_return_val_if_fail (name, FALSE);
+  g_return_val_if_fail (tag, FALSE);
+
+  GST_PRESET_GET_INTERFACE (self)->set_meta (self,name,tag,value);
+}
+
+/**
+ * gst_preset_get_meta:
+ * @self: a #GObject that implements #GstPreset
+ * @name: preset name
+ * @tag: meta data item name
+ * @value: value
+ *
+ * Gets the @value for an existing meta data @tag. Meta data @tag names can be
+ * something like e.g. "comment". Returned values need to be released when done.
+ *
+ * Returns: %TRUE for success, %FALSE if e.g. there is no preset with that @name
+ * or no value for the given @tag
+ */
+gboolean
+gst_preset_get_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar **value)
+{
+  g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
+  g_return_val_if_fail (name, FALSE);
+  g_return_val_if_fail (tag, FALSE);
+  g_return_val_if_fail (value, FALSE);
+
+  GST_PRESET_GET_INTERFACE (self)->get_meta (self,name,tag,value);
 }
 
 /**
@@ -187,25 +306,38 @@ gst_preset_delete_preset (GstPreset *self, const gchar *name) {
  * true randomization will be applied.
  */
 void
-gst_preset_create_preset (GstPreset *self) {
+gst_preset_create_preset (GstPreset *self)
+{
   g_return_if_fail (GST_IS_PRESET (self));
 
   GST_PRESET_GET_INTERFACE (self)->create_preset (self);
 }
 
-//-- class internals
+/* class internals */
 
 static void
-gst_preset_class_init(GstPresetInterface *iface) {
+gst_preset_class_init(GstPresetInterface *iface)
+{
+  iface->get_preset_names = gst_preset_default_get_preset_names;
+
+  iface->load_preset = gst_preset_default_load_preset;
+  iface->save_preset = gst_preset_default_save_preset;
+  iface->rename_preset = gst_preset_default_rename_preset;
+  iface->delete_preset = gst_preset_default_delete_preset;
+  
+  iface->set_meta = gst_preset_default_set_meta;
+  iface->get_meta = gst_preset_default_get_meta;
+  
   iface->create_preset = gst_preset_default_create_preset;
 }
 
 static void
-gst_preset_base_init(gpointer g_class) {
+gst_preset_base_init(gpointer g_class)
+{
   static gboolean initialized = FALSE;
 
   if (!initialized) {
-    /* set default implementations */
+    /* init default implementation */
 
     initialized = TRUE;
   }
@@ -219,9 +351,9 @@ gst_preset_get_type (void)
   if (type == 0) {
     static const GTypeInfo info = {
       sizeof (GstPresetInterface),
-      gst_preset_base_init,   /* base_init */
+      (GBaseInitFunc) gst_preset_base_init,   /* base_init */
       NULL,   /* base_finalize */
-      gst_preset_class_init,   /* class_init */
+      (GClassInitFunc) gst_preset_class_init,   /* class_init */
       NULL,   /* class_finalize */
       NULL,   /* class_data */
       0,
