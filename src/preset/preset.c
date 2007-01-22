@@ -24,11 +24,17 @@
  *
  * This interface offers a methods to query and manipulate parameter preset
  * sets. The name of a presets serves as key for subsequent method calls to 
- * manipulate single presets.
+ * manipulate single presets. All instances of one type will share the list of
+ * presets.
  */
 
 #include "preset.h"
 #include "propertymeta/propertymeta.h"
+
+#if 0
+static GQuark preset_list_quark=0;
+static GQuark instance_list_quark=0;
+#endif
 
 /* default implementation */
 
@@ -37,12 +43,36 @@ gst_preset_default_get_preset_names (GstPreset *self)
 {
   GST_WARNING("not yet implemented");
 #if 0
-  gchar *element_name = G_OBJECT_TYPE_NAME(self);
+  GType *type = G_TYPE_FROM_INSTANCE (self);
+  GList *presets;
+  GList *instances;
+  gboolean found = FALSE;
+
+  // get the preset list from the type
+  preset = (GList *) g_type_get_qdata (type, preset_list_quark);
+  if (presets == NULL) {
+	gchar *element_name = G_OBJECT_TYPE_NAME(self);
   
-  // we need to add DATADIR=$prefix/share/gstreamer-0.10 to config.h
-  // and what about plugins not in $GST_PLUGIN_PATH ?
-  // $DATADIR/presets/<element_name>.xml
-  // $HOME/.gstreamer-0.10/presets/<element_name>.xml
+	// we need to add DATADIR=$prefix/share/gstreamer-0.10 to config.h
+	// and what about plugins not in $GST_PLUGIN_PATH ?
+	// $DATADIR/presets/<element_name>.xml
+	// $HOME/.gstreamer-0.10/presets/<element_name>.xml
+  
+	// attach the preset list to the type
+	g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
+  }
+  
+  // insert instance in instance list (if not yet there)
+  instances = (GList *) g_type_get_qdata (type, instance_list_quark);
+  if (instances != NULL) {
+	if (g_list_find (instances, self))
+	  found = TRUE;
+  }
+  if (!found) {
+	instance = g_list_prepend (instances, self);
+	g_type_set_qdata (type, instance_list_quark, (gpointer) instances);
+  }
+  
 #endif
 }
 
@@ -339,6 +369,12 @@ gst_preset_base_init(gpointer g_class)
   if (!initialized) {
     /* init default implementation */
 
+#if 0
+    /* create quarks for use with g_type_{g,s}et_qdata() */
+    preset_list_quark=g_quark_from_string("GstPreset::presets");
+    instance_list_quark=g_quark_from_string("GstPreset::instances");
+#endif
+
     initialized = TRUE;
   }
 }
@@ -349,7 +385,7 @@ gst_preset_get_type (void)
   static GType type = 0;
   
   if (type == 0) {
-    static const GTypeInfo info = {
+    const GTypeInfo info = {
       sizeof (GstPresetInterface),
       (GBaseInitFunc) gst_preset_base_init,   /* base_init */
       NULL,   /* base_finalize */

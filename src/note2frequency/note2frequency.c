@@ -280,7 +280,7 @@ static void gst_note_2_frequency_class_init(GstNote2FrequencyClass *klass) {
 GType gst_note_2_frequency_get_type(void) {
   static GType type = 0;
   if (type == 0) {
-    static const GTypeInfo info = {
+    const GTypeInfo info = {
       sizeof(GstNote2FrequencyClass),
       NULL, // base_init
       NULL, // base_finalize

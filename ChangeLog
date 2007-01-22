@@ -1,3 +1,21 @@
+2007-01-22  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiodelay/audiodelay.c: (gst_audio_delay_get_type):
+	* src/childbin/childbin.c: (gst_child_bin_get_type):
+	* src/envelope/envelope.c: (gst_envelope_get_type):
+	* src/help/help.c: (gst_help_get_type):
+	* src/note2frequency/note2frequency.c:
+	(gst_note_2_frequency_get_type):
+	* src/preset/preset.c: (gst_preset_default_get_preset_names),
+	(gst_preset_base_init), (gst_preset_get_type):
+	* src/preset/preset.h:
+	* src/propertymeta/propertymeta.c: (gst_property_meta_base_init),
+	(gst_property_meta_get_type):
+	* src/simsyn/simsyn.c: (gst_sim_syn_get_type):
+	* src/tempo/tempo.c: (gst_tempo_get_type):
+	  don't use static for local data that gets copied anyway, more proto-
+	  typing of the default preset implementation
+
 2007-01-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/gst-buzztard-sections.txt:

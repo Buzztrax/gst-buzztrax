@@ -151,7 +151,7 @@ GType gst_envelope_get_type (void)
 {
   static GType type = 0;
   if (type == 0) {
-    static const GTypeInfo element_type_info = {
+    const GTypeInfo element_type_info = {
       sizeof (GstEnvelopeClass),
       NULL,               /* base_init */
       NULL,		  /* base_finalize */

@@ -1150,7 +1150,7 @@ GType gst_sim_syn_get_type (void)
 {
   static GType type = 0;
   if (type == 0) {
-    static const GTypeInfo element_type_info = {
+    const GTypeInfo element_type_info = {
       sizeof (GstSimSynClass),
       (GBaseInitFunc)gst_sim_syn_base_init,
       NULL,		          /* base_finalize */
@@ -1161,17 +1161,17 @@ GType gst_sim_syn_get_type (void)
       0,                  /* n_preallocs */
       (GInstanceInitFunc) gst_sim_syn_init
     };
-    static const GInterfaceInfo property_meta_interface_info = {
+    const GInterfaceInfo property_meta_interface_info = {
       NULL,               /* interface_init */
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
-    static const GInterfaceInfo tempo_interface_info = {
+    const GInterfaceInfo tempo_interface_info = {
       (GInterfaceInitFunc) gst_sim_syn_tempo_interface_init,          /* interface_init */
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
-    static const GInterfaceInfo help_interface_info = {
+    const GInterfaceInfo help_interface_info = {
       NULL,               /* interface_init */
       NULL,               /* interface_finalize */
       NULL                /* interface_data */

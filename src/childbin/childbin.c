@@ -90,7 +90,7 @@ gst_child_bin_get_type (void)
   static GType type = 0;
   
   if (type == 0) {
-    static const GTypeInfo info = {
+    const GTypeInfo info = {
       sizeof (GstChildBinInterface),
       (GBaseInitFunc) gst_child_bin_base_init,   /* base_init */
       NULL,   /* base_finalize */

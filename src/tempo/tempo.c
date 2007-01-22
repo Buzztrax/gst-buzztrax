@@ -90,7 +90,7 @@ gst_tempo_get_type (void)
   static GType type = 0;
   
   if (type == 0) {
-    static const GTypeInfo info = {
+    const GTypeInfo info = {
       sizeof (GstTempoInterface),
       (GBaseInitFunc) gst_tempo_base_init,   /* base_init */
       NULL,   /* base_finalize */

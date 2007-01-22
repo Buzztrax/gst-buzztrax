@@ -96,7 +96,7 @@ gst_property_meta_base_init(gpointer g_class)
   static gboolean initialized = FALSE;
 
   if (!initialized) {
-    // create quarks for use with g_param_spect_{g,s}et_qdata()
+    /* create quarks for use with g_param_spec_{g,s}et_qdata() */
     gst_property_meta_quark_min_val=g_quark_from_string("GstPropertyMeta::min-val");
     gst_property_meta_quark_max_val=g_quark_from_string("GstPropertyMeta::max-val");
     gst_property_meta_quark_def_val=g_quark_from_string("GstPropertyMeta::def-val");
@@ -113,7 +113,7 @@ gst_property_meta_get_type (void)
   static GType type = 0;
   
   if (type == 0) {
-    static const GTypeInfo info = {
+    const GTypeInfo info = {
       sizeof (GstPropertyMetaInterface),
       (GBaseInitFunc) gst_property_meta_base_init,   /* base_init */
       NULL,   /* base_finalize */

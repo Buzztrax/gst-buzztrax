@@ -52,6 +52,15 @@ struct _GstPresetInterface
   gboolean (*get_meta) (GstPreset *self,const gchar *name, const gchar *tag, gchar **value);
 
   void (*create_preset) (GstPreset *self);
+  
+  /* @todo:
+   *
+   * need a presets-changed signal, to notify of changes in preset list
+   *
+   * need a way to sync class instances, we want to keep only one list for all
+   * instances of a type and if the list changes, we trigger the signal for all
+   * instance
+   */
 };
 
 GType gst_preset_get_type(void);

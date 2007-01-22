@@ -424,7 +424,7 @@ GType gst_audio_delay_get_type (void)
 {
   static GType type = 0;
   if (type == 0) {
-    static const GTypeInfo element_type_info = {
+    const GTypeInfo element_type_info = {
       sizeof (GstAudioDelayClass),
       (GBaseInitFunc)gst_audio_delay_base_init,
       NULL,		          /* base_finalize */
@@ -435,12 +435,12 @@ GType gst_audio_delay_get_type (void)
       0,                  /* n_preallocs */
       (GInstanceInitFunc) gst_audio_delay_init
     };
-    static const GInterfaceInfo tempo_interface_info = {
+    const GInterfaceInfo tempo_interface_info = {
       (GInterfaceInitFunc) gst_audio_delay_tempo_interface_init,          /* interface_init */
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
-    static const GInterfaceInfo help_interface_info = {
+    const GInterfaceInfo help_interface_info = {
       NULL,               /* interface_init */
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
