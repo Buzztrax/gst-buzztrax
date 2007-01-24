@@ -1,3 +1,9 @@
+2007-01-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/simsyn/simsyn.c: (gst_sim_syn_filter_hipass),
+	(gst_sim_syn_filter_bandpass), (gst_sim_syn_filter_bandstop):
+	  antic cleanup
+
 2007-01-22  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/audiodelay.c: (gst_audio_delay_get_type):
