@@ -51,8 +51,16 @@ gst_preset_default_get_preset_names (GstPreset *self)
   // get the preset list from the type
   preset = (GList *) g_type_get_qdata (type, preset_list_quark);
   if (presets == NULL) {
-	gchar *element_name = G_OBJECT_TYPE_NAME(self);
-  
+	gchar *element_name, *plugin_name, *file_name;
+	GstElementFactory *factory;
+    GstPlugin *plugin;
+    
+    element_name = G_OBJECT_TYPE_NAME(self);
+    factory = gst_element_factory_find(element_name);
+    plugin_name = GST_PLUGIN_FEATURE (factory)->plugin_name;
+    plugin = gst_default_registry_find_plugin (plugin_name);
+    file_name = gst_plugin_get_filename (plugin);
+
 	// we need to add DATADIR=$prefix/share/gstreamer-0.10 to config.h
 	// and what about plugins not in $GST_PLUGIN_PATH ?
 	// $DATADIR/presets/<element_name>.xml

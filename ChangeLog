@@ -1,5 +1,10 @@
 2007-01-24  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/preset/preset.c: (gst_preset_default_get_preset_names):
+	  idea about deriving fs-path from element
+
+2007-01-24  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/simsyn/simsyn.c: (gst_sim_syn_filter_hipass),
 	(gst_sim_syn_filter_bandpass), (gst_sim_syn_filter_bandstop):
 	  antic cleanup
