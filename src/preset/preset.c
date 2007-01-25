@@ -31,57 +31,66 @@
 #include "preset.h"
 #include "propertymeta/propertymeta.h"
 
-#if 0
 static GQuark preset_list_quark=0;
 static GQuark instance_list_quark=0;
-#endif
 
 /* default implementation */
 
 static GList*
 gst_preset_default_get_preset_names (GstPreset *self)
 {
-  GST_WARNING("not yet implemented");
-#if 0
-  GType *type = G_TYPE_FROM_INSTANCE (self);
+  GType type = G_TYPE_FROM_INSTANCE (self);
   GList *presets;
   GList *instances;
   gboolean found = FALSE;
 
-  // get the preset list from the type
-  preset = (GList *) g_type_get_qdata (type, preset_list_quark);
+  /* get the preset list from the type */
+  presets = (GList *) g_type_get_qdata (type, preset_list_quark);
   if (presets == NULL) {
-	gchar *element_name, *plugin_name, *file_name;
+	const gchar *element_name, *plugin_name, *file_name;
 	GstElementFactory *factory;
     GstPlugin *plugin;
     
     element_name = G_OBJECT_TYPE_NAME(self);
-    factory = gst_element_factory_find(element_name);
-    plugin_name = GST_PLUGIN_FEATURE (factory)->plugin_name;
-    plugin = gst_default_registry_find_plugin (plugin_name);
-    file_name = gst_plugin_get_filename (plugin);
+	GST_INFO("element_name: '%s'",element_name);
 
-	// we need to add DATADIR=$prefix/share/gstreamer-0.10 to config.h
-	// and what about plugins not in $GST_PLUGIN_PATH ?
-	// $DATADIR/presets/<element_name>.xml
-	// $HOME/.gstreamer-0.10/presets/<element_name>.xml
+	factory = GST_ELEMENT_GET_CLASS (self)->elementfactory;
+	GST_INFO("factory: %p",factory);
+	if(factory) {
+	  plugin_name = GST_PLUGIN_FEATURE (factory)->plugin_name;
+	  GST_INFO("plugin_name: '%s'",plugin_name);
+	  plugin = gst_default_registry_find_plugin (plugin_name);
+	  GST_INFO("plugin: %p",plugin);
+	  file_name = gst_plugin_get_filename (plugin);
+	  GST_INFO("file_name: '%s'",file_name);
+	  /*
+	  '/home/ensonic/buzztard/lib/gstreamer-0.10/libgstsimsyn.so'
+	  -> '/home/ensonic/buzztard/share/gstreamer-0.10/GstSimSyn.xml'
+	  -> '$HOME/.gstreamer-0.10/presets/GstSimSyn.xml'
+
+	  '/usr/lib/gstreamer-0.10/libgstaudiofx.so'
+	  -> '/usr/share/gstreamer-0.10/GstAudioPanorama.xml'
+	  -> '$HOME/.gstreamer-0.10/presets/GstAudioPanorama.xml'
+	  */
+	}
+	
+	/* @todo: read and merge presets */
   
-	// attach the preset list to the type
+	/* attach the preset list to the type */
 	g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
   }
   
-  // insert instance in instance list (if not yet there)
+  /* insert instance in instance list (if not yet there) */
   instances = (GList *) g_type_get_qdata (type, instance_list_quark);
   if (instances != NULL) {
 	if (g_list_find (instances, self))
 	  found = TRUE;
   }
   if (!found) {
-	instance = g_list_prepend (instances, self);
+	instances = g_list_prepend (instances, self);
 	g_type_set_qdata (type, instance_list_quark, (gpointer) instances);
-  }
-  
-#endif
+  }  
+  return(presets);
 }
 
 static gboolean
@@ -90,6 +99,7 @@ gst_preset_default_load_preset (GstPreset *self, const gchar *name)
   GST_WARNING("not yet implemented");
 #if 0
 #endif
+  return(FALSE);
 }
 
 static gboolean
@@ -98,6 +108,7 @@ gst_preset_default_save_preset (GstPreset *self, const gchar *name)
   GST_WARNING("not yet implemented");
 #if 0
 #endif
+  return(FALSE);
 }
 
 static gboolean
@@ -106,6 +117,7 @@ gst_preset_default_rename_preset (GstPreset *self, const gchar *old_name, const 
   GST_WARNING("not yet implemented");
 #if 0
 #endif
+  return(FALSE);
 }
 
 static gboolean
@@ -114,6 +126,7 @@ gst_preset_default_delete_preset (GstPreset *self, const gchar *name)
   GST_WARNING("not yet implemented");
 #if 0
 #endif
+  return(FALSE);
 }
 
 static gboolean 
@@ -122,6 +135,7 @@ gst_preset_default_set_meta (GstPreset *self,const gchar *name, const gchar *tag
   GST_WARNING("not yet implemented");
 #if 0
 #endif
+  return(FALSE);
 }
 
 static gboolean
@@ -130,6 +144,7 @@ gst_preset_default_get_meta (GstPreset *self,const gchar *name, const gchar *tag
   GST_WARNING("not yet implemented");
 #if 0
 #endif
+  return(FALSE);
 }
 
 static void
@@ -377,11 +392,9 @@ gst_preset_base_init(gpointer g_class)
   if (!initialized) {
     /* init default implementation */
 
-#if 0
     /* create quarks for use with g_type_{g,s}et_qdata() */
     preset_list_quark=g_quark_from_string("GstPreset::presets");
     instance_list_quark=g_quark_from_string("GstPreset::instances");
-#endif
 
     initialized = TRUE;
   }

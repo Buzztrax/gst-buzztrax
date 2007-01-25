@@ -1,3 +1,16 @@
+2007-01-25  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/preset/preset.c: (gst_preset_default_get_preset_names),
+	(gst_preset_default_load_preset), (gst_preset_default_save_preset),
+	(gst_preset_default_rename_preset),
+	(gst_preset_default_delete_preset), (gst_preset_default_set_meta),
+	(gst_preset_default_get_meta), (gst_preset_base_init):
+	  activate code that derives the path for preset i/o, return default
+	  values from unimplemented methods
+
+	* src/simsyn/simsyn.c: (gst_sim_syn_get_type):
+	  simsyn now has the default preset impl. active
+
 2007-01-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/preset.c: (gst_preset_default_get_preset_names):

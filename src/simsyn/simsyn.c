@@ -45,6 +45,7 @@
 //#include <gst/childbin/childbin.h>
 #include "help/help.h"
 #include "propertymeta/propertymeta.h"
+#include "preset/preset.h"
 #include "tempo/tempo.h"
 
 #include "simsyn.h"
@@ -218,6 +219,8 @@ static void gst_sim_syn_tempo_interface_init(gpointer g_iface, gpointer iface_da
   
   iface->change_tempo = gst_sim_syn_tempo_change_tempo;
 }
+
+//-- preset interface implementations
 
 //-- simsyn implementation
 
@@ -1176,10 +1179,16 @@ GType gst_sim_syn_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
+    const GInterfaceInfo preset_interface_info = {
+      NULL,               /* interface_init */
+      NULL,               /* interface_finalize */
+      NULL                /* interface_data */
+    };
     type = g_type_register_static(GST_TYPE_BASE_SRC, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
     g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
 	g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
+	g_type_add_interface_static(type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;
 }
