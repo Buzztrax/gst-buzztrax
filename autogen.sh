@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autogen.sh,v 1.2 2005-12-12 22:22:19 ensonic Exp $
+# $Id: autogen.sh,v 1.3 2007-01-26 15:38:12 ensonic Exp $
 # Run this to generate all the initial makefiles, etc.
 
 DIE=0
@@ -356,6 +356,8 @@ tool_run "$aclocal" "$ACLOCAL_FLAGS"
 tool_run "$libtoolize" "--copy --force"
 if test -n "$gtkdocize"; then
   tool_run "$gtkdocize" "--copy"
+else
+  echo "EXTRA_DIST = " > gtk-doc.make
 fi
 tool_run "$autoheader"
 

@@ -1,3 +1,14 @@
+2007-01-26  Stefan Kost  <ensonic@users.sf.net>
+
+	* autogen.sh:
+	* configure.ac:
+	* src/preset/preset.c: (gst_preset_default_get_preset_names),
+	(gst_preset_default_save_presets_file),
+	(gst_preset_default_save_preset),
+	(gst_preset_default_rename_preset),
+	(gst_preset_default_delete_preset):
+	  some configure fixes, more default implementation
+
 2007-01-25  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/preset.c: (gst_preset_default_get_preset_names),

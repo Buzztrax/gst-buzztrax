@@ -36,6 +36,14 @@ static GQuark instance_list_quark=0;
 
 /* default implementation */
 
+#if 0
+/* do we need this struct, or shall we just set_qdata both hashmaps */
+struct _GstPresetData {
+  GHashTable *meta;
+  GHashTable *values;
+};
+#endif
+
 static GList*
 gst_preset_default_get_preset_names (GstPreset *self)
 {
@@ -47,37 +55,65 @@ gst_preset_default_get_preset_names (GstPreset *self)
   /* get the preset list from the type */
   presets = (GList *) g_type_get_qdata (type, preset_list_quark);
   if (presets == NULL) {
-	const gchar *element_name, *plugin_name, *file_name;
-	GstElementFactory *factory;
+    const gchar *element_name, *plugin_name, *file_name;
+    gchar *preset_dir, *preset_path;
+    GstElementFactory *factory;
     GstPlugin *plugin;
-    
+
     element_name = G_OBJECT_TYPE_NAME(self);
-	GST_INFO("element_name: '%s'",element_name);
+    GST_INFO("element_name: '%s'",element_name);
 
-	factory = GST_ELEMENT_GET_CLASS (self)->elementfactory;
-	GST_INFO("factory: %p",factory);
-	if(factory) {
-	  plugin_name = GST_PLUGIN_FEATURE (factory)->plugin_name;
-	  GST_INFO("plugin_name: '%s'",plugin_name);
-	  plugin = gst_default_registry_find_plugin (plugin_name);
-	  GST_INFO("plugin: %p",plugin);
-	  file_name = gst_plugin_get_filename (plugin);
-	  GST_INFO("file_name: '%s'",file_name);
-	  /*
-	  '/home/ensonic/buzztard/lib/gstreamer-0.10/libgstsimsyn.so'
-	  -> '/home/ensonic/buzztard/share/gstreamer-0.10/GstSimSyn.xml'
-	  -> '$HOME/.gstreamer-0.10/presets/GstSimSyn.xml'
+    factory = GST_ELEMENT_GET_CLASS (self)->elementfactory;
+    GST_INFO("factory: %p",factory);
+    if(factory) {
+      plugin_name = GST_PLUGIN_FEATURE (factory)->plugin_name;
+      GST_INFO("plugin_name: '%s'",plugin_name);
+      plugin = gst_default_registry_find_plugin (plugin_name);
+      GST_INFO("plugin: %p",plugin);
+      file_name = gst_plugin_get_filename (plugin);
+      GST_INFO("file_name: '%s'",file_name);
+      /*
+      '/home/ensonic/buzztard/lib/gstreamer-0.10/libgstsimsyn.so'
+      -> '/home/ensonic/buzztard/share/gstreamer-0.10/GstSimSyn.xml'
+      -> '$HOME/.gstreamer-0.10/presets/GstSimSyn.xml'
 
-	  '/usr/lib/gstreamer-0.10/libgstaudiofx.so'
-	  -> '/usr/share/gstreamer-0.10/GstAudioPanorama.xml'
-	  -> '$HOME/.gstreamer-0.10/presets/GstAudioPanorama.xml'
-	  */
-	}
-	
-	/* @todo: read and merge presets */
-  
-	/* attach the preset list to the type */
-	g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
+      '/usr/lib/gstreamer-0.10/libgstaudiofx.so'
+      -> '/usr/share/gstreamer-0.10/GstAudioPanorama.xml'
+      -> '$HOME/.gstreamer-0.10/presets/GstAudioPanorama.xml'
+      */
+    }
+    
+    preset_dir = g_build_filename (g_get_home_dir(), ".gstreamer-0.10", "presets", NULL);
+    GST_INFO("preset_dir: '%s'",preset_dir);
+    preset_path = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.prs", preset_dir, element_name);
+    GST_INFO("preset_path: '%s'",preset_path);
+    g_mkdir_with_parents (preset_dir, 755);
+
+#if 0
+    /* read presets */
+    FILE *in;
+    
+    if((in=fopen(preset_path,"rb"))) {
+      /* @todo: read header */
+      
+      /* @todo: read preset entries */
+      g_hash_table_insert(preset_data,(gpointer)preset_name,(gpointer)data);
+      g_hash_table_insert(preset_meta,(gpointer)preset_name,(gpointer)meta);
+      
+      presets=g_list_insert_sorted(presets,(gpointer)preset_name,(GCompareFunc)strcmp);
+      
+      fclose(in);
+    }
+    else {
+      GST_INFO("can't open preset file: '%s'",preset_path);
+    }
+#endif
+    /* @todo: also g_type_set_qdata(type, preset_path_quark, presets_path); */
+    g_free (preset_dir);
+    g_free (preset_path);
+
+    /* attach the preset list to the type */
+    g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
   }
   
   /* insert instance in instance list (if not yet there) */
@@ -103,6 +139,15 @@ gst_preset_default_load_preset (GstPreset *self, const gchar *name)
 }
 
 static gboolean
+gst_preset_default_save_presets_file (GType type)
+{
+  GST_WARNING("not yet implemented");
+#if 0
+#endif
+  return(FALSE);
+}
+
+static gboolean
 gst_preset_default_save_preset (GstPreset *self, const gchar *name)
 {
   GST_WARNING("not yet implemented");
@@ -114,18 +159,38 @@ gst_preset_default_save_preset (GstPreset *self, const gchar *name)
 static gboolean
 gst_preset_default_rename_preset (GstPreset *self, const gchar *old_name, const gchar *new_name)
 {
-  GST_WARNING("not yet implemented");
-#if 0
-#endif
+  GType type = G_TYPE_FROM_INSTANCE (self);
+  GList *presets,*node;
+
+  presets = (GList *) g_type_get_qdata (type, preset_list_quark);
+  if((node = g_list_find_custom (presets, old_name, (GCompareFunc)strcmp))) {
+    /* readd under new name */
+    presets = g_list_delete_link (presets, node);
+    presets = g_list_insert_sorted (presets, (gpointer)new_name, (GCompareFunc)strcmp);
+    GST_INFO ("preset moved 's' -> '%s'", old_name, new_name);
+    g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
+    
+    return(gst_preset_default_save_presets_file(type));
+  }
   return(FALSE);
 }
 
 static gboolean
 gst_preset_default_delete_preset (GstPreset *self, const gchar *name)
 {
-  GST_WARNING("not yet implemented");
-#if 0
-#endif
+  GType type = G_TYPE_FROM_INSTANCE (self);
+  GList *presets,*node;
+
+  presets = (GList *) g_type_get_qdata (type, preset_list_quark);
+  if((node = g_list_find_custom (presets, name, (GCompareFunc)strcmp))) {
+    /* remove the found one */
+    presets = g_list_delete_link (presets, node);
+    GST_INFO ("preset removed 's'", name);
+    g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
+    g_free ((gpointer)name);
+
+    return( gst_preset_default_save_presets_file (type));
+  }
   return(FALSE);
 }
 
