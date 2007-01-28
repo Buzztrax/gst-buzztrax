@@ -1,3 +1,8 @@
+2007-01-28  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/preset/preset.c: (gst_preset_default_get_preset_names):
+	  more docs
+
 2007-01-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* autogen.sh:

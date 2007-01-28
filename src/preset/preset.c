@@ -22,10 +22,20 @@
  * SECTION:gstpreset
  * @short_description: helper interface for element presets
  *
- * This interface offers a methods to query and manipulate parameter preset
- * sets. The name of a presets serves as key for subsequent method calls to 
- * manipulate single presets. All instances of one type will share the list of
- * presets.
+ * This interface offers methods to query and manipulate parameter preset sets. 
+ * A preset is a bunch of property settings, together with meta data and a name.
+ * The name of a preset serves as key for subsequent method calls to manipulate
+ * single presets.
+ * All instances of one type will share the list of presets. The list is created
+ * on demand, if presets are not used, the list is not created.
+ *
+ */
+/* @TODO:
+ * - we need locks to avoid two instances manipulating the preset list
+ * - how can we support both Preferences and Presets, a flag for _get_preset_names ?
+ * - should there be a 'preset-list' property to get the preset list
+ *   (and to conect a notify:: to to listen for changes)
+ *
  */
 
 #include "preset.h"
@@ -92,16 +102,34 @@ gst_preset_default_get_preset_names (GstPreset *self)
 #if 0
     /* read presets */
     FILE *in;
+	#define LINE_LEN=200
+	gchar *line[LINE_LEN+1];
     
     if((in=fopen(preset_path,"rb"))) {
-      /* @todo: read header */
+      /* read header
+	     magic, version, element-name, newline
+	   */
+	  if(fgets(line,LINE_LEN,in)) goto eof_error;
+	  if(fgets(line,LINE_LEN,in)) goto eof_error;
+	  if(fgets(line,LINE_LEN,in)) goto eof_error;
+	  if(fgets(line,LINE_LEN,in)) goto eof_error;
+      if(*line) {
+		GST_INFO("line 4 should have been a blank line in: '%s'",preset_path);
+	  }
       
-      /* @todo: read preset entries */
-      g_hash_table_insert(preset_data,(gpointer)preset_name,(gpointer)data);
-      g_hash_table_insert(preset_meta,(gpointer)preset_name,(gpointer)meta);
+      /* @todo: read preset entries*/
+	  while(TRUE) {
+		/* @todo: read preset entry
+		  name, meta/property entries, newline
+		*/
+		
+		g_hash_table_insert(preset_data,(gpointer)preset_name,(gpointer)data);
+		g_hash_table_insert(preset_meta,(gpointer)preset_name,(gpointer)meta);
+	  }
       
       presets=g_list_insert_sorted(presets,(gpointer)preset_name,(GCompareFunc)strcmp);
-      
+
+eof_error:
       fclose(in);
     }
     else {
