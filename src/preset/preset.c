@@ -106,15 +106,24 @@ gst_preset_default_get_preset_names (GstPreset *self)
 	gchar *line[LINE_LEN+1];
     
     if((in=fopen(preset_path,"rb"))) {
-      /* read header
-	     magic, version, element-name, newline
-	   */
+      /* read header */
+	  /* @todo: chomp() newlines */	  
 	  if(fgets(line,LINE_LEN,in)) goto eof_error;
+      if(!strcmp(line,"GStreamer Preset")) {
+		GST_INFO("%s:1: file id expected",preset_path);
+		goto eof_error;
+	  }
 	  if(fgets(line,LINE_LEN,in)) goto eof_error;
+	  /* @todo: what version */
 	  if(fgets(line,LINE_LEN,in)) goto eof_error;
+      if(!strcmp(line,element_name)) {
+		GST_INFO("%s:3: wrong element name",preset_path);
+		goto eof_error;
+	  }
 	  if(fgets(line,LINE_LEN,in)) goto eof_error;
       if(*line) {
-		GST_INFO("line 4 should have been a blank line in: '%s'",preset_path);
+		GST_INFO("%s:4: blank line expected",preset_path);
+		goto eof_error;
 	  }
       
       /* @todo: read preset entries*/
@@ -171,6 +180,21 @@ gst_preset_default_save_presets_file (GType type)
 {
   GST_WARNING("not yet implemented");
 #if 0
+  /* write presets */
+  FILE *out;
+  
+  /* @todo create backup */
+  
+  if((out=fopen(preset_path,"wb"))) {
+	/* @todo write header */
+	if(!(fputs("GStreamer Preset",out))) goto eof_error;
+	  
+	/* @todo write data */
+
+eof_error:
+    fclose(out);
+    return(TRUE);
+  } 
 #endif
   return(FALSE);
 }

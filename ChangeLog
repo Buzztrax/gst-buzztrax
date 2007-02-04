@@ -1,3 +1,9 @@
+2007-02-04  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/preset/preset.c: (gst_preset_default_get_preset_names),
+	(gst_preset_default_save_presets_file):
+	  sketch header loading/saving
+
 2007-01-28  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/preset.c: (gst_preset_default_get_preset_names):
