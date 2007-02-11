@@ -1,3 +1,15 @@
+2007-02-11  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/preset/preset.c: (preset_get_storage), (preset_get_path),
+	(preset_cleanup), (gst_preset_default_get_preset_names),
+	(gst_preset_default_load_preset), (preset_store_meta),
+	(preset_store_data), (gst_preset_default_save_presets_file),
+	(gst_preset_default_save_preset),
+	(gst_preset_default_rename_preset),
+	(gst_preset_default_delete_preset), (gst_preset_default_set_meta),
+	(gst_preset_default_get_meta), (gst_preset_base_init):
+	  default preset handling is feature complete
+
 2007-02-04  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/preset.c: (gst_preset_default_get_preset_names),
