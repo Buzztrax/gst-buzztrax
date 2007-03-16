@@ -114,7 +114,7 @@ static void gst_audio_delay_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec);
 static void gst_audio_delay_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec);
-static void gst_audio_delay_dispose (GObject * object);
+static void gst_audio_delay_finalize (GObject * object);
 
 static gboolean gst_audio_delay_set_caps (GstBaseTransform * base,
     GstCaps * incaps, GstCaps * outcaps);
@@ -188,11 +188,13 @@ static void
 gst_audio_delay_class_init (GstAudioDelayClass * klass)
 {
   GObjectClass *gobject_class;
+  
+  parent_class = g_type_class_peek_parent (klass);
 
   gobject_class = (GObjectClass *) klass;
   gobject_class->set_property = gst_audio_delay_set_property;
   gobject_class->get_property = gst_audio_delay_get_property;
-  gobject_class->dispose = gst_audio_delay_dispose;
+  gobject_class->finalize = gst_audio_delay_finalize;
 
   // override interface properties
   g_object_class_override_property(gobject_class, PROP_BPM, "beats-per-minute");
@@ -260,11 +262,11 @@ gst_audio_delay_set_property (GObject * object, guint prop_id,
     case PROP_FEEDBACK:
       filter->feedback = g_value_get_uint (value);
       break;
-	// tempo iface
+    // tempo iface
     case PROP_BPM:
     case PROP_TPB:
     case PROP_STPT:
-	  GST_WARNING("use gst_tempo_change_tempo()");
+      GST_WARNING("use gst_tempo_change_tempo()");
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -298,10 +300,10 @@ gst_audio_delay_get_property (GObject * object, guint prop_id,
     case PROP_STPT:
       g_value_set_ulong(value, filter->subticks_per_tick);
       break;
-	// help iface
-	case PROP_DOCU_URI:
-	  g_value_set_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstAudioDelay.html");
-	  break;
+    // help iface
+    case PROP_DOCU_URI:
+      g_value_set_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstAudioDelay.html");
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -309,16 +311,16 @@ gst_audio_delay_get_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_audio_delay_dispose (GObject * object)
+gst_audio_delay_finalize (GObject * object)
 {
   GstAudioDelay *filter = GST_AUDIO_DELAY (object);
-
+  
   if (filter->ring_buffer) {
     g_free (filter->ring_buffer);
     filter->ring_buffer = NULL;
   }
 
-  G_OBJECT_CLASS (parent_class)->dispose (object);
+  G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
 
@@ -423,7 +425,8 @@ gst_audio_delay_stop (GstBaseTransform *base)
 GType gst_audio_delay_get_type (void)
 {
   static GType type = 0;
-  if (type == 0) {
+
+  if (G_UNLIKELY(!type)) {
     const GTypeInfo element_type_info = {
       sizeof (GstAudioDelayClass),
       (GBaseInitFunc)gst_audio_delay_base_init,

@@ -1152,7 +1152,8 @@ gst_sim_syn_dispose (GObject *object)
 GType gst_sim_syn_get_type (void)
 {
   static GType type = 0;
-  if (type == 0) {
+
+  if (G_UNLIKELY(!type)) {
     const GTypeInfo element_type_info = {
       sizeof (GstSimSynClass),
       (GBaseInitFunc)gst_sim_syn_base_init,
