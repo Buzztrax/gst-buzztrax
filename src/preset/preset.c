@@ -31,8 +31,8 @@
  *
  */
 /* @TODO:
- * - we need locks to avoid two instances manipulating the preset list
- * - we need to free preset data (its a huge leak now)
+ * - we need locks to avoid two instances manipulating the preset list -> flock
+ * - need to add support for GstChildProxy
  * - how can we support both Preferences and Presets, a flag for _get_preset_names ?
  * - should there be a 'preset-list' property to get the preset list
  *   (and to connect a notify:: to to listen for changes)
@@ -248,7 +248,7 @@ gst_preset_default_get_preset_names (GstPreset *self)
 			  }
 			  str++;
 			}
-			/* @todo: handle childbin properties
+			/* @todo: handle childproxy properties
 			 * <property>[child]=<value>
 			 */			
 		  }
@@ -531,6 +531,10 @@ gst_preset_default_save_preset (GstPreset *self, const gchar *name)
 	GST_INFO("  saved");
   }
   
+  /*
+   * flock(fileno())
+   * http://www.ecst.csuchico.edu/~beej/guide/ipc/flock.html
+   */
   g_hash_table_insert(preset_data,(gpointer)name,(gpointer)data);
   g_hash_table_insert(preset_meta,(gpointer)name,(gpointer)meta);
   presets=g_list_insert_sorted(presets,(gpointer)name,(GCompareFunc)strcmp);

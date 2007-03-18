@@ -25,8 +25,8 @@
  * This interface provides an extension to the #GstChildProxy interface, which
  * is useful for classes that have identical children.
  *
- * The interface provides a children-count property as well as two methods to
- * add and remove children.
+ * The interface provides a #GstChildBin:children property for the number of
+ * children as well as two methods to add and remove children.
  */
  
 #include "childbin.h"
@@ -72,7 +72,7 @@ gst_child_bin_base_init(gpointer g_class)
 
   if (!initialized) {
     /* create interface signals and properties here. */
-    g_object_interface_install_property (g_class,
+   g_object_interface_install_property (g_class,
       g_param_spec_ulong ("children",
       "children count property",
       "the number of children this element uses",

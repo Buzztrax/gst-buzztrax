@@ -1,3 +1,10 @@
+2007-03-18  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/childbin/childbin.c: (gst_child_bin_base_init):
+	* src/preset/preset.c: (gst_preset_default_get_preset_names),
+	(gst_preset_default_save_preset):
+	  some more comments
+
 2007-03-16  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/audiodelay.c: (gst_audio_delay_class_init),
