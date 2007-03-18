@@ -2,6 +2,15 @@
 
 	patch by by: Henri Valta <henrivee at users.sourceforge.net>
 
+	* src/preset/preset.c: (gst_preset_default_rename_preset),
+	(gst_preset_default_delete_preset):
+	  When editing preset, old data was killed before it was saved to the
+	  new preset. This caused preset corruption. (fixes #1683248)
+
+2007-03-18  Stefan Kost  <ensonic@users.sf.net>
+
+	patch by by: Henri Valta <henrivee at users.sourceforge.net>
+
 	* src/preset/preset.c: (preset_get_storage), (preset_get_path),
 	(preset_cleanup), (gst_preset_default_get_preset_names),
 	(gst_preset_default_load_preset),

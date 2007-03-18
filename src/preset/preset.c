@@ -561,7 +561,6 @@ gst_preset_default_rename_preset (GstPreset *self, const gchar *old_name, const 
 	  GHashTable *meta,*data;
 
 	  /* readd under new name */
-	  presets = g_list_delete_link (presets, node);
 	  presets = g_list_insert_sorted (presets, (gpointer)new_name, (GCompareFunc)strcmp);
 
 	  /* readd the hash entries */
@@ -574,7 +573,10 @@ gst_preset_default_rename_preset (GstPreset *self, const gchar *old_name, const 
 		g_hash_table_insert(preset_data,(gpointer)new_name,(gpointer)data);
 	  }
 
-	  GST_INFO ("preset moved 's' -> '%s'", old_name, new_name);
+	  /* remove the old one */
+	  presets = g_list_delete_link (presets, node);
+
+	  GST_INFO ("preset moved '%s' -> '%s'", old_name, new_name);
 	  g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
 
 	  return(gst_preset_default_save_presets_file(self));
@@ -600,9 +602,6 @@ gst_preset_default_delete_preset (GstPreset *self, const gchar *name)
 	if((node = g_list_find_custom (presets, name, (GCompareFunc)strcmp))) {
 	  GHashTable *meta,*data;
 
-	  /* remove the found one */
-	  presets = g_list_delete_link (presets, node);
-
 	  /* free the hash entries */
 	  if((meta=g_hash_table_lookup(preset_meta,node->data))) {
 		g_hash_table_remove(preset_meta,node->data);
@@ -613,7 +612,10 @@ gst_preset_default_delete_preset (GstPreset *self, const gchar *name)
 		g_hash_table_destroy(data);
 	  }
 
-	  GST_INFO ("preset removed 's'", name);
+	  /* remove the found one */
+	  presets = g_list_delete_link (presets, node);
+
+	  GST_INFO ("preset removed '%s'", name);
 	  g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
 	  g_free ((gpointer)name);
 
