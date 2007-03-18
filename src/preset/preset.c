@@ -22,7 +22,7 @@
  * SECTION:gstpreset
  * @short_description: helper interface for element presets
  *
- * This interface offers methods to query and manipulate parameter preset sets. 
+ * This interface offers methods to query and manipulate parameter preset sets.
  * A preset is a bunch of property settings, together with meta data and a name.
  * The name of a preset serves as key for subsequent method calls to manipulate
  * single presets.
@@ -61,9 +61,9 @@ preset_get_storage(GstPreset *self,GList **presets,GHashTable **preset_meta,GHas
 {
   gboolean res=FALSE;
   GType type = G_TYPE_FROM_INSTANCE (self);
-  
+
   g_assert(presets);
-  
+
   if((*presets = g_type_get_qdata (type, preset_list_quark))) {
 	GST_DEBUG("have presets");
 	res=TRUE;
@@ -91,7 +91,7 @@ preset_get_path(GstPreset *self)
 {
   GType type = G_TYPE_FROM_INSTANCE (self);
   gchar *preset_path;
-  
+
   preset_path = (gchar *) g_type_get_qdata (type, preset_path_quark);
   if(!preset_path) {
     const gchar *element_name, *plugin_name, *file_name;
@@ -121,7 +121,7 @@ preset_get_path(GstPreset *self)
       -> '$HOME/.gstreamer-0.10/presets/GstAudioPanorama.xml'
       */
     }
-    
+
     preset_dir = g_build_filename (g_get_home_dir(), ".gstreamer-0.10", "presets", NULL);
     GST_INFO("preset_dir: '%s'",preset_dir);
     preset_path = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.prs", preset_dir, element_name);
@@ -147,7 +147,7 @@ preset_cleanup(gpointer user_data,GObject *self)
 	instances = g_list_remove (instances, self);
 	GST_INFO("old instanc removed");
 	g_type_set_qdata (type, instance_list_quark, (gpointer) instances);
-  }  
+  }
 }
 
 static GList*
@@ -165,7 +165,7 @@ gst_preset_default_get_preset_names (GstPreset *self)
     FILE *in;
 
 	GST_DEBUG("probing preset file: '%s'",preset_path);
-	
+
     /* read presets */
     if((in=fopen(preset_path,"rb"))) {
 	  const gchar *element_name = G_OBJECT_TYPE_NAME(self);
@@ -176,7 +176,7 @@ gst_preset_default_get_preset_names (GstPreset *self)
       GHashTable *data;
 	  GObjectClass *klass;
 	  GParamSpec *property;
-	  
+
 	  GST_DEBUG("loading preset file: '%s'",preset_path);
 
       /* read header */
@@ -197,9 +197,9 @@ gst_preset_default_get_preset_names (GstPreset *self)
 		GST_WARNING("%s:4: blank line expected",preset_path);
 		goto eof_error;
 	  }
-	  
+
 	  klass=G_OBJECT_CLASS(GST_ELEMENT_GET_CLASS(self));
-      
+
       /* read preset entries*/
 	  while(!feof(in)) {
 		/* read preset entry */
@@ -208,10 +208,10 @@ gst_preset_default_get_preset_names (GstPreset *self)
 		if(*line) {
 		  preset_name=g_strdup(line);
 		  GST_INFO("%s: preset '%s'",preset_path,preset_name);
-		  
+
 		  data=g_hash_table_new_full(g_str_hash,g_str_equal,NULL,g_free);
 		  meta=g_hash_table_new_full(g_str_hash,g_str_equal,g_free,g_free);
-		
+
           /* read preset lines */
 		  parse_preset=TRUE;
 		  while(parse_preset) {
@@ -250,9 +250,9 @@ gst_preset_default_get_preset_names (GstPreset *self)
 			}
 			/* @todo: handle childproxy properties
 			 * <property>[child]=<value>
-			 */			
+			 */
 		  }
-		  
+
 		  GST_INFO("preset: %p, %p",meta,data);
 		  g_hash_table_insert(preset_data,(gpointer)preset_name,(gpointer)data);
 		  g_hash_table_insert(preset_meta,(gpointer)preset_name,(gpointer)meta);
@@ -270,7 +270,7 @@ eof_error:
     /* attach the preset to the type */
 	g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
   }
-  
+
   /* insert instance in instance list (if not yet there) */
   instances = (GList *) g_type_get_qdata (type, instance_list_quark);
   if (instances != NULL) {
@@ -283,7 +283,7 @@ eof_error:
 	g_object_weak_ref(G_OBJECT(self),preset_cleanup,(gpointer)type);
 	instances = g_list_prepend (instances, self);
 	g_type_set_qdata (type, instance_list_quark, (gpointer) instances);
-  }  
+  }
   return(presets);
 }
 
@@ -292,7 +292,7 @@ gst_preset_default_load_preset (GstPreset *self, const gchar *name)
 {
   GList *presets;
   GHashTable *preset_data;
-  
+
   /* get the presets from the type */
   if(preset_get_storage(self,&presets,NULL,&preset_data)) {
 	GList *node;
@@ -303,7 +303,7 @@ gst_preset_default_load_preset (GstPreset *self, const gchar *name)
 	  GType base,parent;
 	  guint i,number_of_properties;
 	  gchar *val=NULL;
-	  
+
 	  GST_DEBUG("loading preset : '%s', data : %p (size=%d)",name,data,g_hash_table_size(data));
 
 	  /* preset found, now set values */
@@ -319,7 +319,7 @@ gst_preset_default_load_preset (GstPreset *self, const gchar *name)
 			base = property->value_type;
 			while ((parent = g_type_parent (base))) {
 			  base = parent;
-			}			
+			}
 			switch(base) {
 			  case G_TYPE_INT:
 			  case G_TYPE_UINT:
@@ -382,37 +382,37 @@ gst_preset_default_save_presets_file (GstPreset *self)
   gboolean res=FALSE;
   GList *presets;
   GHashTable *preset_meta,*preset_data;
-  
+  const gchar *preset_path=preset_get_path(self);
+
   /* get the presets from the type */
   if (preset_get_storage(self,&presets,&preset_meta,&preset_data)) {
-	const gchar *preset_path=preset_get_path(self);
 	FILE *out;
-	
+
 	GST_DEBUG("saving preset file: '%s'",preset_path);
 
 	/* @todo create backup */
-	
+
 	/* write presets */
 	if((out=fopen(preset_path,"wb"))) {
 	  const gchar *element_name = G_OBJECT_TYPE_NAME(self);
 	  gchar *preset_name;
 	  GList *node;
 	  GHashTable *meta,*data;
-	  
+
 	  /* write header */
 	  if(!(fputs("GStreamer Preset\n",out))) goto eof_error;
 	  /* @todo: what version */
 	  if(!(fputs("1.0\n",out))) goto eof_error;
 	  if(!(fputs(element_name,out))) goto eof_error;
 	  if(!(fputs("\n\n",out))) goto eof_error;
-		
+
 	  /* write preset entries*/
 	  for(node=presets;node;node=g_list_next(node)) {
 		preset_name=node->data;
 		/* write preset entry*/
 		if(!(fputs(preset_name,out))) goto eof_error;
 		if(!(fputs("\n",out))) goto eof_error;
-		
+
 		/* write data */
 		meta=g_hash_table_lookup(preset_meta,(gpointer)preset_name);
 		g_hash_table_foreach(meta,preset_store_meta,out);
@@ -420,14 +420,15 @@ gst_preset_default_save_presets_file (GstPreset *self)
 		g_hash_table_foreach(data,preset_store_data,out);
 		if(!(fputs("\n",out))) goto eof_error;
 	  }
-  
+
 	  res=TRUE;
 eof_error:
 	  fclose(out);
 	}
   }
   else {
-	GST_INFO("no presets");
+	GST_DEBUG("no presets, trying to unlink possibly existing preset file: '%s'", preset_path);
+	unlink(preset_path);
   }
   return(res);
 }
@@ -444,12 +445,12 @@ gst_preset_default_save_preset (GstPreset *self, const gchar *name)
   guint i,number_of_properties;
   gchar *str=NULL,buffer[30+1];
   /*guint flags;*/
-  
+
   GST_INFO("saving new preset: %s",name);
 
   /* get the presets from the type */
   preset_get_storage(self,&presets,&preset_meta,&preset_data);
-	
+
   data=g_hash_table_new_full(g_str_hash,g_str_equal,NULL,g_free);
   meta=g_hash_table_new_full(g_str_hash,g_str_equal,g_free,g_free);
 
@@ -458,7 +459,7 @@ gst_preset_default_save_preset (GstPreset *self, const gchar *name)
 	for(i=0;i<number_of_properties;i++) {
 	  property=properties[i];
 	  /*flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));*/
-	  
+
 	  /* skip non-controlable */
 	  if(!(property->flags&GST_PARAM_CONTROLLABLE)) continue;
 	  /*
@@ -470,7 +471,7 @@ gst_preset_default_save_preset (GstPreset *self, const gchar *name)
 	  base = property->value_type;
 	  while ((parent = g_type_parent (base))) {
 		base = parent;
-	  }			
+	  }
 	  /* get value and serialize */
 	  GST_INFO("  storing property: %s (type is %s)",property->name,g_type_name(base));
 	  switch(base) {
@@ -478,25 +479,25 @@ gst_preset_default_save_preset (GstPreset *self, const gchar *name)
 		case G_TYPE_ENUM:
 		case G_TYPE_INT: {
 		  gint val;
-		  
+
 		  g_object_get(G_OBJECT(self),property->name,&val,NULL);
 		  str=g_strdup_printf("%d",val);
 		} break;
 		case G_TYPE_UINT: {
 		  guint val;
-		  
+
 		  g_object_get(G_OBJECT(self),property->name,&val,NULL);
 		  str=g_strdup_printf("%u",val);
 		} break;
 		case G_TYPE_LONG: {
 		  glong val;
-		  
+
 		  g_object_get(G_OBJECT(self),property->name,&val,NULL);
 		  str=g_strdup_printf("%ld",val);
 		} break;
 		case G_TYPE_ULONG: {
 		  gulong val;
-		  
+
 		  g_object_get(G_OBJECT(self),property->name,&val,NULL);
 		  str=g_strdup_printf("%lu",val);
 		} break;
@@ -526,11 +527,11 @@ gst_preset_default_save_preset (GstPreset *self, const gchar *name)
 		g_hash_table_insert(data,(gpointer)property->name,(gpointer)str);
 		str=NULL;
 	  }
-	  
+
 	}
 	GST_INFO("  saved");
   }
-  
+
   /*
    * flock(fileno())
    * http://www.ecst.csuchico.edu/~beej/guide/ipc/flock.html
@@ -551,7 +552,7 @@ gst_preset_default_rename_preset (GstPreset *self, const gchar *old_name, const 
   GType type = G_TYPE_FROM_INSTANCE (self);
   GList *presets;
   GHashTable *preset_meta,*preset_data;
-  
+
   /* get the presets from the type */
   if(preset_get_storage(self,&presets,&preset_meta,&preset_data)) {
 	GList *node;
@@ -575,7 +576,7 @@ gst_preset_default_rename_preset (GstPreset *self, const gchar *old_name, const 
 
 	  GST_INFO ("preset moved 's' -> '%s'", old_name, new_name);
 	  g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
-	  
+
 	  return(gst_preset_default_save_presets_file(self));
 	}
   }
@@ -591,17 +592,17 @@ gst_preset_default_delete_preset (GstPreset *self, const gchar *name)
   GType type = G_TYPE_FROM_INSTANCE (self);
   GList *presets;
   GHashTable *preset_meta,*preset_data;
-  
+
   /* get the presets from the type */
   if(preset_get_storage(self,&presets,&preset_meta,&preset_data)) {
 	GList *node;
 
 	if((node = g_list_find_custom (presets, name, (GCompareFunc)strcmp))) {
 	  GHashTable *meta,*data;
-  
+
 	  /* remove the found one */
 	  presets = g_list_delete_link (presets, node);
-	  
+
 	  /* free the hash entries */
 	  if((meta=g_hash_table_lookup(preset_meta,node->data))) {
 		g_hash_table_remove(preset_meta,node->data);
@@ -611,11 +612,11 @@ gst_preset_default_delete_preset (GstPreset *self, const gchar *name)
 		g_hash_table_remove(preset_data,node->data);
 		g_hash_table_destroy(data);
 	  }
-	  
+
 	  GST_INFO ("preset removed 's'", name);
 	  g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
 	  g_free ((gpointer)name);
-  
+
 	  return( gst_preset_default_save_presets_file (self));
 	}
   }
@@ -625,22 +626,22 @@ gst_preset_default_delete_preset (GstPreset *self, const gchar *name)
   return(FALSE);
 }
 
-static gboolean 
+static gboolean
 gst_preset_default_set_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar *value)
 {
   gboolean res=FALSE;
   GList *presets;
   GHashTable *preset_meta;
-  
+
   /* get the presets from the type */
   if(preset_get_storage(self,&presets,&preset_meta,NULL)) {
 	GList *node;
-	
+
 	if((node=g_list_find_custom(presets,name,(GCompareFunc)strcmp))) {
 	  GHashTable *meta=g_hash_table_lookup(preset_meta,node->data);
       gchar *old_value;
       gboolean changed=FALSE;
-      
+
       if((old_value=g_hash_table_lookup(meta,tag))) {
         g_free(old_value);
         changed=TRUE;
@@ -667,11 +668,11 @@ gst_preset_default_get_meta (GstPreset *self,const gchar *name, const gchar *tag
   gboolean res=FALSE;
   GList *presets;
   GHashTable *preset_meta;
-  
+
   /* get the presets from the type */
   if(preset_get_storage(self,&presets,&preset_meta,NULL)) {
 	GList *node;
-	
+
 	if((node=g_list_find_custom(presets,name,(GCompareFunc)strcmp))) {
 	  GHashTable *meta=g_hash_table_lookup(preset_meta,node->data);
       gchar *new_value;
@@ -701,7 +702,7 @@ gst_preset_default_create_preset (GstPreset *self)
     guint flags=0;
 
     /* @todo: what about voice properties */
-    
+
     GST_INFO("nr of values : %d", number_of_properties);
     for(i=0;i<number_of_properties;i++) {
       property=properties[i];
@@ -717,7 +718,7 @@ gst_preset_default_create_preset (GstPreset *self)
 
       param_type=property->value_type;
       while((base_type=g_type_parent(param_type))) param_type=base_type;
-      
+
       rnd=((gdouble)rand()) / (RAND_MAX + 1.0);
       switch(param_type) {
         case G_TYPE_BOOLEAN: {
@@ -725,12 +726,12 @@ gst_preset_default_create_preset (GstPreset *self)
         } break;
         case G_TYPE_INT: {
           const GParamSpecInt *int_property=G_PARAM_SPEC_INT(property);
-          
+
           g_object_set(self,property->name,(gint)(int_property->minimum+((int_property->maximum-int_property->minimum)*rnd)),NULL);
         } break;
         case G_TYPE_UINT: {
           const GParamSpecUInt *uint_property=G_PARAM_SPEC_UINT(property);
-          
+
           g_object_set(self,property->name,(guint)(uint_property->minimum+((uint_property->maximum-uint_property->minimum)*rnd)),NULL);
         }  break;
         case G_TYPE_DOUBLE: {
@@ -767,7 +768,7 @@ gst_preset_get_preset_names (GstPreset *self)
 {
   g_return_val_if_fail (GST_IS_PRESET (self), NULL);
 
-  return (GST_PRESET_GET_INTERFACE (self)->get_preset_names (self));  
+  return (GST_PRESET_GET_INTERFACE (self)->get_preset_names (self));
 }
 
 /**
@@ -785,7 +786,7 @@ gst_preset_load_preset (GstPreset *self, const gchar *name)
   g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
   g_return_val_if_fail (name, FALSE);
 
-  return (GST_PRESET_GET_INTERFACE (self)->load_preset (self, name));  
+  return (GST_PRESET_GET_INTERFACE (self)->load_preset (self, name));
 }
 
 /**
@@ -804,7 +805,7 @@ gst_preset_save_preset (GstPreset *self, const gchar *name)
   g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
   g_return_val_if_fail (name, FALSE);
 
-  return (GST_PRESET_GET_INTERFACE (self)->save_preset (self, name));  
+  return (GST_PRESET_GET_INTERFACE (self)->save_preset (self, name));
 }
 
 /**
@@ -825,7 +826,7 @@ gst_preset_rename_preset (GstPreset *self, const gchar *old_name, const gchar *n
   g_return_val_if_fail (old_name, FALSE);
   g_return_val_if_fail (new_name, FALSE);
 
-  return (GST_PRESET_GET_INTERFACE (self)->rename_preset (self,old_name,new_name));  
+  return (GST_PRESET_GET_INTERFACE (self)->rename_preset (self,old_name,new_name));
 }
 
 /**
@@ -843,7 +844,7 @@ gst_preset_delete_preset (GstPreset *self, const gchar *name)
   g_return_val_if_fail (GST_IS_PRESET (self), FALSE);
   g_return_val_if_fail (name, FALSE);
 
-  return (GST_PRESET_GET_INTERFACE (self)->delete_preset (self,name));  
+  return (GST_PRESET_GET_INTERFACE (self)->delete_preset (self,name));
 }
 
 /**
@@ -919,10 +920,10 @@ gst_preset_class_init(GstPresetInterface *iface)
   iface->save_preset = gst_preset_default_save_preset;
   iface->rename_preset = gst_preset_default_rename_preset;
   iface->delete_preset = gst_preset_default_delete_preset;
-  
+
   iface->set_meta = gst_preset_default_set_meta;
   iface->get_meta = gst_preset_default_get_meta;
-  
+
   iface->create_preset = gst_preset_default_create_preset;
 }
 
@@ -950,7 +951,7 @@ GType
 gst_preset_get_type (void)
 {
   static GType type = 0;
-  
+
   if (type == 0) {
     const GTypeInfo info = {
       sizeof (GstPresetInterface),

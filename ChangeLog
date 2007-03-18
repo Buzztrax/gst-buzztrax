@@ -1,5 +1,23 @@
 2007-03-18  Stefan Kost  <ensonic@users.sf.net>
 
+	patch by by: Henri Valta <henrivee at users.sourceforge.net>
+
+	* src/preset/preset.c: (preset_get_storage), (preset_get_path),
+	(preset_cleanup), (gst_preset_default_get_preset_names),
+	(gst_preset_default_load_preset),
+	(gst_preset_default_save_presets_file),
+	(gst_preset_default_save_preset),
+	(gst_preset_default_rename_preset),
+	(gst_preset_default_delete_preset), (gst_preset_default_set_meta),
+	(gst_preset_default_get_meta), (gst_preset_default_create_preset),
+	(gst_preset_get_preset_names), (gst_preset_load_preset),
+	(gst_preset_save_preset), (gst_preset_rename_preset),
+	(gst_preset_delete_preset), (gst_preset_class_init),
+	(gst_preset_get_type):
+	allow removal of last gst preset (fixes #1683199)
+
+2007-03-18  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/childbin/childbin.c: (gst_child_bin_base_init):
 	* src/preset/preset.c: (gst_preset_default_get_preset_names),
 	(gst_preset_default_save_preset):
