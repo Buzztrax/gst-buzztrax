@@ -124,6 +124,11 @@ gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar
   guint tone, octave;
   
   g_return_val_if_fail(note,0.0);
+  
+  if(strlen(note)!=3) {
+    GST_WARNING("strlen==3 failed for \"%s\"",note);
+  }
+  
   g_return_val_if_fail((strlen(note)==3),0.0);
   g_return_val_if_fail((note[1]=='-' || note[1]=='#'),0.0);
 

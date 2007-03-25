@@ -28,6 +28,10 @@
  *
  * #GstElements that implement this interface should use the given tempo, to
  * adjust their gst_object_sync_values() cycle.
+ *
+ * The difference between the tempo iface and the tempo-tag metadata is that the
+ * metadata describes the overall tempo, but the iface allows to change the
+ * tempo during playback.
  */
 
 #include "tempo.h"

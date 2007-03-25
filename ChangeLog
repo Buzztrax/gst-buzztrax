@@ -1,3 +1,11 @@
+2007-03-25  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/note2frequency/note2frequency.c:
+	(gst_note_2_frequency_translate_from_string):
+	* src/note2frequency/note2frequency.h:
+	* src/tempo/tempo.c:
+	  more commants + build fixes
+
 2007-03-18  Stefan Kost  <ensonic@users.sf.net>
 
 	patch by by: Henri Valta <henrivee at users.sourceforge.net>
