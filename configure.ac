@@ -1,4 +1,4 @@
-dnl $Id: configure.ac,v 1.23 2007-01-26 15:38:12 ensonic Exp $
+dnl $Id: configure.ac,v 1.24 2007-04-18 19:39:12 ensonic Exp $
 
 dnl
 dnl current  : the interface         : MAJOR + MINOR
@@ -174,6 +174,14 @@ AC_SUBST(GST_PLUGIN_CFLAGS)
 GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*' $COVERAGE_LIBS"
 AC_SUBST(GST_PLUGIN_LDFLAGS)
 
+dnl - Check for FluidSynth
+PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
+    FLUIDSYNTH_SUPPORT=1, FLUIDSYNTH_SUPPORT=0)
+AC_SUBST(FLUIDSYNTH_CFLAGS)
+AC_SUBST(FLUIDSYNTH_LIBS)
+AM_CONDITIONAL(FLUIDSYNTH_SUPPORT, test "$FLUIDSYNTH_SUPPORT" = "1")
+
+
 dnl set license and copyright notice
 AC_DEFINE(GST_PACKAGE_ORIGIN, "http://www.buzztard.org", [Plugin package origin])
 AC_SUBST(GST_PACKAGE_ORIGIN)
@@ -181,11 +189,12 @@ AC_DEFINE(GST_PACKAGE_NAME, "gst-buzztard", [Plugin package name])
 AC_SUBST(GST_PACKAGE_NAME)
 
 
-dnl variable fro gtkdoc-fixxref
+dnl variable from gtkdoc-fixxref
 glib_prefix="`pkg-config --variable=prefix glib-2.0`"
 gst_prefix="`pkg-config --variable=prefix gstreamer-0.10`"
 AC_SUBST(glib_prefix)
 AC_SUBST(gst_prefix)
+
 
 dnl test for availability of check unittest package (with a relative new function)
 dnl @todo: if we configure without --enable-debug most tests wont work
@@ -213,11 +222,12 @@ AC_CONFIG_FILES( \
 	src/audiodelay/Makefile \
 	src/childbin/Makefile \
 	src/envelope/Makefile \
+	src/fluidsynth/Makefile \
 	src/help/Makefile \
 	src/note2frequency/Makefile \
 	src/preset/Makefile \
 	src/propertymeta/Makefile \
-	src/simsyn/Makefile \
+    src/simsyn/Makefile \
 	src/tempo/Makefile \
 	tests/Makefile
 )

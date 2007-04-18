@@ -1,5 +1,11 @@
+if FLUIDSYNTH_SUPPORT
+FLUIDSYNTH = fluidsynth
+else
+FLUIDSYNTH =
+endif
+
 SUBDIRS = childbin envelope help note2frequency preset propertymeta tempo . \
-    audiodelay simsyn
+    audiodelay $(FLUIDSYNTH) simsyn
 
 lib_LTLIBRARIES = libgstbuzztard.la
 

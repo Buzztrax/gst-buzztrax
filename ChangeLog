@@ -1,3 +1,29 @@
+2007-04-18  Stefan Kost  <ensonic@users.sf.net>
+
+	patch by: Josh Green <josh@resonance.org>
+
+	* configure.ac:
+	* src/Makefile.am:
+	* src/fluidsynth/.cvsignore:
+	* src/fluidsynth/Makefile.am:
+	* src/fluidsynth/gstfluidsynth.c: (interp_mode_get_type),
+	(chorus_waveform_get_type),
+	(gst_fluidsynth_calculate_buffer_frames),
+	(gst_fluidsynth_base_init), (gst_fluidsynth_class_init),
+	(settings_foreach_count), (settings_foreach_func),
+	(gst_fluidsynth_set_property), (gst_fluidsynth_get_property),
+	(gst_fluidsynth_init), (gst_fluidsynth_update_reverb),
+	(gst_fluidsynth_update_chorus), (gst_fluidsynth_src_fixate),
+	(gst_fluidsynth_setcaps), (gst_fluidsynth_query),
+	(gst_fluidsynth_get_times), (gst_fluidsynth_do_seek),
+	(gst_fluidsynth_is_seekable), (gst_fluidsynth_create),
+	(gst_fluidsynth_dispose), (gst_fluidsynth_get_type), (plugin_init):
+	* src/fluidsynth/gstfluidsynth.h:
+	  initial fluidsynth plugin
+
+	* src/simsyn/Makefile.am:
+	  fix Makefile
+
 2007-03-25  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/note2frequency/note2frequency.c:
