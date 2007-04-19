@@ -1,3 +1,10 @@
+2007-04-19  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_set_property),
+	(gst_fluidsynth_get_property):
+	  Add some comments, workaround one warning
+	
+
 2007-04-18  Stefan Kost  <ensonic@users.sf.net>
 
 	patch by: Josh Green <josh@resonance.org>

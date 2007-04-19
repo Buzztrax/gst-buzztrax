@@ -1,9 +1,9 @@
 /* GStreamer
  * Copyright (C) 2007 Josh Green <josh@users.sf.net>
- * 
+ *
  * Adapted from symsyn synthesizer plugin in gst-buzztard source.
  * Copyright (C) 2005 Stefan Kost <ensonic@users.sf.net>
- * 
+ *
  * gstfluidsynth.c: GStreamer wrapper for FluidSynth
  *
  * This library is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@
 /**
  * SECTION:gstfluidsynth
  * @short_description: FluidSynth GStreamer wrapper
- * 
+ *
  * FluidSynth is a SoundFont 2 capable wavetable synthesizer.
  */
 
@@ -278,7 +278,7 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
   g_param_spec_set_qdata (paramspec, gst_property_meta_quark_flags,
                           GINT_TO_POINTER (GST_PROPERTY_META_NONE));
   g_param_spec_set_qdata (paramspec, gst_property_meta_quark_no_val, NULL);
-  g_object_class_install_property (gobject_class,PROP_NOTE, paramspec);
+  g_object_class_install_property (gobject_class, PROP_NOTE, paramspec);
 
   g_object_class_install_property (gobject_class, PROP_INTERP,
                         g_param_spec_enum ("interp", _("Interpolation"),
@@ -494,7 +494,7 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       break;
     case PROP_IS_LIVE:
       gst_base_src_set_live (GST_BASE_SRC (gstsynth),
-			     g_value_get_boolean (value));
+      g_value_get_boolean (value));
       break;
     case PROP_TIMESTAMP_OFFSET:
       gstsynth->timestamp_offset = g_value_get_int64 (value);
@@ -506,7 +506,8 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       {
         GST_DEBUG("new note -> '%s'",gstsynth->note);
         gstsynth->freq = gst_note_2_frequency_translate_from_string
-	  (gstsynth->n2f, gstsynth->note);
+	      (gstsynth->n2f, gstsynth->note);
+          // @todo: trigger note
       }
       break;
     default:
@@ -595,6 +596,9 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
       break;
     case PROP_CHORUS_WAVEFORM:
       g_value_set_enum (value, gstsynth->chorus_waveform);
+      break;
+    case PROP_NOTE:
+      g_value_set_string (value, gstsynth->note);
       break;
     case PROP_SAMPLES_PER_BUFFER:
       g_value_set_int (value, (gint)gstsynth->samples_per_buffer);
