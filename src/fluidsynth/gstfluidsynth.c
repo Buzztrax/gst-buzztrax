@@ -507,7 +507,8 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
         GST_DEBUG("new note -> '%s'",gstsynth->note);
         gstsynth->freq = gst_note_2_frequency_translate_from_string
 	      (gstsynth->n2f, gstsynth->note);
-          // @todo: trigger note
+        // @todo: start note-off counter
+        fluid_synth_noteon (gstsynth->fluid, /*chan*/ 0, /*note*/ 60, /*velocity*/ 127);
       }
       break;
     default:
@@ -681,11 +682,17 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
   gst_fluidsynth_update_chorus (gstsynth);      /* update chorus settings */
 
   /* FIXME temporary for testing */
-  fluid_synth_sfload (gstsynth->fluid, "/home/josh/sbks/synth/FlangerSaw.SF2", TRUE);
+  {
+    int res;
 
-  fluid_synth_noteon (gstsynth->fluid, 0, 60, 127);
-
-  return;
+    res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/doc/libfluidsynth-dev/examples/example.sf2", TRUE);
+    //g_strdup_printf("%s/sbks/synth/FlangerSaw.SF2",g_get_home_dir());
+    //res=fluid_synth_sfload (gstsynth->fluid, "/home/josh/sbks/synth/FlangerSaw.SF2", TRUE);
+    if(res==-1) {
+      GST_WARNING("Couldn't load soundfont");
+    }
+    fluid_synth_noteon (gstsynth->fluid, 0, 60, 127);
+  }
 }
 
 static void
@@ -868,7 +875,7 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   GstFluidsynth *src = GST_FLUIDSYNTH (basesrc);
   GstBuffer *buf;
   GstClockTime next_time;
-  gint64 n_samples;	//,samples_done;
+  gint64 n_samples,samples_done;
   guint samples_per_buffer = length;
 
   if (G_UNLIKELY(src->eos_reached)) {
@@ -876,14 +883,12 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
     return GST_FLOW_UNEXPECTED;
   }
 
-#if 0
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   //GST_DEBUG("rounding correction : %ld <> %"G_GUINT64_FORMAT,(glong)(((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND),src->n_samples);
   //samples_per_buffer=src->samples_per_buffer+(((src->running_time*src->samplerate)/GST_SECOND)-src->timestamp_offset);
   samples_done = gst_util_uint64_scale ((src->timestamp_offset + src->running_time), (guint64)src->samplerate, GST_SECOND);
   samples_per_buffer = (gint)(src->samples_per_buffer + (gdouble)(src->n_samples-samples_done));
   //GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf)",samples_per_buffer,src->samples_per_buffer);
-#endif
 
   /* check for eos */
   if (src->check_seek_stop &&

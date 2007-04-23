@@ -1,3 +1,19 @@
+2007-04-23  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_set_property),
+	(gst_fluidsynth_init), (gst_fluidsynth_create):
+	* src/simsyn/simsyn.c: (gst_sim_syn_tempo_interface_init),
+	(gst_sim_syn_class_init), (gst_sim_syn_init),
+	(gst_sim_syn_create_sine), (gst_sim_syn_create_square),
+	(gst_sim_syn_create_saw), (gst_sim_syn_create_triangle),
+	(gst_sim_syn_create_white_noise), (gst_sim_syn_create_pink_noise),
+	(gst_sim_syn_init_sine_table), (gst_sim_syn_change_filter),
+	(gst_sim_syn_do_seek), (gst_sim_syn_create),
+	(gst_sim_syn_set_property), (gst_sim_syn_get_property),
+	(gst_sim_syn_dispose):
+	  formatting, add note_on to set_property, add warning if we can't open
+	  soundfont
+
 2007-04-19  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_set_property),
