@@ -685,7 +685,8 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
   {
     int res;
 
-    res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/doc/libfluidsynth-dev/examples/example.sf2", TRUE);
+    //res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/doc/libfluidsynth-dev/examples/example.sf2", TRUE);
+    res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2", TRUE);
     //g_strdup_printf("%s/sbks/synth/FlangerSaw.SF2",g_get_home_dir());
     //res=fluid_synth_sfload (gstsynth->fluid, "/home/josh/sbks/synth/FlangerSaw.SF2", TRUE);
     if(res==-1) {
@@ -931,7 +932,7 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   src->running_time = next_time;
   src->n_samples = n_samples;
 
-  fluid_synth_write_s16 (src->fluid, n_samples, buf, 0, 2, buf, 1, 2);
+  fluid_synth_write_s16 (src->fluid, src->generate_samples_per_buffer, GST_BUFFER_DATA(buf), 0, 2, GST_BUFFER_DATA(buf), 1, 2);
 
   *buffer = buf;
 

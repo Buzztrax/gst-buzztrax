@@ -1,5 +1,11 @@
 2007-04-23  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_init),
+	(gst_fluidsynth_create):
+	  and fluidsynth makes beep!
+
+2007-04-23  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_set_property),
 	(gst_fluidsynth_init), (gst_fluidsynth_create):
 	* src/simsyn/simsyn.c: (gst_sim_syn_tempo_interface_init),
@@ -11,7 +17,7 @@
 	(gst_sim_syn_do_seek), (gst_sim_syn_create),
 	(gst_sim_syn_set_property), (gst_sim_syn_get_property),
 	(gst_sim_syn_dispose):
-	  formatting, add note_on to set_property, add warning if we can't open
+	  formating, add note_on to set_property, add warning if we can't open
 	  soundfont
 
 2007-04-19  Stefan Kost  <ensonic@users.sf.net>
