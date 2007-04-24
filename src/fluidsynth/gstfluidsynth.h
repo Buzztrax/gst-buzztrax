@@ -51,7 +51,10 @@ struct _GstFluidsynth {
   /* parameters */
   gdouble samples_per_buffer;
   gchar *note;
-  
+  gint key;
+  gint velocity;
+  glong cur_note_length,note_length;
+
   /* < private > */
   gboolean dispose_has_run;		/* validate if dispose has run */
 
@@ -87,9 +90,12 @@ struct _GstFluidsynth {
   gint generate_samples_per_buffer;	/* generate a partial buffer */
   GstSeekFlags seek_flags;
 
-  GstNote2Frequency *n2f;
-  gdouble freq;
-  guint64 note_count;
+  /* tempo handling */
+  gulong beats_per_minute;
+  gulong ticks_per_beat;
+  gulong subticks_per_tick;
+  GstClockTime ticktime;
+
 };
 
 struct _GstFluidsynthClass {

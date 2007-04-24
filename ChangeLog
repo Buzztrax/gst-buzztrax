@@ -1,3 +1,17 @@
+2007-04-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c:
+	(gst_fluidsynth_calculate_buffer_frames),
+	(gst_fluidsynth_tempo_change_tempo),
+	(gst_fluidsynth_tempo_interface_init),
+	(gst_fluidsynth_note_string_2_value),
+	(gst_fluidsynth_note_value_2_string), (gst_fluidsynth_class_init),
+	(gst_fluidsynth_set_property), (gst_fluidsynth_get_property),
+	(gst_fluidsynth_init), (gst_fluidsynth_create),
+	(gst_fluidsynth_dispose), (gst_fluidsynth_get_type):
+	* src/fluidsynth/gstfluidsynth.h:
+	  Add length and velocity parameters. Add tempo iface and note-off management.
+
 2007-04-23  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_init),

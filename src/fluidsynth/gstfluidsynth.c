@@ -26,6 +26,8 @@
  * @short_description: FluidSynth GStreamer wrapper
  *
  * FluidSynth is a SoundFont 2 capable wavetable synthesizer.
+ *
+ * gst-launch fluidsynth num-buffers=100 note="c-3" ! alsasink
  */
 
 #ifdef HAVE_CONFIG_H
@@ -61,8 +63,14 @@ enum {
   PROP_SAMPLES_PER_BUFFER=1,
   PROP_IS_LIVE,
   PROP_TIMESTAMP_OFFSET,
+  // tempo iface
+  PROP_BPM,
+  PROP_TPB,
+  PROP_STPT,
   // dynamic class properties
   PROP_NOTE,
+  PROP_NOTE_LENGTH,
+  PROP_NOTE_VELOCITY,
   PROP_INTERP,
   PROP_REVERB_ENABLE,
   PROP_REVERB_PRESET,
@@ -77,8 +85,6 @@ enum {
   PROP_CHORUS_FREQ,
   PROP_CHORUS_DEPTH,
   PROP_CHORUS_WAVEFORM,
-  // help iface
-  PROP_DOCU_URI
 };
 
 /* number to use for first dynamic (FluidSynth settings) property */
@@ -185,12 +191,115 @@ chorus_waveform_get_type (void)
 
 static void gst_fluidsynth_calculate_buffer_frames(GstFluidsynth *self)
 {
-// FIXME
-//  self->samples_per_buffer = ((self->samplerate*60.0)/(gdouble)(self->beats_per_minute*self->ticks_per_beat));
-//  self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
+  self->samples_per_buffer = ((self->samplerate*60.0)/(gdouble)(self->beats_per_minute*self->ticks_per_beat));
+  self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
   GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
 }
+
+static void gst_fluidsynth_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
+  GstFluidsynth *self=GST_FLUIDSYNTH(tempo);
+  gboolean changed=FALSE;
+
+  if(beats_per_minute>=0) {
+    if(self->beats_per_minute!=beats_per_minute) {
+      self->beats_per_minute=(gulong)beats_per_minute;
+      g_object_notify(G_OBJECT(self),"beats-per-minute");
+      changed=TRUE;
+    }
+  }
+  if(ticks_per_beat>=0) {
+    if(self->ticks_per_beat!=ticks_per_beat) {
+      self->ticks_per_beat=(gulong)ticks_per_beat;
+      g_object_notify(G_OBJECT(self),"ticks-per-beat");
+      changed=TRUE;
+    }
+  }
+  if(subticks_per_tick>=0) {
+    if(self->subticks_per_tick!=subticks_per_tick) {
+      self->subticks_per_tick=(gulong)subticks_per_tick;
+      g_object_notify(G_OBJECT(self),"subticks-per-tick");
+      changed=TRUE;
+    }
+  }
+  if(changed) {
+    GST_DEBUG("changing tempo to %d BPM  %d TPB  %d STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
+    gst_fluidsynth_calculate_buffer_frames(self);
+  }
+}
+
+static void gst_fluidsynth_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
+  GstTempoInterface *iface = g_iface;
+
+  GST_INFO("initializing iface");
+
+  iface->change_tempo = gst_fluidsynth_tempo_change_tempo;
+}
+
+//-- helper
+
+static guint gst_fluidsynth_note_string_2_value (const gchar *note) {
+  guint tone, octave;
+
+  g_return_val_if_fail(note,0);
+  g_return_val_if_fail((strlen(note)==3),0);
+  g_return_val_if_fail((note[1]=='-' || note[1]=='#'),0);
+
+  // parse note
+  switch(note[0]) {
+    case 'c':
+    case 'C':
+      tone=(note[1]=='-')?0:1;
+      break;
+    case 'd':
+    case 'D':
+      tone=(note[1]=='-')?2:3;
+      break;
+    case 'e':
+    case 'E':
+      tone=4;
+      break;
+    case 'f':
+    case 'F':
+      tone=(note[1]=='-')?5:6;
+      break;
+    case 'g':
+    case 'G':
+      tone=(note[1]=='-')?7:8;
+      break;
+    case 'a':
+    case 'A':
+      tone=(note[1]=='-')?9:10;
+      break;
+    case 'b':
+    case 'B':
+    case 'h':
+    case 'H':
+      tone=11;
+      break;
+    default:
+      g_return_val_if_reached(0.0);
+  }
+  octave=atoi(&note[2]);
+  return ((octave*12)+tone);
+}
+
+#if 0
+static const gchar *gst_fluidsynth_note_value_2_string (guint note) {
+  guint tone, octave;
+  static gchar str[4];
+  static gchar *key[12]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
+
+  //g_return_val_if_fail(note<((12*9)+12),0);
+
+  note-=1;
+  octave=note/12;
+  tone=note-(octave*12);
+
+  sprintf(str,"%2s%1d",key[tone],octave);
+  return(str);
+}
+#endif
 
 //-- fluidsynth implementation
 
@@ -254,7 +363,9 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
   delete_fluid_settings (bag.settings);         /* not needed anymore */
 
   // override interface properties
-  g_object_class_override_property(gobject_class, PROP_DOCU_URI, "documentation-uri");
+  g_object_class_override_property(gobject_class, PROP_BPM, "beats-per-minute");
+  g_object_class_override_property(gobject_class, PROP_TPB, "ticks-per-beat");
+  g_object_class_override_property(gobject_class, PROP_STPT, "subticks-per-tick");
 
   // register own properties
 
@@ -279,6 +390,17 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
                           GINT_TO_POINTER (GST_PROPERTY_META_NONE));
   g_param_spec_set_qdata (paramspec, gst_property_meta_quark_no_val, NULL);
   g_object_class_install_property (gobject_class, PROP_NOTE, paramspec);
+
+  g_object_class_install_property (gobject_class, PROP_NOTE_LENGTH,
+                        g_param_spec_long ("note-length", _("Note length"),
+                                          _("Length of a note in ticks (buffers)"),
+                                          1, 100, 4,
+                                          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+  g_object_class_install_property (gobject_class, PROP_NOTE_VELOCITY,
+                        g_param_spec_int ("note-velocity", _("Note velocity"),
+                                          _("Velocity of a note"),
+                                          0, 127, 100,
+                                          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   g_object_class_install_property (gobject_class, PROP_INTERP,
                         g_param_spec_enum ("interp", _("Interpolation"),
@@ -502,14 +624,25 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
     case PROP_NOTE:
       g_free (gstsynth->note);
       gstsynth->note = g_value_dup_string (value);
-      if (gstsynth->note)
-      {
-        GST_DEBUG("new note -> '%s'",gstsynth->note);
-        gstsynth->freq = gst_note_2_frequency_translate_from_string
-	      (gstsynth->n2f, gstsynth->note);
-        // @todo: start note-off counter
-        fluid_synth_noteon (gstsynth->fluid, /*chan*/ 0, /*note*/ 60, /*velocity*/ 127);
+      if (gstsynth->note) {
+        // start note-off counter
+        gstsynth->cur_note_length = gstsynth->note_length;
+        gstsynth->key = gst_fluidsynth_note_string_2_value(gstsynth->note);
+        GST_INFO("new note: '%s' = %d",gstsynth->note,gstsynth->key);
+        fluid_synth_noteon (gstsynth->fluid, /*chan*/ 0,  gstsynth->key, gstsynth->velocity);
       }
+      break;
+    case PROP_NOTE_LENGTH:
+      gstsynth->note_length = g_value_get_long (value);
+      break;
+    case PROP_NOTE_VELOCITY:
+      gstsynth->velocity = g_value_get_int (value);
+      break;
+	// tempo iface
+    case PROP_BPM:
+    case PROP_TPB:
+    case PROP_STPT:
+	  GST_WARNING("use gst_tempo_change_tempo()");
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -601,6 +734,12 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     case PROP_NOTE:
       g_value_set_string (value, gstsynth->note);
       break;
+    case PROP_NOTE_LENGTH:
+      g_value_set_long (value, gstsynth->note_length);
+      break;
+    case PROP_NOTE_VELOCITY:
+      g_value_set_int (value, gstsynth->velocity);
+      break;
     case PROP_SAMPLES_PER_BUFFER:
       g_value_set_int (value, (gint)gstsynth->samples_per_buffer);
       break;
@@ -610,8 +749,15 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     case PROP_TIMESTAMP_OFFSET:
       g_value_set_int64 (value, gstsynth->timestamp_offset);
       break;
-    case PROP_DOCU_URI:         /* help interface */
-      g_value_set_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstFluidsynth.html");
+	// tempo iface
+    case PROP_BPM:
+      g_value_set_ulong(value, gstsynth->beats_per_minute);
+      break;
+    case PROP_TPB:
+      g_value_set_ulong(value, gstsynth->ticks_per_beat);
+      break;
+    case PROP_STPT:
+      g_value_set_ulong(value, gstsynth->subticks_per_tick);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -631,6 +777,9 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
   gstsynth->timestamp_offset = G_GINT64_CONSTANT (0);
 
   gstsynth->samplerate = 44100;
+  gstsynth->beats_per_minute=120;
+  gstsynth->ticks_per_beat=4;
+  gstsynth->subticks_per_tick=1;
   gst_fluidsynth_calculate_buffer_frames (gstsynth);
 
   /* we operate in time */
@@ -638,9 +787,9 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
   gst_base_src_set_live (GST_BASE_SRC (gstsynth), FALSE);
 
   /* set base parameters */
-  gstsynth->freq = 0.0;
   gstsynth->note = NULL;
-  gstsynth->n2f = gst_note_2_frequency_new (GST_NOTE_2_FREQUENCY_CROMATIC);
+  gstsynth->note_length = 4;
+  gstsynth->velocity = 100;
 
   gstsynth->settings = new_fluid_settings ();
 
@@ -692,7 +841,7 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
     if(res==-1) {
       GST_WARNING("Couldn't load soundfont");
     }
-    fluid_synth_noteon (gstsynth->fluid, 0, 60, 127);
+    //fluid_synth_noteon (gstsynth->fluid, 0, 60, 127);
   }
 }
 
@@ -932,6 +1081,14 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   src->running_time = next_time;
   src->n_samples = n_samples;
 
+  if(src->cur_note_length) {
+    src->cur_note_length--;
+    if(!src->cur_note_length) {
+      fluid_synth_noteoff(src->fluid, /*chan*/ 0, src->key);
+      GST_INFO("note-off: %d",src->key);
+    }
+  }
+
   fluid_synth_write_s16 (src->fluid, src->generate_samples_per_buffer, GST_BUFFER_DATA(buf), 0, 2, GST_BUFFER_DATA(buf), 1, 2);
 
   *buffer = buf;
@@ -946,8 +1103,6 @@ gst_fluidsynth_dispose (GObject *object)
 
   if (src->dispose_has_run) return;
   src->dispose_has_run = TRUE;
-
-  if (src->n2f) g_object_unref (src->n2f);
 
   if (src->midi) delete_fluid_midi_driver (src->midi);
   if (src->midi_router) delete_fluid_midi_router (src->midi_router);
@@ -982,8 +1137,8 @@ GType gst_fluidsynth_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
-    const GInterfaceInfo help_interface_info = {
-      NULL,               /* interface_init */
+    const GInterfaceInfo tempo_interface_info = {
+      (GInterfaceInitFunc) gst_fluidsynth_tempo_interface_init,          /* interface_init */
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
@@ -995,7 +1150,7 @@ GType gst_fluidsynth_get_type (void)
 
     type = g_type_register_static(GST_TYPE_BASE_SRC, "GstFluidsynth", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
-    g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
+    g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
     g_type_add_interface_static(type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;
