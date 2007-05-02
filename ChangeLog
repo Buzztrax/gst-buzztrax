@@ -1,5 +1,12 @@
 2007-05-02  Stefan Kost  <ensonic@users.sf.net>
 
+	* ChangeLog:
+      Released
+
+=== release 0.2.0 ===
+
+2007-05-02  Stefan Kost  <ensonic@users.sf.net>
+
 	* NEWS:
 	* configure.ac:
 	  Releasing
@@ -45,7 +52,7 @@
 	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_set_property),
 	(gst_fluidsynth_get_property):
 	  Add some comments, workaround one warning
-	
+
 
 2007-04-18  Stefan Kost  <ensonic@users.sf.net>
 
@@ -411,7 +418,7 @@
 	(gst_audio_delay_stop), (plugin_init):
 	* src/audiodelay/audiodelay.h:
 	rename symbols (add '_')
-	
+
 	* configure.ac:
 	* src/Makefile.am:
 	* src/audiopanorama/.cvsignore:
@@ -427,7 +434,7 @@
 	(plugin_init):
 	* src/audiopanorama/audiopanorama.h:
 	add new plugin for stereo-panorama/balance effect
-	
+
 	* src/simsyn/simsyn.c: (gst_sim_syn_class_init),
 	(gst_sim_syn_get_times):
 	* src/simsyn/simsyn.h:
