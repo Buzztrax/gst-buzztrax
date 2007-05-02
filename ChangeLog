@@ -1,3 +1,9 @@
+2007-05-02  Stefan Kost  <ensonic@users.sf.net>
+
+	* NEWS:
+	* configure.ac:
+	  Releasing
+
 2007-04-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c:

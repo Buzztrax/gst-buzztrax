@@ -1,4 +1,4 @@
-dnl $Id: configure.ac,v 1.24 2007-04-18 19:39:12 ensonic Exp $
+dnl $Id: configure.ac,v 1.25 2007-05-02 19:34:33 ensonic Exp $
 
 dnl
 dnl current  : the interface         : MAJOR + MINOR
@@ -11,12 +11,12 @@ dnl 3: when the interface has changed (removing functions) : MAJOR++, MINOR=0, M
 dnl
 
 dnl Initialise the autoconf/automake tool
-AC_INIT([gst-buzztard], [0.1.0], [buzztard-devel@lists.sourceforge.net])
+AC_INIT([gst-buzztard], [0.2.0], [buzztard-devel@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([ChangeLog])
 AC_CONFIG_HEADERS(config.h)
 
 GSTBT_MAJOR_VERSION=0
-GSTBT_MINOR_VERSION=1
+GSTBT_MINOR_VERSION=2
 GSTBT_MICRO_VERSION=0
 GSTBT_VERSION=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION.$GSTBT_MICRO_VERSION
 GSTBT_VERSION_INFO=`expr $GSTBT_MAJOR_VERSION + $GSTBT_MINOR_VERSION`:$GSTBT_MICRO_VERSION:$GSTBT_MINOR_VERSION
