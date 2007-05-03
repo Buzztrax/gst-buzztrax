@@ -162,6 +162,8 @@ static gboolean gst_sim_syn_do_seek (GstBaseSrc * basesrc,
 static gboolean gst_sim_syn_query (GstBaseSrc * basesrc,
     GstQuery * query);
 
+static gboolean gst_sim_syn_send_event (GstElement *elem, GstEvent *event);
+
 static void gst_sim_syn_change_wave (GstSimSyn * src);
 static void gst_sim_syn_change_volume (GstSimSyn * src);
 static void gst_sim_syn_change_filter (GstSimSyn * src);
@@ -239,23 +241,28 @@ static void
 gst_sim_syn_class_init (GstSimSynClass * klass)
 {
   GObjectClass *gobject_class;
+  GstElementClass *gstelement_class;
   GstBaseSrcClass *gstbasesrc_class;
   GParamSpec *paramspec;
 
   parent_class = (GstBaseSrcClass *) g_type_class_peek_parent (klass);
 
   gobject_class = (GObjectClass *) klass;
+  gstelement_class = (GstElementClass *) klass;
   gstbasesrc_class = (GstBaseSrcClass *) klass;
 
   gobject_class->set_property = gst_sim_syn_set_property;
   gobject_class->get_property = gst_sim_syn_get_property;
   gobject_class->dispose      = gst_sim_syn_dispose;
 
+  gstelement_class->send_event = GST_DEBUG_FUNCPTR (gst_sim_syn_send_event);
+
   gstbasesrc_class->set_caps = GST_DEBUG_FUNCPTR (gst_sim_syn_setcaps);
   gstbasesrc_class->is_seekable =
       GST_DEBUG_FUNCPTR (gst_sim_syn_is_seekable);
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_sim_syn_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_sim_syn_query);
+  //gstbasesrc_class->event = GST_DEBUG_FUNCPTR (gst_sim_syn_event);
   gstbasesrc_class->get_times = GST_DEBUG_FUNCPTR (gst_sim_syn_get_times);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_sim_syn_create);
 
@@ -450,6 +457,27 @@ error:
     GST_DEBUG_OBJECT (src, "query failed");
     return FALSE;
   }
+}
+
+static gboolean
+gst_sim_syn_send_event (GstElement *elem, GstEvent *event) {
+  //GST_INFO_OBJECT(elem,"reveived event: %s",GST_EVENT_TYPE_NAME(event));
+  switch (GST_EVENT_TYPE (event)) {
+    case GST_EVENT_TAG: {
+      GstTagList *list;
+      gchar *str;
+
+      gst_event_parse_tag (event, &list);
+      str=gst_structure_to_string (list);
+      GST_INFO ("got tags: %s",str);
+      g_free (str);
+      //gst_event_unref (event);
+      return gst_pad_push_event (GST_BASE_SRC_PAD(elem),event);
+    } break;
+    default:
+      break;
+  }
+  return GST_ELEMENT_CLASS (parent_class)->send_event (elem,event);
 }
 
 /* Wave generators */
@@ -1187,11 +1215,12 @@ GType gst_sim_syn_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
+
     type = g_type_register_static(GST_TYPE_BASE_SRC, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
     g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
-	g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
-	g_type_add_interface_static(type, GST_TYPE_PRESET, &preset_interface_info);
+    g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
+    g_type_add_interface_static(type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;
 }

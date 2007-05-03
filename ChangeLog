@@ -1,3 +1,15 @@
+2007-05-03  Stefan Kost  <ensonic@users.sf.net>
+
+	* TODO:
+	* src/audiodelay/audiodelay.c:
+	(gst_audio_delay_tempo_interface_init),
+	(gst_audio_delay_class_init), (gst_audio_delay_init),
+	(gst_audio_delay_finalize), (gst_audio_delay_send_event),
+	(gst_audio_delay_start), (gst_audio_delay_transform_ip):
+	* src/simsyn/simsyn.c: (gst_sim_syn_class_init),
+	(gst_sim_syn_send_event), (gst_sim_syn_get_type):
+	  Try reading tags to obtain tempo info from there.
+
 2007-05-02  Stefan Kost  <ensonic@users.sf.net>
 
 	* ChangeLog:

@@ -86,11 +86,11 @@ GST_STATIC_PAD_TEMPLATE (
   GST_PAD_SINK,
   GST_PAD_ALWAYS,
   GST_STATIC_CAPS ("audio/x-raw-int, "
-        "rate = (int) [ 1, MAX ], " 
-        "channels = (int) 1, "      
-        "endianness = (int) BYTE_ORDER, "   
-        "width = (int) 16, "        
-        "depth = (int) 16, "        
+        "rate = (int) [ 1, MAX ], "
+        "channels = (int) 1, "
+        "endianness = (int) BYTE_ORDER, "
+        "width = (int) 16, "
+        "depth = (int) 16, "
         "signed = (boolean) true")
 );
 
@@ -100,11 +100,11 @@ GST_STATIC_PAD_TEMPLATE (
   GST_PAD_SRC,
   GST_PAD_ALWAYS,
   GST_STATIC_CAPS ("audio/x-raw-int, "
-        "rate = (int) [ 1, MAX ], " 
-        "channels = (int) 1, "      
-        "endianness = (int) BYTE_ORDER, "   
-        "width = (int) 16, "        
-        "depth = (int) 16, "        
+        "rate = (int) [ 1, MAX ], "
+        "channels = (int) 1, "
+        "endianness = (int) BYTE_ORDER, "
+        "width = (int) 16, "
+        "depth = (int) 16, "
         "signed = (boolean) true")
 );
 
@@ -118,6 +118,8 @@ static void gst_audio_delay_finalize (GObject * object);
 
 static gboolean gst_audio_delay_set_caps (GstBaseTransform * base,
     GstCaps * incaps, GstCaps * outcaps);
+static gboolean gst_audio_delay_send_event (GstElement *elem, GstEvent *event);
+
 static gboolean gst_audio_delay_start (GstBaseTransform * base);
 static GstFlowReturn gst_audio_delay_transform_ip (GstBaseTransform * base,
     GstBuffer * outbuf);
@@ -162,9 +164,9 @@ static void gst_audio_delay_tempo_change_tempo(GstTempo *tempo, glong beats_per_
 
 static void gst_audio_delay_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
   GstTempoInterface *iface = g_iface;
-  
+
   GST_INFO("initializing iface");
-  
+
   iface->change_tempo = gst_audio_delay_tempo_change_tempo;
 }
 
@@ -188,21 +190,26 @@ static void
 gst_audio_delay_class_init (GstAudioDelayClass * klass)
 {
   GObjectClass *gobject_class;
-  
+  GstElementClass *gstelement_class;
+
   parent_class = g_type_class_peek_parent (klass);
 
   gobject_class = (GObjectClass *) klass;
+  gstelement_class = (GstElementClass *) klass;
+
   gobject_class->set_property = gst_audio_delay_set_property;
   gobject_class->get_property = gst_audio_delay_get_property;
   gobject_class->finalize = gst_audio_delay_finalize;
+
+  gstelement_class->send_event = GST_DEBUG_FUNCPTR (gst_audio_delay_send_event);
 
   // override interface properties
   g_object_class_override_property(gobject_class, PROP_BPM, "beats-per-minute");
   g_object_class_override_property(gobject_class, PROP_TPB, "ticks-per-beat");
   g_object_class_override_property(gobject_class, PROP_STPT, "subticks-per-tick");
-  
+
   g_object_class_override_property(gobject_class, PROP_DOCU_URI, "documentation-uri");
-  
+
   // register own properties
 
   g_object_class_install_property (gobject_class, PROP_DRYWET,
@@ -236,7 +243,7 @@ gst_audio_delay_init (GstAudioDelay *filter, GstAudioDelayClass * klass)
   filter->drywet = 50;
   filter->delaytime = 100;
   filter->feedback = 50;
-  
+
   filter->samplerate = 44100;
   filter->beats_per_minute=120;
   filter->ticks_per_beat=4;
@@ -314,7 +321,7 @@ static void
 gst_audio_delay_finalize (GObject * object)
 {
   GstAudioDelay *filter = GST_AUDIO_DELAY (object);
-  
+
   if (filter->ring_buffer) {
     g_free (filter->ring_buffer);
     filter->ring_buffer = NULL;
@@ -323,6 +330,28 @@ gst_audio_delay_finalize (GObject * object)
   G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
+/* GstElement vmethod implementations */
+
+static gboolean
+gst_audio_delay_send_event (GstElement *elem, GstEvent *event) {
+  //GST_INFO_OBJECT(elem,"reveived event: %s",GST_EVENT_TYPE_NAME(event));
+  switch (GST_EVENT_TYPE (event)) {
+    case GST_EVENT_TAG: {
+      GstTagList *list;
+      gchar *str;
+
+      gst_event_parse_tag (event, &list);
+      str=gst_structure_to_string (list);
+      GST_INFO ("got tags: %s",str);
+      g_free (str);
+      //gst_event_unref (event);
+      return gst_pad_push_event (GST_BASE_TRANSFORM_SRC_PAD(elem),event);
+    } break;
+    default:
+      break;
+  }
+  return GST_ELEMENT_CLASS (parent_class)->send_event (elem,event);
+}
 
 /* GstBaseTransform vmethod implementations */
 
@@ -349,15 +378,15 @@ gst_audio_delay_start (GstBaseTransform *base)
   filter->max_delaytime=(2 + (DELAYTIME_MAX * filter->samplerate) / 100);
   filter->ring_buffer = (gint16 *) g_new0 (gint16, filter->max_delaytime);
   filter->rb_ptr = 0;
-  
+
   GST_INFO ("max_delaytime %d at %d Hz sampling rate", filter->max_delaytime,
     filter->samplerate);
   GST_INFO ("delaytime %d, feedback %d, drywet %d", filter->delaytime,
     filter->feedback,filter->drywet);
-  
+
   return TRUE;
 }
- 
+
 /* this function does the actual processing
  */
 static GstFlowReturn
@@ -369,10 +398,10 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
   gdouble feedback, dry, wet;
   gint16 *data = (gint16 *) GST_BUFFER_DATA (outbuf);
   gdouble val_dry, val_fx;
-  glong val; 
+  glong val;
   guint i, num_samples = GST_BUFFER_SIZE (outbuf) / sizeof (gint16);
   guint rb_in, rb_out;
-  
+
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base))
     return GST_FLOW_OK;
@@ -381,7 +410,7 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
     GST_BUFFER_TIMESTAMP (outbuf));
   if (GST_CLOCK_TIME_IS_VALID (timestamp))
     gst_object_sync_values (G_OBJECT (filter), timestamp);
-  
+
   delaytime = (filter->delaytime * filter->samplerate) / 100;
   feedback = (gdouble)filter->feedback / 100.0;
   wet = (gdouble)filter->drywet / 100.0;
@@ -389,8 +418,8 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
   rb_in = filter->rb_ptr;
   rb_out = (rb_in >= delaytime) ?
         rb_in - delaytime :
-        (rb_in + filter->max_delaytime) - delaytime; 
-        
+        (rb_in + filter->max_delaytime) - delaytime;
+
   for (i = 0; i < num_samples; i++) {
     val_fx = (gdouble)filter->ring_buffer[rb_out];
     val_dry = (gdouble)*data;
