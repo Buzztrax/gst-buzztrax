@@ -1,5 +1,14 @@
 2007-05-04  Stefan Kost  <ensonic@users.sf.net>
 
+	* docs/reference/Makefile.am:
+	* docs/reference/gst-buzztard-docs.sgml:
+	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztard.types:
+	* src/fluidsynth/gstfluidsynth.c:
+	  Add docs and add it to the docs.
+
+2007-05-04  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/fluidsynth/gstfluidsynth.c (gst_fluidsynth_init):
 	  Hack to try various sf that we found so-far.
 

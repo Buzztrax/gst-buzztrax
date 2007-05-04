@@ -18,7 +18,7 @@ DOC_SOURCE_DIR=$(top_srcdir)/src
 SCANGOBJ_OPTIONS=--type-init-func="g_type_init();gst_init(&argc,&argv)"
 
 # Extra options to supply to gtkdoc-scan.
-# e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED" 
+# e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED"
 SCAN_OPTIONS=
 
 # Extra options to supply to gtkdoc-mkdb.
@@ -65,6 +65,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src $(BASE_DEPS_CFLAGS)
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
   $(top_builddir)/src/libgstbuzztard.la \
   $(top_builddir)/src/audiodelay/libgstaudiodelay.la \
+  $(top_builddir)/src/fluidsynth/libgstfluidsynth.la \
   $(top_builddir)/src/simsyn/libgstsimsyn.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.

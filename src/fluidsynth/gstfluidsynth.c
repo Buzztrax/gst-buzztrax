@@ -25,11 +25,25 @@
  * SECTION:gstfluidsynth
  * @short_description: FluidSynth GStreamer wrapper
  *
- * FluidSynth is a SoundFont 2 capable wavetable synthesizer.
- *
+ * <refsect2>
+ * <para>
+ * FluidSynth is a SoundFont 2 capable wavetable synthesizer. Soundpatches are
+ * available on <ulink url="http://sounds.resonance.org">sounds.resonance.org</ulink>
+ * </para>
+ * <title>Example launch line</title>
+ * <para>
+ * <programlisting>
  * gst-launch fluidsynth num-buffers=100 note="c-3" ! alsasink
+ * </programlisting>
+ * </para>
+ * <para>
+ * Plays one c-3 tone using the first instrument.
+ * </para>
+ * </refsect2>
  */
-
+/*
+ * for API look at /usr/share/doc/libfluidsynth-dev/examples/example.c
+ */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

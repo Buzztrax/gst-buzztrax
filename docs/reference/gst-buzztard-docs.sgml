@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
                "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <book id="index" xmlns:xi="http://www.w3.org/2003/XInclude">
   <bookinfo>
@@ -8,14 +8,14 @@
 
   <preface>
     <title>Introduction</title>
-	<para>
-	  This module contains experimental code that extends gstreamer.
-	  The extensions are required to build a CVS version of buzztard.
-	</para>
-	<para>
-	  It also contains some nice audio elements. These could be easily moves to
-	  gst-plugin modules, but only with some of the interfaces.
-	</para>
+    <para>
+      This module contains experimental code that extends gstreamer.
+      The extensions are required to build a CVS version of buzztard.
+    </para>
+    <para>
+      It also contains some nice audio elements. These could be easily moves to
+      gst-plugin modules, but only with some of the interfaces.
+    </para>
   </preface>
 
   <chapter>
@@ -27,8 +27,8 @@
   <chapter>
     <title>GStreamer Buzztard interfaces</title>
     <xi:include href="xml/gstchildbin.xml"/>
-	<xi:include href="xml/gsthelp.xml"/>
-	<xi:include href="xml/gstpreset.xml"/>
+    <xi:include href="xml/gsthelp.xml"/>
+    <xi:include href="xml/gstpreset.xml"/>
     <xi:include href="xml/gstpropertymeta.xml"/>
     <xi:include href="xml/gsttempo.xml"/>
   </chapter>
@@ -36,6 +36,7 @@
   <chapter>
     <title>GStreamer Buzztard elements</title>
     <xi:include href="xml/gstaudiodelay.xml"/>
+    <xi:include href="xml/gstfluidsynth.xml"/>
     <xi:include href="xml/gstsimsyn.xml"/>
   </chapter>
 
