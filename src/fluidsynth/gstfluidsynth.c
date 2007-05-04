@@ -830,16 +830,20 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
   gst_fluidsynth_update_reverb (gstsynth);      /* update reverb settings */
   gst_fluidsynth_update_chorus (gstsynth);      /* update chorus settings */
 
-  /* FIXME temporary for testing */
+  /* FIXME: temporary for testing */
   {
     int res;
 
-    //res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/doc/libfluidsynth-dev/examples/example.sf2", TRUE);
-    res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2", TRUE);
-    //g_strdup_printf("%s/sbks/synth/FlangerSaw.SF2",g_get_home_dir());
-    //res=fluid_synth_sfload (gstsynth->fluid, "/home/josh/sbks/synth/FlangerSaw.SF2", TRUE);
+    res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/doc/libfluidsynth-dev/examples/example.sf2", TRUE);
+    if(res==-1)
+      res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2", TRUE);
     if(res==-1) {
-      GST_WARNING("Couldn't load soundfont");
+      gchar *path=g_strdup_printf("%s/sbks/synth/FlangerSaw.SF2",g_get_home_dir());
+      res=fluid_synth_sfload (gstsynth->fluid, path, TRUE);
+      g_free(path);
+    }
+    if(res==-1) {
+      GST_WARNING("Couldn't load any soundfont");
     }
     //fluid_synth_noteon (gstsynth->fluid, 0, 60, 127);
   }

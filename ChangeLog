@@ -1,3 +1,8 @@
+2007-05-04  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c (gst_fluidsynth_init):
+	  Hack to try various sf that we found so-far.
+
 2007-05-03  Stefan Kost  <ensonic@users.sf.net>
 
 	* TODO:
