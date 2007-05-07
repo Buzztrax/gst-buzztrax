@@ -1,3 +1,14 @@
+2007-05-06  Stefan Kost  <ensonic@users.sf.net>
+
+	* TODO:
+	* src/fluidsynth/gstfluidsynth.c (PROP_PROGRAM, PROP_INSTRUMENT_PATCH,
+	  PROP_INTERP, gst_fluidsynth_class_init, gst_fluidsynth_set_property,
+	  gst_fluidsynth_get_property, gst_fluidsynth_init,
+	  gst_fluidsynth_dispose):
+	* src/fluidsynth/gstfluidsynth.h (program, instrument_patch_path,
+	  instrument_patch, interp):
+	  Add two more properties to allow chaning soundfonts and switching programms.
+
 2007-05-04  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:

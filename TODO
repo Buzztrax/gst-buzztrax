@@ -1,4 +1,4 @@
-$Id: TODO,v 1.4 2007-05-03 15:04:01 ensonic Exp $
+$Id: TODO,v 1.5 2007-05-07 15:51:31 ensonic Exp $
 
 = tempo =
 - should we rename 'tempo' to 'tempo_sync' or 'song_tempo'?
@@ -8,4 +8,7 @@ $Id: TODO,v 1.4 2007-05-03 15:04:01 ensonic Exp $
       _("beats per minute"), _("number of beats per minute in audio"), NULL);
   - we need GST_TAG_TICKS_PER_BEAT and GST_TAG_SUBTICKS_PER_TICK
     where to register them?
-  - unfortunately we don't get tags in sources (simsynth)
+  - das hauptproblem mit tags anstatt tempo iface ist das man dann schlecht das
+    tempo im song ändern kann, müsste man dann eher über die rate im playback
+    segment machen
+

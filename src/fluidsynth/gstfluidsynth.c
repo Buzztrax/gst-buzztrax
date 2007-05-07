@@ -39,10 +39,20 @@
  * <para>
  * Plays one c-3 tone using the first instrument.
  * </para>
+ * <para>
+ * <programlisting>
+ * gst-launch fluidsynth num-buffers=20 instrument-patch="/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2" program=2 note="c-3" ! alsasink
+ * </programlisting>
+ * </para>
+ * <para>
+ * Load a specific patch and plays one c-3 tone using the second program.
+ * </para>
  * </refsect2>
  */
 /*
  * for API look at /usr/share/doc/libfluidsynth-dev/examples/example.c
+ * TODO:
+ * - what about LIB_INSTPATCH_PATH to look for soundfonts
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -85,6 +95,9 @@ enum {
   PROP_NOTE,
   PROP_NOTE_LENGTH,
   PROP_NOTE_VELOCITY,
+  PROP_PROGRAM,
+  // not yet GST_PARAM_CONTROLLABLE
+  PROP_INSTRUMENT_PATCH,
   PROP_INTERP,
   PROP_REVERB_ENABLE,
   PROP_REVERB_PRESET,
@@ -415,7 +428,16 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
                                           _("Velocity of a note"),
                                           0, 127, 100,
                                           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+  g_object_class_install_property (gobject_class, PROP_PROGRAM,
+                        g_param_spec_int ("program", _("Sound program"),
+                                          _("Sound program number"),
+                                          0, (0x7F<<7|0x7F), 0,
+                                          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
+  g_object_class_install_property (gobject_class, PROP_INSTRUMENT_PATCH,
+                        g_param_spec_string ("instrument-patch", _("Instrument patch file"),
+                                          _("Path to soundfont intrument patch file"),
+                                          NULL, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_INTERP,
                         g_param_spec_enum ("interp", _("Interpolation"),
                                            _("Interpolation type"),
@@ -568,6 +590,48 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
 
   switch (prop_id)
   {
+    // dynamic class properties
+    case PROP_NOTE:
+      g_free (gstsynth->note);
+      gstsynth->note = g_value_dup_string (value);
+      if (gstsynth->note) {
+        // start note-off counter
+        gstsynth->cur_note_length = gstsynth->note_length;
+        gstsynth->key = gst_fluidsynth_note_string_2_value(gstsynth->note);
+        GST_INFO("new note: '%s' = %d",gstsynth->note,gstsynth->key);
+        fluid_synth_noteon (gstsynth->fluid, /*chan*/ 0,  gstsynth->key, gstsynth->velocity);
+      }
+      break;
+    case PROP_NOTE_LENGTH:
+      gstsynth->note_length = g_value_get_long (value);
+      break;
+    case PROP_NOTE_VELOCITY:
+      gstsynth->velocity = g_value_get_int (value);
+      break;
+    case PROP_PROGRAM:
+      gstsynth->program = g_value_get_int (value);
+      GST_INFO("Switch to program: %d, %d",gstsynth->program>>7, gstsynth->program&0x7F);
+      fluid_synth_program_select(gstsynth->fluid, /*chan*/ 0, gstsynth->instrument_patch,
+                              gstsynth->program>>7, gstsynth->program&0x7F);
+      break;
+    // not yet GST_PARAM_CONTROLLABLE
+    case PROP_INSTRUMENT_PATCH:
+      // unload old patch
+      g_free(gstsynth->instrument_patch_path);
+      fluid_synth_sfunload(gstsynth->fluid, gstsynth->instrument_patch, TRUE);
+      // load new patch
+      gstsynth->instrument_patch_path = g_value_dup_string(value);
+      GST_INFO("Trying to load load soundfont: '%s'",gstsynth->instrument_patch_path);
+      if((gstsynth->instrument_patch=fluid_synth_sfload (gstsynth->fluid, gstsynth->instrument_patch_path, TRUE))==-1) {
+        GST_WARNING("Couldn't load soundfont: '%s'",gstsynth->instrument_patch_path);
+      }
+      else {
+        GST_INFO("soundfont loaded as %d",gstsynth->instrument_patch);
+        //fluid_synth_program_reset(gstsynth->fluid);
+        fluid_synth_program_select(gstsynth->fluid, /*chan*/ 0, gstsynth->instrument_patch,
+                              gstsynth->program>>7, gstsynth->program&0x7F);
+      }
+      break;
     case PROP_INTERP:
       gstsynth->interp = g_value_get_enum (value);
       fluid_synth_set_interp_method (gstsynth->fluid, -1, gstsynth->interp);
@@ -625,6 +689,7 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       gstsynth->chorus_update = TRUE;
       gst_fluidsynth_update_chorus (gstsynth);
       break;
+    // static class properties
     case PROP_SAMPLES_PER_BUFFER:
       gstsynth->samples_per_buffer = (gdouble)g_value_get_int (value);
       break;
@@ -634,23 +699,6 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       break;
     case PROP_TIMESTAMP_OFFSET:
       gstsynth->timestamp_offset = g_value_get_int64 (value);
-      break;
-    case PROP_NOTE:
-      g_free (gstsynth->note);
-      gstsynth->note = g_value_dup_string (value);
-      if (gstsynth->note) {
-        // start note-off counter
-        gstsynth->cur_note_length = gstsynth->note_length;
-        gstsynth->key = gst_fluidsynth_note_string_2_value(gstsynth->note);
-        GST_INFO("new note: '%s' = %d",gstsynth->note,gstsynth->key);
-        fluid_synth_noteon (gstsynth->fluid, /*chan*/ 0,  gstsynth->key, gstsynth->velocity);
-      }
-      break;
-    case PROP_NOTE_LENGTH:
-      gstsynth->note_length = g_value_get_long (value);
-      break;
-    case PROP_NOTE_VELOCITY:
-      gstsynth->velocity = g_value_get_int (value);
       break;
 	// tempo iface
     case PROP_BPM:
@@ -708,7 +756,24 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
   }
 
   switch (prop_id)
-    {
+  {
+    // static class properties
+    case PROP_NOTE:
+      g_value_set_string (value, gstsynth->note);
+      break;
+    case PROP_NOTE_LENGTH:
+      g_value_set_long (value, gstsynth->note_length);
+      break;
+    case PROP_NOTE_VELOCITY:
+      g_value_set_int (value, gstsynth->velocity);
+      break;
+    case PROP_PROGRAM:
+      g_value_set_int(value, gstsynth->program);
+      break;
+    // not yet GST_PARAM_CONTROLLABLE
+  case PROP_INSTRUMENT_PATCH:
+    g_value_set_string(value, gstsynth->instrument_patch_path);
+    break;
     case PROP_INTERP:
       g_value_set_enum (value, gstsynth->interp);
       break;
@@ -745,15 +810,7 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     case PROP_CHORUS_WAVEFORM:
       g_value_set_enum (value, gstsynth->chorus_waveform);
       break;
-    case PROP_NOTE:
-      g_value_set_string (value, gstsynth->note);
-      break;
-    case PROP_NOTE_LENGTH:
-      g_value_set_long (value, gstsynth->note_length);
-      break;
-    case PROP_NOTE_VELOCITY:
-      g_value_set_int (value, gstsynth->velocity);
-      break;
+    // static class properties
     case PROP_SAMPLES_PER_BUFFER:
       g_value_set_int (value, (gint)gstsynth->samples_per_buffer);
       break;
@@ -845,22 +902,21 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
   gst_fluidsynth_update_chorus (gstsynth);      /* update chorus settings */
 
   /* FIXME: temporary for testing */
-  {
-    int res;
-
-    res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/doc/libfluidsynth-dev/examples/example.sf2", TRUE);
-    if(res==-1)
-      res=fluid_synth_sfload (gstsynth->fluid, "/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2", TRUE);
-    if(res==-1) {
-      gchar *path=g_strdup_printf("%s/sbks/synth/FlangerSaw.SF2",g_get_home_dir());
-      res=fluid_synth_sfload (gstsynth->fluid, path, TRUE);
-      g_free(path);
-    }
-    if(res==-1) {
-      GST_WARNING("Couldn't load any soundfont");
-    }
-    //fluid_synth_noteon (gstsynth->fluid, 0, 60, 127);
+  gstsynth->instrument_patch=fluid_synth_sfload (gstsynth->fluid, "/usr/share/doc/libfluidsynth-dev/examples/example.sf2", TRUE);
+  if(gstsynth->instrument_patch==-1)
+    gstsynth->instrument_patch=fluid_synth_sfload (gstsynth->fluid, "/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2", TRUE);
+  if(gstsynth->instrument_patch==-1) {
+    gchar *path=g_strdup_printf("%s/sbks/synth/FlangerSaw.SF2",g_get_home_dir());
+    gstsynth->instrument_patch=fluid_synth_sfload (gstsynth->fluid, path, TRUE);
+    g_free(path);
   }
+  if(gstsynth->instrument_patch==-1) {
+    GST_WARNING("Couldn't load any soundfont");
+  }
+  else {
+    GST_INFO("soundfont loaded as %d",gstsynth->instrument_patch);
+  }
+  //fluid_synth_noteon (gstsynth->fluid, 0, 60, 127);
 }
 
 static void
@@ -1117,18 +1173,20 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
 static void
 gst_fluidsynth_dispose (GObject *object)
 {
-  GstFluidsynth *src = GST_FLUIDSYNTH (object);
+  GstFluidsynth *gstsynth = GST_FLUIDSYNTH (object);
 
-  if (src->dispose_has_run) return;
-  src->dispose_has_run = TRUE;
+  if (gstsynth->dispose_has_run) return;
+  gstsynth->dispose_has_run = TRUE;
 
-  if (src->midi) delete_fluid_midi_driver (src->midi);
-  if (src->midi_router) delete_fluid_midi_router (src->midi_router);
-  if (src->fluid) delete_fluid_synth (src->fluid);
+  if (gstsynth->midi) delete_fluid_midi_driver (gstsynth->midi);
+  if (gstsynth->midi_router) delete_fluid_midi_router (gstsynth->midi_router);
+  if (gstsynth->fluid) delete_fluid_synth (gstsynth->fluid);
 
-  src->midi = NULL;
-  src->midi_router = NULL;
-  src->fluid = NULL;
+  gstsynth->midi = NULL;
+  gstsynth->midi_router = NULL;
+  gstsynth->fluid = NULL;
+
+  g_free(gstsynth->instrument_patch_path);
 
   if (G_OBJECT_CLASS (parent_class)->dispose)
     G_OBJECT_CLASS (parent_class)->dispose (object);

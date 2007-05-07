@@ -54,6 +54,7 @@ struct _GstFluidsynth {
   gint key;
   gint velocity;
   glong cur_note_length,note_length;
+  gint program;
 
   /* < private > */
   gboolean dispose_has_run;		/* validate if dispose has run */
@@ -62,6 +63,9 @@ struct _GstFluidsynth {
   fluid_settings_t *settings;		/* to free on close */
   fluid_midi_driver_t *midi;		/* FluidSynth MIDI driver */
   fluid_midi_router_t *midi_router; 	/* FluidSynth MIDI router */
+
+  gchar *instrument_patch_path;
+  gint instrument_patch;
 
   int interp;				/* interpolation type */
 
