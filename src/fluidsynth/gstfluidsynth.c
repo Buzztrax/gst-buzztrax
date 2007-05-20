@@ -1060,7 +1060,8 @@ gst_fluidsynth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   GstFluidsynth *src = GST_FLUIDSYNTH (basesrc);
   GstClockTime time;
 
-  time = segment->time = segment->start;
+  segment->time = segment->start;
+  time = segment->last_stop;
 
   /* now move to the time indicated */
   src->n_samples = time * src->samplerate / GST_SECOND;

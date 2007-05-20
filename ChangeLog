@@ -1,3 +1,9 @@
+2007-05-20  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c (gst_fluidsynth_do_seek):
+	* src/simsyn/simsyn.c (gst_sim_syn_do_seek):
+	  Apply recent change from gst-plugin-base.
+
 2007-05-06  Stefan Kost  <ensonic@users.sf.net>
 
 	* TODO:
