@@ -13,7 +13,7 @@ libgstfluidsynth_la_CFLAGS = -I@srcdir@ -I$(top_srcdir)/src \
 	$(FLUIDSYNTH_CFLAGS)
 libgstfluidsynth_la_LIBADD = $(BASE_DEPS_LIBS) $(FLUIDSYNTH_LIBS) \
 	$(top_builddir)/src/libgstbuzztard.la
-libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstfluidsynth_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 
 # headers we need but don't want installed
 noinst_HEADERS = gstfluidsynth.h

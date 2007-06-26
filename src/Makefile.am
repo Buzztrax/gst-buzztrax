@@ -4,7 +4,7 @@ else
 FLUIDSYNTH =
 endif
 
-SUBDIRS = childbin envelope help note2frequency preset propertymeta tempo . \
+SUBDIRS = childbin envelope help musicenums note2frequency preset propertymeta tempo . \
     audiodelay $(FLUIDSYNTH) simsyn
 
 lib_LTLIBRARIES = libgstbuzztard.la
@@ -13,6 +13,7 @@ libgstbuzztard_la_SOURCES =
 
 libgstbuzztard_la_LIBADD = \
     childbin/libgstchildbin.la \
+    musicenums/libbtmusicenums.la \
     envelope/libgstenvelope.la \
     help/libgsthelp.la \
     note2frequency/libgstnote2frequency.la \

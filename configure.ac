@@ -1,4 +1,4 @@
-dnl $Id: configure.ac,v 1.25 2007-05-02 19:34:33 ensonic Exp $
+dnl $Id: configure.ac,v 1.26 2007-06-26 16:15:29 ensonic Exp $
 
 dnl
 dnl current  : the interface         : MAJOR + MINOR
@@ -224,6 +224,7 @@ AC_CONFIG_FILES( \
 	src/envelope/Makefile \
 	src/fluidsynth/Makefile \
 	src/help/Makefile \
+    src/musicenums/Makefile \
 	src/note2frequency/Makefile \
 	src/preset/Makefile \
 	src/propertymeta/Makefile \

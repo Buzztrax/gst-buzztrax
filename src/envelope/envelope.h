@@ -22,7 +22,7 @@
 #ifndef __GST_ENVELOPE_H__
 #define __GST_ENVELOPE_H__
 
-#include <gst/gst.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -41,7 +41,7 @@ struct _GstEnvelope {
 
   /* parameters */
   gdouble value;
-  
+
   /* < private > */
   gboolean dispose_has_run;		/* validate if dispose has run */
 };

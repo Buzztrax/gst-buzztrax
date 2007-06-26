@@ -1,3 +1,26 @@
+2007-06-26  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* src/Makefile.am:
+	* src/audiodelay/audiodelay.c: (gst_audio_delay_base_init):
+	* src/childbin/childbin.c: (gst_child_bin_get_type):
+	* src/envelope/envelope.h:
+	* src/fluidsynth/Makefile.am:
+	* src/help/help.h:
+	* src/musicenums/Makefile.am:
+	* src/musicenums/musicenums.c: (bt_trigger_switch_get_type):
+	* src/musicenums/musicenums.h:
+	* src/note2frequency/note2frequency.c:
+	(gst_note_2_frequency_tuning_get_type), (gst_note_2_frequency_new),
+	(gst_note_2_frequency_translate_cromatic),
+	(gst_note_2_frequency_translate_from_string),
+	(gst_note_2_frequency_translate_from_number),
+	(gst_note_2_frequency_get_property),
+	(gst_note_2_frequency_set_property),
+	(gst_note_2_frequency_dispose), (gst_note_2_frequency_class_init),
+	(gst_note_2_frequency_get_type):
+	  Build fixes and formatting. Add BtTriggerSwitch enum type (tri-state).
+
 2007-05-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c (gst_fluidsynth_do_seek):

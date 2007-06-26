@@ -1,7 +1,7 @@
 /* GStreamer
- * Copyright (C) 2006 Stefan Kost <ensonic@users.sf.net>
+ * Copyright (C) 2007 Stefan Kost <ensonic@users.sf.net>
  *
- * help.h: helper interface header for telement user docs
+ * musicenums.h: enum types for gstreamer elements
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -19,29 +19,23 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_HELP_H__
-#define __GST_HELP_H__
+#ifndef __BT_MUSICENUMS_H__
+#define __BT_MUSICENUMS_H__
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_HELP               (gst_help_get_type())
-#define GST_HELP(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_HELP, GstHelp))
-#define GST_IS_HELP(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_HELP))
-#define GST_HELP_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GST_TYPE_HELP, GstHelpInterface))
+typedef enum {
+  BT_TRIGGER_SWITCH_OFF=0,
+  BT_TRIGGER_SWITCH_ON=1,
+  BT_TRIGGER_SWITCH_EMPTY=255,
+} BtTriggerSwitch;
 
+#define BT_TYPE_TRIGGER_SWITCH   (bt_trigger_switch_get_type())
 
-typedef struct _GstHelp GstHelp; /* dummy object */
-typedef struct _GstHelpInterface GstHelpInterface;
-
-struct _GstHelpInterface
-{
-  GTypeInterface parent;
-};
-
-GType gst_help_get_type(void);
+extern GType bt_trigger_switch_get_type(void);
 
 G_END_DECLS
 
-#endif /* __GST_HELP_H__ */
+#endif /* __BT_MUSICENUMS_H__ */

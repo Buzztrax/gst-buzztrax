@@ -28,7 +28,7 @@
  * The interface provides a #GstChildBin:children property for the number of
  * children as well as two methods to add and remove children.
  */
- 
+
 #include "childbin.h"
 
 /**
@@ -88,7 +88,7 @@ GType
 gst_child_bin_get_type (void)
 {
   static GType type = 0;
-  
+
   if (type == 0) {
     const GTypeInfo info = {
       sizeof (GstChildBinInterface),
