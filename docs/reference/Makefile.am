@@ -9,6 +9,15 @@ DOC_MODULE=gst-buzztard
 # The top-level SGML file. You can change this if you want to.
 DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.sgml
 
+# Some parts are dynamic
+if FLUIDSYNTH_SUPPORT
+FLUIDSYNTH_LIBS = $(top_builddir)/src/fluidsynth/libgstfluidsynth.la
+FLUIDSYNTH_IGNORE_H =
+else
+FLUIDSYNTH_LIBS =
+FLUIDSYNTH_IGNORE_H = gstfluidsynth.h
+endif
+
 # The directory containing the source code. Relative to $(srcdir).
 # gtk-doc will search all .c & .h files beneath here for inline comments
 # documenting the functions and macros.
@@ -41,7 +50,7 @@ CFILE_GLOB=$(top_srcdir)/src/*/*.c
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=config.h
+IGNORE_HFILES=config.h $(FLUIDSYNTH_IGNORE_H)
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -56,12 +65,6 @@ content_files=
 # e.g. expand_content_files=running.sgml
 expand_content_files=
 
-if FLUIDSYNTH_SUPPORT
-FLUIDSYNTH = $(top_builddir)/src/fluidsynth/libgstfluidsynth.la
-else
-FLUIDSYNTH =
-endif
-
 
 # CFLAGS and LDFLAGS for compiling gtkdoc-scangobj with your library.
 # Only needed if you are using gtkdoc-scangobj to dynamically query widget
@@ -72,7 +75,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src $(BASE_DEPS_CFLAGS)
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
   $(top_builddir)/src/libgstbuzztard.la \
   $(top_builddir)/src/audiodelay/libgstaudiodelay.la \
-  $(FLUIDSYNTH) \
+  $(FLUIDSYNTH_LIBS) \
   $(top_builddir)/src/simsyn/libgstsimsyn.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.

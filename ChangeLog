@@ -1,6 +1,11 @@
 2007-06-28  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
+	  Also don't parse the header, if fluidsynth is disabled.
+
+2007-06-28  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/Makefile.am:
 	  Don't try to link to fluidsynth in docs if its disabled.
 
 2007-06-26  Stefan Kost  <ensonic@users.sf.net>
