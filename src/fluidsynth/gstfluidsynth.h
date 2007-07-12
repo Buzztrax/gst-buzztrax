@@ -1,7 +1,7 @@
 /* GStreamer
  * Copyright (C) 2007 Josh Green <josh@users.sf.net>
  *
- * Adapted from symsyn synthesizer plugin in gst-buzztard source.
+ * Adapted from simsyn synthesizer plugin in gst-buzztard source.
  * Copyright (C) 2005 Stefan Kost <ensonic@users.sf.net>
  *
  * gstfluidsynth.h: GStreamer wrapper for FluidSynth
@@ -33,7 +33,6 @@
 #include <fluidsynth.h>
 
 G_BEGIN_DECLS
-
 
 #define GST_TYPE_FLUIDSYNTH            (gst_fluidsynth_get_type())
 #define GST_FLUIDSYNTH(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_FLUIDSYNTH,GstFluidsynth))

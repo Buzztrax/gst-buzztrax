@@ -1226,6 +1226,7 @@ GType gst_sim_syn_get_type (void)
   return type;
 }
 
+
 static gboolean
 plugin_init (GstPlugin * plugin)
 {

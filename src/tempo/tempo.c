@@ -33,6 +33,10 @@
  * metadata describes the overall tempo, but the iface allows to change the
  * tempo during playback.
  */
+/*
+ * if this is in gstreamer we could enhance jacksink to call:
+ * jack_set_timebase_callback()
+ */
 
 #include "tempo.h"
 
@@ -92,7 +96,7 @@ GType
 gst_tempo_get_type (void)
 {
   static GType type = 0;
-  
+
   if (type == 0) {
     const GTypeInfo info = {
       sizeof (GstTempoInterface),

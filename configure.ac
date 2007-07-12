@@ -1,4 +1,4 @@
-dnl $Id: configure.ac,v 1.26 2007-06-26 16:15:29 ensonic Exp $
+dnl $Id: configure.ac,v 1.27 2007-07-12 11:49:46 ensonic Exp $
 
 dnl
 dnl current  : the interface         : MAJOR + MINOR
@@ -176,16 +176,17 @@ AC_SUBST(GST_PLUGIN_LDFLAGS)
 
 dnl - Check for FluidSynth
 PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
-    FLUIDSYNTH_SUPPORT=1, FLUIDSYNTH_SUPPORT=0)
+    HAVE_FLUIDSYNTH=1, HAVE_FLUIDSYNTH=0)
 AC_SUBST(FLUIDSYNTH_CFLAGS)
 AC_SUBST(FLUIDSYNTH_LIBS)
-AM_CONDITIONAL(FLUIDSYNTH_SUPPORT, test "$FLUIDSYNTH_SUPPORT" = "1")
+dnl AC_DEFINE_UNQUOTED(HAVE_FLUIDSYNTH, $HAVE_FLUIDSYNTH, [have fluidsynth])
+AM_CONDITIONAL(FLUIDSYNTH_SUPPORT, test "$HAVE_FLUIDSYNTH" = "1")
 
 
 dnl set license and copyright notice
 AC_DEFINE(GST_PACKAGE_ORIGIN, "http://www.buzztard.org", [Plugin package origin])
 AC_SUBST(GST_PACKAGE_ORIGIN)
-AC_DEFINE(GST_PACKAGE_NAME, "gst-buzztard", [Plugin package name])
+AC_DEFINE(GST_PACKAGE_NAME, "have fluidsynth", [Plugin package name])
 AC_SUBST(GST_PACKAGE_NAME)
 
 
@@ -198,12 +199,9 @@ AC_SUBST(gst_prefix)
 
 dnl test for availability of check unittest package (with a relative new function)
 dnl @todo: if we configure without --enable-debug most tests wont work
-AC_CHECK_HEADER( check.h, \
-  AC_CHECK_LIB( check, tcase_set_timeout, \
-    AM_CONDITIONAL(BUILD_CHECK_TESTS, true), \
-    AM_CONDITIONAL(BUILD_CHECK_TESTS, false) \
-  ), \
-  AM_CONDITIONAL(BUILD_CHECK_TESTS, false) \
+PKG_CHECK_MODULES(CHECK, check >= 0.9.2,
+  AM_CONDITIONAL(BUILD_CHECK_TESTS, true),
+  AM_CONDITIONAL(BUILD_CHECK_TESTS, false)
 )
 
 dnl Check for gtk-doc.

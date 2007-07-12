@@ -1,3 +1,17 @@
+2007-07-12  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  Use pkg-config to locate check.
+
+	* src/fluidsynth/gstfluidsynth.h:
+	  Fix typo.
+
+	* src/simsyn/simsyn.c:
+	  Formatting.
+
+	* src/tempo/tempo.c: (gst_tempo_get_type):
+	  Note about how this can help jacksink.
+
 2007-06-28  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
