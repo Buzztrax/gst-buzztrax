@@ -46,6 +46,7 @@ GType gst_property_meta_get_type(void);
 
 gchar *gst_property_meta_describe_property (GstPropertyMeta *self, glong index, GValue *value);
 
+extern GQuark gst_property_meta_quark;
 extern GQuark gst_property_meta_quark_min_val;
 extern GQuark gst_property_meta_quark_max_val;
 extern GQuark gst_property_meta_quark_def_val;

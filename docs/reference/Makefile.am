@@ -11,10 +11,10 @@ DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.sgml
 
 # Some parts are dynamic
 if FLUIDSYNTH_SUPPORT
-FLUIDSYNTH_LIBS = $(top_builddir)/src/fluidsynth/libgstfluidsynth.la
+FLUIDSYNTH_LA = $(top_builddir)/src/fluidsynth/libgstfluidsynth.la
 FLUIDSYNTH_IGNORE_H =
 else
-FLUIDSYNTH_LIBS =
+FLUIDSYNTH_LA =
 FLUIDSYNTH_IGNORE_H = gstfluidsynth.h
 endif
 
@@ -75,7 +75,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src $(BASE_DEPS_CFLAGS)
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
   $(top_builddir)/src/libgstbuzztard.la \
   $(top_builddir)/src/audiodelay/libgstaudiodelay.la \
-  $(FLUIDSYNTH_LIBS) \
+  $(FLUIDSYNTH_LA) \
   $(top_builddir)/src/simsyn/libgstsimsyn.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.

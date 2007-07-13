@@ -1,4 +1,4 @@
-# $Id: gst-buzztard-sections.txt,v 1.12 2007-05-04 15:00:59 ensonic Exp $
+# $Id: gst-buzztard-sections.txt,v 1.13 2007-07-13 18:52:18 ensonic Exp $
 # :mode=html:
 
 # please add section in the alpahbetical order using the following template
@@ -131,6 +131,7 @@ gst_preset_get_type
 GstPropertyMeta
 GstPropertyMetaFlags
 gst_property_meta_describe_property
+gst_property_meta_quark
 gst_property_meta_quark_min_val
 gst_property_meta_quark_max_val
 gst_property_meta_quark_def_val

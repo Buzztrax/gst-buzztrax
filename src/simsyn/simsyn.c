@@ -292,6 +292,7 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
 
   paramspec=g_param_spec_string("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
           NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
+  g_param_spec_set_qdata(paramspec,gst_property_meta_quark,GINT_TO_POINTER(TRUE));
   g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_NONE));
   g_param_spec_set_qdata(paramspec,gst_property_meta_quark_no_val,NULL);
   g_object_class_install_property(gobject_class,PROP_NOTE, paramspec);
@@ -300,35 +301,29 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
           GST_TYPE_SIM_SYN_WAVE, /* enum type */
           GST_SIM_SYN_WAVE_SINE, /* default value */
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
   g_object_class_install_property(gobject_class, PROP_WAVE, paramspec);
 
   paramspec=g_param_spec_double("volume", "Volume", "Volume of tone",
           0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
   g_object_class_install_property(gobject_class, PROP_VOLUME, paramspec);
 
   paramspec=g_param_spec_double("decay", "Decay", "Volume decay of the tone in seconds",
           0.001, 4.0, 0.5,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
   g_object_class_install_property(gobject_class, PROP_DECAY, paramspec);
 
   paramspec=g_param_spec_enum("filter", "Filtertype", "Type of audio filter",
           GST_TYPE_SIM_SYN_FILTER,    /* enum type */
           GST_SIM_SYN_FILTER_LOWPASS, /* default value */
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
   g_object_class_install_property(gobject_class, PROP_FILTER, paramspec);
 
   paramspec=g_param_spec_double("cut-off", "Cut-Off", "Audio filter cut-off frequency",
           0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
   g_object_class_install_property(gobject_class, PROP_CUTOFF, paramspec);
 
   paramspec=g_param_spec_double("resonance", "Resonance", "Audio filter resonance",
           0.7, 25.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_STATE));
   g_object_class_install_property(gobject_class, PROP_RESONANCE, paramspec);
 }
 

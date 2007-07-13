@@ -1,3 +1,18 @@
+2007-07-13  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/Makefile.am:
+	  Fix build.
+
+	* docs/reference/gst-buzztard-sections.txt:
+	* src/propertymeta/propertymeta.c: (gst_property_meta_base_init),
+	(gst_property_meta_get_type):
+	* src/propertymeta/propertymeta.h:
+	  Add propertymeta flag that indicates that property meta is used for
+	  the property.
+
+	* src/simsyn/simsyn.c: (gst_sim_syn_class_init):
+	  Make use of the flag.
+
 2007-07-12  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
