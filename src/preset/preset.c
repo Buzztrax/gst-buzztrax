@@ -43,6 +43,8 @@
 #include "preset.h"
 #include "propertymeta/propertymeta.h"
 
+#include "stdlib.h"
+
 #define GST_CAT_DEFAULT preset_debug
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
