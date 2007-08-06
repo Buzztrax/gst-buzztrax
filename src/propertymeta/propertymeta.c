@@ -26,7 +26,7 @@
  * #GObject properties.
  *
  * Furthermore it adds the gst_property_meta_describe_property() method that
- * returns a string description of a property value.
+ * builds a string description of a property value.
  */
 
 #include "propertymeta.h"

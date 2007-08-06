@@ -1,3 +1,10 @@
+2007-08-06  Stefan Kost  <ensonic@users.sf.net>
+
+
+	* src/propertymeta/propertymeta.c:
+	* src/simsyn/simsyn.c:
+	  Sync with seeking fixes of audiotestsrc. Fix filter init.
+
 2007-08-03  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/preset.c:

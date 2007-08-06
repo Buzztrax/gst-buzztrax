@@ -348,7 +348,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
 
   /* set base parameters */
-  src->volume = 1.0;
+  src->volume = 0.8;
   src->freq = 0.0;
   src->note = NULL;
   src->decay = 0.5;
@@ -367,6 +367,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->filter = GST_SIM_SYN_FILTER_LOWPASS;
   src->cutoff = 0.8;
   src->resonance = 0.8;
+  src->flt_res=1.0/src->resonance;
   gst_sim_syn_change_filter (src);
 }
 
@@ -417,7 +418,8 @@ gst_sim_syn_query (GstBaseSrc * basesrc, GstQuery * query)
           switch (dest_fmt) {
             case GST_FORMAT_TIME:
               /* samples to time */
-              dest_val = src_val / src->samplerate;
+              dest_val = gst_util_uint64_scale_int (src_val, GST_SECOND,
+                src->samplerate);
               break;
             default:
               goto error;
@@ -427,7 +429,8 @@ gst_sim_syn_query (GstBaseSrc * basesrc, GstQuery * query)
           switch (dest_fmt) {
             case GST_FORMAT_DEFAULT:
               /* time to samples */
-              dest_val = src_val * src->samplerate;
+              dest_val = gst_util_uint64_scale_int (src_val, src->samplerate,
+                GST_SECOND);
               break;
             default:
               goto error;
@@ -822,7 +825,7 @@ gst_sim_syn_change_wave (GstSimSyn * src)
       src->process = gst_sim_syn_create_sine_table;
       break;
     default:
-      GST_ERROR ("invalid wave-form");
+      GST_ERROR ("invalid wave-form: %d",src->wave);
       break;
   }
 }
@@ -867,6 +870,7 @@ gst_sim_syn_change_filter (GstSimSyn * src)
       src->apply_filter = gst_sim_syn_filter_bandstop;
       break;
     default:
+      GST_ERROR ("invalid filter-type: %d",src->filter);
       break;
   }
 }
@@ -1068,24 +1072,30 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       }
       break;
     case PROP_WAVE:
+      //GST_INFO("change wave %d -> %d",g_value_get_enum (value),src->wave);
       src->wave = g_value_get_enum (value);
       gst_sim_syn_change_wave (src);
       break;
     case PROP_VOLUME:
+      //GST_INFO("change volume %lf -> %lf",g_value_get_double (value),src->volume);
       src->volume = g_value_get_double (value);
       gst_sim_syn_change_volume (src);
       break;
     case PROP_DECAY:
+      //GST_INFO("change decay %lf -> %lf",g_value_get_double (value),src->decay);
       src->decay = g_value_get_double (value);
       break;
     case PROP_FILTER:
+      //GST_INFO("change filter %d -> %d",g_value_get_enum (value),src->filter);
       src->filter = g_value_get_enum (value);
       gst_sim_syn_change_filter (src);
       break;
     case PROP_CUTOFF:
+      //GST_INFO("change cutoff %lf -> %lf",g_value_get_double (value),src->cutoff);
       src->cutoff = g_value_get_double (value);
       break;
     case PROP_RESONANCE:
+      //GST_INFO("change resonance %lf -> %lf",g_value_get_double (value),src->resonance);
       src->resonance = g_value_get_double (value);
       src->flt_res=1.0/src->resonance;
       break;
