@@ -407,6 +407,12 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
   glong val;
   guint i, num_samples = GST_BUFFER_SIZE (outbuf) / sizeof (gint16);
   guint rb_in, rb_out;
+  
+  /* flush ring_buffer on DISCONT */
+  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_DISCONT)) {
+    memset (filter->ring_buffer, 0, sizeof (gint16) * filter->max_delaytime);
+    filter->rb_ptr = 0;
+  }
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base))

@@ -1010,6 +1010,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
       src->apply_filter (src, (gint16 *) GST_BUFFER_DATA (buf));
   } else {
     gst_sim_syn_create_silence (src, (gint16 *) GST_BUFFER_DATA (buf));
+    GST_BUFFER_FLAG_SET(buf,GST_BUFFER_FLAG_GAP);
   }
 
   *buffer = buf;

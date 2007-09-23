@@ -1,5 +1,13 @@
 2007-09-23  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/audiodelay/audiodelay.c:
+	  Flushing delayline on DISCONT (seeking).
+
+	* src/simsyn/simsyn.c:
+	  Mark silent buffers with GAP flag.
+
+2007-09-23  Stefan Kost  <ensonic@users.sf.net>
+
 	* Makefile.am:
 	* configure.ac:
 	  Improved lcov detection.
