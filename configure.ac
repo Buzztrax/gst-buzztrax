@@ -1,4 +1,4 @@
-dnl $Id: configure.ac,v 1.28 2007-09-23 14:43:15 ensonic Exp $
+dnl $Id: configure.ac,v 1.29 2007-10-18 10:50:50 ensonic Exp $
 
 dnl
 dnl current  : the interface         : MAJOR + MINOR
@@ -64,6 +64,7 @@ AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
+AC_PROG_SED
 AC_ISC_POSIX
 AC_PROG_LIBTOOL
 AM_PROG_CC_STDC
@@ -125,9 +126,9 @@ if test "$enable_coverage" = "yes"; then
 
   AC_PATH_PROG(locv_path, [lcov], [no])
   if test "x$lcov_path" != "xno" ; then
-    LCOV_VERSION=`lcov --version|head -n 1| 's/^.* version //'`
-    LCOV_MAJOR=`echo $LCOV_VERSION | cut -d. -f1 | sed s/[a-zA-Z\-].*//g`
-    LCOV_MINOR=`echo $LCOV_VERSION | cut -d. -f2 | sed s/[a-zA-Z\-].*//g`
+    LCOV_VERSION=`lcov --version|head -n 1| $SED 's/^.* version //'`
+    LCOV_MAJOR=`echo $LCOV_VERSION | cut -d. -f1 | $SED s/[a-zA-Z\-].*//g`
+    LCOV_MINOR=`echo $LCOV_VERSION | cut -d. -f2 | $SED s/[a-zA-Z\-].*//g`
     if [[ "$LCOV_MAJOR" -lt "1" ]]; then
       AC_MSG_WARN([lcov >= 1.6 is required, you have $LCOV_VERSION])
       lcov_path="no"
