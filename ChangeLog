@@ -1,6 +1,11 @@
 2007-11-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/preset.c:
+	  Sync again.
+
+2007-11-20  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/preset/preset.c:
 	* src/preset/preset.h:
 	  Sync with the upstream version.
 
