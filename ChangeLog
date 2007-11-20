@@ -1,5 +1,17 @@
 2007-11-20  Stefan Kost  <ensonic@users.sf.net>
 
+	* autogen.sh:
+	* configure.ac:
+	* docs/reference/gst-buzztard.types:
+	* src/Makefile.am:
+	  Build the preset iface conditionally.
+
+	* src/audiodelay/audiodelay.c:
+	* src/simsyn/simsyn.c:
+	  Use GST_BUFFER_FLAG_GAP for silent buffers.
+
+2007-11-20  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/preset/preset.c:
 	  Sync again.
 

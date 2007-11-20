@@ -1,4 +1,4 @@
-dnl $Id: configure.ac,v 1.29 2007-10-18 10:50:50 ensonic Exp $
+dnl $Id: configure.ac,v 1.30 2007-11-20 21:43:22 ensonic Exp $
 
 dnl
 dnl current  : the interface         : MAJOR + MINOR
@@ -189,6 +189,16 @@ AC_SUBST(GST_PLUGIN_CFLAGS)
 GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*' $COVERAGE_LIBS"
 AC_SUBST(GST_PLUGIN_LDFLAGS)
 
+dnl - Check for modules already commited upstream
+ac_cflags_save="$CFLAGS"
+ac_ldflags_save="$LDFLAGS"
+CFLAGS="$CFLAGS $BASE_DEPS_CFLAGS"
+LDFLAGS="$LDFLAGS $BASE_DEPS_LIBS"
+AC_CHECK_HEADERS(gst/gstpreset.h)
+AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET_H" = "1")
+CFLAGS="$ac_cflags_save"
+LDFLAGS="$ac_ldflags_save"
+
 dnl - Check for FluidSynth
 PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
     HAVE_FLUIDSYNTH=1, HAVE_FLUIDSYNTH=0)
@@ -237,11 +247,11 @@ AC_CONFIG_FILES( \
 	src/envelope/Makefile \
 	src/fluidsynth/Makefile \
 	src/help/Makefile \
-    src/musicenums/Makefile \
+	src/musicenums/Makefile \
 	src/note2frequency/Makefile \
 	src/preset/Makefile \
 	src/propertymeta/Makefile \
-    src/simsyn/Makefile \
+	src/simsyn/Makefile \
 	src/tempo/Makefile \
 	tests/Makefile
 )

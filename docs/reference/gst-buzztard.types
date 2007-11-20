@@ -17,3 +17,4 @@ gst_tempo_get_type
 #include <note2frequency/note2frequency.h>
 
 gst_note_2_frequency_get_type
+

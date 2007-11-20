@@ -4,7 +4,16 @@ else
 FLUIDSYNTH =
 endif
 
-SUBDIRS = childbin envelope help musicenums note2frequency preset propertymeta tempo . \
+if BUILD_PRESET_IFACE
+PRESET_IFACE_MOD = preset
+PRESET_FFACE_LIB = preset/libgstpreset.la
+else
+PRESET_IFACE_MOD =
+PRESET_FFACE_LIB =
+endif
+
+SUBDIRS = childbin envelope help musicenums note2frequency \
+    $(PRESET_IFACE_MOD) propertymeta tempo . \
     audiodelay $(FLUIDSYNTH) simsyn
 
 lib_LTLIBRARIES = libgstbuzztard.la
@@ -17,7 +26,7 @@ libgstbuzztard_la_LIBADD = \
     envelope/libgstenvelope.la \
     help/libgsthelp.la \
     note2frequency/libgstnote2frequency.la \
-    preset/libgstpreset.la \
+    $(PRESET_IFACE_LIB) \
     propertymeta/libgstpropertymeta.la \
     tempo/libgsttempo.la \
     $(BASE_DEPS_LIBS)

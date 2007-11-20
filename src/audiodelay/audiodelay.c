@@ -40,6 +40,8 @@
 #include "config.h"
 #endif
 
+#include <stdlib.h>
+
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
 #include <gst/controller/gstcontroller.h>
@@ -407,16 +409,13 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
   glong val;
   guint i, num_samples = GST_BUFFER_SIZE (outbuf) / sizeof (gint16);
   guint rb_in, rb_out;
+  gint32 sum_fx=0;
   
   /* flush ring_buffer on DISCONT */
-  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_DISCONT)) {
+  if (GST_BUFFER_FLAG_IS_SET (outbuf,GST_BUFFER_FLAG_DISCONT)) {
     memset (filter->ring_buffer, 0, sizeof (gint16) * filter->max_delaytime);
     filter->rb_ptr = 0;
   }
-
-  /* don't process data in passthrough-mode */
-  if (gst_base_transform_is_passthrough (base))
-    return GST_FLOW_OK;
 
   timestamp = gst_segment_to_stream_time (&base->segment, GST_FORMAT_TIME,
     GST_BUFFER_TIMESTAMP (outbuf));
@@ -432,17 +431,39 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
         rb_in - delaytime :
         (rb_in + filter->max_delaytime) - delaytime;
 
-  for (i = 0; i < num_samples; i++) {
-    val_fx = (gdouble)filter->ring_buffer[rb_out];
-    val_dry = (gdouble)*data;
-    val = (glong)(val_fx * feedback + val_dry);
-    filter->ring_buffer[rb_in] = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
-    val = (glong)(wet * val_fx + dry * val_dry);
-    *data++ = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
-    rb_in++; if(rb_in == filter->max_delaytime) rb_in = 0;
-    rb_out++; if(rb_out == filter->max_delaytime) rb_out = 0;
+  if (G_UNLIKELY(GST_BUFFER_FLAG_IS_SET (outbuf,GST_BUFFER_FLAG_GAP) ||
+    gst_base_transform_is_passthrough (base))) {
+    /* input is silence */
+  
+    for (i = 0; i < num_samples; i++) {
+      val_fx = (gdouble)filter->ring_buffer[rb_out];
+      sum_fx += abs (filter->ring_buffer[rb_out]);
+      val = (glong)(val_fx * feedback);
+      filter->ring_buffer[rb_in] = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
+      val = (glong)(wet * val_fx);
+      *data++ = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
+      rb_in++; if(rb_in == filter->max_delaytime) rb_in = 0;
+      rb_out++; if(rb_out == filter->max_delaytime) rb_out = 0;
+    }
+  }
+  else {
+    for (i = 0; i < num_samples; i++) {
+      val_fx = (gdouble)filter->ring_buffer[rb_out];
+      sum_fx += abs (filter->ring_buffer[rb_out]);
+      val_dry = (gdouble)*data;
+      val = (glong)(val_fx * feedback + val_dry);
+      filter->ring_buffer[rb_in] = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
+      val = (glong)(wet * val_fx + dry * val_dry);
+      *data++ = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
+      rb_in++; if(rb_in == filter->max_delaytime) rb_in = 0;
+      rb_out++; if(rb_out == filter->max_delaytime) rb_out = 0;
+    }
   }
   filter->rb_ptr=rb_in;
+  
+  if (GST_BUFFER_FLAG_IS_SET (outbuf,GST_BUFFER_FLAG_GAP) && sum_fx) {
+    GST_BUFFER_FLAG_UNSET (outbuf,GST_BUFFER_FLAG_GAP);
+  }
 
   return GST_FLOW_OK;
 }
