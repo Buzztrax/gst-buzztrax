@@ -6,10 +6,10 @@ endif
 
 if BUILD_PRESET_IFACE
 PRESET_IFACE_MOD = preset
-PRESET_FFACE_LIB = preset/libgstpreset.la
+PRESET_IFACE_LIB = preset/libgstpreset.la
 else
 PRESET_IFACE_MOD =
-PRESET_FFACE_LIB =
+PRESET_IFACE_LIB =
 endif
 
 SUBDIRS = childbin envelope help musicenums note2frequency \

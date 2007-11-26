@@ -1,4 +1,4 @@
-dnl $Id: configure.ac,v 1.30 2007-11-20 21:43:22 ensonic Exp $
+dnl $Id: configure.ac,v 1.31 2007-11-26 22:49:54 ensonic Exp $
 
 dnl
 dnl current  : the interface         : MAJOR + MINOR
@@ -194,8 +194,8 @@ ac_cflags_save="$CFLAGS"
 ac_ldflags_save="$LDFLAGS"
 CFLAGS="$CFLAGS $BASE_DEPS_CFLAGS"
 LDFLAGS="$LDFLAGS $BASE_DEPS_LIBS"
-AC_CHECK_HEADERS(gst/gstpreset.h)
-AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET_H" = "1")
+AC_CHECK_HEADERS(gst/gstpreset.h,[HAVE_GST_GSTPRESET_H="1"],[HAVE_GST_GSTPRESET_H="0"])
+AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET_H" = "0")
 CFLAGS="$ac_cflags_save"
 LDFLAGS="$ac_ldflags_save"
 
