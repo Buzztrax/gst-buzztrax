@@ -1,4 +1,4 @@
-dnl $Id: configure.ac,v 1.31 2007-11-26 22:49:54 ensonic Exp $
+dnl $Id: configure.ac,v 1.32 2007-11-27 13:50:20 ensonic Exp $
 
 dnl
 dnl current  : the interface         : MAJOR + MINOR
@@ -191,12 +191,15 @@ AC_SUBST(GST_PLUGIN_LDFLAGS)
 
 dnl - Check for modules already commited upstream
 ac_cflags_save="$CFLAGS"
+ac_cppflags_save="$CPPFLAGS"
 ac_ldflags_save="$LDFLAGS"
 CFLAGS="$CFLAGS $BASE_DEPS_CFLAGS"
+CPPFLAGS="$CPPFLAGS $BASE_DEPS_CFLAGS"
 LDFLAGS="$LDFLAGS $BASE_DEPS_LIBS"
 AC_CHECK_HEADERS(gst/gstpreset.h,[HAVE_GST_GSTPRESET_H="1"],[HAVE_GST_GSTPRESET_H="0"])
 AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET_H" = "0")
 CFLAGS="$ac_cflags_save"
+CPPFLAGS="$ac_cppflags_save"
 LDFLAGS="$ac_ldflags_save"
 
 dnl - Check for FluidSynth

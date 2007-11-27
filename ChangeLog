@@ -1,6 +1,11 @@
 2007-11-27  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
+          Fix configure magic, by also saving and setting cppflags.
+
+2007-11-27  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
 	* src/Makefile.am:
 	  Fix the broken build for internal preset iface use.
 
