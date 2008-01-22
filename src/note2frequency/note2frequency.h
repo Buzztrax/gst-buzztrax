@@ -55,6 +55,8 @@ typedef struct _GstNote2FrequencyClass GstNote2FrequencyClass;
 
 /**
  * GstNote2Frequency:
+ *
+ * Opaque object instance.
  */
 struct _GstNote2Frequency {
   GObject parent;
