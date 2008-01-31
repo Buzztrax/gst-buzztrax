@@ -259,6 +259,10 @@ gst_audio_delay_init (GstAudioDelay *filter, GstAudioDelayClass * klass)
   gst_audio_delay_calculate_tick_time (filter);
 
   filter->ring_buffer = NULL;
+  
+#ifdef HAVE_GST_0_10_17
+  gst_base_transform_set_gap_aware (GST_BASE_TRANSFORM (this), TRUE);
+#endif
 }
 
 static void

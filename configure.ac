@@ -202,6 +202,15 @@ CFLAGS="$ac_cflags_save"
 CPPFLAGS="$ac_cppflags_save"
 LDFLAGS="$ac_ldflags_save"
 
+AC_MSG_CHECKING([gstreamer version >= 0.10.17])
+if pkg-config --atleast-version=0.10.17 gstreamer-0.10; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_GST_0_10_17, [1], [Define to 1 if we can use API new in gstreamer-0.10.17])
+else
+  AC_MSG_RESULT(no)
+fi
+
+
 dnl - Check for FluidSynth
 PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
     HAVE_FLUIDSYNTH=1, HAVE_FLUIDSYNTH=0)
