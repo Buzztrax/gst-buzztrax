@@ -5,8 +5,11 @@ Please turn you browser to http://www.buzztard.org to learn what this project
 is about. Buzztard is free software and distributed under the LGPL.
 
 = intro =
-This module contains experimental code that extends gstreamer. The extensions
-may be required to build a CVS version of buzztard.
+This module contains experimental code that extends gstreamer. The library will
+never be ABI stable. if you are interested in any code here, please help to
+mature it in order to get it into upstream.
+The extensions are quite likely to be required to build a SVN version of
+buzztard.
 
 = installing locally =
 You can install this module locally too.

@@ -1,3 +1,9 @@
+2008-02-01  Stefan Kost  <ensonic@users.sf.net>
+
+	* README:
+	* src/audiodelay/audiodelay.c:
+	  Fix the build.
+
 2008-01-31  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
