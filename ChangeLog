@@ -1,5 +1,10 @@
 2008-03-09  Stefan Kost  <ensonic@users.sf.net>
 
+	* configure.ac:
+	  Bump version correctly.
+
+2008-03-09  Stefan Kost  <ensonic@users.sf.net>
+
 	* NEWS:
 	* configure.ac:
 	  Prepare the release.
