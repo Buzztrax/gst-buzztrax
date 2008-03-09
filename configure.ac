@@ -11,7 +11,7 @@ dnl 3: when the interface has changed (removing functions) : MAJOR++, MINOR=0, M
 dnl
 
 dnl Initialise the autoconf/automake tool
-AC_INIT([gst-buzztard], [0.2.0], [buzztard-devel@lists.sourceforge.net])
+AC_INIT([gst-buzztard], [0.3.0], [buzztard-devel@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([ChangeLog])
 AC_CONFIG_HEADERS(config.h)
 

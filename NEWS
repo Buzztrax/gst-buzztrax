@@ -1,3 +1,7 @@
+0.3.0 a tale of ice and darkness (09.Mar.2008)
+================================================================================
+Improvements on the preset interface. Support for sparse streams (GAP flag).
+
 0.2.0 sunrise release (03.May.2007)
 ================================================================================
 Two new interfaces for preset and help have been added. Fluidsynth generator
