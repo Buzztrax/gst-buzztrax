@@ -29,7 +29,9 @@ dnl GSTBT_MAJORMINOR=0.10
 
 dnl that is needed to figure the directory name, where the plugin goes to
 GST_MAJORMINOR=0.10
+AC_DEFINE_UNQUOTED(GST_MAJORMINOR, "$GST_MAJORMINOR", [gstreamer series])
 AC_SUBST(GST_MAJORMINOR)
+
 
 AC_SUBST(GSTBT_MAJOR_VERSION)
 AC_SUBST(GSTBT_MINOR_VERSION)
@@ -223,7 +225,7 @@ AM_CONDITIONAL(FLUIDSYNTH_SUPPORT, test "$HAVE_FLUIDSYNTH" = "1")
 dnl set license and copyright notice
 AC_DEFINE(GST_PACKAGE_ORIGIN, "http://www.buzztard.org", [Plugin package origin])
 AC_SUBST(GST_PACKAGE_ORIGIN)
-AC_DEFINE(GST_PACKAGE_NAME, "have fluidsynth", [Plugin package name])
+AC_DEFINE(GST_PACKAGE_NAME, "gst-buzztard", [Plugin package name])
 AC_SUBST(GST_PACKAGE_NAME)
 
 
@@ -247,6 +249,16 @@ GTK_DOC_CHECK([1.4])
 dnl Substitutes
 AC_SUBST(BASE_DEPS_LIBS)
 AC_SUBST(BASE_DEPS_CFLAGS)
+
+# needed for preset iface
+full_var=${datadir}
+while true; do
+    new_full_var="`eval echo $full_var`"
+    if test "x$new_full_var" = "x$full_var"; then break; fi
+    full_var=$new_full_var
+done
+AC_DEFINE_UNQUOTED(DATADIR, "$full_var", [data dir])
+AC_SUBST(DATADIR)
 
 AC_CONFIG_FILES( \
 	libgstbuzztard.pc \

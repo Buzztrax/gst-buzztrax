@@ -740,11 +740,11 @@ gst_sim_syn_filter_lowpass (GstSimSyn * src, gint16 * samples)
   gint i;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
-	src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
-	src->flt_mid += (src->flt_high * src->cutoff);
+    src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
+    src->flt_mid += (src->flt_high * src->cutoff);
     src->flt_low += (src->flt_mid * src->cutoff);
 
-	samples[i]=(gint16)CLAMP((glong)src->flt_low,G_MININT16,G_MAXINT16);
+    samples[i]=(gint16)CLAMP((glong)src->flt_low,G_MININT16,G_MAXINT16);
   }
 }
 
@@ -754,11 +754,11 @@ gst_sim_syn_filter_hipass (GstSimSyn * src, gint16 * samples)
   gint i;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
-	src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
-	src->flt_mid += (src->flt_high * src->cutoff);
+    src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
+    src->flt_mid += (src->flt_high * src->cutoff);
     src->flt_low += (src->flt_mid * src->cutoff);
 
-	samples[i]=(gint16)CLAMP((glong)src->flt_high,G_MININT16,G_MAXINT16);
+    samples[i]=(gint16)CLAMP((glong)src->flt_high,G_MININT16,G_MAXINT16);
   }
 }
 
@@ -768,11 +768,11 @@ gst_sim_syn_filter_bandpass (GstSimSyn * src, gint16 * samples)
   gint i;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
-	src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
-	src->flt_mid += (src->flt_high * src->cutoff);
+    src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
+    src->flt_mid += (src->flt_high * src->cutoff);
     src->flt_low += (src->flt_mid * src->cutoff);
 
-	samples[i]=(gint16)CLAMP((glong)src->flt_mid,G_MININT16,G_MAXINT16);
+    samples[i]=(gint16)CLAMP((glong)src->flt_mid,G_MININT16,G_MAXINT16);
   }
 }
 
@@ -782,11 +782,11 @@ gst_sim_syn_filter_bandstop (GstSimSyn * src, gint16 * samples)
   gint i;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
-	src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
-	src->flt_mid += (src->flt_high * src->cutoff);
+    src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
+    src->flt_mid += (src->flt_high * src->cutoff);
     src->flt_low += (src->flt_mid * src->cutoff);
 
-	samples[i]=(gint16)CLAMP((glong)(src->flt_low+src->flt_high),G_MININT16,G_MAXINT16);
+    samples[i]=(gint16)CLAMP((glong)(src->flt_low+src->flt_high),G_MININT16,G_MAXINT16);
   }
 }
 

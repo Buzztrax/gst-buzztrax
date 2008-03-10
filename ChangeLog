@@ -1,3 +1,12 @@
+2008-03-10  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* src/preset/preset.c:
+	  Sync with official patch.
+
+	* src/simsyn/simsyn.c:
+	  Whitespace only change.
+
 2008-03-09  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

@@ -32,30 +32,27 @@
  * The interface comes with a default implementation that servers most plugins.
  * Wrapper plugins will override most methods to implement support for the
  * native preset format of those wrapped plugins.
- * One method that is useful to be overridde is gst_preset_get_property_names().
+ * One method that is useful to be overridden is gst_preset_get_property_names().
  * With that one can control which properties are saved and in which order.
  */
 /* @todo:
- * - we need locks to avoid two instances manipulating the preset list -> flock
- *   better save the new file to a tempfile and then rename
+ * - we need locks to avoid two instances writing the preset file
+ *   -> flock(fileno()), http://www.ecst.csuchico.edu/~beej/guide/ipc/flock.html
+ *   -> better save the new file to a tempfile and then rename?
+ *
  * - need to add support for GstChildProxy
- * - how can we support both Preferences and Presets,
- *   - preferences = static settings, configurations (non controlable)
- *     e.g. alsasink:device
- *   - preset = a snapshot of dynamic params
- *     e.g. volume:volume
- *   - we could use a flag for _get_preset_names()
- *   - we could even use tags as part of preset metadata
- *     e.g. quality, performance, preset, config
- *     if there are some agreed tags, one could say, please optimize the pipline
- *     for 'performance'
+ *
  * - should there be a 'preset-list' property to get the preset list
  *   (and to connect a notify:: to to listen for changes)
+ *   we could use gnome_vfs_monitor_add() to monitor the user preset_file.
+ *
  * - should there be a 'preset-name' property so that we can set a preset via
  *   gst-launch
- *
- * - do we want to ship presets for some elements?
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "preset.h"
 #include "propertymeta/propertymeta.h"
@@ -68,7 +65,8 @@
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
 static GQuark preset_list_quark = 0;
-static GQuark preset_path_quark = 0;
+static GQuark preset_user_path_quark = 0;
+static GQuark preset_system_path_quark = 0;
 static GQuark preset_data_quark = 0;
 static GQuark preset_meta_quark = 0;
 static GQuark instance_list_quark = 0;
@@ -78,6 +76,9 @@ static GQuark instance_list_quark = 0;
 
 /* max character per line */
 #define LINE_LEN 200
+
+static gboolean gst_preset_default_save_presets_file (GstPreset * self);
+
 
 static gboolean
 preset_get_storage (GstPreset * self, GList ** presets,
@@ -112,13 +113,22 @@ preset_get_storage (GstPreset * self, GList ** presets,
   return (res);
 }
 
-static const gchar *
-preset_get_path (GstPreset * self)
+/*
+ * preset_get_paths:
+ * @self: a #GObject that implements #GstPreset
+ * @preset_user_path: location for path or %NULL
+ * @preset_system_path: location for path or %NULL
+ *
+ * Fetch the preset_path for user local and system wide settings. Don't free
+ * after use.
+ */
+static void
+preset_get_paths (GstPreset *self, const gchar **preset_user_path, const gchar **preset_system_path)
 {
   GType type = G_TYPE_FROM_INSTANCE (self);
   gchar *preset_path;
 
-  preset_path = (gchar *) g_type_get_qdata (type, preset_path_quark);
+  preset_path = (gchar *) g_type_get_qdata (type, preset_user_path_quark);
   if (!preset_path) {
     const gchar *element_name, *plugin_name, *file_name;
     gchar *preset_dir;
@@ -129,40 +139,70 @@ preset_get_path (GstPreset * self)
     GST_INFO ("element_name: '%s'", element_name);
 
     factory = GST_ELEMENT_GET_CLASS (self)->elementfactory;
-    GST_INFO ("factory: %p", factory);
     if (factory) {
+      GST_INFO ("factory: %p", factory);
       plugin_name = GST_PLUGIN_FEATURE (factory)->plugin_name;
       GST_INFO ("plugin_name: '%s'", plugin_name);
       plugin = gst_default_registry_find_plugin (plugin_name);
       GST_INFO ("plugin: %p", plugin);
       file_name = gst_plugin_get_filename (plugin);
       GST_INFO ("file_name: '%s'", file_name);
-      /*
-         '/home/ensonic/buzztard/lib/gstreamer-0.10/libgstsimsyn.so'
-         -> '/home/ensonic/buzztard/share/gstreamer-0.10/GstSimSyn.prs'
-         -> '$HOME/.gstreamer-0.10/presets/GstSimSyn.prs'
-
-         '/usr/lib/gstreamer-0.10/libgstaudiofx.so'
-         -> '/usr/share/gstreamer-0.10/GstAudioPanorama.prs'
-         -> '$HOME/.gstreamer-0.10/presets/GstAudioPanorama.prs'
-       */
+    }
+    else {
+      GST_WARNING ("no factory ??");
+      return;
     }
 
-    preset_dir =
-        g_build_filename (g_get_home_dir (), ".gstreamer-0.10", "presets",
-        NULL);
-    GST_INFO ("preset_dir: '%s'", preset_dir);
-    preset_path =
-        g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.prs", preset_dir,
-        element_name);
-    GST_INFO ("preset_path: '%s'", preset_path);
-    g_mkdir_with_parents (preset_dir, 0755);
-    g_free (preset_dir);
-
-    /* attach the preset path to the type */
-    g_type_set_qdata (type, preset_path_quark, (gpointer) preset_path);
+    /*
+     '/home/ensonic/buzztard/lib/gstreamer-0.10/libgstsimsyn.so'
+     -> '/home/ensonic/buzztard/share/gstreamer-0.10/presets/GstSimSyn.prs'
+     -> '$HOME/.gstreamer-0.10/presets/GstSimSyn.prs'
+     */
+    if (preset_user_path) {
+      preset_dir =
+          g_build_filename (g_get_home_dir (),
+            ".gstreamer-" GST_MAJORMINOR, "presets", NULL);
+      GST_INFO ("user_preset_dir: '%s'", preset_dir);
+      *preset_user_path =
+          g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.prs", preset_dir,
+          element_name);
+      GST_INFO ("user_preset_path: '%s'", *preset_user_path);
+      g_mkdir_with_parents (preset_dir, 0755);
+      g_free (preset_dir);
+      /* attach the preset path to the type */
+      g_type_set_qdata (type, preset_user_path_quark, (gpointer) *preset_user_path);
+    }
+    /*
+     '/usr/lib/gstreamer-0.10/libgstaudiofx.so'
+     -> '/usr/share/gstreamer-0.10/presets/GstAudioPanorama.prs'
+     -> '$HOME/.gstreamer-0.10/presets/GstAudioPanorama.prs'
+     */
+    if (preset_system_path) {
+      preset_dir =
+          g_build_filename (g_get_home_dir (),
+            DATADIR, "gstreamer-" GST_MAJORMINOR, "presets", NULL);
+      GST_INFO ("system_preset_dir: '%s'", preset_dir);
+      *preset_system_path =
+          g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.prs", preset_dir,
+          element_name);
+      GST_INFO ("system_preset_path: '%s'", *preset_system_path);
+      g_mkdir_with_parents (preset_dir, 0755);
+      g_free (preset_dir);
+      /* attach the preset path to the type */
+      g_type_set_qdata (type, preset_system_path_quark, (gpointer) *preset_system_path);
+    }
   }
-  return (preset_path);
+  else {
+    if (preset_user_path) {
+      *preset_user_path = preset_path;
+    }
+    if (preset_system_path) {
+      *preset_system_path = (gchar *) g_type_get_qdata (type, preset_system_path_quark);
+    }
+  }
+  GST_DEBUG("user_preset_path='%s', system_preset_path='%s'",
+    preset_user_path?*preset_user_path:"-", 
+    preset_system_path?*preset_system_path:"-");
 }
 
 static gboolean
@@ -171,6 +211,7 @@ preset_skip_property (GParamSpec *property)
   if (!(property->flags & (G_PARAM_READABLE|G_PARAM_WRITABLE)) ||
     (property->flags & G_PARAM_CONSTRUCT_ONLY))
         return TRUE;
+  /* @todo: skip GstObject::name ? */
   return FALSE;
 }
 
@@ -184,9 +225,163 @@ preset_cleanup (gpointer user_data, GObject * self)
   instances = (GList *) g_type_get_qdata (type, instance_list_quark);
   if (instances != NULL) {
     instances = g_list_remove (instances, self);
-    GST_INFO ("old instanc removed");
+    GST_INFO ("old instance removed");
     g_type_set_qdata (type, instance_list_quark, (gpointer) instances);
   }
+}
+
+static gboolean
+preset_parse_header(GstPreset * self, FILE *in, const gchar *preset_path, gchar **preset_version)
+{
+  const gchar *element_name = G_OBJECT_TYPE_NAME (self);
+  gchar line[LINE_LEN + 1];
+  gboolean res=FALSE;
+
+  GST_DEBUG ("parsing preset header: '%s'", preset_path);
+
+  /* read header */
+  if (!fgets (line, LINE_LEN, in))
+    goto eof_error;
+  if (strcmp (line, "GStreamer Preset\n")) {
+    GST_WARNING ("%s:1: file id expected", preset_path);
+    goto eof_error;
+  }
+  if (!fgets (line, LINE_LEN, in))
+    goto eof_error;
+  /* current gstreamer version is PACKAGE_VERSION */
+  if (preset_version)
+    *preset_version = g_strdup (g_strchomp (line));
+
+  if (!fgets (line, LINE_LEN, in))
+    goto eof_error;
+  if (strcmp (g_strchomp (line), element_name)) {
+    GST_WARNING ("%s:3: wrong element name", preset_path);
+    goto eof_error;
+  }
+
+  if (!fgets (line, LINE_LEN, in))
+    goto eof_error;
+  if (*line != '\n') {
+    GST_WARNING ("%s:4: blank line expected", preset_path);
+    goto eof_error;
+  }
+  res = TRUE;
+eof_error:
+  return res;
+}
+
+static guint64
+preset_parse_version (const gchar *str_version) {
+  gchar **version_parts;
+  guint64 version = 0;
+  
+  /* @todo: make copy less version with strchr() */
+  
+  /* parse version (e.g. 0.10.15.1) to guint64 */
+  version_parts = g_strsplit(str_version,".",4);
+  if (g_strv_length (version_parts) == 4) {
+    version = ((guint64) atoi (version_parts[0])) << 48 |
+      ((guint64) atoi (version_parts[1])) << 32 |
+      ((guint64) atoi (version_parts[2])) << 16 |
+      ((guint64) atoi (version_parts[3]));
+    GST_INFO("version parts: %s.%s.%s.%s", version_parts[0], version_parts[1],
+      version_parts[2], version_parts[3]);
+  }
+  else {
+    GST_WARNING("broken version string: '%s'", str_version);
+  }
+  g_strfreev (version_parts);
+  GST_DEBUG("version %s -> %" G_GUINT64_FORMAT, str_version, version);
+  return version;
+}
+
+static GList *
+preset_parse_body (GstPreset * self, FILE *in, const gchar *preset_path, GList *presets, GHashTable *preset_meta, GHashTable *preset_data)
+{
+  gchar line[LINE_LEN + 1], *str, *val;
+  gboolean parse_preset;
+  gchar *preset_name;
+  GHashTable *meta;
+  GHashTable *data;
+  GObjectClass *klass;
+  GParamSpec *property;
+
+  klass = G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS (self));
+  GST_DEBUG ("loading preset file: '%s'", preset_path);
+
+  /* read preset entries */
+  while (!feof (in)) {
+    /* read preset entry */
+    if(!fgets (line, LINE_LEN, in))
+      break;
+    g_strchomp (line);
+    if (*line) {
+      preset_name = g_strdup (line);
+      GST_INFO ("%s: preset '%s'", preset_path, preset_name);
+
+      data = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+      meta =
+          g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+
+      /* read preset lines */
+      parse_preset = TRUE;
+      while (parse_preset) {
+        if (!fgets (line, LINE_LEN, in) || (*line == '\n')) {
+          GST_DEBUG ("preset done");
+          parse_preset = FALSE;
+          break;
+        }
+        str = g_strchomp (line);
+        while (*str) {
+          if (*str == ':') {
+            *str = '\0';
+            GST_DEBUG ("meta[%s]='%s'", line, &str[1]);
+            if ((val = g_hash_table_lookup (meta, line))) {
+              g_free (val);
+              g_hash_table_insert (meta, (gpointer) line,
+                  (gpointer) g_strdup (&str[1]));
+            } else {
+              g_hash_table_insert (meta, (gpointer) g_strdup (line),
+                  (gpointer) g_strdup (&str[1]));
+            }
+            break;
+          } else if (*str == '=') {
+            *str = '\0';
+            GST_DEBUG ("data[%s]='%s'", line, &str[1]);
+            if ((property = g_object_class_find_property (klass, line))) {
+              g_hash_table_insert (data, (gpointer) property->name,
+                  (gpointer) g_strdup (&str[1]));
+            } else {
+              GST_WARNING ("%s: Invalid property '%s'", preset_path, line);
+            }
+            break;
+          }
+          str++;
+        }
+        /* @todo: handle childproxy properties
+         * <property>[child]=<value>
+         */
+      }
+
+      GST_DEBUG ("preset: %p, %p", meta, data);
+      g_hash_table_insert (preset_data, (gpointer) preset_name,
+          (gpointer) data);
+      g_hash_table_insert (preset_meta, (gpointer) preset_name,
+          (gpointer) meta);
+      /* only insert if it is not yet there */
+      if (!g_list_find_custom (presets, (gpointer) preset_name,
+        (GCompareFunc) strcmp)) {
+        presets =
+            g_list_insert_sorted (presets, (gpointer) preset_name,
+            (GCompareFunc) strcmp);
+      }
+      else {
+        GST_INFO ("%s: preset '%s' already exists", preset_path, preset_name);
+        g_free (preset_name);
+      }
+    }
+  }
+  return presets;
 }
 
 static gchar **
@@ -200,122 +395,54 @@ gst_preset_default_get_preset_names (GstPreset * self)
 
   /* get the presets from the type */
   if (!preset_get_storage (self, &presets, &preset_meta, &preset_data)) {
-    const gchar *preset_path = preset_get_path (self);
-    FILE *in;
+    const gchar *preset_user_path, *preset_system_path;
+    gchar *str_version_user = NULL, *str_version_system = NULL;
+    FILE *in_user, *in_system;
+    gboolean updated_from_system = FALSE;
 
-    GST_DEBUG ("probing preset file: '%s'", preset_path);
+    preset_get_paths (self, &preset_user_path, &preset_system_path);
 
-    /* read presets */
-    if ((in = fopen (preset_path, "rb"))) {
-      const gchar *element_name = G_OBJECT_TYPE_NAME (self);
-      gchar line[LINE_LEN + 1], *str, *val;
-      gboolean parse_preset;
-      gchar *preset_name;
-      GHashTable *meta;
-      GHashTable *data;
-      GObjectClass *klass;
-      GParamSpec *property;
-
-      GST_DEBUG ("loading preset file: '%s'", preset_path);
-
-      /* read header */
-      if (!fgets (line, LINE_LEN, in))
-        goto eof_error;
-      if (strcmp (line, "GStreamer Preset\n")) {
-        GST_WARNING ("%s:1: file id expected", preset_path);
-        goto eof_error;
+    /* test presets */
+    if ((in_user = fopen (preset_user_path, "rb"))) {
+      if (!preset_parse_header (self, in_user, preset_user_path, &str_version_user)) {
+        fclose (in_user);
+        in_user = NULL;
       }
-      if (!fgets (line, LINE_LEN, in))
-        goto eof_error;
-      /* @todo: what version (core?) */
-      if (!fgets (line, LINE_LEN, in))
-        goto eof_error;
-      if (strcmp (g_strchomp (line), element_name)) {
-        GST_WARNING ("%s:3: wrong element name", preset_path);
-        goto eof_error;
-      }
-      if (!fgets (line, LINE_LEN, in))
-        goto eof_error;
-      if (*line != '\n') {
-        GST_WARNING ("%s:4: blank line expected", preset_path);
-        goto eof_error;
-      }
-
-      klass = G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS (self));
-
-      /* read preset entries */
-      while (!feof (in)) {
-        /* read preset entry */
-        fgets (line, LINE_LEN, in);
-        g_strchomp (line);
-        if (*line) {
-          preset_name = g_strdup (line);
-          GST_INFO ("%s: preset '%s'", preset_path, preset_name);
-
-          data = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
-          meta =
-              g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-
-          /* read preset lines */
-          parse_preset = TRUE;
-          while (parse_preset) {
-            fgets (line, LINE_LEN, in);
-            if (feof (in) || (*line == '\n')) {
-              GST_DEBUG ("preset done");
-              parse_preset = FALSE;
-              break;
-            }
-            str = g_strchomp (line);
-            while (*str) {
-              if (*str == ':') {
-                *str = '\0';
-                GST_DEBUG ("meta[%s]='%s'", line, &str[1]);
-                if ((val = g_hash_table_lookup (meta, line))) {
-                  g_free (val);
-                  g_hash_table_insert (meta, (gpointer) line,
-                      (gpointer) g_strdup (&str[1]));
-                } else {
-                  g_hash_table_insert (meta, (gpointer) g_strdup (line),
-                      (gpointer) g_strdup (&str[1]));
-                }
-                break;
-              } else if (*str == '=') {
-                *str = '\0';
-                GST_DEBUG ("data[%s]='%s'", line, &str[1]);
-                if ((property = g_object_class_find_property (klass, line))) {
-                  g_hash_table_insert (data, (gpointer) property->name,
-                      (gpointer) g_strdup (&str[1]));
-                } else {
-                  GST_WARNING ("%s: Invalid property '%s'", preset_path, line);
-                }
-                break;
-              }
-              str++;
-            }
-            /* @todo: handle childproxy properties
-             * <property>[child]=<value>
-             */
-          }
-
-          GST_INFO ("preset: %p, %p", meta, data);
-          g_hash_table_insert (preset_data, (gpointer) preset_name,
-              (gpointer) data);
-          g_hash_table_insert (preset_meta, (gpointer) preset_name,
-              (gpointer) meta);
-          presets =
-              g_list_insert_sorted (presets, (gpointer) preset_name,
-              (GCompareFunc) strcmp);
-        }
-      }
-
-    eof_error:
-      fclose (in);
-    } else {
-      GST_INFO ("can't open preset file: '%s'", preset_path);
     }
+    if ((in_system = fopen (preset_system_path, "rb"))) {
+      if (!preset_parse_header (self, in_system, preset_system_path, &str_version_system)) {
+        fclose (in_system);
+        in_system = NULL;
+      }
+    }
+    /* compare version to check for merge */
+    if (in_system) {
+      if (!in_user || (in_user && (preset_parse_version (str_version_system) > 
+          preset_parse_version (str_version_user)))) {
+        /* read system presets */
+        presets = preset_parse_body (self, in_system, preset_system_path,
+          presets, preset_data, preset_meta);
+        updated_from_system = TRUE;
+      }
+      fclose (in_system);
+    }
+    if (in_user) {
+      /* read user presets */
+      presets = preset_parse_body (self, in_user, preset_user_path,
+        presets, preset_data, preset_meta);
+      fclose (in_user);
+    }
+
+    g_free (str_version_user);
+    g_free (str_version_system);
 
     /* attach the preset to the type */
     g_type_set_qdata (type, preset_list_quark, (gpointer) presets);
+
+    if (updated_from_system) {
+      gst_preset_default_save_presets_file (self);
+    }
+    
   }
 
   /* insert instance in instance list (if not yet there) */
@@ -491,8 +618,9 @@ gst_preset_default_save_presets_file (GstPreset * self)
   gboolean res = FALSE;
   GList *presets;
   GHashTable *preset_meta, *preset_data;
-  const gchar *preset_path = preset_get_path (self);
+  const gchar *preset_path;
 
+  preset_get_paths (self, &preset_path, NULL);
   /* get the presets from the type */
   if (preset_get_storage (self, &presets, &preset_meta, &preset_data)) {
     FILE *out;
@@ -671,10 +799,6 @@ gst_preset_default_save_preset (GstPreset * self, const gchar * name)
     GST_INFO ("no properties");
   }
 
-  /*
-   * @todo: flock(fileno())
-   * http://www.ecst.csuchico.edu/~beej/guide/ipc/flock.html
-   */
   g_hash_table_insert (preset_data, (gpointer) name, (gpointer) data);
   g_hash_table_insert (preset_meta, (gpointer) name, (gpointer) meta);
   presets =
@@ -701,12 +825,12 @@ gst_preset_default_rename_preset (GstPreset * self, const gchar * old_name,
     if ((node = g_list_find_custom (presets, old_name, (GCompareFunc) strcmp))) {
       GHashTable *meta, *data;
 
-      /* readd under new name */
+      /* re-add under new name */
       presets =
           g_list_insert_sorted (presets, (gpointer) new_name,
           (GCompareFunc) strcmp);
 
-      /* readd the hash entries */
+      /* re-add the hash entries */
       if ((meta = g_hash_table_lookup (preset_meta, node->data))) {
         g_hash_table_remove (preset_meta, node->data);
         g_hash_table_insert (preset_meta, (gpointer) new_name, (gpointer) meta);
@@ -980,7 +1104,7 @@ gst_preset_save_preset (GstPreset * self, const gchar * name)
  * @old_name: current preset name
  * @new_name: new preset name
  *
- * Renames a preset. If there is already a preset by thr @new_name it will be
+ * Renames a preset. If there is already a preset by the @new_name it will be
  * overwritten.
  *
  * Returns: %TRUE for success, %FALSE if e.g. there is no preset with @old_name
@@ -1110,7 +1234,8 @@ gst_preset_base_init (gpointer g_class)
 
     /* create quarks for use with g_type_{g,s}et_qdata() */
     preset_list_quark = g_quark_from_static_string ("GstPreset::presets");
-    preset_path_quark = g_quark_from_static_string ("GstPreset::path");
+    preset_user_path_quark = g_quark_from_static_string ("GstPreset::user_path");
+    preset_system_path_quark = g_quark_from_static_string ("GstPreset::system_path");
     preset_data_quark = g_quark_from_static_string ("GstPreset::data");
     preset_meta_quark = g_quark_from_static_string ("GstPreset::meta");
     instance_list_quark = g_quark_from_static_string ("GstPreset::instances");
