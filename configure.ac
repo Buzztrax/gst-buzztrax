@@ -218,9 +218,14 @@ PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
     HAVE_FLUIDSYNTH=1, HAVE_FLUIDSYNTH=0)
 AC_SUBST(FLUIDSYNTH_CFLAGS)
 AC_SUBST(FLUIDSYNTH_LIBS)
-dnl AC_DEFINE_UNQUOTED(HAVE_FLUIDSYNTH, $HAVE_FLUIDSYNTH, [have fluidsynth])
 AM_CONDITIONAL(FLUIDSYNTH_SUPPORT, test "$HAVE_FLUIDSYNTH" = "1")
-
+if test "x$HAVE_FLUIDSYNTH" = "x1"
+then
+  FLUIDSYNTH_DOC_TYPES=
+else
+  FLUIDSYNTH_DOC_TYPES="%"
+fi
+AC_SUBST(FLUIDSYNTH_DOC_TYPES)
 
 dnl set license and copyright notice
 AC_DEFINE(GST_PACKAGE_ORIGIN, "http://www.buzztard.org", [Plugin package origin])
@@ -265,6 +270,7 @@ AC_CONFIG_FILES( \
 	Makefile \
 	docs/Makefile \
 	docs/reference/Makefile \
+	docs/reference/gst-buzztard.types \
 	src/Makefile \
 	src/audiodelay/Makefile \
 	src/childbin/Makefile \

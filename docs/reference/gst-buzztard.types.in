@@ -1,9 +1,9 @@
 #include <audiodelay/audiodelay.h>
-#include <fluidsynth/gstfluidsynth.h>
+@FLUIDSYNTH_DOC_TYPES@#include <fluidsynth/gstfluidsynth.h>
 #include <simsyn/simsyn.h>
 
 gst_audio_delay_get_type
-gst_fluidsynth_get_type
+@FLUIDSYNTH_DOC_TYPES@gst_fluidsynth_get_type
 gst_sim_syn_get_type
 
 #include <childbin/childbin.h>

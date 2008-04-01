@@ -1,3 +1,13 @@
+2008-04-01  Stefan Kost  <ensonic@users.sf.net>
+
+
+	* configure.ac:
+	* docs/reference/Makefile.am:
+	* docs/reference/gst-buzztard.types:
+	* docs/reference/gst-buzztard.types.in:
+	  Add some autofoo magic to programmaticaly comment outfluidsynth from
+	  gobject introspection, if its not build.
+
 2008-03-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
