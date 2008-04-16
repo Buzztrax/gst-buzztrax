@@ -90,26 +90,27 @@ preset_get_storage (GstPreset * self, GList ** presets,
   g_assert (presets);
 
   if ((*presets = g_type_get_qdata (type, preset_list_quark))) {
-    GST_DEBUG ("have presets");
+    GST_DEBUG_OBJECT (GST_OBJECT(self), "has presets");
     res = TRUE;
   }
   if (preset_meta) {
     if (!(*preset_meta = g_type_get_qdata (type, preset_meta_quark))) {
       *preset_meta = g_hash_table_new (g_str_hash, g_str_equal);
       g_type_set_qdata (type, preset_meta_quark, (gpointer) * preset_meta);
-      GST_DEBUG ("new meta hash");
+      GST_DEBUG_OBJECT (GST_OBJECT(self), "new meta hash");
     }
   }
   if (preset_data) {
     if (!(*preset_data = g_type_get_qdata (type, preset_data_quark))) {
       *preset_data = g_hash_table_new (g_str_hash, g_str_equal);
       g_type_set_qdata (type, preset_data_quark, (gpointer) * preset_data);
-      GST_DEBUG ("new data hash");
+      GST_DEBUG_OBJECT (GST_OBJECT(self), "new data hash");
     }
   }
-  GST_INFO ("%s: presets: %p, %p, %p", G_OBJECT_TYPE_NAME (self),
-      *presets, (preset_meta ? *preset_meta : 0),
-      (preset_data ? *preset_data : 0));
+  GST_INFO_OBJECT (GST_OBJECT(self), "presets: %p, meta: %p, data: %p",
+      *presets,
+      (preset_meta ? *preset_meta : NULL),
+      (preset_data ? *preset_data : NULL));
   return (res);
 }
 
@@ -211,7 +212,7 @@ preset_skip_property (GParamSpec *property)
   if (!(property->flags & (G_PARAM_READABLE|G_PARAM_WRITABLE)) ||
     (property->flags & G_PARAM_CONSTRUCT_ONLY))
         return TRUE;
-  /* @todo: skip GstObject::name ? */
+  /* @todo: skip !GST_PARAM_PRESETABLE ? */
   return FALSE;
 }
 
@@ -284,14 +285,14 @@ preset_parse_version (const gchar *str_version) {
       ((guint64) atoi (version_parts[1])) << 32 |
       ((guint64) atoi (version_parts[2])) << 16 |
       ((guint64) atoi (version_parts[3]));
-    GST_INFO("version parts: %s.%s.%s.%s", version_parts[0], version_parts[1],
+    GST_INFO ("version parts: %s.%s.%s.%s", version_parts[0], version_parts[1],
       version_parts[2], version_parts[3]);
   }
   else {
-    GST_WARNING("broken version string: '%s'", str_version);
+    GST_WARNING ("broken version string: '%s'", str_version);
   }
   g_strfreev (version_parts);
-  GST_DEBUG("version %s -> %" G_GUINT64_FORMAT, str_version, version);
+  GST_DEBUG ("version %s -> %" G_GUINT64_FORMAT, str_version, version);
   return version;
 }
 
@@ -307,7 +308,7 @@ preset_parse_body (GstPreset * self, FILE *in, const gchar *preset_path, GList *
   GParamSpec *property;
 
   klass = G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS (self));
-  GST_DEBUG ("loading preset file: '%s'", preset_path);
+  GST_DEBUG ("loading preset file: '%s', meta: %p, data: %p", preset_path, preset_meta, preset_data);
 
   /* read preset entries */
   while (!feof (in)) {
@@ -363,7 +364,7 @@ preset_parse_body (GstPreset * self, FILE *in, const gchar *preset_path, GList *
          */
       }
 
-      GST_DEBUG ("preset: %p, %p", meta, data);
+      GST_DEBUG_OBJECT (GST_OBJECT(self), "preset: meta: %p, data: %p", meta, data);
       g_hash_table_insert (preset_data, (gpointer) preset_name,
           (gpointer) data);
       g_hash_table_insert (preset_meta, (gpointer) preset_name,
@@ -421,7 +422,7 @@ gst_preset_default_get_preset_names (GstPreset * self)
           preset_parse_version (str_version_user)))) {
         /* read system presets */
         presets = preset_parse_body (self, in_system, preset_system_path,
-          presets, preset_data, preset_meta);
+          presets, preset_meta, preset_data);
         updated_from_system = TRUE;
       }
       fclose (in_system);
@@ -429,7 +430,7 @@ gst_preset_default_get_preset_names (GstPreset * self)
     if (in_user) {
       /* read user presets */
       presets = preset_parse_body (self, in_user, preset_user_path,
-        presets, preset_data, preset_meta);
+        presets, preset_meta, preset_data);
       fclose (in_user);
     }
 
@@ -482,19 +483,11 @@ gst_preset_default_get_property_names (GstPreset * self)
 
   if ((properties = g_object_class_list_properties (G_OBJECT_CLASS
             (GST_ELEMENT_GET_CLASS (self)), &number_of_properties))) {
-    GST_INFO ("  filtering properties: %u", number_of_properties);
+    GST_DEBUG_OBJECT (self, "  filtering properties: %u", number_of_properties);
     for (i = 0; i < number_of_properties; i++) {
       property = properties[i];
       if (preset_skip_property (property) ||
         (property->flags & GST_PARAM_CONTROLLABLE))
-        continue;
-
-      names = g_list_prepend (names, property->name);
-    }
-    for (i = 0; i < number_of_properties; i++) {
-      property = properties[i];
-      if (preset_skip_property (property) ||
-        !(property->flags & GST_PARAM_CONTROLLABLE))
         continue;
 
       names = g_list_prepend (names, property->name);
@@ -1192,8 +1185,10 @@ gst_preset_get_meta (GstPreset * self, const gchar * name, const gchar * tag,
  * gst_preset_create_preset:
  * @self: a #GObject that implements #GstPreset
  *
- * Create a new randomized preset. This method is optional. If not implemented
- * true randomization will be applied.
+ * Create a new preset. This method is optional. If not implemented
+ * randomization will be applied. Elements can override this if they can make
+ * more meaningful variations or even override with an empty implementation
+ * if it does not make sense for them.
  */
 void
 gst_preset_create_preset (GstPreset * self)

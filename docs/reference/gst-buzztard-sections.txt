@@ -1,4 +1,4 @@
-# $Id: gst-buzztard-sections.txt,v 1.13 2007-07-13 18:52:18 ensonic Exp $
+# $Id$
 # :mode=html:
 
 # please add section in the alpahbetical order using the following template

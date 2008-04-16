@@ -1,4 +1,4 @@
-/* $Id: e-gst-note2frequency.c,v 1.3 2006-01-09 20:13:42 ensonic Exp $ */
+/* $Id$ */
 
 #include "m-gst-buzztard.h"
 

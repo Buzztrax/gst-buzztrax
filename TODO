@@ -1,4 +1,4 @@
-$Id: TODO,v 1.5 2007-05-07 15:51:31 ensonic Exp $
+$Id$
 
 = tempo =
 - should we rename 'tempo' to 'tempo_sync' or 'song_tempo'?

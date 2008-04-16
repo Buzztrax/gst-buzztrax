@@ -1,3 +1,19 @@
+2008-04-16  Stefan Kost  <ensonic@users.sf.net>
+
+	* README:
+	* TODO:
+	* autogen.sh:
+	* configure.ac:
+	* docs/reference/gst-buzztard-sections.txt:
+	* src/preset/preset.c:
+	* tests/Makefile.am:
+	* tests/e-gst-note2frequency.c:
+	* tests/m-gst-buzztard.c:
+	* tests/m-gst-buzztard.h:
+	* tests/s-gst-note2frequency.c:
+	* tests/t-gst-note2frequency.c:
+	  Svn property tuning.
+
 2008-04-01  Stefan Kost  <ensonic@users.sf.net>
 
 

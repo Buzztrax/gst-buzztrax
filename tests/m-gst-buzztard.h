@@ -1,4 +1,4 @@
-/* $Id: m-gst-buzztard.h,v 1.2 2006-01-07 17:33:28 ensonic Exp $ */
+/* $Id$ */
 
 #include <signal.h>
 #include "check.h"

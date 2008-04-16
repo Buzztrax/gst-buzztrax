@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: autogen.sh,v 1.4 2007-11-20 21:43:22 ensonic Exp $
+# $Id$
 # Run this to generate all the initial makefiles, etc.
 
 DIE=0

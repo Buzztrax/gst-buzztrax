@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.4 2006-01-16 19:48:41 ensonic Exp $
+## $Id$
 
 if BUILD_CHECK_TESTS
   TESTS_BIN = gst_buzztard
