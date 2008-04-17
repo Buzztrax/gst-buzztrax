@@ -24,7 +24,6 @@
 
 #include <glib-object.h>
 #include <gst/gst.h>
-#include <gst/controller/gstcontroller.h>
 
 G_BEGIN_DECLS
 
@@ -49,19 +48,11 @@ struct _GstPresetInterface
   gboolean (*rename_preset) (GstPreset *self, const gchar *old_name, const gchar *new_name);
   gboolean (*delete_preset) (GstPreset *self, const gchar *name);
   
-  gboolean (*set_meta) (GstPreset *self,const gchar *name, const gchar *tag, gchar *value);
+  gboolean (*set_meta) (GstPreset *self,const gchar *name, const gchar *tag, const gchar *value);
   gboolean (*get_meta) (GstPreset *self,const gchar *name, const gchar *tag, gchar **value);
 
-  void (*create_preset) (GstPreset *self);
-  
-  /* @todo:
-   *
-   * need a presets-changed signal, to notify of changes in preset list
-   *
-   * need a way to sync class instances, we want to keep only one list for all
-   * instances of a type and if the list changes, we trigger the signal for all
-   * instance
-   */
+  void (*randomize) (GstPreset *self);
+  void (*reset) (GstPreset *self);
 
   /*< private >*/
   gpointer _gst_reserved[GST_PADDING];
@@ -77,10 +68,11 @@ gboolean gst_preset_save_preset (GstPreset *self, const gchar *name);
 gboolean gst_preset_rename_preset (GstPreset *self, const gchar *old_name, const gchar *new_name);
 gboolean gst_preset_delete_preset (GstPreset *self, const gchar *name);
 
-gboolean gst_preset_set_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar *value);
+gboolean gst_preset_set_meta (GstPreset *self,const gchar *name, const gchar *tag, const gchar *value);
 gboolean gst_preset_get_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar **value);
 
-void gst_preset_create_preset (GstPreset *self);
+void gst_preset_randomize (GstPreset *self);
+void gst_preset_reset (GstPreset *self);
 
 G_END_DECLS
 

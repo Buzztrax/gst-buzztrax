@@ -1,3 +1,9 @@
+2008-04-17  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/preset/preset.c:
+	* src/preset/preset.h:
+	  Sync preset iface implemnetation with gstreamer patch. New format!
+
 2008-04-16  Stefan Kost  <ensonic@users.sf.net>
 
 	* README:
