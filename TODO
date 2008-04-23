@@ -22,7 +22,7 @@ $Id$
   its just that we use them for gstbml and buzztard
 == todo ==
 - rename API in sources
-  envelope, musicenums, note2frequency : gst -> bt
+  envelope, note2frequency : gst -> bt
 == done ==
 - includes
   $prefix/include/gstreamer-0.10/gst/

@@ -1,5 +1,13 @@
 2008-04-24  Stefan Kost  <ensonic@users.sf.net>
 
+	* TODO:
+	* src/propertymeta/.cvsignore:
+	* src/propertymeta/Makefile.am:
+	* src/tempo/.cvsignore:
+	  Remove more leftovers.
+
+2008-04-24  Stefan Kost  <ensonic@users.sf.net>
+
 	* Makefile.am:
 	* TODO:
 	* configure.ac:
