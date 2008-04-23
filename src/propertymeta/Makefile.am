@@ -1,6 +1,4 @@
-libgstpropertymetaincludedir = \
-	$(includedir)/gstreamer-@GST_MAJORMINOR@/gst/propertymeta
-
+libgstpropertymetaincludedir = $(includedir)/libgstbuzztard
 libgstpropertymetainclude_HEADERS = propertymeta.h
 
 noinst_LTLIBRARIES = libgstpropertymeta.la

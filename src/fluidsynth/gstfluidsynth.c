@@ -63,10 +63,10 @@
 #include <gst/controller/gstcontroller.h>
 
 //#include <gst/childbin/childbin.h>
-#include "help/help.h"
-#include "propertymeta/propertymeta.h"
-#include "preset/preset.h"
-#include "tempo/tempo.h"
+#include "libgstbuzztard/help.h"
+#include "libgstbuzztard/propertymeta.h"
+#include "libgstbuzztard/preset.h"
+#include "libgstbuzztard/tempo.h"
 
 #include "gstfluidsynth.h"
 

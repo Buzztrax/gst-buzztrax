@@ -1,3 +1,58 @@
+2008-04-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* Makefile.am:
+	* TODO:
+	* configure.ac:
+	* docs/reference/Makefile.am:
+	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztard.types.in:
+	* libgstbuzztard.pc.in:
+	* libgstbuzztard/preset.c:
+	* libgstbuzztard/sampler.c:
+	* libgstbuzztard/sampler.h:
+	* src/Makefile.am:
+	* src/audiodelay/Makefile.am:
+	* src/audiodelay/audiodelay.c:
+	* src/childbin/.cvsignore:
+	* src/childbin/Makefile.am:
+	* src/childbin/childbin.c:
+	* src/childbin/childbin.h:
+	* src/envelope/.cvsignore:
+	* src/envelope/Makefile.am:
+	* src/envelope/envelope.c:
+	* src/envelope/envelope.h:
+	* src/fluidsynth/Makefile.am:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/help/.cvsignore:
+	* src/help/Makefile.am:
+	* src/help/help.c:
+	* src/help/help.h:
+	* src/musicenums/Makefile.am:
+	* src/musicenums/musicenums.c:
+	* src/musicenums/musicenums.h:
+	* src/note2frequency/.cvsignore:
+	* src/note2frequency/Makefile.am:
+	* src/note2frequency/note2frequency.c:
+	* src/note2frequency/note2frequency.h:
+	* src/preset/.cvsignore:
+	* src/preset/Makefile.am:
+	* src/preset/preset.c:
+	* src/preset/preset.h:
+	* src/propertymeta/Makefile.am:
+	* src/propertymeta/propertymeta.c:
+	* src/propertymeta/propertymeta.h:
+	* src/simsyn/Makefile.am:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	* src/tempo/Makefile.am:
+	* src/tempo/tempo.c:
+	* src/tempo/tempo.h:
+	* tests/Makefile.am:
+	* tests/m-gst-buzztard.h:
+	  Restructure the files and stop poluting the gst namespace. Add sampler
+	  iface.
+
 2008-04-19  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/preset/preset.c:

@@ -9,6 +9,8 @@
 # <SUBSECTION Private>
 # </SECTION>
 
+# plugins
+
 <SECTION>
 <FILE>gstaudiodelay</FILE>
 <TITLE>GstAudioDelay</TITLE>
@@ -22,37 +24,6 @@ GST_IS_AUDIO_DELAY_CLASS
 GST_AUDIO_DELAY_GET_CLASS
 GST_TYPE_AUDIO_DELAY
 gst_audio_delay_get_type
-</SECTION>
-
-<SECTION>
-<FILE>gstchildbin</FILE>
-<TITLE>GstChildBin</TITLE>
-GstChildBin
-gst_child_bin_add_child
-gst_child_bin_remove_child
-<SUBSECTION Standard>
-GstChildBinInterface
-GST_CHILD_BIN
-GST_IS_CHILD_BIN
-GST_TYPE_CHILD_BIN
-GST_CHILD_BIN_GET_INTERFACE
-gst_child_bin_get_type
-</SECTION>
-
-<SECTION>
-<FILE>gstenvelope</FILE>
-<TITLE>GstEnvelope</TITLE>
-GstEnvelope
-gst_envelope_new
-<SUBSECTION Standard>
-GstEnvelopeClass
-GST_ENVELOPE
-GST_IS_ENVELOPE
-GST_ENVELOPE_CLASS
-GST_IS_ENVELOPE_CLASS
-GST_ENVELOPE_GET_CLASS
-GST_TYPE_ENVELOPE
-gst_envelope_get_type
 </SECTION>
 
 <SECTION>
@@ -71,6 +42,45 @@ gst_fluidsynth_get_type
 </SECTION>
 
 <SECTION>
+<FILE>gstsimsyn</FILE>
+<TITLE>GstSimSyn</TITLE>
+GstSimSyn
+GstSimSynFilter
+GstSimSynWave
+<SUBSECTION Standard>
+GstSimSynClass
+GstPinkNoise
+PINK_MAX_RANDOM_ROWS
+PINK_RANDOM_BITS
+PINK_RANDOM_SHIFT
+GST_SIM_SYN
+GST_IS_SIM_SYN
+GST_SIM_SYN_CLASS
+GST_IS_SIM_SYN_CLASS
+GST_SIM_SYN_GET_CLASS
+GST_TYPE_SIM_SYN
+gst_sim_syn_get_type
+</SECTION>
+
+
+# stuff that we want for gstreamer
+
+<SECTION>
+<FILE>gstchildbin</FILE>
+<TITLE>GstChildBin</TITLE>
+GstChildBin
+gst_child_bin_add_child
+gst_child_bin_remove_child
+<SUBSECTION Standard>
+GstChildBinInterface
+GST_CHILD_BIN
+GST_IS_CHILD_BIN
+GST_TYPE_CHILD_BIN
+GST_CHILD_BIN_GET_INTERFACE
+gst_child_bin_get_type
+</SECTION>
+
+<SECTION>
 <FILE>gsthelp</FILE>
 <TITLE>GstHelp</TITLE>
 GstHelp
@@ -84,24 +94,17 @@ gst_help_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstnote2frequency</FILE>
-<TITLE>GstNote2Frequency</TITLE>
-GstNote2Frequency
-GstNote2FrequencyTuning
-gst_note_2_frequency_new
-gst_note_2_frequency_translate_from_string
-gst_note_2_frequency_translate_from_number
+<FILE>gsttempo</FILE>
+<TITLE>GstTempo</TITLE>
+GstTempo
+gst_tempo_change_tempo
 <SUBSECTION Standard>
-GstNote2FrequencyClass
-GST_NOTE_2_FREQUENCY
-GST_IS_NOTE_2_FREQUENCY
-GST_NOTE_2_FREQUENCY_CLASS
-GST_IS_NOTE_2_FREQUENCY_CLASS
-GST_NOTE_2_FREQUENCY_GET_CLASS
-GST_TYPE_NOTE_2_FREQUENCY
-GST_TYPE_NOTE_2_FREQUENCY_TUNING
-gst_note_2_frequency_get_type
-gst_note_2_frequency_tuning_get_type
+GstTempoInterface
+GST_TEMPO
+GST_IS_TEMPO
+GST_TYPE_TEMPO
+GST_TEMPO_GET_INTERFACE
+gst_tempo_get_type
 </SECTION>
 
 <SECTION>
@@ -146,37 +149,42 @@ GST_PROPERTY_META_GET_INTERFACE
 gst_property_meta_get_type
 </SECTION>
 
+# own stuff
+
 <SECTION>
-<FILE>gstsimsyn</FILE>
-<TITLE>GstSimSyn</TITLE>
-GstSimSyn
-GstSimSynFilter
-GstSimSynWave
+<FILE>gstenvelope</FILE>
+<TITLE>GstEnvelope</TITLE>
+GstEnvelope
+gst_envelope_new
 <SUBSECTION Standard>
-GstSimSynClass
-GstPinkNoise
-PINK_MAX_RANDOM_ROWS
-PINK_RANDOM_BITS
-PINK_RANDOM_SHIFT
-GST_SIM_SYN
-GST_IS_SIM_SYN
-GST_SIM_SYN_CLASS
-GST_IS_SIM_SYN_CLASS
-GST_SIM_SYN_GET_CLASS
-GST_TYPE_SIM_SYN
-gst_sim_syn_get_type
+GstEnvelopeClass
+GST_ENVELOPE
+GST_IS_ENVELOPE
+GST_ENVELOPE_CLASS
+GST_IS_ENVELOPE_CLASS
+GST_ENVELOPE_GET_CLASS
+GST_TYPE_ENVELOPE
+gst_envelope_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gsttempo</FILE>
-<TITLE>GstTempo</TITLE>
-GstTempo
-gst_tempo_change_tempo
+<FILE>gstnote2frequency</FILE>
+<TITLE>GstNote2Frequency</TITLE>
+GstNote2Frequency
+GstNote2FrequencyTuning
+gst_note_2_frequency_new
+gst_note_2_frequency_translate_from_string
+gst_note_2_frequency_translate_from_number
 <SUBSECTION Standard>
-GstTempoInterface
-GST_TEMPO
-GST_IS_TEMPO
-GST_TYPE_TEMPO
-GST_TEMPO_GET_INTERFACE
-gst_tempo_get_type
+GstNote2FrequencyClass
+GST_NOTE_2_FREQUENCY
+GST_IS_NOTE_2_FREQUENCY
+GST_NOTE_2_FREQUENCY_CLASS
+GST_IS_NOTE_2_FREQUENCY_CLASS
+GST_NOTE_2_FREQUENCY_GET_CLASS
+GST_TYPE_NOTE_2_FREQUENCY
+GST_TYPE_NOTE_2_FREQUENCY_TUNING
+gst_note_2_frequency_get_type
+gst_note_2_frequency_tuning_get_type
 </SECTION>
+

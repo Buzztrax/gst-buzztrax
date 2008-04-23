@@ -5,7 +5,7 @@
 #include "glib.h"
 #include "gst/gst.h"
 
-#include "note2frequency/note2frequency.h"
+#include "libgstbuzztard/note2frequency.h"
 
 //-- globals
 

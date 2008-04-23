@@ -23,7 +23,7 @@ endif
 # The directory containing the source code. Relative to $(srcdir).
 # gtk-doc will search all .c & .h files beneath here for inline comments
 # documenting the functions and macros.
-DOC_SOURCE_DIR=$(top_srcdir)/src
+DOC_SOURCE_DIR=$(top_srcdir)/
 
 # Extra options to pass to gtkdoc-scangobj. Not normally needed.
 SCANGOBJ_OPTIONS=--type-init-func="g_type_init();gst_init(&argc,&argv)"
@@ -47,8 +47,8 @@ FIXXREF_OPTIONS=--extra-dir=$(glib_prefix)/share/gtk-doc/html/gobject \
 	--extra-dir=$(gst_prefix)/share/gtk-doc/html/gstreamer-libs
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
-HFILE_GLOB=$(top_srcdir)/src/*/*.h
-CFILE_GLOB=$(top_srcdir)/src/*/*.c
+HFILE_GLOB=$(top_srcdir)/libgstbuzztard/*.h $(top_srcdir)/src/*/*.c
+CFILE_GLOB=$(top_srcdir)/libgstbuzztard/*.c $(top_srcdir)/src/*/*.h
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
@@ -73,9 +73,9 @@ expand_content_files=
 # signals and properties.
 # e.g. INCLUDES=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
-INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src $(BASE_DEPS_CFLAGS)
+INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/src $(BASE_DEPS_CFLAGS)
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
-  $(top_builddir)/src/libgstbuzztard.la \
+  $(top_builddir)/libgstbuzztard/libgstbuzztard.la \
   $(top_builddir)/src/audiodelay/libgstaudiodelay.la \
   $(FLUIDSYNTH_LA) \
   $(top_builddir)/src/simsyn/libgstsimsyn.la

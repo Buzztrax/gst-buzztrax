@@ -1,3 +1,5 @@
+% plugins
+
 #include <audiodelay/audiodelay.h>
 @FLUIDSYNTH_DOC_TYPES@#include <fluidsynth/gstfluidsynth.h>
 #include <simsyn/simsyn.h>
@@ -6,15 +8,24 @@ gst_audio_delay_get_type
 @FLUIDSYNTH_DOC_TYPES@gst_fluidsynth_get_type
 gst_sim_syn_get_type
 
-#include <childbin/childbin.h>
-#include <propertymeta/propertymeta.h>
-#include <tempo/tempo.h>
+% stuff that we want for gstreamer
+
+#include <libgstbuzztard/childbin.h>
+#include <libgstbuzztard/help.h>
+@PRESET_DOC_TYPES@#include <libgstbuzztard/preset.h>
+#include <libgstbuzztard/propertymeta.h>
+#include <libgstbuzztard/tempo.h>
 
 gst_child_bin_get_type
+gst_help_get_type
+@PRESET_DOC_TYPES@gst_preset_get_type
 gst_property_meta_get_type
 gst_tempo_get_type
 
-#include <note2frequency/note2frequency.h>
+% own stuff
+
+#include <libgstbuzztard/note2frequency.h>
+#include <libgstbuzztard/sampler.h>
 
 gst_note_2_frequency_get_type
-
+bt_sampler_get_type

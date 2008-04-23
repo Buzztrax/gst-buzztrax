@@ -2,13 +2,29 @@ $Id$
 
 = tempo =
 - should we rename 'tempo' to 'tempo_sync' or 'song_tempo'?
-- or can we remove it and use TAGS?
+- or can we remove the iface and use TAGS?
   - we already have GST_TAG_BEATS_PER_MINUTE
     gst_tag_register (GST_TAG_BEATS_PER_MINUTE, GST_TAG_FLAG_META, G_TYPE_DOUBLE,
       _("beats per minute"), _("number of beats per minute in audio"), NULL);
   - we need GST_TAG_TICKS_PER_BEAT and GST_TAG_SUBTICKS_PER_TICK
     where to register them?
   - das hauptproblem mit tags anstatt tempo iface ist das man dann schlecht das
-    tempo im song ändern kann, müsste man dann eher über die rate im playback
+    tempo im song ï¿½ndern kann, mï¿½sste man dann eher ï¿½ber die rate im playback
     segment machen
+
+= help =
+- can be removed once we get around added a GstStructure *meta to
+  GstElementFactory
+  
+= cleanup =
+- stop polluting gst namespace
+- envelope, musicenums, note2frequency and sampler are not gst specific;
+  its just that we use them for gstbml and buzztard
+== todo ==
+- rename API in sources
+  envelope, musicenums, note2frequency : gst -> bt
+== done ==
+- includes
+  $prefix/include/gstreamer-0.10/gst/
+  $prefix/include/libgstbuzztard/
 

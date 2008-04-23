@@ -16,7 +16,7 @@ AC_CONFIG_SRCDIR([ChangeLog])
 AC_CONFIG_HEADERS(config.h)
 
 GSTBT_MAJOR_VERSION=0
-GSTBT_MINOR_VERSION=3
+GSTBT_MINOR_VERSION=4
 GSTBT_MICRO_VERSION=0
 GSTBT_VERSION=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION.$GSTBT_MICRO_VERSION
 GSTBT_VERSION_INFO=`expr $GSTBT_MAJOR_VERSION + $GSTBT_MINOR_VERSION`:$GSTBT_MICRO_VERSION:$GSTBT_MINOR_VERSION
@@ -200,6 +200,13 @@ CPPFLAGS="$CPPFLAGS $BASE_DEPS_CFLAGS"
 LDFLAGS="$LDFLAGS $BASE_DEPS_LIBS"
 AC_CHECK_HEADERS(gst/gstpreset.h,[HAVE_GST_GSTPRESET_H="1"],[HAVE_GST_GSTPRESET_H="0"])
 AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET_H" = "0")
+if test "x$HAVE_GST_GSTPRESET_H" = "x1"
+then
+  PRESET_DOC_TYPES=
+else
+  PRESET_DOC_TYPES="%"
+fi
+AC_SUBST(PRESET_DOC_TYPES)
 CFLAGS="$ac_cflags_save"
 CPPFLAGS="$ac_cppflags_save"
 LDFLAGS="$ac_ldflags_save"
@@ -271,18 +278,11 @@ AC_CONFIG_FILES( \
 	docs/Makefile \
 	docs/reference/Makefile \
 	docs/reference/gst-buzztard.types \
+    libgstbuzztard/Makefile \
 	src/Makefile \
 	src/audiodelay/Makefile \
-	src/childbin/Makefile \
-	src/envelope/Makefile \
 	src/fluidsynth/Makefile \
-	src/help/Makefile \
-	src/musicenums/Makefile \
-	src/note2frequency/Makefile \
-	src/preset/Makefile \
-	src/propertymeta/Makefile \
 	src/simsyn/Makefile \
-	src/tempo/Makefile \
 	tests/Makefile
 )
 AC_OUTPUT

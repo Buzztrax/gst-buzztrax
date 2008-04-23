@@ -6,12 +6,12 @@ plugin_LTLIBRARIES = libgstaudiodelay.la
 libgstaudiodelay_la_SOURCES = audiodelay.c
 
 # flags used to compile this plugin
-libgstaudiodelay_la_CFLAGS =  -I@srcdir@ -I$(top_srcdir)/src \
+libgstaudiodelay_la_CFLAGS =  -I@srcdir@ -I$(top_srcdir) \
 	-DDATADIR=\"$(datadir)\" \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstaudiodelay_la_LIBADD = $(GST_BASE_LIBS) \
-	$(top_builddir)/src/libgstbuzztard.la
+	$(top_builddir)/libgstbuzztard/libgstbuzztard.la
 libgstaudiodelay_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 
 # headers we need but don't want installed

@@ -26,8 +26,8 @@
 #include <gst/gst.h>
 #include <gst/base/gstbasesrc.h>
 #include <gst/controller/gstcontroller.h>
-#include <note2frequency/note2frequency.h>
-#include <envelope/envelope.h>
+#include <libgstbuzztard/note2frequency.h>
+#include <libgstbuzztard/envelope.h>
 
 G_BEGIN_DECLS
 

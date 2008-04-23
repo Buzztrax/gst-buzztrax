@@ -1,4 +1,4 @@
-SUBDIRS = src docs tests
+SUBDIRS = libgstbuzztard src docs tests
 
 DISTCHECK_CONFIGURE_FLAGS=--enable-gtk-doc
 
