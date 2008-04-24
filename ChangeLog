@@ -1,5 +1,10 @@
 2008-04-24  Stefan Kost  <ensonic@users.sf.net>
 
+	* libgstbuzztard/Makefile.am:
+	  And add missing file.
+
+2008-04-24  Stefan Kost  <ensonic@users.sf.net>
+
 	* TODO:
 	* src/propertymeta/.cvsignore:
 	* src/propertymeta/Makefile.am:

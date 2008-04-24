@@ -1,0 +1,41 @@
+if BUILD_PRESET_IFACE
+PRESET_C = preset.c
+PRESET_H = preset.h
+else
+PRESET_C =
+PRESET_H =
+endif
+
+lib_LTLIBRARIES = libgstbuzztard.la
+
+libgstbuzztard_la_SOURCES = \
+	childbin.c \
+	envelope.c \
+	help.c \
+	musicenums.c \
+	note2frequency.c \
+	$(PRESET_C) \
+	propertymeta.c \
+	sampler.c \
+	tempo.c
+
+INCLUDES = \
+	-I@srcdir@ \
+	$(BASE_DEPS_CFLAGS)
+
+libgstbuzztardincludedir = $(includedir)/libgstbuzztard
+libgstbuzztardinclude_HEADERS = \
+	childbin.h \
+	envelope.h \
+	help.h \
+	musicenums.h \
+	note2frequency.h \
+	$(PRESET_H) \
+	propertymeta.h \
+	sampler.h \
+	tempo.h
+
+
+libgstbuzztard_la_LIBADD = $(BASE_DEPS_LIBS)
+libgstbuzztard_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@
+
