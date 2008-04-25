@@ -1,3 +1,9 @@
+2008-04-25  Stefan Kost  <ensonic@users.sf.net>
+
+	* TODO:
+	* libgstbuzztard/sampler.c:
+	  Fix paramspec type.
+
 2008-04-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/Makefile.am:

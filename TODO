@@ -23,6 +23,7 @@ $Id$
 == todo ==
 - rename API in sources
   envelope, note2frequency : gst -> bt
+- move all plugins to different ns?
 == done ==
 - includes
   $prefix/include/gstreamer-0.10/gst/

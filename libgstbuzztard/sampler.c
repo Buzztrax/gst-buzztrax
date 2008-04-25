@@ -35,10 +35,9 @@ bt_sampler_base_init(gpointer g_class)
   if (!initialized) {
     /* create interface signals and properties here. */
     g_object_interface_install_property (g_class,
-      g_param_spec_string ("wavetable",
+      g_param_spec_pointer ("wavetable",
       "wavelist property",
       "GList of wave objects",
-      NULL,
       G_PARAM_READWRITE));
     initialized = TRUE;
   }
