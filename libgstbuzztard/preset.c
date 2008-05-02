@@ -469,7 +469,7 @@ gst_preset_default_load_preset (GstPreset * self, const gchar * name)
       }
     }
     else {
-      GST_WARNING ("no preset named %s", name);
+      GST_WARNING ("no preset named '%s'", name);
     }
   } else {
     GST_WARNING ("no presets");
@@ -569,6 +569,7 @@ gst_preset_default_save_preset (GstPreset * self, const gchar * name)
             property->name);
       } else {
         g_key_file_set_string (presets, name, property->name, (gpointer) str);
+        g_free (str);
         str = NULL;
       }
       g_value_unset(&gvalue);
@@ -695,96 +696,6 @@ gst_preset_default_get_meta (GstPreset * self, const gchar * name,
   }
   *value = NULL;
   return FALSE;
-}
-
-static void
-gst_preset_default_randomize (GstPreset * self)
-{
-  GList *properties;
-  GType base, parent;
-
-  if ((properties = gst_preset_get_property_names (self))) {
-    GParamSpec *property;
-    GList *node;
-    gdouble rnd;
-
-    for (node = properties; node; node = g_list_next (node)) {
-      property = g_object_class_find_property (G_OBJECT_CLASS
-          (GST_ELEMENT_GET_CLASS (self)), node->data);
-
-      rnd = ((gdouble) rand ()) / (RAND_MAX + 1.0);
-
-      /* get base type */
-      base = property->value_type;
-      while ((parent = g_type_parent (base)))
-        base = parent;
-      GST_INFO ("set random value for property: %s (type is %s)", property->name,
-          g_type_name (base));
-
-      switch (base) {
-        case G_TYPE_BOOLEAN:{
-          g_object_set (self, property->name, (gboolean) (2.0 * rnd), NULL);
-        } break;
-        case G_TYPE_INT:{
-          const GParamSpecInt *int_property = G_PARAM_SPEC_INT (property);
-
-          g_object_set (self, property->name,
-              (gint) (int_property->minimum + ((int_property->maximum -
-                          int_property->minimum) * rnd)), NULL);
-        } break;
-        case G_TYPE_UINT:{
-          const GParamSpecUInt *uint_property = G_PARAM_SPEC_UINT (property);
-
-          g_object_set (self, property->name,
-              (guint) (uint_property->minimum + ((uint_property->maximum -
-                          uint_property->minimum) * rnd)), NULL);
-        } break;
-        case G_TYPE_DOUBLE:{
-          const GParamSpecDouble *double_property =
-              G_PARAM_SPEC_DOUBLE (property);
-
-          g_object_set (self, property->name,
-              (gdouble) (double_property->minimum + ((double_property->maximum -
-                          double_property->minimum) * rnd)), NULL);
-        } break;
-        case G_TYPE_ENUM:{
-          const GParamSpecEnum *enum_property = G_PARAM_SPEC_ENUM (property);
-          const GEnumClass *enum_class = enum_property->enum_class;
-
-          g_object_set (self, property->name,
-              (gulong) (enum_class->minimum + ((enum_class->maximum -
-                          enum_class->minimum) * rnd)), NULL);
-        } break;
-        default:
-          GST_WARNING ("incomplete implementation for GParamSpec type '%s'",
-              G_PARAM_SPEC_TYPE_NAME (property));
-      }
-    }
-    /* FIXME: handle childproxy properties as well */
-  }
-}
-
-static void
-gst_preset_default_reset (GstPreset * self)
-{
-  GList *properties;
-
-  if ((properties = gst_preset_get_property_names (self))) {
-    GParamSpec *property;
-    GList *node;
-    GValue gvalue={0,};
-
-    for (node = properties; node; node = g_list_next (node)) {
-      property = g_object_class_find_property (G_OBJECT_CLASS
-          (GST_ELEMENT_GET_CLASS (self)), node->data);
-      
-      g_value_init(&gvalue, property->value_type);
-      g_param_value_set_default (property, &gvalue);
-      g_object_set_property (G_OBJECT (self), property->name, &gvalue);
-      g_value_unset(&gvalue);
-    }
-    /* FIXME: handle childproxy properties as well */
-  }
 }
 
 /* wrapper */
@@ -949,38 +860,6 @@ gst_preset_get_meta (GstPreset * self, const gchar * name, const gchar * tag,
   return GST_PRESET_GET_INTERFACE (self)->get_meta (self, name, tag, value);
 }
 
-/**
- * gst_preset_randomize:
- * @self: a #GObject that implements #GstPreset
- *
- * Create a new randomized preset. This method is optional. If not overridden
- * true randomization will be applied. Elements can override this if they can
- * make more meaningful variations or even override with an empty implementation
- * if it does not make sense for them.
- */
-void
-gst_preset_randomize (GstPreset * self)
-{
-  g_return_if_fail (GST_IS_PRESET (self));
-
-  GST_PRESET_GET_INTERFACE (self)->randomize (self);
-}
-
-/**
- * gst_preset_reset:
- * @self: a #GObject that implements #GstPreset
- *
- * Resets values to defaults. This method is optional. If not overridden
- * default from paramspecs are used.
- */
-void
-gst_preset_reset (GstPreset * self)
-{
-  g_return_if_fail (GST_IS_PRESET (self));
-
-  GST_PRESET_GET_INTERFACE (self)->reset (self);
-}
-
 /* class internals */
 
 static void
@@ -996,9 +875,6 @@ gst_preset_class_init (GstPresetInterface * iface)
 
   iface->set_meta = gst_preset_default_set_meta;
   iface->get_meta = gst_preset_default_get_meta;
-
-  iface->randomize = gst_preset_default_randomize;
-  iface->reset = gst_preset_default_reset;
 }
 
 static void

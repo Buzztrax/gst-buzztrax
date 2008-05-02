@@ -32,8 +32,12 @@ G_BEGIN_DECLS
 #define GST_IS_PRESET(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_PRESET))
 #define GST_PRESET_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GST_TYPE_PRESET, GstPresetInterface))
 
-
-typedef struct _GstPreset GstPreset; /* dummy object */
+/**
+ * GstPreset:
+ *
+ * Opaque #GstPreset structure.
+ */
+typedef struct _GstPreset GstPreset;
 typedef struct _GstPresetInterface GstPresetInterface;
 
 struct _GstPresetInterface
@@ -51,9 +55,6 @@ struct _GstPresetInterface
   gboolean (*set_meta) (GstPreset *self,const gchar *name, const gchar *tag, const gchar *value);
   gboolean (*get_meta) (GstPreset *self,const gchar *name, const gchar *tag, gchar **value);
 
-  void (*randomize) (GstPreset *self);
-  void (*reset) (GstPreset *self);
-
   /*< private >*/
   gpointer _gst_reserved[GST_PADDING];
 };
@@ -70,9 +71,6 @@ gboolean gst_preset_delete_preset (GstPreset *self, const gchar *name);
 
 gboolean gst_preset_set_meta (GstPreset *self,const gchar *name, const gchar *tag, const gchar *value);
 gboolean gst_preset_get_meta (GstPreset *self,const gchar *name, const gchar *tag, gchar **value);
-
-void gst_preset_randomize (GstPreset *self);
-void gst_preset_reset (GstPreset *self);
 
 G_END_DECLS
 

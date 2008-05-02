@@ -1,3 +1,9 @@
+2008-05-02  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/preset.c:
+	* libgstbuzztard/preset.h:
+	  Sync with latest of my patch.
+
 2008-04-25  Stefan Kost  <ensonic@users.sf.net>
 
 	* TODO:
