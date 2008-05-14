@@ -16,7 +16,6 @@ libgstbuzztard_la_SOURCES = \
 	note2frequency.c \
 	$(PRESET_C) \
 	propertymeta.c \
-	sampler.c \
 	tempo.c
 
 INCLUDES = \
@@ -32,7 +31,6 @@ libgstbuzztardinclude_HEADERS = \
 	note2frequency.h \
 	$(PRESET_H) \
 	propertymeta.h \
-	sampler.h \
 	tempo.h
 
 

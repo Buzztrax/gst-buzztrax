@@ -118,7 +118,6 @@ gst_preset_rename_preset
 gst_preset_delete_preset
 gst_preset_set_meta
 gst_preset_get_meta
-gst_preset_create_preset
 <SUBSECTION Standard>
 GstPresetInterface
 GST_PRESET
