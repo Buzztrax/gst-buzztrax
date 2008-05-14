@@ -4,8 +4,6 @@
 	  Removed removed method.
 
 	* libgstbuzztard/Makefile.am:
-	* libgstbuzztard/sampler.c:
-	* libgstbuzztard/sampler.h:
 	  Remove iface, we use a property now.
 
 2008-05-02  Stefan Kost  <ensonic@users.sf.net>
