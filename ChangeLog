@@ -1,3 +1,8 @@
+2008-05-30  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/gst-buzztard.types.in:
+	  Fix the build. Spotted by Marc Brockhuis.
+
 2008-05-14  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/gst-buzztard-sections.txt:

@@ -25,7 +25,6 @@ gst_tempo_get_type
 % own stuff
 
 #include <libgstbuzztard/note2frequency.h>
-#include <libgstbuzztard/sampler.h>
 
 gst_note_2_frequency_get_type
-bt_sampler_get_type
+
