@@ -1,3 +1,11 @@
+2008-06-03  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiodelay/Makefile.am:
+	* src/fluidsynth/Makefile.am:
+	* src/simsyn/Makefile.am:
+	  Don't double define DATADIR. We have it in config.h, no need to have
+	  it on the commandline once again.
+
 2008-05-30  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/gst-buzztard.types.in:
