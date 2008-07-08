@@ -1,3 +1,12 @@
+2008-07-08  Stefan Kost  <ensonic@users.sf.net>
+
+	* TODO:
+	  note2frequency should be renamed.
+
+	* libgstbuzztard/note2frequency.c:
+	* libgstbuzztard/note2frequency.h:
+	  Add buzz note conversions.
+
 2008-06-03  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/Makefile.am:

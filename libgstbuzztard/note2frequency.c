@@ -55,6 +55,66 @@ GType gst_note_2_frequency_tuning_get_type(void) {
   return type;
 }
 
+//-- helpers
+
+static gboolean note_string_2_value (const gchar *note, guint *tone, guint *octave) {
+  g_return_val_if_fail(note,FALSE);
+  g_return_val_if_fail((strlen(note)==3),FALSE);
+  g_return_val_if_fail((note[1]=='-' || note[1]=='#'),FALSE);
+  g_assert(tone);
+  g_assert(octave);
+
+  // parse note
+  switch(note[0]) {
+    case 'c':
+    case 'C':
+      *tone=(note[1]=='-')?0:1;
+      break;
+    case 'd':
+    case 'D':
+      *tone=(note[1]=='-')?2:3;
+      break;
+    case 'e':
+    case 'E':
+      *tone=4;
+      break;
+    case 'f':
+    case 'F':
+      *tone=(note[1]=='-')?5:6;
+      break;
+    case 'g':
+    case 'G':
+      *tone=(note[1]=='-')?7:8;
+      break;
+    case 'a':
+    case 'A':
+      *tone=(note[1]=='-')?9:10;
+      break;
+    case 'b':
+    case 'B':
+    case 'h':
+    case 'H':
+      *tone=11;
+      break;
+    default:
+      g_return_val_if_reached(FALSE);
+  }
+  *octave=atoi(&note[2]);
+  return(TRUE);
+}
+
+static gboolean note_value_2_string (guint note, guint *tone, guint *octave) {
+  g_return_val_if_fail(note,FALSE);
+  g_return_val_if_fail(note<((16*9)+12),0);
+  g_assert(tone);
+  g_assert(octave);
+
+  note-=1;
+  *octave=note/16;
+  *tone=note-(*octave*16);
+}
+
+
 //-- constructor methods
 
 /**
@@ -111,6 +171,7 @@ static gst_note_2_frequency_change_tuning(GstNote2Frequency *self) {
   }
 }
 
+
 /**
  * gst_note_2_frequency_translate_from_string:
  * @self: a #GstNote2Frequency
@@ -124,53 +185,10 @@ static gst_note_2_frequency_change_tuning(GstNote2Frequency *self) {
 gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar *note) {
   guint tone, octave;
 
-  g_return_val_if_fail(note,0.0);
-
-  if(strlen(note)!=3) {
-    GST_WARNING("strlen==3 failed for \"%s\"",note);
-  }
-
-  g_return_val_if_fail((strlen(note)==3),0.0);
-  g_return_val_if_fail((note[1]=='-' || note[1]=='#'),0.0);
-
-  // parse note
-  switch(note[0]) {
-    case 'c':
-    case 'C':
-      tone=(note[1]=='-')?0:1;
-      break;
-    case 'd':
-    case 'D':
-      tone=(note[1]=='-')?2:3;
-      break;
-    case 'e':
-    case 'E':
-      tone=4;
-      break;
-    case 'f':
-    case 'F':
-      tone=(note[1]=='-')?5:6;
-      break;
-    case 'g':
-    case 'G':
-      tone=(note[1]=='-')?7:8;
-      break;
-    case 'a':
-    case 'A':
-      tone=(note[1]=='-')?9:10;
-      break;
-    case 'b':
-    case 'B':
-    case 'h':
-    case 'H':
-      tone=11;
-      break;
-    default:
-      g_return_val_if_reached(0.0);
-  }
-  octave=atoi(&note[2]);
-
-  return(self->translate(self,octave,tone));
+  if(note_string_2_value(note,&tone,&octave))
+    return(self->translate(self,octave,tone));
+  else
+    return(0.0);
 }
 
 /**
@@ -178,22 +196,64 @@ gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar
  * @self: a #GstNote2Frequency
  * @note: a musical note as number
  *
- * Converts the numerical number of a note to a frequency in Hz. A value of 0
- * for @note represents 'c-0'. The highes supported value is 'b-9' (or 'h-9')
- * which is (10*12)-1.
+ * Converts the numerical number of a note to a frequency in Hz. A value of 1
+ * for @note represents 'c-0'. The highest supported value is 'b-9' (or 'h-9')
+ * which is 1+(9*16)+11 (1 octave has 12 tones, 4 are left unused for easy
+ * coding).
  *
  * Returns: the frequency of the note or 0.0 in case of an error
  */
 gdouble gst_note_2_frequency_translate_from_number(GstNote2Frequency *self,guint note) {
   guint tone, octave;
 
-  g_return_val_if_fail(note<(10*12),0.0);
-
-  octave=note/12;
-  tone=note-(octave*12);
-
-  return(self->translate(self,octave,tone));
+  if(note_value_2_string(note,&tone,&octave))
+    return(self->translate(self,octave,tone));
+  else
+    return(0.0);
 }
+
+/**
+ * gst_note_2_frequency_note_string_2_number:
+ * @note: a musical note in string representation
+ * 
+ * Converts the string representation of a musical note such as 'C-3' or 'd#4'
+ * to a note number.
+ *
+ * Returns: the note number or 0 in case of an error.
+ */
+guint gst_note_2_frequency_note_string_2_number(const gchar *note) {
+  guint tone, octave;
+  
+  if(note_string_2_value(note,&tone,&octave))
+    return (1+(octave<<4)+tone);
+  else
+    return(0);
+}
+
+/**
+ * gst_note_2_frequency_note_number_2_string:
+ * @note: a musical note as number
+ *
+ * Converts the numerical number of a note to a string. A value of 1
+ * for @note represents 'c-0'. The highest supported value is 'b-9' (or 'h-9')
+ * which is 1+(9*16)+11 (1 octave has 12 tones, 4 are left unused for easy
+ * coding).
+ *
+ * Returns: the note as string or an empty string in the case of an error.
+ */
+const gchar *gst_note_2_frequency_note_number_2_string(guint note) {
+  static gchar str[4];
+  static const gchar *key[12]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
+  guint tone, octave;
+  
+  if(note_value_2_string(note,&tone,&octave)) {
+    sprintf(str,"%2s%1d",key[tone],octave);
+    return(str);
+  }
+  else
+    return("");  
+}
+
 //-- wrapper
 
 //-- class internals

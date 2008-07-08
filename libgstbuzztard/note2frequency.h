@@ -81,6 +81,9 @@ GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning);
 gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar *note);
 gdouble gst_note_2_frequency_translate_from_number(GstNote2Frequency *self,guint note);
 
+guint gst_note_2_frequency_note_string_2_number(const gchar *note);
+const gchar *gst_note_2_frequency_note_number_2_string(guint note);
+
 G_END_DECLS
 
 #endif /* __GST_NOTE_2_FREQUENCY_H__ */
