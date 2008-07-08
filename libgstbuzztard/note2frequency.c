@@ -104,10 +104,11 @@ static gboolean note_string_2_value (const gchar *note, guint *tone, guint *octa
 }
 
 static gboolean note_value_2_string (guint note, guint *tone, guint *octave) {
-  g_return_val_if_fail(note,FALSE);
   g_return_val_if_fail(note<((16*9)+12),0);
   g_assert(tone);
   g_assert(octave);
+  
+  if(note==0) return(FALSE);
 
   note-=1;
   *octave=note/16;

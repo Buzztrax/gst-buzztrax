@@ -1,5 +1,10 @@
 2008-07-08  Stefan Kost  <ensonic@users.sf.net>
 
+	* libgstbuzztard/note2frequency.c:
+	  Don't assert on note==0.
+
+2008-07-08  Stefan Kost  <ensonic@users.sf.net>
+
 	* TODO:
 	  note2frequency should be renamed.
 
