@@ -1,3 +1,8 @@
+2008-07-25  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/note2frequency.c:
+	  Add missing return.
+
 2008-07-08  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/note2frequency.c:

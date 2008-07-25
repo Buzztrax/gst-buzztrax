@@ -58,9 +58,10 @@ GType gst_note_2_frequency_tuning_get_type(void) {
 //-- helpers
 
 static gboolean note_string_2_value (const gchar *note, guint *tone, guint *octave) {
-  g_return_val_if_fail(note,FALSE);
-  g_return_val_if_fail((strlen(note)==3),FALSE);
-  g_return_val_if_fail((note[1]=='-' || note[1]=='#'),FALSE);
+  if(!note) return(FALSE);
+  if((strlen(note)!=3)) return(FALSE);
+  if(!(note[1]=='-' || note[1]=='#')) return (FALSE);
+  if(!(note[2]>='0' && note[2]<='9')) return (FALSE);
   g_assert(tone);
   g_assert(octave);
 
@@ -113,6 +114,7 @@ static gboolean note_value_2_string (guint note, guint *tone, guint *octave) {
   note-=1;
   *octave=note/16;
   *tone=note-(*octave*16);
+  return(TRUE);
 }
 
 
