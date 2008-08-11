@@ -82,7 +82,7 @@ START_TEST(test_translate_num_base) {
   n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
   fail_unless(n2f != NULL, NULL);
 
-  frq=gst_note_2_frequency_translate_from_number(n2f,12*3+9);
+  frq=gst_note_2_frequency_translate_from_number(n2f,1+(16*3+9));
   //g_print("frq=%lf\n",frq);
   fail_unless(frq==440.0, NULL);
   
@@ -94,17 +94,19 @@ END_TEST
 START_TEST(test_translate_num_series) {
   GstNote2Frequency *n2f;
   gdouble frq,frq_prev=0.0;
-  guint i=0;
+  guint i,j;
   
   n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
   fail_unless(n2f != NULL, NULL);
   
-  for(i=0;i<12*10;i++) {
-	frq=gst_note_2_frequency_translate_from_number(n2f,i);
-	//g_print("%3u -> frq=%lf\n",i,frq);
-	fail_unless(frq!=0.0, NULL);
-	fail_unless(frq>frq_prev, NULL);
-	frq_prev=frq;
+  for(i=0;i<9;i++) {
+    for(j=0;j<12;j++) {
+      frq=gst_note_2_frequency_translate_from_number(n2f,1+(i*16+j));
+      //g_print("%3u -> frq=%lf\n",i,frq);
+      fail_unless(frq!=0.0, NULL);
+      fail_unless(frq>frq_prev, NULL);
+      frq_prev=frq;
+    }
   }
   
   // free object

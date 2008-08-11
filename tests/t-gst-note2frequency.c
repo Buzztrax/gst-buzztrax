@@ -82,7 +82,7 @@ START_TEST(test_translate_num_range) {
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 
-  frq=gst_note_2_frequency_translate_from_number(n2f,12*10);
+  frq=gst_note_2_frequency_translate_from_number(n2f,1+(16*10));
   fail_unless(frq == 0.0, NULL);
 
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
