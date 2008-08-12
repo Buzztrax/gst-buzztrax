@@ -11,7 +11,8 @@ TESTS = \
 	gtkdoccomplete.sh
 
 # prevent endless loops
-TESTS_ENVIRONMENT = ulimit -St20;
+TESTS_ENVIRONMENT = ulimit -St20; \
+	LD_LIBRARY_PATH=$(top_builddir)/libgstbuzztard/.libs:$(LD_LIBRARY_PATH)
 
 if BUILD_CHECK_TESTS
 noinst_PROGRAMS=$(TESTS_BIN)
