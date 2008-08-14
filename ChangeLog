@@ -1,3 +1,9 @@
+2008-08-14  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* src/audiodelay/audiodelay.c:
+	  Use XXX_CHECK_VERSION macros.
+
 2008-08-12  Stefan Kost  <ensonic@users.sf.net>
 
 	* tests/Makefile.am:

@@ -260,7 +260,7 @@ gst_audio_delay_init (GstAudioDelay *filter, GstAudioDelayClass * klass)
 
   filter->ring_buffer = NULL;
   
-#ifdef HAVE_GST_0_10_17
+#if GST_CHECK_VERSION(0,10,17)
   gst_base_transform_set_gap_aware (GST_BASE_TRANSFORM (filter), TRUE);
 #endif
 }

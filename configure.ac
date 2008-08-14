@@ -191,25 +191,25 @@ AC_SUBST(GST_PLUGIN_CFLAGS)
 GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*' $COVERAGE_LIBS"
 AC_SUBST(GST_PLUGIN_LDFLAGS)
 
-dnl - Check for modules already commited upstream
-ac_cflags_save="$CFLAGS"
-ac_cppflags_save="$CPPFLAGS"
-ac_ldflags_save="$LDFLAGS"
-CFLAGS="$CFLAGS $BASE_DEPS_CFLAGS"
-CPPFLAGS="$CPPFLAGS $BASE_DEPS_CFLAGS"
-LDFLAGS="$LDFLAGS $BASE_DEPS_LIBS"
-AC_CHECK_HEADERS(gst/gstpreset.h,[HAVE_GST_GSTPRESET_H="1"],[HAVE_GST_GSTPRESET_H="0"])
-AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET_H" = "0")
-if test "x$HAVE_GST_GSTPRESET_H" = "x1"
-then
-  PRESET_DOC_TYPES=
-else
-  PRESET_DOC_TYPES="%"
-fi
-AC_SUBST(PRESET_DOC_TYPES)
-CFLAGS="$ac_cflags_save"
-CPPFLAGS="$ac_cppflags_save"
-LDFLAGS="$ac_ldflags_save"
+#dnl - Check for modules already commited upstream
+#ac_cflags_save="$CFLAGS"
+#ac_cppflags_save="$CPPFLAGS"
+#ac_ldflags_save="$LDFLAGS"
+#CFLAGS="$CFLAGS $BASE_DEPS_CFLAGS"
+#CPPFLAGS="$CPPFLAGS $BASE_DEPS_CFLAGS"
+#LDFLAGS="$LDFLAGS $BASE_DEPS_LIBS"
+#AC_CHECK_HEADERS(gst/gstpreset.h,[HAVE_GST_GSTPRESET_H="1"],[HAVE_GST_GSTPRESET_H="0"])
+#AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET_H" = "0")
+#if test "x$HAVE_GST_GSTPRESET_H" = "x1"
+#then
+#  PRESET_DOC_TYPES=
+#else
+#  PRESET_DOC_TYPES="%"
+#fi
+#AC_SUBST(PRESET_DOC_TYPES)
+#CFLAGS="$ac_cflags_save"
+#CPPFLAGS="$ac_cppflags_save"
+#LDFLAGS="$ac_ldflags_save"
 
 AC_MSG_CHECKING([gstreamer version >= 0.10.17])
 if pkg-config --atleast-version=0.10.17 gstreamer-0.10; then
@@ -219,6 +219,18 @@ else
   AC_MSG_RESULT(no)
 fi
 
+AC_MSG_CHECKING([gstreamer version >= 0.10.20])
+if pkg-config --atleast-version=0.10.20 gstreamer-0.10; then
+  HAVE_GST_GSTPRESET=1
+  PRESET_DOC_TYPES="%"
+  AC_MSG_RESULT(yes)
+else
+  HAVE_GST_GSTPRESET=0
+  PRESET_DOC_TYPES=
+  AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET" = "0")
+AC_SUBST(PRESET_DOC_TYPES)
 
 dnl - Check for FluidSynth
 PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
