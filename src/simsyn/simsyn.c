@@ -1247,8 +1247,13 @@ plugin_init (GstPlugin * plugin)
       GST_RANK_NONE, GST_TYPE_SIM_SYN);
 }
 
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
+GST_PLUGIN_DEFINE (
+    GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
     "simsyn",
     "Simple audio synthesizer",
-    plugin_init, VERSION, "LGPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN);
+    plugin_init,
+    VERSION,
+    "LGPL",
+    GST_PACKAGE_NAME,
+    GST_PACKAGE_ORIGIN);

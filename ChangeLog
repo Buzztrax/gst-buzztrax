@@ -1,3 +1,14 @@
+2008-08-19  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* src/audiodelay/audiodelay.c:
+	* src/simsyn/simsyn.c:
+	* src/bml/plugin.c:
+	* src/bml/native/Makefile.am:
+	* src/bml/wrapped/Makefile.am:
+	* src/bml/Makefile.am:
+	  Merge gstbml plugin.
+
 2008-08-14  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

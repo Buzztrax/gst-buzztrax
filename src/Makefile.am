@@ -4,6 +4,12 @@ else
 FLUIDSYNTH =
 endif
 
+if BML_SUPPORT
+BML = bml
+else
+BML =
+endif
+
 SUBDIRS = \
-    audiodelay $(FLUIDSYNTH) simsyn
+    audiodelay $(BML) $(FLUIDSYNTH) simsyn
 

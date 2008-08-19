@@ -522,13 +522,6 @@ GType gst_audio_delay_get_type (void)
 }
 
 
-/* entry point to initialize the plug-in
- * initialize the plug-in itself
- * register the element factories and pad templates
- * register the features
- *
- * exchange the string 'plugin' with your elemnt name
- */
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
@@ -541,11 +534,6 @@ plugin_init (GstPlugin * plugin)
       GST_TYPE_AUDIO_DELAY);
 }
 
-/* this is the structure that gstreamer looks for to register plugins
- *
- * exchange the strings 'plugin' and 'Template plugin' with you plugin name and
- * description
- */
 GST_PLUGIN_DEFINE (
     GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
@@ -554,6 +542,5 @@ GST_PLUGIN_DEFINE (
     plugin_init,
     VERSION,
     "LGPL",
-    "GStreamer",
-    "http://gstreamer.net/"
-)
+    GST_PACKAGE_NAME,
+    GST_PACKAGE_ORIGIN);

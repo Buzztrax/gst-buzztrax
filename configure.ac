@@ -175,6 +175,7 @@ if test $ac_cv_use_valgrind != no; then
 fi
 AC_SUBST(VALGRIND_CFLAGS)dnl
 
+
 dnl Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= 2.2.0 gobject-2.0  >= 2.6.0 gthread-2.0 >= 2.2.0 gmodule-2.0 >= 2.2.0 \
@@ -182,14 +183,14 @@ PKG_CHECK_MODULES(BASE_DEPS, \
   gstreamer-controller-0.10 >= 0.10.0 \
 )
 
+dnl GStreamer plugin build
 plugindir="\$(libdir)/gstreamer-$GST_MAJORMINOR"
 AC_SUBST(plugindir)
-
 GST_PLUGIN_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS"
 AC_SUBST(GST_PLUGIN_CFLAGS)
-
 GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*' $COVERAGE_LIBS"
 AC_SUBST(GST_PLUGIN_LDFLAGS)
+
 
 #dnl - Check for modules already commited upstream
 #ac_cflags_save="$CFLAGS"
@@ -211,13 +212,6 @@ AC_SUBST(GST_PLUGIN_LDFLAGS)
 #CPPFLAGS="$ac_cppflags_save"
 #LDFLAGS="$ac_ldflags_save"
 
-AC_MSG_CHECKING([gstreamer version >= 0.10.17])
-if pkg-config --atleast-version=0.10.17 gstreamer-0.10; then
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(HAVE_GST_0_10_17, [1], [Define to 1 if we can use API new in gstreamer-0.10.17])
-else
-  AC_MSG_RESULT(no)
-fi
 
 AC_MSG_CHECKING([gstreamer version >= 0.10.20])
 if pkg-config --atleast-version=0.10.20 gstreamer-0.10; then
@@ -232,6 +226,29 @@ fi
 AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET" = "0")
 AC_SUBST(PRESET_DOC_TYPES)
 
+
+dnl - Check for buzzmachineloader (bml)
+PKG_CHECK_MODULES(BML, libbml >= 0.4.0 liboil-0.3 >= 0.3.8,
+    HAVE_BML=1, HAVE_BML=0)
+AC_SUBST(BML_CFLAGS)
+AC_SUBST(BML_LIBS)
+AM_CONDITIONAL(BML_SUPPORT, test "$HAVE_BML" = "1")
+if test "x$HAVE_BML" = "x1"
+then
+  BML_DOC_TYPES=
+else
+  BML_DOC_TYPES="%"
+fi
+AC_SUBST(BML_DOC_TYPES)
+dnl check for bml variant (wrapped/native)
+AC_CHECK_LIB( bml, bmlw_init, [
+    HAVE_BMLW=1
+    AC_DEFINE(HAVE_BMLW, [1], [Define to 1 if bml has been build with wrapper]) \
+  ]
+)
+AM_CONDITIONAL(BUILD_BMLW, test $HAVE_BMLW == "1")
+
+
 dnl - Check for FluidSynth
 PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
     HAVE_FLUIDSYNTH=1, HAVE_FLUIDSYNTH=0)
@@ -245,6 +262,7 @@ else
   FLUIDSYNTH_DOC_TYPES="%"
 fi
 AC_SUBST(FLUIDSYNTH_DOC_TYPES)
+
 
 dnl set license and copyright notice
 AC_DEFINE(GST_PACKAGE_ORIGIN, "http://www.buzztard.org", [Plugin package origin])
@@ -293,6 +311,9 @@ AC_CONFIG_FILES( \
     libgstbuzztard/Makefile \
 	src/Makefile \
 	src/audiodelay/Makefile \
+	src/bml/Makefile \
+	src/bml/native/Makefile \
+	src/bml/wrapped/Makefile \
 	src/fluidsynth/Makefile \
 	src/simsyn/Makefile \
 	tests/Makefile
