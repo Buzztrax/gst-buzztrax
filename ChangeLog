@@ -1,3 +1,8 @@
+2008-08-20  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  Fix configure checks.
+
 2008-08-19  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
@@ -56,7 +61,7 @@
 2008-05-30  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/gst-buzztard.types.in:
-	  Fix the build. Spotted by Marc Brockhuis.
+	  Fix the build. Spotted by Marc Broekhuis.
 
 2008-05-14  Stefan Kost  <ensonic@users.sf.net>
 

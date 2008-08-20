@@ -232,7 +232,7 @@ PKG_CHECK_MODULES(BML, libbml >= 0.4.0 liboil-0.3 >= 0.3.8,
     HAVE_BML=1, HAVE_BML=0)
 AC_SUBST(BML_CFLAGS)
 AC_SUBST(BML_LIBS)
-AM_CONDITIONAL(BML_SUPPORT, test "$HAVE_BML" = "1")
+AM_CONDITIONAL(BML_SUPPORT, test "x$HAVE_BML" = "x1")
 if test "x$HAVE_BML" = "x1"
 then
   BML_DOC_TYPES=
@@ -241,12 +241,20 @@ else
 fi
 AC_SUBST(BML_DOC_TYPES)
 dnl check for bml variant (wrapped/native)
+ac_cflags_save="$CFLAGS"
+ac_ldflags_save="$LDFLAGS"
+CFLAGS="$CFLAGS $BML_CFLAGS"
+LDFLAGS="$LDFLAGS $BML_LIBS"
 AC_CHECK_LIB( bml, bmlw_init, [
     HAVE_BMLW=1
     AC_DEFINE(HAVE_BMLW, [1], [Define to 1 if bml has been build with wrapper]) \
+  ],[
+    HAVE_BMLW=0
   ]
 )
-AM_CONDITIONAL(BUILD_BMLW, test $HAVE_BMLW == "1")
+AM_CONDITIONAL(BUILD_BMLW, test "x$HAVE_BMLW" = "x1")
+CFLAGS="$ac_cflags_save"
+LDFLAGS="$ac_ldflags_save"
 
 
 dnl - Check for FluidSynth
