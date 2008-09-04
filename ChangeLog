@@ -1,3 +1,14 @@
+2008-09-04  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  Indent.
+
+	* src/audiodelay/Makefile.am:
+	* src/bml/Makefile.am:
+	* src/fluidsynth/Makefile.am:
+	* src/simsyn/Makefile.am:
+	  Do not install *.a for plugins.
+
 2008-08-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

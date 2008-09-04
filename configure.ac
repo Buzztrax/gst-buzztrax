@@ -316,7 +316,7 @@ AC_CONFIG_FILES( \
 	docs/Makefile \
 	docs/reference/Makefile \
 	docs/reference/gst-buzztard.types \
-    libgstbuzztard/Makefile \
+	libgstbuzztard/Makefile \
 	src/Makefile \
 	src/audiodelay/Makefile \
 	src/bml/Makefile \
