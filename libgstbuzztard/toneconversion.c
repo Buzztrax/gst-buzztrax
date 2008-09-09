@@ -27,7 +27,7 @@
  * notes as numbers and strings.
  */
 
-#include "note2frequency.h"
+#include "toneconversion.h"
 #include "math.h"
 #include "string.h"
 

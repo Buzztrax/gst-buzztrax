@@ -180,11 +180,11 @@ gboolean gstbml_preset_load_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
       if((properties=g_object_class_list_properties(G_OBJECT_CLASS(GST_ELEMENT_GET_CLASS(self)),&number_of_properties))) {
         for(i=0;i<number_of_properties;i++) {
           property=properties[i];
-          flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
+          flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gstbt_property_meta_quark_flags));
 
           // skip non-controlable, trigger params & voice params
           if(!(property->flags&GST_PARAM_CONTROLLABLE)) continue;
-          else if(!(flags&GST_PROPERTY_META_STATE)) continue;
+          else if(!(flags&GSTBT_PROPERTY_META_STATE)) continue;
           else if(voice_class && g_object_class_find_property(voice_class,property->name)) continue;
           // set parameters
           g_object_set(self,property->name,*data++,NULL);
@@ -202,10 +202,10 @@ gboolean gstbml_preset_load_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
             voice=node->data;
             for(i=0;i<number_of_properties;i++) {
               property=properties[i];
-              flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
+              flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gstbt_property_meta_quark_flags));
 
               // skip trigger params
-              if(!(flags&GST_PROPERTY_META_STATE)) continue;
+              if(!(flags&GSTBT_PROPERTY_META_STATE)) continue;
 
               // set parameters
               g_object_set(voice,property->name,*data++,NULL);
@@ -308,11 +308,11 @@ gboolean gstbml_preset_save_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
   if((properties=g_object_class_list_properties(G_OBJECT_CLASS(GST_ELEMENT_GET_CLASS(self)),&number_of_properties))) {
     for(i=0;i<number_of_properties;i++) {
       property=properties[i];
-      flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
+      flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gstbt_property_meta_quark_flags));
 
       // skip non-controlable, trigger params & voice params
       if(!(property->flags&GST_PARAM_CONTROLLABLE)) continue;
-      else if(!(flags&GST_PROPERTY_META_STATE)) continue;
+      else if(!(flags&GSTBT_PROPERTY_META_STATE)) continue;
       else if(voice_class && g_object_class_find_property(voice_class,property->name)) continue;
       numglobalparams++;
     }
@@ -322,10 +322,10 @@ gboolean gstbml_preset_save_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
     if((properties=g_object_class_list_properties(voice_class,&number_of_properties))) {
       for(i=0;i<number_of_properties;i++) {
         property=properties[i];
-        flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
+        flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gstbt_property_meta_quark_flags));
 
         // skip trigger params
-        if(!(flags&GST_PROPERTY_META_STATE)) continue;
+        if(!(flags&GSTBT_PROPERTY_META_STATE)) continue;
         numtrackparams++;
       }
     }
@@ -345,11 +345,11 @@ gboolean gstbml_preset_save_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
   if((properties=g_object_class_list_properties(G_OBJECT_CLASS(GST_ELEMENT_GET_CLASS(self)),&number_of_properties))) {
     for(i=0;i<number_of_properties;i++) {
       property=properties[i];
-      flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
+      flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gstbt_property_meta_quark_flags));
 
       // skip non-controlable, trigger params & voice params
       if(!(property->flags&GST_PARAM_CONTROLLABLE)) continue;
-      else if(!(flags&GST_PROPERTY_META_STATE)) continue;
+      else if(!(flags&GSTBT_PROPERTY_META_STATE)) continue;
       else if(voice_class && g_object_class_find_property(voice_class,property->name)) continue;
       // get parameters
       g_object_get(self,property->name,ptr++,NULL);
@@ -365,10 +365,10 @@ gboolean gstbml_preset_save_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
         voice=node->data;
         for(i=0;i<number_of_properties;i++) {
           property=properties[i];
-          flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
+          flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gstbt_property_meta_quark_flags));
 
           // skip trigger params
-          if(!(flags&GST_PROPERTY_META_STATE)) continue;
+          if(!(flags&GSTBT_PROPERTY_META_STATE)) continue;
 
           // get parameters
           g_object_get(voice,property->name,ptr++,NULL);
@@ -597,7 +597,7 @@ gboolean gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GTyp
     saved_max_val=max_val;
     max_val=def_val;
   }
-  if(!(flags&GST_PROPERTY_META_STATE)) {
+  if(!(flags&GSTBT_PROPERTY_META_STATE)) {
     // only trigger params need no_val handling
     if(no_val<min_val) {
       GST_WARNING("par=%d:%s, no_val < min_val",type,name);
@@ -621,7 +621,7 @@ gboolean gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GTyp
       break;
     case PT_SWITCH:
       if(min_val==-1) min_val=0;
-      //if(!(flags&GST_PROPERTY_META_STATE)) {
+      //if(!(flags&GSTBT_PROPERTY_META_STATE)) {
         /* @todo use better type for triggers
          * this is how its define for buzz
          * [ 0 ... n=255 ... 1]
@@ -643,7 +643,7 @@ gboolean gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GTyp
         */
         type=PT_ENUM;
         paramspec=g_param_spec_enum(name, nick, desc,
-          BT_TYPE_TRIGGER_SWITCH, BT_TRIGGER_SWITCH_EMPTY,
+          GSTBT_TYPE_TRIGGER_SWITCH, GSTGSTBT_TRIGGER_SWITCH_EMPTY,
           G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);
       /*}
       else {
@@ -680,12 +680,12 @@ gboolean gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GTyp
       break;
   }
   if(paramspec) {
-    g_param_spec_set_qdata(paramspec,gst_property_meta_quark,GINT_TO_POINTER(TRUE));
-    g_param_spec_set_qdata(paramspec,gst_property_meta_quark_min_val, GINT_TO_POINTER(saved_min_val));
-    g_param_spec_set_qdata(paramspec,gst_property_meta_quark_max_val, GINT_TO_POINTER(saved_max_val));
-    g_param_spec_set_qdata(paramspec,gst_property_meta_quark_def_val, GINT_TO_POINTER(saved_def_val));
-    g_param_spec_set_qdata(paramspec,gst_property_meta_quark_no_val,  GINT_TO_POINTER(no_val));
-    g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,   GINT_TO_POINTER(flags));
+    g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark,GINT_TO_POINTER(TRUE));
+    g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_min_val, GINT_TO_POINTER(saved_min_val));
+    g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_max_val, GINT_TO_POINTER(saved_max_val));
+    g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_def_val, GINT_TO_POINTER(saved_def_val));
+    g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_no_val,  GINT_TO_POINTER(no_val));
+    g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_flags,   GINT_TO_POINTER(flags));
     g_param_spec_set_qdata(paramspec,gst_bml_property_meta_quark_type,GINT_TO_POINTER(type));
     g_object_class_install_property(klass,prop_id,paramspec);
     GST_DEBUG("registered paramspec=%p",paramspec);
@@ -700,7 +700,7 @@ void gstbml_set_param(gint type,gpointer addr,const GValue *value) {
   switch(type) {
     case PT_NOTE: {
       const gchar *str=g_value_get_string(value);
-      *(guint8 *)addr=(str && *str) ? gst_note_2_frequency_note_string_2_number (str) : 0;
+      *(guint8 *)addr=(str && *str) ? gstbt_tone_conversion_note_string_2_number (str) : 0;
       break;
     }
     case PT_SWITCH:
@@ -724,7 +724,7 @@ void gstbml_set_param(gint type,gpointer addr,const GValue *value) {
 void gstbml_get_param(gint type,gpointer addr,GValue *value) {
   switch(type) {
     case PT_NOTE:
-      g_value_set_string(value, gst_note_2_frequency_note_number_2_string ((guint)(*(guint8 *)addr)));
+      g_value_set_string(value, gstbt_tone_conversion_note_number_2_string ((guint)(*(guint8 *)addr)));
       break;
     case PT_SWITCH:
       g_value_set_boolean(value,(guint)(*(guint8 *)addr));

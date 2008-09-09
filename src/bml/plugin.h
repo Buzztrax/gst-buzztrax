@@ -40,7 +40,7 @@
 #include <libgstbuzztard/childbin.h>
 #include <libgstbuzztard/help.h>
 #include <libgstbuzztard/musicenums.h>
-#include <libgstbuzztard/note2frequency.h>
+#include <libgstbuzztard/toneconversion.h>
 #ifndef HAVE_GST_GSTPRESET_H
 #include <libgstbuzztard/preset.h>
 #endif

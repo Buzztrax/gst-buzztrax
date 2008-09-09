@@ -5,7 +5,7 @@
 #include "glib.h"
 #include "gst/gst.h"
 
-#include "libgstbuzztard/note2frequency.h"
+#include "libgstbuzztard/toneconversion.h"
 
 //-- globals
 

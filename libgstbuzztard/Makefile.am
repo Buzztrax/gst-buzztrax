@@ -13,7 +13,7 @@ libgstbuzztard_la_SOURCES = \
 	envelope.c \
 	help.c \
 	musicenums.c \
-	note2frequency.c \
+	toneconversion.c \
 	$(PRESET_C) \
 	propertymeta.c \
 	tempo.c
@@ -28,7 +28,7 @@ libgstbuzztardinclude_HEADERS = \
 	envelope.h \
 	help.h \
 	musicenums.h \
-	note2frequency.h \
+	toneconversion.h \
 	$(PRESET_H) \
 	propertymeta.h \
 	tempo.h

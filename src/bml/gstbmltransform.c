@@ -116,14 +116,14 @@ static void gst_bml_child_proxy_interface_init(gpointer g_iface, gpointer iface_
 
 //-- property meta interface implementations
 
-static gchar *gst_bml_property_meta_describe_property(GstPropertyMeta *property_meta, glong index, GValue *event) {
+static gchar *gst_bml_property_meta_describe_property(GstBtPropertyMeta *property_meta, glong index, GValue *event) {
   GstBML *bml=GST_BML(GST_BML_TRANSFORM(property_meta));
 
   return(bml(gstbml_property_meta_describe_property(bml->bm,index,event)));
 }
 
 static void gst_bml_property_meta_interface_init(gpointer g_iface, gpointer iface_data) {
-  GstPropertyMetaInterface *iface = g_iface;
+  GstBtPropertyMetaInterface *iface = g_iface;
 
   GST_INFO("initializing iface");
 
@@ -132,7 +132,7 @@ static void gst_bml_property_meta_interface_init(gpointer g_iface, gpointer ifac
 
 //-- tempo interface implementations
 
-static void gst_bml_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
+static void gst_bml_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(tempo);
   GstBML *bml=GST_BML(bml_transform);
 
@@ -140,7 +140,7 @@ static void gst_bml_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, 
 }
 
 static void gst_bml_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
-  GstTempoInterface *iface = g_iface;
+  GstBtTempoInterface *iface = g_iface;
 
   GST_INFO("initializing iface");
 
@@ -675,17 +675,17 @@ GType bml(transform_get_type(const char *element_type_name, gpointer bm)) {
   // create the element type now
   element_type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, element_type_name, &element_type_info, 0);
   GST_INFO("succefully registered new type : \"%s\"", element_type_name);
-  g_type_add_interface_static(element_type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
-  g_type_add_interface_static(element_type, GST_TYPE_TEMPO, &tempo_interface_info);
+  g_type_add_interface_static(element_type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
+  g_type_add_interface_static(element_type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
 
   // check if this plugin can do multiple voices
   if(bml(gstbml_is_polyphonic(bm))) {
     g_type_add_interface_static(element_type, GST_TYPE_CHILD_PROXY, &child_proxy_interface_info);
-    g_type_add_interface_static(element_type, GST_TYPE_CHILD_BIN, &child_bin_interface_info);
+    g_type_add_interface_static(element_type, GSTBT_TYPE_CHILD_BIN, &child_bin_interface_info);
   }
   // check if this plugin has user docs
   if(gstbml_get_help_uri(bm)) {
-    g_type_add_interface_static(element_type, GST_TYPE_HELP, &help_interface_info);
+    g_type_add_interface_static(element_type, GSTBT_TYPE_HELP, &help_interface_info);
   }
   // add presets iface
   g_type_add_interface_static(element_type, GST_TYPE_PRESET, &preset_interface_info);

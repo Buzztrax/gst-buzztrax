@@ -1,5 +1,18 @@
 2008-09-09  Stefan Kost  <ensonic@users.sf.net>
 
+	* libgstbuzztard/Makefile.am:
+	* src/bml/common.c:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/gstbmlv.c:
+	* src/bml/plugin.h:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/simsyn/simsyn.h:
+	* tests/m-gst-buzztard.h:
+	  Rename note2frequency -> toneconversion
+
+2008-09-09  Stefan Kost  <ensonic@users.sf.net>
+
 	* libgstbuzztard/childbin.c:
 	* libgstbuzztard/childbin.h:
 	* libgstbuzztard/envelope.c:

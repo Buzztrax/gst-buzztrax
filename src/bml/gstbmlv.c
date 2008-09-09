@@ -66,14 +66,14 @@ static gchar *bml(v_property_meta_describe_property(gpointer bm, glong index, GV
   return(g_strdup(str));
 }
 
-static gchar *gst_bmlv_property_meta_describe_property(GstPropertyMeta *property_meta, glong index, GValue *event) {
+static gchar *gst_bmlv_property_meta_describe_property(GstBtPropertyMeta *property_meta, glong index, GValue *event) {
   GstBMLV *bmlv=GST_BMLV(property_meta);
 
   return(bml(v_property_meta_describe_property(bmlv->bm,index,event)));
 }
 
 static void gst_bmlv_property_meta_interface_init(gpointer g_iface, gpointer iface_data) {
-  GstPropertyMetaInterface *iface = g_iface;
+  GstBtPropertyMetaInterface *iface = g_iface;
 
   GST_INFO("initializing iface");
 
@@ -247,6 +247,6 @@ GType bml(v_get_type(gchar *voice_type_name)) {
   };
   // @todo should we have a hashmap by voice_type_name ?
   type = g_type_register_static(GST_TYPE_OBJECT, voice_type_name, &voice_type_info, 0);
-  g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
+  g_type_add_interface_static(type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
   return(type);
 }
