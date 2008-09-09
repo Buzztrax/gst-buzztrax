@@ -19,59 +19,59 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:gstpropertymeta
+ * SECTION:gstbtpropertymeta
  * @short_description: helper interface for extended gstreamer element meta data
  *
  * This interface standardises some additional meta-data that is attached to
  * #GObject properties.
  *
- * Furthermore it adds the gst_property_meta_describe_property() method that
+ * Furthermore it adds the gstbt_property_meta_describe_property() method that
  * builds a string description of a property value.
  */
 
 #include "propertymeta.h"
 
 /**
- * gst_property_meta_quark:
+ * gstbt_property_meta_quark:
  *
  * Only if this is set to TRUE, there is property meta data for this property..
  */
-GQuark gst_property_meta_quark;
+GQuark gstbt_property_meta_quark;
 /**
- * gst_property_meta_quark_min_val:
+ * gstbt_property_meta_quark_min_val:
  *
  * Minimum property value (excluding default and no-value).
  */
-GQuark gst_property_meta_quark_min_val=0;
+GQuark gstbt_property_meta_quark_min_val=0;
 /**
- * gst_property_meta_quark_max_val:
+ * gstbt_property_meta_quark_max_val:
  *
  * Maximum property value (excluding default and no-value).
  */
-GQuark gst_property_meta_quark_max_val=0;
+GQuark gstbt_property_meta_quark_max_val=0;
 /**
- * gst_property_meta_quark_def_val:
+ * gstbt_property_meta_quark_def_val:
  *
  * Default property value (used initialy).
  */
-GQuark gst_property_meta_quark_def_val=0;
+GQuark gstbt_property_meta_quark_def_val=0;
 /**
- * gst_property_meta_quark_no_val:
+ * gstbt_property_meta_quark_no_val:
  *
  * Property value (used in trigger style properties, when there is no current
  * value)
  */
-GQuark gst_property_meta_quark_no_val=0;
+GQuark gstbt_property_meta_quark_no_val=0;
 /**
- * gst_property_meta_quark_flags:
+ * gstbt_property_meta_quark_flags:
  *
  * Application specific flags giving more hints about the property.
  */
-GQuark gst_property_meta_quark_flags=0;
+GQuark gstbt_property_meta_quark_flags=0;
 
 /**
- * gst_property_meta_describe_property:
- * @self: a #GObject that implements #GstPropertyMeta
+ * gstbt_property_meta_describe_property:
+ * @self: a #GObject that implements #GstBtPropertyMeta
  * @index: the property index
  * @value: the current property value
  *
@@ -84,12 +84,12 @@ GQuark gst_property_meta_quark_flags=0;
  */
  // @todo make index generic (property name)
 gchar *
-gst_property_meta_describe_property (GstPropertyMeta *self, glong index, GValue *value)
+gstbt_property_meta_describe_property (GstBtPropertyMeta *self, glong index, GValue *value)
 {
-  g_return_val_if_fail (GST_IS_PROPERTY_META (self), FALSE);
+  g_return_val_if_fail (GSTBT_IS_PROPERTY_META (self), FALSE);
 
-  if(GST_PROPERTY_META_GET_INTERFACE (self)->describe_property) {
-    return (GST_PROPERTY_META_GET_INTERFACE (self)->describe_property (self, index, value));
+  if(GSTBT_PROPERTY_META_GET_INTERFACE (self)->describe_property) {
+    return (GSTBT_PROPERTY_META_GET_INTERFACE (self)->describe_property (self, index, value));
   }
   else {
     return(g_strdup_value_contents(value));
@@ -97,32 +97,32 @@ gst_property_meta_describe_property (GstPropertyMeta *self, glong index, GValue 
 }
 
 static void
-gst_property_meta_base_init(gpointer g_class)
+gstbt_property_meta_base_init(gpointer g_class)
 {
   static gboolean initialized = FALSE;
 
   if (!initialized) {
     /* create quarks for use with g_param_spec_{g,s}et_qdata() */
-    gst_property_meta_quark=g_quark_from_string("GstPropertyMeta::");
-    gst_property_meta_quark_min_val=g_quark_from_string("GstPropertyMeta::min-val");
-    gst_property_meta_quark_max_val=g_quark_from_string("GstPropertyMeta::max-val");
-    gst_property_meta_quark_def_val=g_quark_from_string("GstPropertyMeta::def-val");
-    gst_property_meta_quark_no_val=g_quark_from_string("GstPropertyMeta::no-val");
-    gst_property_meta_quark_flags=g_quark_from_string("GstPropertyMeta::flags");
+    gstbt_property_meta_quark=g_quark_from_string("GstBtPropertyMeta::");
+    gstbt_property_meta_quark_min_val=g_quark_from_string("GstBtPropertyMeta::min-val");
+    gstbt_property_meta_quark_max_val=g_quark_from_string("GstBtPropertyMeta::max-val");
+    gstbt_property_meta_quark_def_val=g_quark_from_string("GstBtPropertyMeta::def-val");
+    gstbt_property_meta_quark_no_val=g_quark_from_string("GstBtPropertyMeta::no-val");
+    gstbt_property_meta_quark_flags=g_quark_from_string("GstBtPropertyMeta::flags");
 
     initialized = TRUE;
   }
 }
 
 GType
-gst_property_meta_get_type (void)
+gstbt_property_meta_get_type (void)
 {
   static GType type = 0;
 
   if (type == 0) {
     const GTypeInfo info = {
-      sizeof (GstPropertyMetaInterface),
-      (GBaseInitFunc) gst_property_meta_base_init,   /* base_init */
+      sizeof (GstBtPropertyMetaInterface),
+      (GBaseInitFunc) gstbt_property_meta_base_init,   /* base_init */
       NULL,   /* base_finalize */
       NULL,   /* class_init */
       NULL,   /* class_finalize */
@@ -131,7 +131,7 @@ gst_property_meta_get_type (void)
       0,      /* n_preallocs */
       NULL    /* instance_init */
     };
-    type = g_type_register_static (G_TYPE_INTERFACE,"GstPropertyMeta",&info,0);
+    type = g_type_register_static (G_TYPE_INTERFACE,"GstBtPropertyMeta",&info,0);
   }
   return type;
 }

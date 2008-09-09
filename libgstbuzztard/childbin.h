@@ -19,8 +19,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_CHILD_BIN_H__
-#define __GST_CHILD_BIN_H__
+#ifndef __GSTBT_CHILD_BIN_H__
+#define __GSTBT_CHILD_BIN_H__
 
 #include <glib-object.h>
 #include <gst/gst.h>
@@ -28,28 +28,28 @@
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_CHILD_BIN               (gst_child_bin_get_type())
-#define GST_CHILD_BIN(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_CHILD_BIN, GstChildBin))
-#define GST_IS_CHILD_BIN(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_CHILD_BIN))
-#define GST_CHILD_BIN_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GST_TYPE_CHILD_BIN, GstChildBinInterface))
+#define GSTBT_TYPE_CHILD_BIN               (gstbt_child_bin_get_type())
+#define GSTBT_CHILD_BIN(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GSTBT_TYPE_CHILD_BIN, GstBtChildBin))
+#define GSTBT_IS_CHILD_BIN(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSTBT_TYPE_CHILD_BIN))
+#define GSTBT_CHILD_BIN_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GSTBT_TYPE_CHILD_BIN, GstBtChildBinInterface))
 
 
-typedef struct _GstChildBin GstChildBin; /* dummy object */
-typedef struct _GstChildBinInterface GstChildBinInterface;
+typedef struct _GstBtChildBin GstBtChildBin; /* dummy object */
+typedef struct _GstBtChildBinInterface GstBtChildBinInterface;
 
-struct _GstChildBinInterface
+struct _GstBtChildBinInterface
 {
   GTypeInterface parent;
 
-  gboolean (*add_child) (GstChildBin *self, GstObject *child);
-  gboolean (*remove_child) (GstChildBin *self, GstObject *child);
+  gboolean (*add_child) (GstBtChildBin *self, GstObject *child);
+  gboolean (*remove_child) (GstBtChildBin *self, GstObject *child);
 };
 
-GType gst_child_bin_get_type(void);
+GType gstbt_child_bin_get_type(void);
 
-gboolean gst_child_bin_add_child (GstChildBin *self, GstObject *child);
-gboolean gst_child_bin_remove_child (GstChildBin *self, GstObject *child);
+gboolean gstbt_child_bin_add_child (GstBtChildBin *self, GstObject *child);
+gboolean gstbt_child_bin_remove_child (GstBtChildBin *self, GstObject *child);
 
 G_END_DECLS
 
-#endif /* __GST_CHILD_BIN_H__ */
+#endif /* __GSTBT_CHILD_BIN_H__ */

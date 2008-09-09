@@ -18,14 +18,14 @@ static void test_teardown(void) {
 //-- tests
 
 START_TEST(test_translate_str_null) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
   
-  frq=gst_note_2_frequency_translate_from_string(n2f,NULL);
+  frq=gstbt_tone_conversion_translate_from_string(n2f,NULL);
   fail_unless(frq == 0.0, NULL);
 
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
@@ -35,20 +35,20 @@ START_TEST(test_translate_str_null) {
 END_TEST
 
 START_TEST(test_translate_str_length) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 
-  frq=gst_note_2_frequency_translate_from_string(n2f,"x");
+  frq=gstbt_tone_conversion_translate_from_string(n2f,"x");
   fail_unless(frq == 0.0, NULL);
 
-  frq=gst_note_2_frequency_translate_from_string(n2f,"x-");
+  frq=gstbt_tone_conversion_translate_from_string(n2f,"x-");
   fail_unless(frq == 0.0, NULL);
 
-  frq=gst_note_2_frequency_translate_from_string(n2f,"x-000");
+  frq=gstbt_tone_conversion_translate_from_string(n2f,"x-000");
   fail_unless(frq == 0.0, NULL);
 
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
@@ -58,14 +58,14 @@ START_TEST(test_translate_str_length) {
 END_TEST
 
 START_TEST(test_translate_str_delim) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 
-  frq=gst_note_2_frequency_translate_from_string(n2f,"C+3");
+  frq=gstbt_tone_conversion_translate_from_string(n2f,"C+3");
   fail_unless(frq == 0.0, NULL);
 
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
@@ -75,14 +75,14 @@ START_TEST(test_translate_str_delim) {
 END_TEST
 
 START_TEST(test_translate_num_range) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 
-  frq=gst_note_2_frequency_translate_from_number(n2f,1+(16*10));
+  frq=gstbt_tone_conversion_translate_from_number(n2f,1+(16*10));
   fail_unless(frq == 0.0, NULL);
 
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)|G_LOG_LEVEL_CRITICAL);
@@ -93,7 +93,7 @@ END_TEST
 
 
 TCase *gst_buzztard_note2frequency_test_case(void) {
-  TCase *tc = tcase_create("GstNote2FrequencyTests");
+  TCase *tc = tcase_create("GstBtToneConversionTests");
 
   tcase_add_test(tc,test_translate_str_null);
   tcase_add_test(tc,test_translate_str_length);

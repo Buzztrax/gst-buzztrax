@@ -102,10 +102,10 @@ struct _GstSimSyn {
   gint generate_samples_per_buffer;	/* generate a partial buffer */
   GstSeekFlags seek_flags;
 
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble freq;
   guint64 note_count;
-  GstEnvelope *volenv;                  /* volume-envelope */
+  GstBtEnvelope *volenv;                  /* volume-envelope */
   GstController *volenv_controller;     /* volume-envelope controller */
 
   /* tempo handling */

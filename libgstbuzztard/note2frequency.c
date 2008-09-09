@@ -19,11 +19,12 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:gstnote2frequency
- * @short_description: helper class for unit conversion
+ * SECTION:gstbttoneconversion
+ * @short_description: helper class for tone unit conversion
  *
  * An instance of this class can translate a musical note to a frequency, while
- * taking a specific tuning into account.
+ * taking a specific tuning into account. It also provides conversion betwen
+ * notes as numbers and strings.
  */
 
 #include "note2frequency.h"
@@ -35,22 +36,22 @@
 //-- property ids
 
 enum {
-  GST_NOTE_2_FREQUENCY_TUNING=1
+  GSTBT_TONE_CONVERSION_TUNING=1
 };
 
 static GObjectClass *parent_class=NULL;
 
 //-- enums
 
-GType gst_note_2_frequency_tuning_get_type(void) {
+GType gstbt_tone_conversion_tuning_get_type(void) {
   static GType type = 0;
 
   if(G_UNLIKELY(!type)) {
     static const GEnumValue values[] = {
-      { GST_NOTE_2_FREQUENCY_CROMATIC,"GST_NOTE_2_FREQUENCY_CROMATIC","cromatic tuning" },
+      { GSTBT_TONE_CONVERSION_CROMATIC,"GSTBT_TONE_CONVERSION_CROMATIC","cromatic tuning" },
       { 0, NULL, NULL},
     };
-    type = g_enum_register_static("GstNote2FrequencyTuning", values);
+    type = g_enum_register_static("GstBtToneConversionTuning", values);
   }
   return type;
 }
@@ -121,18 +122,18 @@ static gboolean note_value_2_string (guint note, guint *tone, guint *octave) {
 //-- constructor methods
 
 /**
- * gst_note_2_frequency_new:
- * @tuning: the #GstNote2FrequencyTuning to use
+ * gstbt_tone_conversion_new:
+ * @tuning: the #GstBtToneConversionTuning to use
  *
  * Create a new instance of a note to frequency translator, that will use the
  * given @tuning.
  *
- * Returns: a new #GstNote2Frequency translator
+ * Returns: a new #GstBtToneConversion translator
  */
-GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning) {
-  GstNote2Frequency *self;
+GstBtToneConversion *gstbt_tone_conversion_new(GstBtToneConversionTuning tuning) {
+  GstBtToneConversion *self;
 
-  if(!(self=GST_NOTE_2_FREQUENCY(g_object_new(GST_TYPE_NOTE_2_FREQUENCY,"tuning",tuning,NULL)))) {
+  if(!(self=GSTBT_TONE_CONVERSION(g_object_new(GSTBT_TYPE_TONE_CONVERSION,"tuning",tuning,NULL)))) {
     goto Error;
   }
   return(self);
@@ -142,7 +143,7 @@ Error:
 
 //-- methods
 
-static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,guint octave, guint tone) {
+static gdouble gstbt_tone_conversion_translate_cromatic(GstBtToneConversion *self,guint octave, guint tone) {
   gdouble frequency=0.0, step;
   guint steps, i;
 
@@ -166,18 +167,18 @@ static gdouble gst_note_2_frequency_translate_cromatic(GstNote2Frequency *self,g
   return(frequency);
 }
 
-static gst_note_2_frequency_change_tuning(GstNote2Frequency *self) {
+static gstbt_tone_conversion_change_tuning(GstBtToneConversion *self) {
   switch(self->tuning) {
-    case GST_NOTE_2_FREQUENCY_CROMATIC:
-      self->translate=gst_note_2_frequency_translate_cromatic;
+    case GSTBT_TONE_CONVERSION_CROMATIC:
+      self->translate=gstbt_tone_conversion_translate_cromatic;
       break;
   }
 }
 
 
 /**
- * gst_note_2_frequency_translate_from_string:
- * @self: a #GstNote2Frequency
+ * gstbt_tone_conversion_translate_from_string:
+ * @self: a #GstBtToneConversion
  * @note: a musical note in string representation
  *
  * Converts the string representation of a musical note such as 'C-3' or 'd#4'
@@ -185,7 +186,7 @@ static gst_note_2_frequency_change_tuning(GstNote2Frequency *self) {
  *
  * Returns: the frequency of the note or 0.0 in case of an error
  */
-gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar *note) {
+gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gchar *note) {
   guint tone, octave;
 
   if(note_string_2_value(note,&tone,&octave))
@@ -195,8 +196,8 @@ gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar
 }
 
 /**
- * gst_note_2_frequency_translate_from_number:
- * @self: a #GstNote2Frequency
+ * gstbt_tone_conversion_translate_from_number:
+ * @self: a #GstBtToneConversion
  * @note: a musical note as number
  *
  * Converts the numerical number of a note to a frequency in Hz. A value of 1
@@ -206,7 +207,7 @@ gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar
  *
  * Returns: the frequency of the note or 0.0 in case of an error
  */
-gdouble gst_note_2_frequency_translate_from_number(GstNote2Frequency *self,guint note) {
+gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,guint note) {
   guint tone, octave;
 
   if(note_value_2_string(note,&tone,&octave))
@@ -216,7 +217,7 @@ gdouble gst_note_2_frequency_translate_from_number(GstNote2Frequency *self,guint
 }
 
 /**
- * gst_note_2_frequency_note_string_2_number:
+ * gstbt_tone_conversion_note_string_2_number:
  * @note: a musical note in string representation
  * 
  * Converts the string representation of a musical note such as 'C-3' or 'd#4'
@@ -224,7 +225,7 @@ gdouble gst_note_2_frequency_translate_from_number(GstNote2Frequency *self,guint
  *
  * Returns: the note number or 0 in case of an error.
  */
-guint gst_note_2_frequency_note_string_2_number(const gchar *note) {
+guint gstbt_tone_conversion_note_string_2_number(const gchar *note) {
   guint tone, octave;
   
   if(note_string_2_value(note,&tone,&octave))
@@ -234,7 +235,7 @@ guint gst_note_2_frequency_note_string_2_number(const gchar *note) {
 }
 
 /**
- * gst_note_2_frequency_note_number_2_string:
+ * gstbt_tone_conversion_note_number_2_string:
  * @note: a musical note as number
  *
  * Converts the numerical number of a note to a string. A value of 1
@@ -244,7 +245,7 @@ guint gst_note_2_frequency_note_string_2_number(const gchar *note) {
  *
  * Returns: the note as string or an empty string in the case of an error.
  */
-const gchar *gst_note_2_frequency_note_number_2_string(guint note) {
+const gchar *gstbt_tone_conversion_note_number_2_string(guint note) {
   static gchar str[4];
   static const gchar *key[12]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
   guint tone, octave;
@@ -262,17 +263,17 @@ const gchar *gst_note_2_frequency_note_number_2_string(guint note) {
 //-- class internals
 
 /* returns a property for the given property_id for this object */
-static void gst_note_2_frequency_get_property(GObject      *object,
+static void gstbt_tone_conversion_get_property(GObject      *object,
                                guint         property_id,
                                GValue       *value,
                                GParamSpec   *pspec)
 {
-  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(object);
+  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
 
   if(self->dispose_has_run) return;
 
   switch (property_id) {
-    case GST_NOTE_2_FREQUENCY_TUNING: {
+    case GSTBT_TONE_CONVERSION_TUNING: {
       g_value_set_enum(value, self->tuning);
     } break;
     default: {
@@ -282,19 +283,19 @@ static void gst_note_2_frequency_get_property(GObject      *object,
 }
 
 /* sets the given properties for this object */
-static void gst_note_2_frequency_set_property(GObject      *object,
+static void gstbt_tone_conversion_set_property(GObject      *object,
                               guint         property_id,
                               const GValue *value,
                               GParamSpec   *pspec)
 {
-  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(object);
+  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
 
   if(self->dispose_has_run) return;
 
   switch (property_id) {
-    case GST_NOTE_2_FREQUENCY_TUNING: {
+    case GSTBT_TONE_CONVERSION_TUNING: {
       self->tuning = g_value_get_enum(value);
-	  gst_note_2_frequency_change_tuning(self);
+	  gstbt_tone_conversion_change_tuning(self);
     } break;
     default: {
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object,property_id,pspec);
@@ -302,8 +303,8 @@ static void gst_note_2_frequency_set_property(GObject      *object,
   }
 }
 
-static void gst_note_2_frequency_dispose(GObject *object) {
-  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(object);
+static void gstbt_tone_conversion_dispose(GObject *object) {
+  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
 
   if(self->dispose_has_run) return;
   self->dispose_has_run = TRUE;
@@ -313,56 +314,56 @@ static void gst_note_2_frequency_dispose(GObject *object) {
   }
 }
 
-static void gst_note_2_frequency_finalize(GObject *object) {
-  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(object);
+static void gstbt_tone_conversion_finalize(GObject *object) {
+  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
 
   if(G_OBJECT_CLASS(parent_class)->finalize) {
     (G_OBJECT_CLASS(parent_class)->finalize)(object);
   }
 }
 
-static void gst_note_2_frequency_init(GTypeInstance *instance, gpointer g_class) {
-  GstNote2Frequency *self = GST_NOTE_2_FREQUENCY(instance);
+static void gstbt_tone_conversion_init(GTypeInstance *instance, gpointer g_class) {
+  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(instance);
   self->dispose_has_run = FALSE;
 }
 
-static void gst_note_2_frequency_class_init(GstNote2FrequencyClass *klass) {
+static void gstbt_tone_conversion_class_init(GstBtToneConversionClass *klass) {
   GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
   parent_class=g_type_class_peek_parent(klass);
 
-  gobject_class->set_property = gst_note_2_frequency_set_property;
-  gobject_class->get_property = gst_note_2_frequency_get_property;
-  gobject_class->dispose      = gst_note_2_frequency_dispose;
-  gobject_class->finalize     = gst_note_2_frequency_finalize;
+  gobject_class->set_property = gstbt_tone_conversion_set_property;
+  gobject_class->get_property = gstbt_tone_conversion_get_property;
+  gobject_class->dispose      = gstbt_tone_conversion_dispose;
+  gobject_class->finalize     = gstbt_tone_conversion_finalize;
 
-  g_object_class_install_property(gobject_class,GST_NOTE_2_FREQUENCY_TUNING,
+  g_object_class_install_property(gobject_class,GSTBT_TONE_CONVERSION_TUNING,
                                   g_param_spec_enum("tuning",
                                     "tuning prop",
                                     "selection frequency tuning table",
-                                    GST_TYPE_NOTE_2_FREQUENCY_TUNING,
-									GST_NOTE_2_FREQUENCY_CROMATIC,
+                                    GSTBT_TYPE_TONE_CONVERSION_TUNING,
+									GSTBT_TONE_CONVERSION_CROMATIC,
                                     G_PARAM_READWRITE));
 
 }
 
-GType gst_note_2_frequency_get_type(void) {
+GType gstbt_tone_conversion_get_type(void) {
   static GType type = 0;
 
   if(G_UNLIKELY(!type)) {
     const GTypeInfo info = {
-      sizeof(GstNote2FrequencyClass),
+      sizeof(GstBtToneConversionClass),
       NULL, // base_init
       NULL, // base_finalize
-      (GClassInitFunc)gst_note_2_frequency_class_init, // class_init
+      (GClassInitFunc)gstbt_tone_conversion_class_init, // class_init
       NULL, // class_finalize
       NULL, // class_data
-      sizeof(GstNote2Frequency),
+      sizeof(GstBtToneConversion),
       0,   // n_preallocs
-      (GInstanceInitFunc)gst_note_2_frequency_init, // instance_init
+      (GInstanceInitFunc)gstbt_tone_conversion_init, // instance_init
       NULL // value_table
     };
-    type = g_type_register_static(G_TYPE_OBJECT,"GstNote2Frequency",&info,0);
+    type = g_type_register_static(G_TYPE_OBJECT,"GstBtToneConversion",&info,0);
   }
   return type;
 }

@@ -181,10 +181,10 @@ static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
   self->samples_per_buffer=((self->samplerate*60.0)/(gdouble)(self->beats_per_minute*self->ticks_per_beat));
   self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
-  GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
+  GST_INFO("samples_per_buffer=%lf",self->samples_per_buffer);
 }
 
-static void gst_sim_syn_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
+static void gst_sim_syn_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
   GstSimSyn *self=GST_SIM_SYN(tempo);
   gboolean changed=FALSE;
 
@@ -216,7 +216,7 @@ static void gst_sim_syn_tempo_change_tempo(GstTempo *tempo, glong beats_per_minu
 }
 
 static void gst_sim_syn_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
-  GstTempoInterface *iface = g_iface;
+  GstBtTempoInterface *iface = g_iface;
 
   GST_INFO("initializing iface");
 
@@ -292,9 +292,9 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
 
   paramspec=g_param_spec_string("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
           NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark,GINT_TO_POINTER(TRUE));
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_flags,GINT_TO_POINTER(GST_PROPERTY_META_NONE));
-  g_param_spec_set_qdata(paramspec,gst_property_meta_quark_no_val,NULL);
+  g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark,GINT_TO_POINTER(TRUE));
+  g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_flags,GINT_TO_POINTER(GSTBT_PROPERTY_META_NONE));
+  g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_no_val,NULL);
   g_object_class_install_property(gobject_class,PROP_NOTE, paramspec);
 
   paramspec=g_param_spec_enum("wave", "Waveform", "Oscillator waveform",
@@ -352,14 +352,14 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->freq = 0.0;
   src->note = NULL;
   src->decay = 0.5;
-  src->n2f = gst_note_2_frequency_new (GST_NOTE_2_FREQUENCY_CROMATIC);
+  src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_CROMATIC);
 
   /* set the waveform */
   src->wave = GST_SIM_SYN_WAVE_SINE;
   gst_sim_syn_change_wave (src);
 
   /* add a volume envelope generator */
-  src->volenv=gst_envelope_new ();
+  src->volenv=gstbt_envelope_new ();
   src->volenv_controller=gst_controller_new (G_OBJECT(src->volenv), "value", NULL);
   gst_controller_set_interpolation_mode (src->volenv_controller, "value", GST_INTERPOLATE_LINEAR);
 
@@ -1044,7 +1044,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
         GValue val = { 0, };
 
         GST_DEBUG("new note -> '%s'",src->note);
-        src->freq = gst_note_2_frequency_translate_from_string (src->n2f, src->note);
+        src->freq = gstbt_tone_conversion_translate_from_string (src->n2f, src->note);
         /* trigger volume 'envelope' */
         src->volenv->value=0.001;
         src->note_count=0L;
@@ -1104,7 +1104,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
     case PROP_BPM:
     case PROP_TPB:
     case PROP_STPT:
-	  GST_WARNING("use gst_tempo_change_tempo()");
+	  GST_WARNING("use gstbt_tempo_change_tempo()");
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1226,9 +1226,9 @@ GType gst_sim_syn_get_type (void)
     };
 
     type = g_type_register_static(GST_TYPE_BASE_SRC, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
-    g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
-    g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
-    g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
+    g_type_add_interface_static(type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
+    g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
+    g_type_add_interface_static(type, GSTBT_TYPE_HELP, &help_interface_info);
     g_type_add_interface_static(type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;

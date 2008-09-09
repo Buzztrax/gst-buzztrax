@@ -19,29 +19,29 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_HELP_H__
-#define __GST_HELP_H__
+#ifndef __GSTBT_HELP_H__
+#define __GSTBT_HELP_H__
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_HELP               (gst_help_get_type())
-#define GST_HELP(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_HELP, GstHelp))
-#define GST_IS_HELP(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_HELP))
-#define GST_HELP_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GST_TYPE_HELP, GstHelpInterface))
+#define GSTBT_TYPE_HELP               (gstbt_help_get_type())
+#define GSTBT_HELP(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GSTBT_TYPE_HELP, GstBtHelp))
+#define GSTBT_IS_HELP(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSTBT_TYPE_HELP))
+#define GSTBT_HELP_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GSTBT_TYPE_HELP, GstBtHelpInterface))
 
 
-typedef struct _GstHelp GstHelp; /* dummy object */
-typedef struct _GstHelpInterface GstHelpInterface;
+typedef struct _GstBtHelp GstBtHelp; /* dummy object */
+typedef struct _GstBtHelpInterface GstBtHelpInterface;
 
-struct _GstHelpInterface
+struct _GstBtHelpInterface
 {
   GTypeInterface parent;
 };
 
-GType gst_help_get_type(void);
+GType gstbt_help_get_type(void);
 
 G_END_DECLS
 
-#endif /* __GST_HELP_H__ */
+#endif /* __GSTBT_HELP_H__ */

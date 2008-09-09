@@ -19,8 +19,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_NOTE_2_FREQUENCY_H__
-#define __GST_NOTE_2_FREQUENCY_H__
+#ifndef __GSTBT_TONE_CONVERSION_H__
+#define __GSTBT_TONE_CONVERSION_H__
 
 #include <glib.h>
 #include <glib-object.h>
@@ -28,62 +28,62 @@
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_NOTE_2_FREQUENCY_TUNING     (gst_note_2_frequency_tuning_get_type())
+#define GSTBT_TYPE_TONE_CONVERSION_TUNING     (gstbt_tone_conversion_tuning_get_type())
 
 /**
- * GstNote2FrequencyTuning:
- * @GST_NOTE_2_FREQUENCY_CROMATIC: 12 tones with equal distance (equal temperament)
+ * GstBtToneConversionTuning:
+ * @GSTBT_TONE_CONVERSION_CROMATIC: 12 tones with equal distance (equal temperament)
  *
  * Supported tuning types.
  * see http://en.wikipedia.org/wiki/Musical_tuning
  */
 typedef enum {
   /* 12 tones with equal distance (equal temperament) */
-  GST_NOTE_2_FREQUENCY_CROMATIC=0,
+  GSTBT_TONE_CONVERSION_CROMATIC=0,
   /* @todo: add more */
-} GstNote2FrequencyTuning;
+} GstBtToneConversionTuning;
 
-#define GST_TYPE_NOTE_2_FREQUENCY            (gst_note_2_frequency_get_type ())
-#define GST_NOTE_2_FREQUENCY(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_NOTE_2_FREQUENCY, GstNote2Frequency))
-#define GST_NOTE_2_FREQUENCY_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GST_TYPE_NOTE_2_FREQUENCY, GstNote2FrequencyClass))
-#define GST_IS_NOTE_2_FREQUENCY(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_NOTE_2_FREQUENCY))
-#define GST_IS_NOTE_2_FREQUENCY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GST_TYPE_NOTE_2_FREQUENCY))
-#define GST_NOTE_2_FREQUENCY_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), GST_TYPE_NOTE_2_FREQUENCY, GstNote2FrequencyClass))
+#define GSTBT_TYPE_TONE_CONVERSION            (gstbt_tone_conversion_get_type ())
+#define GSTBT_TONE_CONVERSION(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GSTBT_TYPE_TONE_CONVERSION, GstBtToneConversion))
+#define GSTBT_TONE_CONVERSION_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GSTBT_TYPE_TONE_CONVERSION, GstBtToneConversionClass))
+#define GSTBT_IS_TONE_CONVERSION(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSTBT_TYPE_TONE_CONVERSION))
+#define GSTBT_IS_TONE_CONVERSION_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GSTBT_TYPE_TONE_CONVERSION))
+#define GSTBT_TONE_CONVERSION_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), GSTBT_TYPE_TONE_CONVERSION, GstBtToneConversionClass))
 
-typedef struct _GstNote2Frequency GstNote2Frequency;
-typedef struct _GstNote2FrequencyClass GstNote2FrequencyClass;
+typedef struct _GstBtToneConversion GstBtToneConversion;
+typedef struct _GstBtToneConversionClass GstBtToneConversionClass;
 
 /**
- * GstNote2Frequency:
+ * GstBtToneConversion:
  *
  * Opaque object instance.
  */
-struct _GstNote2Frequency {
+struct _GstBtToneConversion {
   GObject parent;
   
   /*< private >*/
-  GstNote2FrequencyTuning tuning;
+  GstBtToneConversionTuning tuning;
   /* used to validate if dispose has run */
   gboolean dispose_has_run;
   /* translate callback */
-  gdouble (*translate)(GstNote2Frequency*, guint, guint);
+  gdouble (*translate)(GstBtToneConversion*, guint, guint);
 };
 
-struct _GstNote2FrequencyClass {
+struct _GstBtToneConversionClass {
   GObjectClass parent;
   
 };
 
-GType gst_note_2_frequency_get_type(void) G_GNUC_CONST;
-GType gst_note_2_frequency_tuning_get_type(void) G_GNUC_CONST;
+GType gstbt_tone_conversion_get_type(void) G_GNUC_CONST;
+GType gstbt_tone_conversion_tuning_get_type(void) G_GNUC_CONST;
 
-GstNote2Frequency *gst_note_2_frequency_new(GstNote2FrequencyTuning tuning);
-gdouble gst_note_2_frequency_translate_from_string(GstNote2Frequency *self,gchar *note);
-gdouble gst_note_2_frequency_translate_from_number(GstNote2Frequency *self,guint note);
+GstBtToneConversion *gstbt_tone_conversion_new(GstBtToneConversionTuning tuning);
+gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gchar *note);
+gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,guint note);
 
-guint gst_note_2_frequency_note_string_2_number(const gchar *note);
-const gchar *gst_note_2_frequency_note_number_2_string(guint note);
+guint gstbt_tone_conversion_note_string_2_number(const gchar *note);
+const gchar *gstbt_tone_conversion_note_number_2_string(guint note);
 
 G_END_DECLS
 
-#endif /* __GST_NOTE_2_FREQUENCY_H__ */
+#endif /* __GSTBT_TONE_CONVERSION_H__ */

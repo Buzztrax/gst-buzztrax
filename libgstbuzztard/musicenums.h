@@ -19,23 +19,23 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __BT_MUSICENUMS_H__
-#define __BT_MUSICENUMS_H__
+#ifndef __GSTBT_MUSICENUMS_H__
+#define __GSTBT_MUSICENUMS_H__
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
 typedef enum {
-  BT_TRIGGER_SWITCH_OFF=0,
-  BT_TRIGGER_SWITCH_ON=1,
-  BT_TRIGGER_SWITCH_EMPTY=255,
+  GSTGSTBT_TRIGGER_SWITCH_OFF=0,
+  GSTGSTBT_TRIGGER_SWITCH_ON=1,
+  GSTGSTBT_TRIGGER_SWITCH_EMPTY=255,
 } BtTriggerSwitch;
 
-#define BT_TYPE_TRIGGER_SWITCH   (bt_trigger_switch_get_type())
+#define GSTBT_TYPE_TRIGGER_SWITCH   (gstGSTBT_TRIGGER_SWITCH_get_type())
 
-extern GType bt_trigger_switch_get_type(void);
+extern GType gstGSTBT_TRIGGER_SWITCH_get_type(void);
 
 G_END_DECLS
 
-#endif /* __BT_MUSICENUMS_H__ */
+#endif /* __GSTBT_MUSICENUMS_H__ */

@@ -435,10 +435,10 @@ gst_preset_default_load_preset (GstPreset * self, const gchar * name)
               (GST_ELEMENT_GET_CLASS (self)), node->data);
 
 	      /* @todo:
-          if(GST_IS_PROPERTY_META(self)) {
-            flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gst_property_meta_quark_flags));
+          if(GSTBT_IS_PROPERTY_META(self)) {
+            flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gstbt_property_meta_quark_flags));
           }
-	      else if(!(flags&GST_PROPERTY_META_STATE)) continue;
+	      else if(!(flags&GSTBT_PROPERTY_META_STATE)) continue;
 	      else if(voice_class && g_object_class_find_property(voice_class,property->name)) continue;
 	      */
           /* check if we have a settings for this property */

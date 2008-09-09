@@ -224,7 +224,7 @@ static void gst_fluidsynth_calculate_buffer_frames(GstFluidsynth *self)
   GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
 }
 
-static void gst_fluidsynth_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
+static void gst_fluidsynth_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
   GstFluidsynth *self=GST_FLUIDSYNTH(tempo);
   gboolean changed=FALSE;
 
@@ -256,7 +256,7 @@ static void gst_fluidsynth_tempo_change_tempo(GstTempo *tempo, glong beats_per_m
 }
 
 static void gst_fluidsynth_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
-  GstTempoInterface *iface = g_iface;
+  GstBtTempoInterface *iface = g_iface;
 
   GST_INFO("initializing iface");
 
@@ -413,9 +413,9 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
   paramspec = g_param_spec_string ("note", _("Musical note"),
                                    _("Musical note (e.g. 'c-3', 'd#4')"),
                                    NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata (paramspec, gst_property_meta_quark_flags,
-                          GINT_TO_POINTER (GST_PROPERTY_META_NONE));
-  g_param_spec_set_qdata (paramspec, gst_property_meta_quark_no_val, NULL);
+  g_param_spec_set_qdata (paramspec, gstbt_property_meta_quark_flags,
+                          GINT_TO_POINTER (GSTBT_PROPERTY_META_NONE));
+  g_param_spec_set_qdata (paramspec, gstbt_property_meta_quark_no_val, NULL);
   g_object_class_install_property (gobject_class, PROP_NOTE, paramspec);
 
   g_object_class_install_property (gobject_class, PROP_NOTE_LENGTH,
@@ -704,7 +704,7 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
     case PROP_BPM:
     case PROP_TPB:
     case PROP_STPT:
-	  GST_WARNING("use gst_tempo_change_tempo()");
+	  GST_WARNING("use gstbt_tempo_change_tempo()");
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1226,8 +1226,8 @@ GType gst_fluidsynth_get_type (void)
     };
 
     type = g_type_register_static(GST_TYPE_BASE_SRC, "GstFluidsynth", &element_type_info, (GTypeFlags) 0);
-    g_type_add_interface_static(type, GST_TYPE_PROPERTY_META, &property_meta_interface_info);
-    g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
+    g_type_add_interface_static(type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
+    g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
     g_type_add_interface_static(type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;
@@ -1246,8 +1246,13 @@ plugin_init (GstPlugin * plugin)
                                GST_RANK_NONE, GST_TYPE_FLUIDSYNTH);
 }
 
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
+GST_PLUGIN_DEFINE (
+    GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
     "fluidsynth",
     "FluidSynth wavetable synthesizer",
-    plugin_init, VERSION, "LGPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN);
+    plugin_init,
+    VERSION,
+    "LGPL",
+    GST_PACKAGE_NAME,
+    GST_PACKAGE_ORIGIN);

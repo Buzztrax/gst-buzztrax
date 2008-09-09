@@ -127,7 +127,7 @@ static void gst_audio_delay_calculate_tick_time(GstAudioDelay *self) {
   self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
 }
 
-static void gst_audio_delay_tempo_change_tempo(GstTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
+static void gst_audio_delay_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
   GstAudioDelay *self=GST_AUDIO_DELAY(tempo);
   gboolean changed=FALSE;
 
@@ -159,7 +159,7 @@ static void gst_audio_delay_tempo_change_tempo(GstTempo *tempo, glong beats_per_
 }
 
 static void gst_audio_delay_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
-  GstTempoInterface *iface = g_iface;
+  GstBtTempoInterface *iface = g_iface;
 
   GST_INFO("initializing iface");
 
@@ -285,7 +285,7 @@ gst_audio_delay_set_property (GObject * object, guint prop_id,
     case PROP_BPM:
     case PROP_TPB:
     case PROP_STPT:
-      GST_WARNING("use gst_tempo_change_tempo()");
+      GST_WARNING("use gstbt_tempo_change_tempo()");
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -515,8 +515,8 @@ GType gst_audio_delay_get_type (void)
       NULL                /* interface_data */
     };
     type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, "GstAudioDelay", &element_type_info, (GTypeFlags) 0);
-    g_type_add_interface_static(type, GST_TYPE_TEMPO, &tempo_interface_info);
-	g_type_add_interface_static(type, GST_TYPE_HELP, &help_interface_info);
+    g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
+	g_type_add_interface_static(type, GSTBT_TYPE_HELP, &help_interface_info);
   }
   return type;
 }

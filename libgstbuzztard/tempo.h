@@ -19,34 +19,34 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_TEMPO_H__
-#define __GST_TEMPO_H__
+#ifndef __GSTBT_TEMPO_H__
+#define __GSTBT_TEMPO_H__
 
 #include <glib-object.h>
 #include <gst/gst.h>
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_TEMPO               (gst_tempo_get_type())
-#define GST_TEMPO(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_TEMPO, GstTempo))
-#define GST_IS_TEMPO(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_TEMPO))
-#define GST_TEMPO_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GST_TYPE_TEMPO, GstTempoInterface))
+#define GSTBT_TYPE_TEMPO               (gstbt_tempo_get_type())
+#define GSTBT_TEMPO(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GSTBT_TYPE_TEMPO, GstBtTempo))
+#define GSTBT_IS_TEMPO(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSTBT_TYPE_TEMPO))
+#define GSTBT_TEMPO_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GSTBT_TYPE_TEMPO, GstBtTempoInterface))
 
 
-typedef struct _GstTempo GstTempo; /* dummy object */
-typedef struct _GstTempoInterface GstTempoInterface;
+typedef struct _GstBtTempo GstBtTempo; /* dummy object */
+typedef struct _GstBtTempoInterface GstBtTempoInterface;
 
-struct _GstTempoInterface
+struct _GstBtTempoInterface
 {
   GTypeInterface parent;
 
-  void (*change_tempo) (GstTempo *self, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick);
+  void (*change_tempo) (GstBtTempo *self, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick);
 };
 
-GType gst_tempo_get_type(void);
+GType gstbt_tempo_get_type(void);
 
-void gst_tempo_change_tempo (GstTempo *self, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick);
+void gstbt_tempo_change_tempo (GstBtTempo *self, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick);
 
 G_END_DECLS
 
-#endif /* __GST_TEMPO_H__ */
+#endif /* __GSTBT_TEMPO_H__ */

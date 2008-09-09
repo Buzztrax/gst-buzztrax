@@ -19,47 +19,47 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_PROPERTY_META_H__
-#define __GST_PROPERTY_META_H__
+#ifndef __GSTBT_PROPERTY_META_H__
+#define __GSTBT_PROPERTY_META_H__
 
 #include <glib-object.h>
 #include <gst/gst.h>
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_PROPERTY_META               (gst_property_meta_get_type())
-#define GST_PROPERTY_META(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_PROPERTY_META, GstPropertyMeta))
-#define GST_IS_PROPERTY_META(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_PROPERTY_META))
-#define GST_PROPERTY_META_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GST_TYPE_PROPERTY_META, GstPropertyMetaInterface))
+#define GSTBT_TYPE_PROPERTY_META               (gstbt_property_meta_get_type())
+#define GSTBT_PROPERTY_META(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GSTBT_TYPE_PROPERTY_META, GstBtPropertyMeta))
+#define GSTBT_IS_PROPERTY_META(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GSTBT_TYPE_PROPERTY_META))
+#define GSTBT_PROPERTY_META_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GSTBT_TYPE_PROPERTY_META, GstBtPropertyMetaInterface))
 
-typedef struct _GstPropertyMeta GstPropertyMeta; /* dummy object */
-typedef struct _GstPropertyMetaInterface GstPropertyMetaInterface;
+typedef struct _GstBtPropertyMeta GstBtPropertyMeta; /* dummy object */
+typedef struct _GstBtPropertyMetaInterface GstBtPropertyMetaInterface;
 
-struct _GstPropertyMetaInterface
+struct _GstBtPropertyMetaInterface
 {
   GTypeInterface parent;
 
-  gchar *(*describe_property) (GstPropertyMeta *self, glong index, GValue *value);
+  gchar *(*describe_property) (GstBtPropertyMeta *self, glong index, GValue *value);
 };
 
-GType gst_property_meta_get_type(void);
+GType gstbt_property_meta_get_type(void);
 
-gchar *gst_property_meta_describe_property (GstPropertyMeta *self, glong index, GValue *value);
+gchar *gstbt_property_meta_describe_property (GstBtPropertyMeta *self, glong index, GValue *value);
 
-extern GQuark gst_property_meta_quark;
-extern GQuark gst_property_meta_quark_min_val;
-extern GQuark gst_property_meta_quark_max_val;
-extern GQuark gst_property_meta_quark_def_val;
-extern GQuark gst_property_meta_quark_no_val;
-extern GQuark gst_property_meta_quark_flags;
+extern GQuark gstbt_property_meta_quark;
+extern GQuark gstbt_property_meta_quark_min_val;
+extern GQuark gstbt_property_meta_quark_max_val;
+extern GQuark gstbt_property_meta_quark_def_val;
+extern GQuark gstbt_property_meta_quark_no_val;
+extern GQuark gstbt_property_meta_quark_flags;
 
 G_END_DECLS
 
 typedef enum {
-  GST_PROPERTY_META_NONE=0,
-  GST_PROPERTY_META_WAVE=1,		/* parameter value references a wavetable slot */
-  GST_PROPERTY_META_STATE=2,		/* parameter is continuously changing (not used for notes and triggers) */
-  GST_PROPERTY_META_TICK_ON_EDIT=4
-} GstPropertyMetaFlags;
+  GSTBT_PROPERTY_META_NONE=0,
+  GSTBT_PROPERTY_META_WAVE=1,		/* parameter value references a wavetable slot */
+  GSTBT_PROPERTY_META_STATE=2,		/* parameter is continuously changing (not used for notes and triggers) */
+  GSTBT_PROPERTY_META_TICK_ON_EDIT=4
+} GstBtPropertyMetaFlags;
 
-#endif /* __GST_PROPERTY_META_H__ */
+#endif /* __GSTBT_PROPERTY_META_H__ */

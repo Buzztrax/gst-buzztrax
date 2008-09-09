@@ -19,11 +19,11 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:gstenvelope
+ * SECTION:gstbtenvelope
  * @short_description: envelope helper object
  *
  * Object with one controllable public gdouble variable /property
- * (#GstEnvelope:value).
+ * (#GstBtEnvelope:value).
  */
 
 #ifdef HAVE_CONFIG_H
@@ -50,16 +50,16 @@ static GObjectClass *parent_class = NULL;
 //-- constructor methods
 
 /**
- * gst_envelope_new:
+ * gstbt_envelope_new:
  *
  * Create a new instance
  *
  * Returns: the new instance or %NULL in case of an error
  */
-GstEnvelope *gst_envelope_new(void) {
-  GstEnvelope *self;
+GstBtEnvelope *gstbt_envelope_new(void) {
+  GstBtEnvelope *self;
 
-  self=GST_ENVELOPE(g_object_new(GST_TYPE_ENVELOPE,NULL));
+  self=GSTBT_ENVELOPE(g_object_new(GSTBT_TYPE_ENVELOPE,NULL));
   return(self);
 }
 
@@ -68,10 +68,10 @@ GstEnvelope *gst_envelope_new(void) {
 //-- public methods
 
 static void
-gst_envelope_set_property (GObject * object, guint prop_id,
+gstbt_envelope_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstEnvelope *env = GST_ENVELOPE (object);
+  GstBtEnvelope *env = GSTBT_ENVELOPE (object);
 
   if (env->dispose_has_run) return;
 
@@ -86,10 +86,10 @@ gst_envelope_set_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_envelope_get_property (GObject * object, guint prop_id,
+gstbt_envelope_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
-  GstEnvelope *env = GST_ENVELOPE (object);
+  GstBtEnvelope *env = GSTBT_ENVELOPE (object);
 
   if (env->dispose_has_run) return;
 
@@ -105,9 +105,9 @@ gst_envelope_get_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_envelope_dispose (GObject *object)
+gstbt_envelope_dispose (GObject *object)
 {
-  GstEnvelope *env = GST_ENVELOPE (object);
+  GstBtEnvelope *env = GSTBT_ENVELOPE (object);
 
   if (env->dispose_has_run) return;
   env->dispose_has_run = TRUE;
@@ -118,13 +118,13 @@ gst_envelope_dispose (GObject *object)
 }
 
 static void
-gst_envelope_init (GstEnvelope * env, GstEnvelopeClass * g_class)
+gstbt_envelope_init (GstBtEnvelope * env, GstBtEnvelopeClass * g_class)
 {
   env->value=0.0;
 }
 
 static void
-gst_envelope_class_init (GstEnvelopeClass * klass)
+gstbt_envelope_class_init (GstBtEnvelopeClass * klass)
 {
   GObjectClass *gobject_class;
 
@@ -134,9 +134,9 @@ gst_envelope_class_init (GstEnvelopeClass * klass)
 
   gobject_class = (GObjectClass *) klass;
 
-  gobject_class->set_property = gst_envelope_set_property;
-  gobject_class->get_property = gst_envelope_get_property;
-  gobject_class->dispose      = gst_envelope_dispose;
+  gobject_class->set_property = gstbt_envelope_set_property;
+  gobject_class->get_property = gstbt_envelope_get_property;
+  gobject_class->dispose      = gstbt_envelope_dispose;
   
   // register own properties
 
@@ -147,22 +147,22 @@ gst_envelope_class_init (GstEnvelopeClass * klass)
 
 }
 
-GType gst_envelope_get_type (void)
+GType gstbt_envelope_get_type (void)
 {
   static GType type = 0;
   if (type == 0) {
     const GTypeInfo element_type_info = {
-      sizeof (GstEnvelopeClass),
+      sizeof (GstBtEnvelopeClass),
       NULL,               /* base_init */
       NULL,		  /* base_finalize */
-      (GClassInitFunc)gst_envelope_class_init,
+      (GClassInitFunc)gstbt_envelope_class_init,
       NULL,		  /* class_finalize */
       NULL,               /* class_data */
-      sizeof (GstEnvelope),
+      sizeof (GstBtEnvelope),
       0,                  /* n_preallocs */
-      (GInstanceInitFunc) gst_envelope_init
+      (GInstanceInitFunc) gstbt_envelope_init
     };
-    type = g_type_register_static(G_TYPE_OBJECT, "GstEnvelope", &element_type_info, (GTypeFlags) 0);
+    type = g_type_register_static(G_TYPE_OBJECT, "GstBtEnvelope", &element_type_info, (GTypeFlags) 0);
   }
   return type;
 }

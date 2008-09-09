@@ -1,3 +1,29 @@
+2008-09-09  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/childbin.c:
+	* libgstbuzztard/childbin.h:
+	* libgstbuzztard/envelope.c:
+	* libgstbuzztard/envelope.h:
+	* libgstbuzztard/help.c:
+	* libgstbuzztard/help.h:
+	* libgstbuzztard/musicenums.c:
+	* libgstbuzztard/musicenums.h:
+	* libgstbuzztard/note2frequency.c:
+	* libgstbuzztard/note2frequency.h:
+	* libgstbuzztard/preset.c:
+	* libgstbuzztard/propertymeta.c:
+	* libgstbuzztard/propertymeta.h:
+	* libgstbuzztard/tempo.c:
+	* libgstbuzztard/tempo.h:
+	* src/audiodelay/audiodelay.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	* tests/e-gst-note2frequency.c:
+	* tests/s-gst-note2frequency.c:
+	* tests/t-gst-note2frequency.c:
+	  Another mass rename to stop stepping on gst namespace.
+
 2008-09-04  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

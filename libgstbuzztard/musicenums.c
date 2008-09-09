@@ -30,13 +30,13 @@
 
 #include "musicenums.h"
 
-GType bt_trigger_switch_get_type(void) {
+GType gstGSTBT_TRIGGER_SWITCH_get_type(void) {
   static GType type = 0;
   if(type==0) {
     static const GEnumValue values[] = {
-      { BT_TRIGGER_SWITCH_OFF,  "OFF","0" },
-      { BT_TRIGGER_SWITCH_ON,   "ON","1" },
-      { BT_TRIGGER_SWITCH_EMPTY,"EMPTY","" },
+      { GSTGSTBT_TRIGGER_SWITCH_OFF,  "OFF","0" },
+      { GSTGSTBT_TRIGGER_SWITCH_ON,   "ON","1" },
+      { GSTGSTBT_TRIGGER_SWITCH_EMPTY,"EMPTY","" },
       { 0, NULL, NULL},
     };
     type = g_enum_register_static("BtTriggerSwitch", values);

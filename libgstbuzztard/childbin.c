@@ -19,21 +19,21 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:gstchildbin
+ * SECTION:gstbtchildbin
  * @short_description: helper interface for multi child gstreamer elements
  *
  * This interface provides an extension to the #GstChildProxy interface, which
  * is useful for classes that have identical children.
  *
- * The interface provides a #GstChildBin:children property for the number of
+ * The interface provides a #GstBtChildBin:children property for the number of
  * children as well as two methods to add and remove children.
  */
 
 #include "childbin.h"
 
 /**
- * gst_child_bin_add_child:
- * @self: a #GObject that implements #GstChildBin
+ * gstbt_child_bin_add_child:
+ * @self: a #GObject that implements #GstBtChildBin
  * @child: the #GstObject to add as a child
  *
  * Add the given child to the list of children.
@@ -41,16 +41,16 @@
  * Returns: %TRUE for success
  */
 gboolean
-gst_child_bin_add_child (GstChildBin * self, GstObject *child)
+gstbt_child_bin_add_child (GstBtChildBin * self, GstObject *child)
 {
-  g_return_val_if_fail (GST_IS_CHILD_BIN (self), FALSE);
+  g_return_val_if_fail (GSTBT_IS_CHILD_BIN (self), FALSE);
 
-  return (GST_CHILD_BIN_GET_INTERFACE (self)->add_child (self, child));
+  return (GSTBT_CHILD_BIN_GET_INTERFACE (self)->add_child (self, child));
 }
 
 /**
- * gst_child_bin_remove_child:
- * @self: a #GObject that implements #GstChildBin
+ * gstbt_child_bin_remove_child:
+ * @self: a #GObject that implements #GstBtChildBin
  * @child: the #GstObject to remove from the children
  *
  * Remove the given child from the list of children.
@@ -58,15 +58,15 @@ gst_child_bin_add_child (GstChildBin * self, GstObject *child)
  * Returns: %TRUE for success
  */
 gboolean
-gst_child_bin_remove_child (GstChildBin * self, GstObject *child)
+gstbt_child_bin_remove_child (GstBtChildBin * self, GstObject *child)
 {
-  g_return_val_if_fail (GST_IS_CHILD_BIN (self), FALSE);
+  g_return_val_if_fail (GSTBT_IS_CHILD_BIN (self), FALSE);
 
-  return (GST_CHILD_BIN_GET_INTERFACE (self)->remove_child (self, child));
+  return (GSTBT_CHILD_BIN_GET_INTERFACE (self)->remove_child (self, child));
 }
 
 static void
-gst_child_bin_base_init(gpointer g_class)
+gstbt_child_bin_base_init(gpointer g_class)
 {
   static gboolean initialized = FALSE;
 
@@ -85,14 +85,14 @@ gst_child_bin_base_init(gpointer g_class)
 }
 
 GType
-gst_child_bin_get_type (void)
+gstbt_child_bin_get_type (void)
 {
   static GType type = 0;
 
   if (type == 0) {
     const GTypeInfo info = {
-      sizeof (GstChildBinInterface),
-      (GBaseInitFunc) gst_child_bin_base_init,   /* base_init */
+      sizeof (GstBtChildBinInterface),
+      (GBaseInitFunc) gstbt_child_bin_base_init,   /* base_init */
       NULL,   /* base_finalize */
       NULL,   /* class_init */
       NULL,   /* class_finalize */
@@ -101,7 +101,7 @@ gst_child_bin_get_type (void)
       0,      /* n_preallocs */
       NULL    /* instance_init */
     };
-    type = g_type_register_static (G_TYPE_INTERFACE,"GstChildBin",&info,0);
+    type = g_type_register_static (G_TYPE_INTERFACE,"GstBtChildBin",&info,0);
     g_type_interface_add_prerequisite (type, GST_TYPE_CHILD_PROXY);
   }
   return type;

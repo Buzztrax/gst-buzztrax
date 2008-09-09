@@ -18,9 +18,9 @@ static void test_teardown(void) {
 //-- tests
 
 START_TEST(test_create_obj) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
   fail_unless(G_OBJECT(n2f)->ref_count == 1, NULL);
 
@@ -30,17 +30,17 @@ START_TEST(test_create_obj) {
 END_TEST
 
 START_TEST(test_translate_str_base) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
 
-  frq=gst_note_2_frequency_translate_from_string(n2f,"A-3");
+  frq=gstbt_tone_conversion_translate_from_string(n2f,"A-3");
   //g_print("frq=%lf\n",frq);
   fail_unless(frq==440.0, NULL);
 
-  frq=gst_note_2_frequency_translate_from_string(n2f,"a-3");
+  frq=gstbt_tone_conversion_translate_from_string(n2f,"a-3");
   //g_print("frq=%lf\n",frq);
   fail_unless(frq==440.0, NULL);
   
@@ -50,7 +50,7 @@ START_TEST(test_translate_str_base) {
 END_TEST
 
 START_TEST(test_translate_str_series) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble frq,frq_prev=0.0;
   gchar *notes[]={
 	"c-0","c#0","d-0","d#0","e-0","f-0","f#0","g-0","g#0","a-0","a#0","h-0",
@@ -58,11 +58,11 @@ START_TEST(test_translate_str_series) {
 	"c-2",NULL };
   guint i=0;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
   
   while(notes[i]) {
-	frq=gst_note_2_frequency_translate_from_string(n2f,notes[i]);
+	frq=gstbt_tone_conversion_translate_from_string(n2f,notes[i]);
 	//g_print("%s -> frq=%lf\n",notes[i],frq);
 	fail_unless(frq!=0.0, NULL);
 	fail_unless(frq>frq_prev, NULL);
@@ -76,13 +76,13 @@ START_TEST(test_translate_str_series) {
 END_TEST
 
 START_TEST(test_translate_num_base) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
 
-  frq=gst_note_2_frequency_translate_from_number(n2f,1+(16*3+9));
+  frq=gstbt_tone_conversion_translate_from_number(n2f,1+(16*3+9));
   //g_print("frq=%lf\n",frq);
   fail_unless(frq==440.0, NULL);
   
@@ -92,16 +92,16 @@ START_TEST(test_translate_num_base) {
 END_TEST
 
 START_TEST(test_translate_num_series) {
-  GstNote2Frequency *n2f;
+  GstBtToneConversion *n2f;
   gdouble frq,frq_prev=0.0;
   guint i,j;
   
-  n2f=gst_note_2_frequency_new(GST_NOTE_2_FREQUENCY_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
   fail_unless(n2f != NULL, NULL);
   
   for(i=0;i<9;i++) {
     for(j=0;j<12;j++) {
-      frq=gst_note_2_frequency_translate_from_number(n2f,1+(i*16+j));
+      frq=gstbt_tone_conversion_translate_from_number(n2f,1+(i*16+j));
       //g_print("%3u -> frq=%lf\n",i,frq);
       fail_unless(frq!=0.0, NULL);
       fail_unless(frq>frq_prev, NULL);
@@ -116,7 +116,7 @@ END_TEST
 
 
 TCase *gst_buzztard_note2frequency_example_case(void) {
-  TCase *tc = tcase_create("GstNote2FrequencyExamples");
+  TCase *tc = tcase_create("GstBtToneConversionExamples");
 
   tcase_add_test(tc,test_create_obj);
   tcase_add_test(tc,test_translate_str_base);

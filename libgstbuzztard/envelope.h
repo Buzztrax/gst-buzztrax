@@ -19,24 +19,24 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_ENVELOPE_H__
-#define __GST_ENVELOPE_H__
+#ifndef __GSTBT_ENVELOPE_H__
+#define __GSTBT_ENVELOPE_H__
 
 #include <glib-object.h>
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_ENVELOPE            (gst_envelope_get_type())
-#define GST_ENVELOPE(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_ENVELOPE,GstEnvelope))
-#define GST_IS_ENVELOPE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_ENVELOPE))
-#define GST_ENVELOPE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GST_TYPE_ENVELOPE,GstEnvelopeClass))
-#define GST_IS_ENVELOPE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GST_TYPE_ENVELOPE))
-#define GST_ENVELOPE_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GST_TYPE_ENVELOPE,GstEnvelopeClass))
+#define GSTBT_TYPE_ENVELOPE            (gstbt_envelope_get_type())
+#define GSTBT_ENVELOPE(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_ENVELOPE,GstBtEnvelope))
+#define GSTBT_IS_ENVELOPE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_ENVELOPE))
+#define GSTBT_ENVELOPE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_ENVELOPE,GstBtEnvelopeClass))
+#define GSTBT_IS_ENVELOPE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_ENVELOPE))
+#define GSTBT_ENVELOPE_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_ENVELOPE,GstBtEnvelopeClass))
 
-typedef struct _GstEnvelope GstEnvelope;
-typedef struct _GstEnvelopeClass GstEnvelopeClass;
+typedef struct _GstBtEnvelope GstBtEnvelope;
+typedef struct _GstBtEnvelopeClass GstBtEnvelopeClass;
 
-struct _GstEnvelope {
+struct _GstBtEnvelope {
   GObject parent;
 
   /* parameters */
@@ -46,14 +46,14 @@ struct _GstEnvelope {
   gboolean dispose_has_run;		/* validate if dispose has run */
 };
 
-struct _GstEnvelopeClass {
+struct _GstBtEnvelopeClass {
   GObjectClass parent_class;
 };
 
-GType gst_envelope_get_type(void);
+GType gstbt_envelope_get_type(void);
 
-GstEnvelope *gst_envelope_new(void);
+GstBtEnvelope *gstbt_envelope_new(void);
 
 G_END_DECLS
 
-#endif /* __GST_ENVELOPE_H__ */
+#endif /* __GSTBT_ENVELOPE_H__ */

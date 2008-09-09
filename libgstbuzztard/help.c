@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:gsthelp
+ * SECTION:gstbthelp
  * @short_description: helper interface for element user docs
  *
  * This interface offers a method to query the URL of the user documentation.
@@ -28,7 +28,7 @@
 #include "help.h"
 
 static void
-gst_help_base_init(gpointer g_class)
+gstbt_help_base_init(gpointer g_class)
 {
   static gboolean initialized = FALSE;
 
@@ -45,14 +45,14 @@ gst_help_base_init(gpointer g_class)
 }
 
 GType
-gst_help_get_type (void)
+gstbt_help_get_type (void)
 {
   static GType type = 0;
   
   if (type == 0) {
     const GTypeInfo info = {
-      sizeof (GstHelpInterface),
-      (GBaseInitFunc) gst_help_base_init,   /* base_init */
+      sizeof (GstBtHelpInterface),
+      (GBaseInitFunc) gstbt_help_base_init,   /* base_init */
       NULL,   /* base_finalize */
       NULL,   /* class_init */
       NULL,   /* class_finalize */
@@ -61,7 +61,7 @@ gst_help_get_type (void)
       0,      /* n_preallocs */
       NULL    /* instance_init */
     };
-    type = g_type_register_static (G_TYPE_INTERFACE,"GstHelp",&info,0);
+    type = g_type_register_static (G_TYPE_INTERFACE,"GstBtHelp",&info,0);
   }
   return type;
 }
