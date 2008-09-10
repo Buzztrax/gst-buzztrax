@@ -45,6 +45,7 @@
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
 #include <gst/controller/gstcontroller.h>
+#include <gst/audio/audio.h>
 
 #include <libgstbuzztard/help.h>
 #include <libgstbuzztard/tempo.h>
@@ -252,7 +253,7 @@ gst_audio_delay_init (GstAudioDelay *filter, GstAudioDelayClass * klass)
   filter->delaytime = 100;
   filter->feedback = 50;
 
-  filter->samplerate = 44100;
+  filter->samplerate = GST_AUDIO_DEF_RATE;
   filter->beats_per_minute=120;
   filter->ticks_per_beat=4;
   filter->subticks_per_tick=1;
@@ -514,7 +515,7 @@ GType gst_audio_delay_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
-    type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, "GstAudioDelay", &element_type_info, (GTypeFlags) 0);
+    type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, "GstBtAudioDelay", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
 	g_type_add_interface_static(type, GSTBT_TYPE_HELP, &help_interface_info);
   }

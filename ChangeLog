@@ -1,5 +1,16 @@
 2008-09-10  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/audiodelay/audiodelay.c:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/utils.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Use constant for default sampling rate. Adjust to samplerate changes.
+	  Also change GObject names from Gst -> GstBt (transparent change).
+
+2008-09-10  Stefan Kost  <ensonic@users.sf.net>
+
 	* docs/reference/gst-buzztard-docs.sgml:
 	* docs/reference/gst-buzztard-sections.txt:
 	* docs/reference/gst-buzztard.types.in:

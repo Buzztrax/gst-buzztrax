@@ -61,6 +61,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gst/controller/gstcontroller.h>
+#include <gst/audio/audio.h>
 
 //#include <gst/childbin/childbin.h>
 #include "libgstbuzztard/help.h"
@@ -847,7 +848,7 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
   gstsynth->generate_samples_per_buffer = (gint)gstsynth->samples_per_buffer;
   gstsynth->timestamp_offset = G_GINT64_CONSTANT (0);
 
-  gstsynth->samplerate = 44100;
+  gstsynth->samplerate = GST_AUDIO_DEF_RATE;
   gstsynth->beats_per_minute=120;
   gstsynth->ticks_per_beat=4;
   gstsynth->subticks_per_tick=1;
@@ -863,6 +864,10 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
   gstsynth->velocity = 100;
 
   gstsynth->settings = new_fluid_settings ();
+  //fluid_settings_setstr(gstsynth->settings, "audio.driver", "alsa");
+  if(!(fluid_settings_setnum(gstsynth->settings, "synth.sample-rate", gstsynth->samplerate))) {
+    GST_WARNING("Can't set samplerate : %d", gstsynth->samplerate);
+  }
 
   /* create new FluidSynth */
   gstsynth->fluid = new_fluid_synth (gstsynth->settings);
@@ -966,7 +971,11 @@ gst_fluidsynth_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
   gboolean ret;
 
   structure = gst_caps_get_structure (caps, 0);
-  ret = gst_structure_get_int (structure, "rate", &src->samplerate);
+  if((ret = gst_structure_get_int (structure, "rate", &src->samplerate))) {
+    if(!(fluid_settings_setnum(src->settings, "synth.sample-rate", src->samplerate))) {
+      GST_WARNING("Can't set samplerate : %d", src->samplerate);
+    }
+  }
 
   return ret;
 }
@@ -1225,7 +1234,7 @@ GType gst_fluidsynth_get_type (void)
       NULL                /* interface_data */
     };
 
-    type = g_type_register_static(GST_TYPE_BASE_SRC, "GstFluidsynth", &element_type_info, (GTypeFlags) 0);
+    type = g_type_register_static(GST_TYPE_BASE_SRC, "GstBtFluidsynth", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
     g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
     g_type_add_interface_static(type, GST_TYPE_PRESET, &preset_interface_info);

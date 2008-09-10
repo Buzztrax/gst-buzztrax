@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gst/controller/gstcontroller.h>
+#include <gst/audio/audio.h>
 
 //#include <gst/childbin/childbin.h>
 #include "libgstbuzztard/help.h"
@@ -338,7 +339,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->generate_samples_per_buffer = (gint)src->samples_per_buffer;
   src->timestamp_offset = G_GINT64_CONSTANT (0);
 
-  src->samplerate = 44100;
+  src->samplerate = GST_AUDIO_DEF_RATE;
   src->beats_per_minute=120;
   src->ticks_per_beat=4;
   src->subticks_per_tick=1;
@@ -1225,7 +1226,7 @@ GType gst_sim_syn_get_type (void)
       NULL                /* interface_data */
     };
 
-    type = g_type_register_static(GST_TYPE_BASE_SRC, "GstSimSyn", &element_type_info, (GTypeFlags) 0);
+    type = g_type_register_static(GST_TYPE_BASE_SRC, "GstBtSimSyn", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
     g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
     g_type_add_interface_static(type, GSTBT_TYPE_HELP, &help_interface_info);

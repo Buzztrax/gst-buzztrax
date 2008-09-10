@@ -214,9 +214,15 @@ static gboolean gst_bml_src_set_caps(GstBaseSrc *base, GstCaps *caps) {
   GstBMLSrc *bml_src=GST_BML_SRC(base);
   GstBML *bml=GST_BML(bml_src);
   GstStructure *structure;
+  gboolean ret;
 
   structure = gst_caps_get_structure (caps, 0);
-  return(gst_structure_get_int(structure, "rate", &bml->samplerate));
+  if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate))) {
+    bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
+    bml(init(bml->bm,0,NULL));
+  }
+  
+  return ret;
 }
 
 static gboolean gst_bml_src_query(GstBaseSrc *base, GstQuery * query) {

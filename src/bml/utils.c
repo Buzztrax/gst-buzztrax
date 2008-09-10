@@ -124,6 +124,7 @@ void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per
     gstbml_calculate_buffer_frames(bml);
     // update timevalues in buzzmachine
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
+    bml(init(bml->bm,0,NULL));
   }
 }
 
@@ -591,7 +592,7 @@ void bml(gstbml_init(GstBML *bml,GstBMLClass *klass,GstElement *element)) {
   bml->sinkpads=g_new0(GstPad *,klass->numsinkpads);
 
   // nonzero default needed to instantiate() some plugins
-  bml->samplerate=44100;
+  bml->samplerate=GST_AUDIO_DEF_RATE;
   bml->beats_per_minute=120;
   bml->ticks_per_beat=4;
   bml->subticks_per_tick=1;

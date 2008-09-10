@@ -227,18 +227,29 @@ static void gst_bml_preset_interface_init(gpointer g_iface, gpointer iface_data)
 /* get notified of caps and reject unsupported ones */
 static gboolean gst_bml_transform_set_caps(GstBaseTransform * base, GstCaps * incaps, GstCaps * outcaps) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
+  GstBML *bml=GST_BML(bml_transform);
+  GstStructure *structure;
   const gchar *mimetype;
+  gboolean ret;
 
   GST_INFO("set_caps: in %"GST_PTR_FORMAT"  out %"GST_PTR_FORMAT, incaps, outcaps);
 
-  mimetype=gst_structure_get_name(gst_caps_get_structure(incaps,0));
+  structure=gst_caps_get_structure(incaps,0);
+  
+  // given our caps, this should actually never happen
+  mimetype=gst_structure_get_name(structure);
   if(strcmp(mimetype,"audio/x-raw-float")) {
     GST_ELEMENT_ERROR (bml_transform, CORE, NEGOTIATION,
         ("Unsupported incoming caps: %" GST_PTR_FORMAT, incaps), (NULL));
     return FALSE;
   }
+  
+  if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate))) {
+    bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
+    bml(init(bml->bm,0,NULL));
+  }
 
-  return TRUE;
+  return ret;
 }
 
 static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base, GstBuffer *outbuf) {
