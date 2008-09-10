@@ -12,19 +12,23 @@ gst_sim_syn_get_type
 
 #include <libgstbuzztard/childbin.h>
 #include <libgstbuzztard/help.h>
-@PRESET_DOC_TYPES@#include <libgstbuzztard/preset.h>
 #include <libgstbuzztard/propertymeta.h>
 #include <libgstbuzztard/tempo.h>
 
-gst_child_bin_get_type
-gst_help_get_type
+gstbt_child_bin_get_type
+gstbt_help_get_type
+gstbt_property_meta_get_type
+gstbt_tempo_get_type
+
+% stuff that we have contributed to gstreamer
+
+@PRESET_DOC_TYPES@#include <libgstbuzztard/preset.h>
+
 @PRESET_DOC_TYPES@gst_preset_get_type
-gst_property_meta_get_type
-gst_tempo_get_type
 
 % own stuff
 
-#include <libgstbuzztard/note2frequency.h>
+#include <libgstbuzztard/toneconversion.h>
 
-gst_note_2_frequency_get_type
+gstbt_tone_conversion_get_type
 

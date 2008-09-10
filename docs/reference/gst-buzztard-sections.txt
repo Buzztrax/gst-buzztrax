@@ -66,46 +66,70 @@ gst_sim_syn_get_type
 # stuff that we want for gstreamer
 
 <SECTION>
-<FILE>gstchildbin</FILE>
-<TITLE>GstChildBin</TITLE>
-GstChildBin
-gst_child_bin_add_child
-gst_child_bin_remove_child
+<FILE>gstbtchildbin</FILE>
+<TITLE>GstBtChildBin</TITLE>
+GstBtChildBin
+gstbt_child_bin_add_child
+gstbt_child_bin_remove_child
 <SUBSECTION Standard>
-GstChildBinInterface
-GST_CHILD_BIN
-GST_IS_CHILD_BIN
-GST_TYPE_CHILD_BIN
-GST_CHILD_BIN_GET_INTERFACE
-gst_child_bin_get_type
+GstBtChildBinInterface
+GSTBT_CHILD_BIN
+GSTBT_IS_CHILD_BIN
+GSTBT_TYPE_CHILD_BIN
+GSTBT_CHILD_BIN_GET_INTERFACE
+gstbt_child_bin_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gsthelp</FILE>
-<TITLE>GstHelp</TITLE>
-GstHelp
+<FILE>gstbthelp</FILE>
+<TITLE>GstBtHelp</TITLE>
+GstBtHelp
 <SUBSECTION Standard>
-GstHelpInterface
-GST_HELP
-GST_IS_HELP
-GST_TYPE_HELP
-GST_HELP_GET_INTERFACE
-gst_help_get_type
+GstBtHelpInterface
+GSTBT_HELP
+GSTBT_IS_HELP
+GSTBT_TYPE_HELP
+GSTBT_HELP_GET_INTERFACE
+gstbt_help_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gsttempo</FILE>
-<TITLE>GstTempo</TITLE>
-GstTempo
-gst_tempo_change_tempo
+<FILE>gstbttempo</FILE>
+<TITLE>GstBtTempo</TITLE>
+GstBtTempo
+gstbt_tempo_change_tempo
 <SUBSECTION Standard>
-GstTempoInterface
-GST_TEMPO
-GST_IS_TEMPO
-GST_TYPE_TEMPO
-GST_TEMPO_GET_INTERFACE
-gst_tempo_get_type
+GstBtTempoInterface
+GSTBT_TEMPO
+GSTBT_IS_TEMPO
+GSTBT_TYPE_TEMPO
+GSTBT_TEMPO_GET_INTERFACE
+gstbt_tempo_get_type
 </SECTION>
+
+<SECTION>
+<FILE>gstbtpropertymeta</FILE>
+<TITLE>GstBtPropertyMeta</TITLE>
+GstBtPropertyMeta
+GstBtPropertyMetaFlags
+gstbt_property_meta_describe_property
+gstbt_property_meta_quark
+gstbt_property_meta_quark_min_val
+gstbt_property_meta_quark_max_val
+gstbt_property_meta_quark_def_val
+gstbt_property_meta_quark_no_val
+gstbt_property_meta_quark_flags
+<SUBSECTION Standard>
+GstBtPropertyMetaInterface
+GSTBT_PROPERTY_META
+GSTBT_IS_PROPERTY_META
+GSTBT_TYPE_PROPERTY_META
+GSTBT_PROPERTY_META_GET_INTERFACE
+gstbt_property_meta_get_type
+</SECTION>
+
+
+# stuff that we have contributed to gstreamer
 
 <SECTION>
 <FILE>gstpreset</FILE>
@@ -127,63 +151,43 @@ GST_PRESET_GET_INTERFACE
 gst_preset_get_type
 </SECTION>
 
-<SECTION>
-<FILE>gstpropertymeta</FILE>
-<TITLE>GstPropertyMeta</TITLE>
-GstPropertyMeta
-GstPropertyMetaFlags
-gst_property_meta_describe_property
-gst_property_meta_quark
-gst_property_meta_quark_min_val
-gst_property_meta_quark_max_val
-gst_property_meta_quark_def_val
-gst_property_meta_quark_no_val
-gst_property_meta_quark_flags
-<SUBSECTION Standard>
-GstPropertyMetaInterface
-GST_PROPERTY_META
-GST_IS_PROPERTY_META
-GST_TYPE_PROPERTY_META
-GST_PROPERTY_META_GET_INTERFACE
-gst_property_meta_get_type
-</SECTION>
 
 # own stuff
 
 <SECTION>
-<FILE>gstenvelope</FILE>
-<TITLE>GstEnvelope</TITLE>
-GstEnvelope
-gst_envelope_new
+<FILE>gstbtenvelope</FILE>
+<TITLE>GstBtEnvelope</TITLE>
+GstBtEnvelope
+gstbt_envelope_new
 <SUBSECTION Standard>
-GstEnvelopeClass
-GST_ENVELOPE
-GST_IS_ENVELOPE
-GST_ENVELOPE_CLASS
-GST_IS_ENVELOPE_CLASS
-GST_ENVELOPE_GET_CLASS
-GST_TYPE_ENVELOPE
-gst_envelope_get_type
+GstBtEnvelopeClass
+GSTBT_ENVELOPE
+GSTBT_IS_ENVELOPE
+GSTBT_ENVELOPE_CLASS
+GSTBT_IS_ENVELOPE_CLASS
+GSTBT_ENVELOPE_GET_CLASS
+GSTBT_TYPE_ENVELOPE
+gstbt_envelope_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstnote2frequency</FILE>
-<TITLE>GstNote2Frequency</TITLE>
-GstNote2Frequency
-GstNote2FrequencyTuning
-gst_note_2_frequency_new
-gst_note_2_frequency_translate_from_string
-gst_note_2_frequency_translate_from_number
+<FILE>gstbttoneconversion</FILE>
+<TITLE>GstBtToneConversion</TITLE>
+GstBtToneConversion
+GstBtToneConversionTuning
+gstbt_tone_conversion_new
+gstbt_tone_conversion_translate_from_string
+gstbt_tone_conversion_translate_from_number
 <SUBSECTION Standard>
-GstNote2FrequencyClass
-GST_NOTE_2_FREQUENCY
-GST_IS_NOTE_2_FREQUENCY
-GST_NOTE_2_FREQUENCY_CLASS
-GST_IS_NOTE_2_FREQUENCY_CLASS
-GST_NOTE_2_FREQUENCY_GET_CLASS
-GST_TYPE_NOTE_2_FREQUENCY
-GST_TYPE_NOTE_2_FREQUENCY_TUNING
-gst_note_2_frequency_get_type
-gst_note_2_frequency_tuning_get_type
+GstBtToneConversionClass
+GSTBT_TONE_CONVERSION
+GSTBT_IS_TONE_CONVERSION
+GSTBT_TONE_CONVERSION_CLASS
+GSTBT_IS_TONE_CONVERSION_CLASS
+GSTBT_TONE_CONVERSION_GET_CLASS
+GSTBT_TYPE_TONE_CONVERSION
+GSTBT_TYPE_TONE_CONVERSION_TUNING
+gstbt_tone_conversion_get_type
+gstbt_tone_conversion_tuning_get_type
 </SECTION>
 

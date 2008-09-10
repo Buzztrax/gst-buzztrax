@@ -20,17 +20,18 @@
 
   <chapter>
     <title>GStreamer Buzztard classes</title>
-    <xi:include href="xml/gstenvelope.xml"/>
-    <xi:include href="xml/gstnote2frequency.xml"/>
+    <xi:include href="xml/gstbtenvelope.xml"/>
+    <xi:include href="xml/gstbttoneconversion.xml"/>
   </chapter>
 
   <chapter>
     <title>GStreamer Buzztard interfaces</title>
-    <xi:include href="xml/gstchildbin.xml"/>
-    <xi:include href="xml/gsthelp.xml"/>
+    <xi:include href="xml/gstbtchildbin.xml"/>
+    <xi:include href="xml/gstbthelp.xml"/>
+    <xi:include href="xml/gstbtpropertymeta.xml"/>
+    <xi:include href="xml/gstbttempo.xml"/>
+
     <xi:include href="xml/gstpreset.xml"/>
-    <xi:include href="xml/gstpropertymeta.xml"/>
-    <xi:include href="xml/gsttempo.xml"/>
   </chapter>
 
   <chapter>

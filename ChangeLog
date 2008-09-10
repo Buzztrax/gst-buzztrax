@@ -1,3 +1,13 @@
+2008-09-10  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/gst-buzztard-docs.sgml:
+	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztard.types.in:
+	  Also update docs.
+
+	* tests/Makefile.am:
+	  Run tests with libtool.
+
 2008-09-09  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/Makefile.am:
