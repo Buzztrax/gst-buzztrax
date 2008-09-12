@@ -15,18 +15,4 @@ $Id$
 = help =
 - can be removed once we get around added a GstStructure *meta to
   GstElementFactory
-  
-= cleanup =
-- stop polluting gst namespace
-- envelope, musicenums, note2frequency and sampler are not gst specific;
-  its just that we use them for gstbml and buzztard
-== todo ==
-- rename API in sources
-  gst_envelope -> bt_envelope
-  gst_note_2_frequency : bt_note_conversion
-- move all plugins to different ns?
-== done ==
-- includes
-  $prefix/include/gstreamer-0.10/gst/
-  $prefix/include/libgstbuzztard/
 

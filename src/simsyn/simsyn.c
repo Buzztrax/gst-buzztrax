@@ -28,7 +28,7 @@
 /* @todo:
  * - implement property-meta iface (see gstbml)
  * - cut-off is now relative to samplerate, needs change
- * - get rid of samples-per-buffer property
+ * - get rid of samples-per-buffer, timestamp-offset properties
  *
  * - add polyphonic element
  *   - simsyn-mono, simsyn-poly
@@ -171,6 +171,7 @@ static void gst_sim_syn_change_filter (GstSimSyn * src);
 
 static void gst_sim_syn_get_times (GstBaseSrc * basesrc,
     GstBuffer * buffer, GstClockTime * start, GstClockTime * end);
+static gboolean gst_sim_syn_start (GstBaseSrc *basesrc);
 static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
@@ -263,8 +264,8 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
       GST_DEBUG_FUNCPTR (gst_sim_syn_is_seekable);
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_sim_syn_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_sim_syn_query);
-  //gstbasesrc_class->event = GST_DEBUG_FUNCPTR (gst_sim_syn_event);
   gstbasesrc_class->get_times = GST_DEBUG_FUNCPTR (gst_sim_syn_get_times);
+  gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gst_sim_syn_start);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_sim_syn_create);
 
   // override interface properties
@@ -336,7 +337,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   gst_pad_set_fixatecaps_function (pad, gst_sim_syn_src_fixate);
 
   src->samples_per_buffer = 1024.0;
-  src->generate_samples_per_buffer = (gint)src->samples_per_buffer;
+  src->generate_samples_per_buffer = (guint)src->samples_per_buffer;
   src->timestamp_offset = G_GINT64_CONSTANT (0);
 
   src->samplerate = GST_AUDIO_DEF_RATE;
@@ -484,7 +485,7 @@ gst_sim_syn_send_event (GstElement *elem, GstEvent *event) {
 static void
 gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
 {
-  gint i=0, j;
+  guint i=0, j;
   gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
@@ -509,7 +510,7 @@ gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
 {
-  gint i=0, j;
+  guint i=0, j;
   gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
@@ -533,7 +534,7 @@ gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
 {
-  gint i=0, j;
+  guint i=0, j;
   gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
@@ -561,7 +562,7 @@ gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_triangle (GstSimSyn * src, gint16 * samples)
 {
-  gint i=0, j;
+  guint i=0, j;
   gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
@@ -597,7 +598,7 @@ gst_sim_syn_create_silence (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_white_noise (GstSimSyn * src, gint16 * samples)
 {
-  gint i=0, j;
+  guint i=0, j;
   gdouble amp, ampf;
 
   ampf = src->volume * 65535.0;
@@ -681,7 +682,7 @@ gst_sim_syn_generate_pink_noise_value (GstPinkNoise * pink)
 static void
 gst_sim_syn_create_pink_noise (GstSimSyn * src, gint16 * samples)
 {
-  gint i=0, j;
+  guint i=0, j;
   gdouble amp, ampf;
 
   ampf = src->volume * 32767.0;
@@ -716,7 +717,7 @@ gst_sim_syn_init_sine_table (GstSimSyn * src)
 static void
 gst_sim_syn_create_sine_table (GstSimSyn * src, gint16 * samples)
 {
-  gint i;
+  guint i;
   gdouble step, scl;
 
   step = M_PI_M2 * src->freq / src->samplerate;
@@ -738,7 +739,7 @@ gst_sim_syn_create_sine_table (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_lowpass (GstSimSyn * src, gint16 * samples)
 {
-  gint i;
+  guint i;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
     src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
@@ -752,7 +753,7 @@ gst_sim_syn_filter_lowpass (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_hipass (GstSimSyn * src, gint16 * samples)
 {
-  gint i;
+  guint i;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
     src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
@@ -766,7 +767,7 @@ gst_sim_syn_filter_hipass (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_bandpass (GstSimSyn * src, gint16 * samples)
 {
-  gint i;
+  guint i;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
     src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
@@ -780,7 +781,7 @@ gst_sim_syn_filter_bandpass (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_bandstop (GstSimSyn * src, gint16 * samples)
 {
-  gint i;
+  guint i;
 
   for (i = 0; i < src->generate_samples_per_buffer; i++) {
     src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
@@ -939,12 +940,22 @@ gst_sim_syn_is_seekable (GstBaseSrc * basesrc)
   return TRUE;
 }
 
+static gboolean
+gst_sim_syn_start (GstBaseSrc *basesrc)
+{
+  GstSimSyn *src = GST_SIM_SYN (basesrc);
+
+  src->n_samples=G_GINT64_CONSTANT(0);
+  src->running_time=G_GINT64_CONSTANT(0);
+  return(TRUE);
+}
+
 static GstFlowReturn
 gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     guint length, GstBuffer ** buffer)
 {
-  GstFlowReturn res;
   GstSimSyn *src = GST_SIM_SYN (basesrc);
+  GstFlowReturn res;
   GstBuffer *buf;
   GstClockTime next_time;
   gint64 n_samples,samples_done;
@@ -964,12 +975,12 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf), length = %u",samples_per_buffer,src->samples_per_buffer,length);
 
   /* check for eos */
-  if (src->check_seek_stop &&
+  if (G_UNLIKELY(src->check_seek_stop &&
     (src->n_samples_stop > src->n_samples) &&
-    (src->n_samples_stop < src->n_samples + samples_per_buffer)
+    (src->n_samples_stop < src->n_samples + samples_per_buffer))
   ) {
     /* calculate only partial buffer */
-    src->generate_samples_per_buffer = src->n_samples_stop - src->n_samples;
+    src->generate_samples_per_buffer = (guint)(src->n_samples_stop - src->n_samples);
     n_samples = src->n_samples_stop;
     if (!(src->seek_flags&GST_SEEK_FLAG_SEGMENT)) {
       src->eos_reached = TRUE;
@@ -997,8 +1008,9 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
 
   gst_object_sync_values (G_OBJECT (src), src->running_time);
 
-  GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", running_time %"GST_TIME_FORMAT", next_time %"GST_TIME_FORMAT", duration %"GST_TIME_FORMAT,
-    src->n_samples,GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
+  GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", d_samples %6u running_time %"GST_TIME_FORMAT", next_time %"GST_TIME_FORMAT", duration %"GST_TIME_FORMAT,
+    src->n_samples,src->generate_samples_per_buffer,
+    GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
 
   src->running_time = next_time;
   src->n_samples = n_samples;

@@ -1,3 +1,11 @@
+2008-09-12  Stefan Kost  <ensonic@users.sf.net>
+
+	* TODO:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Add start method to safely reset some values. More comments and
+	  logging. Switch generate_samples_per_buffer to uint.
+
 2008-09-10  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/audiodelay.c:
