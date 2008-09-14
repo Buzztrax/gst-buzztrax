@@ -909,7 +909,7 @@ gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   segment->time = segment->start;
   time = segment->last_stop;
 
-  /* now move to the time indicated */
+  /* now move to the time indicated, this quantizes the time to sampling rate */
   src->n_samples = gst_util_uint64_scale_int(time, src->samplerate, GST_SECOND);
   src->running_time = gst_util_uint64_scale_int(src->n_samples, GST_SECOND,
       src->samplerate);
@@ -958,7 +958,8 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   GstFlowReturn res;
   GstBuffer *buf;
   GstClockTime next_time;
-  gint64 n_samples,samples_done;
+  gint64 n_samples;
+  gdouble samples_done;
   guint samples_per_buffer;
 
   if (G_UNLIKELY(src->eos_reached)) {
@@ -969,8 +970,11 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   //GST_DEBUG("rounding correction : %ld <> %"G_GUINT64_FORMAT,(glong)(((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND),src->n_samples);
   //samples_per_buffer=src->samples_per_buffer+(((src->running_time*src->samplerate)/GST_SECOND)-src->timestamp_offset);
-  samples_done = gst_util_uint64_scale((src->timestamp_offset+src->running_time),(guint64)src->samplerate,GST_SECOND);
-  samples_per_buffer=(gint)(src->samples_per_buffer+(gdouble)(src->n_samples-samples_done));
+  
+  //samples_done = gst_util_uint64_scale((src->timestamp_offset+src->running_time),(guint64)src->samplerate,GST_SECOND);
+  //samples_per_buffer=(guint)(src->samples_per_buffer+(gdouble)(src->n_samples-samples_done));
+  samples_done = (gdouble)(src->timestamp_offset+src->running_time)*(gdouble)src->samplerate/(gdouble)GST_SECOND;
+  samples_per_buffer=(guint)(src->samples_per_buffer+((gdouble)src->n_samples-samples_done));
 
   GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf), length = %u",samples_per_buffer,src->samples_per_buffer,length);
 

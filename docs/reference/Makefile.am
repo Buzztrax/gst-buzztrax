@@ -19,6 +19,16 @@ else
 FLUIDSYNTH_LA =
 FLUIDSYNTH_IGNORE_H = gstfluidsynth.h
 endif
+if BML_SUPPORT
+BML_CF = -DBML_NATIVE $(BML_CFLAGS)
+BML_LA = $(top_builddir)/src/bml/libgstbml.la
+BML_IGNORE_H =
+else
+BML_CF =
+BML_LA =
+BML_IGNORE_H = common.h gstbml.h gstbmlsrc.h gstbmltransform.h gstbmlv.h \
+	plugin.h utils.h  
+endif
 
 # The directory containing the source code. Relative to $(srcdir).
 # gtk-doc will search all .c & .h files beneath here for inline comments
@@ -52,7 +62,7 @@ CFILE_GLOB=$(top_srcdir)/libgstbuzztard/*.c $(top_srcdir)/src/*/*.h
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=config.h $(FLUIDSYNTH_IGNORE_H)
+IGNORE_HFILES=config.h $(BML_IGNORE_H) $(FLUIDSYNTH_IGNORE_H)
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
