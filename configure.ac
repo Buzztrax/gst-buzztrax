@@ -327,3 +327,18 @@ AC_CONFIG_FILES( \
 	tests/Makefile
 )
 AC_OUTPUT
+
+echo "
+
+Configuration
+	Version                    : ${VERSION}
+	Source code location       : ${srcdir}
+	Prefix                     : ${prefix}
+	Compiler                   : ${CC}
+
+	Documentation (API)        : ${enable_gtk_doc}
+
+	Debug                      : ${enable_debug}
+	Coverage profiling         : ${enable_coverage}
+	Use of deprecated API      : ${set_enable_deprecated}
+"
