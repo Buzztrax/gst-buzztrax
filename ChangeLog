@@ -1,5 +1,11 @@
 2008-09-24  Stefan Kost  <ensonic@users.sf.net>
 
+	* NEWS:
+	* configure.ac:
+	  make distcheck fixes.
+
+2008-09-24  Stefan Kost  <ensonic@users.sf.net>
+
 	* docs/reference/Makefile.am:
 	* libgstbuzztard/Makefile.am:
 	* tests/Makefile.am:
