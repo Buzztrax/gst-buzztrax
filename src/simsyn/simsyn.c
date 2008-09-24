@@ -180,8 +180,10 @@ static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
 //-- tempo interface implementations
 
 static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
-  self->samples_per_buffer=((self->samplerate*60.0)/(gdouble)(self->beats_per_minute*self->ticks_per_beat));
-  self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
+  const gulong ticks_per_minute=self->beats_per_minute*self->ticks_per_beat;
+  
+  self->samples_per_buffer=((self->samplerate*60.0)/(gdouble)ticks_per_minute);
+  self->ticktime=((GST_SECOND*60.0)/ticks_per_minute);
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
   GST_INFO("samples_per_buffer=%lf",self->samples_per_buffer);
 }
@@ -911,8 +913,11 @@ gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
 
   /* now move to the time indicated, this quantizes the time to sampling rate */
   src->n_samples = gst_util_uint64_scale_int(time, src->samplerate, GST_SECOND);
+  src->running_time = (gdouble)time;
+/*
   src->running_time = gst_util_uint64_scale_int(src->n_samples, GST_SECOND,
       src->samplerate);
+*/
 
   g_assert (src->running_time <= time);
 
@@ -946,7 +951,7 @@ gst_sim_syn_start (GstBaseSrc *basesrc)
   GstSimSyn *src = GST_SIM_SYN (basesrc);
 
   src->n_samples=G_GINT64_CONSTANT(0);
-  src->running_time=G_GINT64_CONSTANT(0);
+  src->running_time=0.0;
   return(TRUE);
 }
 
@@ -970,11 +975,11 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   //GST_DEBUG("rounding correction : %ld <> %"G_GUINT64_FORMAT,(glong)(((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND),src->n_samples);
   //samples_per_buffer=src->samples_per_buffer+(((src->running_time*src->samplerate)/GST_SECOND)-src->timestamp_offset);
-  
+
   //samples_done = gst_util_uint64_scale((src->timestamp_offset+src->running_time),(guint64)src->samplerate,GST_SECOND);
-  //samples_per_buffer=(guint)(src->samples_per_buffer+(gdouble)(src->n_samples-samples_done));
-  samples_done = (gdouble)(src->timestamp_offset+src->running_time)*(gdouble)src->samplerate/(gdouble)GST_SECOND;
-  samples_per_buffer=(guint)(src->samples_per_buffer+((gdouble)src->n_samples-samples_done));
+  //samples_per_buffer=(guint)(src->samples_per_buffer+(gdouble)(samples_done-src->n_samples));
+  samples_done = ((gdouble)src->timestamp_offset+src->running_time)*(gdouble)src->samplerate/(gdouble)GST_SECOND;
+  samples_per_buffer=(guint)(src->samples_per_buffer+(samples_done-(gdouble)src->n_samples));
 
   GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf), length = %u",samples_per_buffer,src->samples_per_buffer,length);
 
@@ -1008,15 +1013,16 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
 
   GST_BUFFER_TIMESTAMP (buf) = src->timestamp_offset + src->running_time;
   GST_BUFFER_OFFSET_END (buf) = n_samples;
-  GST_BUFFER_DURATION (buf) = next_time - src->running_time;
+  GST_BUFFER_DURATION (buf) = next_time - (GstClockTime)src->running_time;
 
-  gst_object_sync_values (G_OBJECT (src), src->running_time);
+  gst_object_sync_values (G_OBJECT (src), (GstClockTime)src->running_time);
 
   GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", d_samples %6u running_time %"GST_TIME_FORMAT", next_time %"GST_TIME_FORMAT", duration %"GST_TIME_FORMAT,
     src->n_samples,src->generate_samples_per_buffer,
-    GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
+    GST_TIME_ARGS((GstClockTime)src->running_time),GST_TIME_ARGS(next_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
 
-  src->running_time = next_time;
+  src->running_time += src->ticktime;
+  //src->running_time = next_time;
   src->n_samples = n_samples;
 
   if ((src->freq != 0.0) && (src->volenv->value > 0.0001)) {

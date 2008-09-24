@@ -1,5 +1,11 @@
 2008-09-24  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Rework error accummulation for precise timing.
+
+2008-09-24  Stefan Kost  <ensonic@users.sf.net>
+
 	* NEWS:
 	* configure.ac:
 	  make distcheck fixes.
