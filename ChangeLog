@@ -1,3 +1,11 @@
+2008-09-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/Makefile.am:
+	* libgstbuzztard/Makefile.am:
+	* tests/Makefile.am:
+	  Get rid of INCLUDES variable (automake deprecates it). Use namespace
+	  feature for docs.
+
 2008-09-22  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

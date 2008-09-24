@@ -22,8 +22,7 @@ gst_buzztard_LDADD = \
 	$(BASE_DEPS_LIBS) -lcheck
 gst_buzztard_SOURCES= m-gst-buzztard.c m-gst-buzztard.h \
 	s-gst-note2frequency.c e-gst-note2frequency.c t-gst-note2frequency.c
-	
-INCLUDES = \
+gst_buzztard_CFLAGS = \
 	-I@srcdir@ -I$(top_srcdir) \
 	-DG_LOG_DOMAIN=\"gst-buzztard-check\" \
 	$(BASE_DEPS_CFLAGS) \
