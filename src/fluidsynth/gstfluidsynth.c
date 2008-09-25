@@ -219,8 +219,10 @@ chorus_waveform_get_type (void)
 
 static void gst_fluidsynth_calculate_buffer_frames(GstFluidsynth *self)
 {
-  self->samples_per_buffer = ((self->samplerate*60.0)/(gdouble)(self->beats_per_minute*self->ticks_per_beat));
-  self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
+  const gdouble ticks_per_minute=(gdouble)(self->beats_per_minute*self->ticks_per_beat);
+  
+  self->samples_per_buffer=((self->samplerate*60.0)/ticks_per_minute);
+  self->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
   GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
 }
@@ -1073,14 +1075,15 @@ gst_fluidsynth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   time = segment->last_stop;
 
   /* now move to the time indicated */
-  src->n_samples = time * src->samplerate / GST_SECOND;
-  src->running_time = src->n_samples * GST_SECOND / src->samplerate;
+  src->n_samples = gst_util_uint64_scale_int(time, src->samplerate, GST_SECOND);
+  src->running_time = time;
 
   g_assert (src->running_time <= time);
 
   if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
     time = segment->stop;
-    src->n_samples_stop = time * src->samplerate / GST_SECOND;
+    src->n_samples_stop = gst_util_uint64_scale_int(time, src->samplerate,
+        GST_SECOND);
     src->check_seek_stop = TRUE;
   } else {
     src->check_seek_stop = FALSE;
@@ -1105,12 +1108,13 @@ static GstFlowReturn
 gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
 		       GstBuffer ** buffer)
 {
-  GstFlowReturn res;
   GstFluidsynth *src = GST_FLUIDSYNTH (basesrc);
+  GstFlowReturn res;
   GstBuffer *buf;
   GstClockTime next_time;
-  gint64 n_samples,samples_done;
-  guint samples_per_buffer = length;
+  gint64 n_samples;
+  gdouble samples_done;
+  guint samples_per_buffer;
 
   if (G_UNLIKELY(src->eos_reached)) {
     GST_DEBUG("  EOS reached");
@@ -1118,11 +1122,10 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  //GST_DEBUG("rounding correction : %ld <> %"G_GUINT64_FORMAT,(glong)(((src->timestamp_offset+src->running_time)*src->samplerate)/GST_SECOND),src->n_samples);
-  //samples_per_buffer=src->samples_per_buffer+(((src->running_time*src->samplerate)/GST_SECOND)-src->timestamp_offset);
-  samples_done = gst_util_uint64_scale ((src->timestamp_offset + src->running_time), (guint64)src->samplerate, GST_SECOND);
-  samples_per_buffer = (gint)(src->samples_per_buffer + (gdouble)(src->n_samples-samples_done));
-  //GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf)",samples_per_buffer,src->samples_per_buffer);
+  samples_done = (gdouble)(src->timestamp_offset+src->running_time)*(gdouble)src->samplerate/(gdouble)GST_SECOND;
+  samples_per_buffer=(guint)(src->samples_per_buffer+(samples_done-(gdouble)src->n_samples));
+
+  //GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf), length = %u",samples_per_buffer,src->samples_per_buffer,length);
 
   /* check for eos */
   if (src->check_seek_stop &&
@@ -1143,7 +1146,6 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
     n_samples = src->n_samples + samples_per_buffer;
   }
 
-  //next_time = n_samples * GST_SECOND / src->samplerate;
   next_time = gst_util_uint64_scale (n_samples, GST_SECOND, (guint64)src->samplerate);
 
   /* allocate a new buffer suitable for this pad */
@@ -1162,7 +1164,8 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", running_time %"GST_TIME_FORMAT", next_time %"GST_TIME_FORMAT", duration %"GST_TIME_FORMAT,
     src->n_samples,GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
 
-  src->running_time = next_time;
+  src->running_time += src->ticktime;
+  //src->running_time = next_time;
   src->n_samples = n_samples;
 
   if(src->cur_note_length) {

@@ -87,7 +87,7 @@ struct _GstBML {
 
   GstPad **sinkpads,**srcpads;
 
-  gint samplerate, buffer_frames;
+  gint samplerate, samples_per_buffer;
   // machines that can't put result into the same buffer as input
   // we don't use that right now
   //gboolean inplace_broken;

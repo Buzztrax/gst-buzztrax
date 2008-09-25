@@ -751,8 +751,10 @@ void gstbml_get_param(gint type,gpointer addr,GValue *value) {
  * buffer_frames = samples_per_minute/ticks_per_minute
  */
 void gstbml_calculate_buffer_frames(GstBML *bml) {
-  bml->buffer_frames=((bml->samplerate*60)/(bml->beats_per_minute*bml->ticks_per_beat));
-  bml->ticktime=((GST_SECOND*60)/(GstClockTime)(bml->beats_per_minute*bml->ticks_per_beat));
+  const gdouble ticks_per_minute=(gdouble)(bml->beats_per_minute*bml->ticks_per_beat);
+
+  bml->samples_per_buffer=((bml->samplerate*60.0)/ticks_per_minute);
+  bml->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
 }
 
 /*

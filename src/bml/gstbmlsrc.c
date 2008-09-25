@@ -326,8 +326,7 @@ static gboolean gst_bml_src_do_seek(GstBaseSrc * base, GstSegment * segment) {
 
   /* now move to the time indicated */
   bml->n_samples = gst_util_uint64_scale_int(time, bml->samplerate, GST_SECOND);
-  bml->running_time = gst_util_uint64_scale_int(bml->n_samples, GST_SECOND,
-      bml->samplerate);
+  bml->running_time = time;
 
   g_assert (bml->running_time <= time);
 
@@ -356,7 +355,8 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   GstBML *bml=GST_BML(bml_src);
   GstBuffer *buf;
   GstClockTime next_time;
-  gint64 n_samples,samples_done;
+  gint64 n_samples;
+  gdouble samples_done;
   GstPad *srcpad=GST_BASE_SRC_PAD(base);
   BMLData *data,*seg_data;
   gpointer bm=bml->bm;
@@ -369,10 +369,8 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  //samples_per_buffer=bml->buffer_frames+(((bml->running_time*bml->samplerate)/GST_SECOND)-bml->timestamp_offset);
-  //samples_per_buffer=bml->buffer_frames+(((bml->timestamp_offset+bml->running_time*bml->samplerate)/GST_SECOND)-bml->n_samples);
-  samples_done = gst_util_uint64_scale((bml->timestamp_offset+bml->running_time),(guint64)bml->samplerate,GST_SECOND);
-  samples_per_buffer=bml->buffer_frames+(gint)(bml->n_samples-samples_done);
+  samples_done = (gdouble)(bml->timestamp_offset+bml->running_time)*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
+  samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
 
   /* check for eos */
   if (bml->check_seek_stop &&
@@ -389,7 +387,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
     /* calculate full buffer */
     n_samples = bml->n_samples + samples_per_buffer;
   }
-  //next_time = n_samples * GST_SECOND / bml->samplerate;
+
   next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
 
   /* allocate a new buffer suitable for this pad */
@@ -411,7 +409,8 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   gstbml_sync_values(bml);
   bml(tick(bm));
 
-  bml->running_time = next_time;
+  bml->running_time += bml->ticktime;
+  //bml->running_time = next_time;
   bml->n_samples = n_samples;
 
   GST_DEBUG("  calling work(%d)",samples_per_buffer);
@@ -454,7 +453,8 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   GstBML *bml=GST_BML(bml_src);
   GstBuffer *buf;
   GstClockTime next_time;
-  gint64 n_samples,samples_done;
+  gint64 n_samples;
+  gdouble samples_done;
   GstPad *srcpad=GST_BASE_SRC_PAD(base);
   BMLData *data,*seg_data;
   gpointer bm=bml->bm;
@@ -467,8 +467,8 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  samples_done = gst_util_uint64_scale((bml->timestamp_offset+bml->running_time),(guint64)bml->samplerate,GST_SECOND);
-  samples_per_buffer=bml->buffer_frames+(gint)(bml->n_samples-samples_done);
+  samples_done = (gdouble)(bml->timestamp_offset+bml->running_time)*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
+  samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
 
   /* check for eos */
   if (bml->check_seek_stop &&
@@ -483,7 +483,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
     /* calculate full buffer */
     n_samples = bml->n_samples + samples_per_buffer;
   }
-  //next_time = n_samples * GST_SECOND / bml->samplerate;
+
   next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
 
   /* allocate a new buffer suitable for this pad */
@@ -505,7 +505,8 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   gstbml_sync_values(bml);
   bml(tick(bm));
 
-  bml->running_time = next_time;
+  bml->running_time += bml->ticktime;
+  //bml->running_time = next_time;
   bml->n_samples = n_samples;
 
   GST_DEBUG("  calling work_m2s(%d)",samples_per_buffer);

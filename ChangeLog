@@ -1,3 +1,14 @@
+2008-09-25  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	* src/bml/gstbml.h:
+	* src/bml/gstbmlsrc.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Use guint64 for bar-time to avoid accumulation of float rounding
+	  errors. Fix frame size handling in all sources.
+
 2008-09-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/simsyn/simsyn.c:

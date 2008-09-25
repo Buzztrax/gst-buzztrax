@@ -94,7 +94,7 @@ struct _GstSimSyn {
 
   gint samplerate;
   GstClockTimeDiff timestamp_offset;    /* base offset */
-  gdouble running_time;            /* total running time */
+  GstClockTime running_time;            /* total running time */
   gint64 n_samples;                     /* total samples sent */
   gint64 n_samples_stop;
   gboolean check_seek_stop;
@@ -112,7 +112,7 @@ struct _GstSimSyn {
   gulong beats_per_minute;
   gulong ticks_per_beat;
   gulong subticks_per_tick;
-  gdouble ticktime;
+  GstClockTime ticktime;
 
   /* waveform specific context data */
   gdouble accumulator;			/* phase angle */
