@@ -600,9 +600,6 @@ void bml(gstbml_init(GstBML *bml,GstBMLClass *klass,GstElement *element)) {
   bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
   GST_DEBUG("activating %d voice(s)",bml->num_voices);
   //bml(set_num_tracks(bml,bml->num_voices));
-
-  // init timestamp counters
-  bml->timestamp_offset = G_GINT64_CONSTANT(0);
 }
 
 /*

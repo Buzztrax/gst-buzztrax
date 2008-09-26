@@ -369,7 +369,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  samples_done = (gdouble)(bml->timestamp_offset+bml->running_time)*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
+  samples_done = (gdouble)bml->running_time*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
   samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
 
   /* check for eos */
@@ -399,7 +399,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
     return res;
   }
 
-  GST_BUFFER_TIMESTAMP(buf)=bml->timestamp_offset + bml->running_time;
+  GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
   GST_BUFFER_OFFSET_END(buf)=n_samples;
   GST_BUFFER_DURATION(buf)=next_time - bml->running_time;
 
@@ -467,7 +467,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  samples_done = (gdouble)(bml->timestamp_offset+bml->running_time)*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
+  samples_done = (gdouble)bml->running_time*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
   samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
 
   /* check for eos */
@@ -495,7 +495,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
     return res;
   }
 
-  GST_BUFFER_TIMESTAMP(buf)=bml->timestamp_offset + bml->running_time;
+  GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
   GST_BUFFER_OFFSET_END(buf)=n_samples;
   GST_BUFFER_DURATION(buf)=next_time - bml->running_time;
 

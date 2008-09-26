@@ -28,7 +28,7 @@
 /* @todo:
  * - implement property-meta iface (see gstbml)
  * - cut-off is now relative to samplerate, needs change
- * - get rid of samples-per-buffer, timestamp-offset properties
+ * - get rid of samples-per-buffer, is-live properties
  *
  * - add polyphonic element
  *   - simsyn-mono, simsyn-poly
@@ -69,7 +69,6 @@ enum {
   // static class properties
   PROP_SAMPLES_PER_BUFFER=1,
   PROP_IS_LIVE,
-  PROP_TIMESTAMP_OFFSET,
   // dynamic class properties
   PROP_NOTE,
   PROP_WAVE,
@@ -288,12 +287,6 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
       g_param_spec_boolean ("is-live", "Is Live",
           "Whether to act as a live source", FALSE, G_PARAM_READWRITE));
 
-  g_object_class_install_property (G_OBJECT_CLASS (klass), PROP_TIMESTAMP_OFFSET,
-      g_param_spec_int64 ("timestamp-offset", "Timestamp offset",
-          "An offset added to timestamps set on buffers (in ns)", G_MININT64,
-          G_MAXINT64, 0, G_PARAM_READWRITE));
-
-
   paramspec=g_param_spec_string("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
           NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
   g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark,GINT_TO_POINTER(TRUE));
@@ -340,7 +333,6 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
 
   src->samples_per_buffer = 1024.0;
   src->generate_samples_per_buffer = (guint)src->samples_per_buffer;
-  src->timestamp_offset = G_GINT64_CONSTANT (0);
 
   src->samplerate = GST_AUDIO_DEF_RATE;
   src->beats_per_minute=120;
@@ -969,7 +961,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  samples_done = (gdouble)(src->timestamp_offset+src->running_time)*(gdouble)src->samplerate/(gdouble)GST_SECOND;
+  samples_done = (gdouble)src->running_time*(gdouble)src->samplerate/(gdouble)GST_SECOND;
   samples_per_buffer=(guint)(src->samples_per_buffer+(samples_done-(gdouble)src->n_samples));
 
   //GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf), length = %u",samples_per_buffer,src->samples_per_buffer,length);
@@ -1002,7 +994,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     return res;
   }
 
-  GST_BUFFER_TIMESTAMP (buf) = src->timestamp_offset + src->running_time;
+  GST_BUFFER_TIMESTAMP (buf) = src->running_time;
   GST_BUFFER_OFFSET_END (buf) = n_samples;
   GST_BUFFER_DURATION (buf) = next_time - src->running_time;
 
@@ -1046,9 +1038,6 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       break;
     case PROP_IS_LIVE:
       gst_base_src_set_live (GST_BASE_SRC (src), g_value_get_boolean (value));
-      break;
-    case PROP_TIMESTAMP_OFFSET:
-      src->timestamp_offset = g_value_get_int64 (value);
       break;
     case PROP_NOTE:
       g_free (src->note);
@@ -1140,9 +1129,6 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
       break;
     case PROP_IS_LIVE:
       g_value_set_boolean (value, gst_base_src_is_live (GST_BASE_SRC (src)));
-      break;
-    case PROP_TIMESTAMP_OFFSET:
-      g_value_set_int64 (value, src->timestamp_offset);
       break;
     case PROP_NOTE:
       g_value_set_string (value, src->note);

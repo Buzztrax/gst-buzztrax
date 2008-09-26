@@ -87,7 +87,6 @@ enum {
   // static class properties
   PROP_SAMPLES_PER_BUFFER=1,
   PROP_IS_LIVE,
-  PROP_TIMESTAMP_OFFSET,
   // tempo iface
   PROP_BPM,
   PROP_TPB,
@@ -408,11 +407,6 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
       g_param_spec_boolean ("is-live", _("Is Live"),
           _("Whether to act as a live source"), FALSE, G_PARAM_READWRITE));
 
-  g_object_class_install_property (G_OBJECT_CLASS (klass), PROP_TIMESTAMP_OFFSET,
-      g_param_spec_int64 ("timestamp-offset", _("Timestamp offset"),
-          _("An offset added to timestamps set on buffers (in ns)"), G_MININT64,
-          G_MAXINT64, 0, G_PARAM_READWRITE));
-
   paramspec = g_param_spec_string ("note", _("Musical note"),
                                    _("Musical note (e.g. 'c-3', 'd#4')"),
                                    NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
@@ -700,9 +694,6 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       gst_base_src_set_live (GST_BASE_SRC (gstsynth),
       g_value_get_boolean (value));
       break;
-    case PROP_TIMESTAMP_OFFSET:
-      gstsynth->timestamp_offset = g_value_get_int64 (value);
-      break;
 	// tempo iface
     case PROP_BPM:
     case PROP_TPB:
@@ -820,9 +811,6 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     case PROP_IS_LIVE:
       g_value_set_boolean (value, gst_base_src_is_live (GST_BASE_SRC (gstsynth)));
       break;
-    case PROP_TIMESTAMP_OFFSET:
-      g_value_set_int64 (value, gstsynth->timestamp_offset);
-      break;
 	// tempo iface
     case PROP_BPM:
       g_value_set_ulong(value, gstsynth->beats_per_minute);
@@ -848,7 +836,6 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
 
   gstsynth->samples_per_buffer = 1024.0;
   gstsynth->generate_samples_per_buffer = (gint)gstsynth->samples_per_buffer;
-  gstsynth->timestamp_offset = G_GINT64_CONSTANT (0);
 
   gstsynth->samplerate = GST_AUDIO_DEF_RATE;
   gstsynth->beats_per_minute=120;
@@ -1122,7 +1109,7 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  samples_done = (gdouble)(src->timestamp_offset+src->running_time)*(gdouble)src->samplerate/(gdouble)GST_SECOND;
+  samples_done = (gdouble)src->running_time*(gdouble)src->samplerate/(gdouble)GST_SECOND;
   samples_per_buffer=(guint)(src->samples_per_buffer+(samples_done-(gdouble)src->n_samples));
 
   //GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf), length = %u",samples_per_buffer,src->samples_per_buffer,length);
@@ -1155,7 +1142,7 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
       &buf)) != GST_FLOW_OK)
     return res;
 
-  GST_BUFFER_TIMESTAMP (buf) = src->timestamp_offset + src->running_time;
+  GST_BUFFER_TIMESTAMP (buf) = src->running_time;
   GST_BUFFER_OFFSET_END (buf) = n_samples;
   GST_BUFFER_DURATION (buf) = next_time - src->running_time;
 

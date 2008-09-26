@@ -1,3 +1,14 @@
+2008-09-26  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.h:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/utils.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Remove timestamp_offset. It came from audiotestsrc - we don't need it.
+
 2008-09-25  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:

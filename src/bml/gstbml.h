@@ -94,7 +94,6 @@ struct _GstBML {
 
   /* < private > */
   gboolean tags_pushed;			/* send tags just once ? */
-  GstClockTimeDiff timestamp_offset;    /* base offset */
   GstClockTime ticktime;
   GstClockTime running_time;            /* total running time */
   gint64 n_samples;                     /* total samples sent */
