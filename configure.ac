@@ -217,6 +217,7 @@ AC_MSG_CHECKING([gstreamer version >= 0.10.20])
 if pkg-config --atleast-version=0.10.20 gstreamer-0.10; then
   HAVE_GST_GSTPRESET=1
   PRESET_DOC_TYPES="%"
+  AC_DEFINE(HAVE_GST_GSTPRESET_H, [1], [Define to 1 if gstreamer has the preset iface])
   AC_MSG_RESULT(yes)
 else
   HAVE_GST_GSTPRESET=0
@@ -224,7 +225,6 @@ else
   AC_MSG_RESULT(no)
 fi
 AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET" = "0")
-AC_DEFINE(HAVE_GST_GSTPRESET_H, test "$HAVE_GST_GSTPRESET" = "0", [Define to 1 if gstreamer has the preset iface])
 AC_SUBST(PRESET_DOC_TYPES)
 
 
