@@ -73,8 +73,8 @@ static gboolean dir_scan(const gchar *dir_name) {
     "AUTOMATON PARAMETRIC EQ.DLL",
     "AUTOMATON VCF.DLL",
     "BUZZINAMOVIE.DLL",
-    /* hangs after GetInfo() */
-    "CHEAPO SPREAD.DLL",
+    /* hangs after GetInfo(), should be fixed after installing msvcr70.dll and with new function implemented */
+    /*"CHEAPO SPREAD.DLL",*/
     "CHIMP REPLAY.DLL",
     "CYANPHASE AUXRETURN.DLL",
     "CYANPHASE DMO EFFECT ADAPTER.DLL",

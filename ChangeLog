@@ -1,3 +1,8 @@
+2008-10-17  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Enable one more plugin.
+
 2008-10-01  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
