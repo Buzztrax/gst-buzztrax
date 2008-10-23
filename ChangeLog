@@ -1,3 +1,8 @@
+2008-10-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Enable two more plugins and comment on issues.
+
 2008-10-17  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:

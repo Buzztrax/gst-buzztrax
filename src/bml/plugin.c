@@ -66,11 +66,12 @@ static gboolean dir_scan(const gchar *dir_name) {
     "2NDPROCESS NUMBIRD 1.4.DLL",
     "ANEURYSM DISTGARB.DLL",
     "ARGUELLES FX2.DLL",
-    "ARGUELLES KFILTER.DLL",
+    /* does not crash anymore, but produce NAN */
+    /*"ARGUELLES KFILTER.DLL",*/
     "ARGUELLES ROVOX.DLL",
     "AUTOMATON COMPRESSOR MKII.DLL",
     /* crashes on CMachineInterface::SetNumTracks(1) */
-    "AUTOMATON PARAMETRIC EQ.DLL",
+    /*"AUTOMATON PARAMETRIC EQ.DLL",*/
     "AUTOMATON VCF.DLL",
     "BUZZINAMOVIE.DLL",
     /* hangs after GetInfo(), should be fixed after installing msvcr70.dll and with new function implemented */
@@ -105,6 +106,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     "JESKOLA AUXSEND.DLL",
     "JESKOLA EQ-3 XP.DLL",
     "JESKOLA MULTIPLIER.DLL",
+    /* has issues with dsplib on some platforms, produces buffers full of NAN */
     /*"JESKOLA NINJA DELAY.DLL",*/
     "JESKOLA REVERB 2.DLL",
     /*"JESKOLA REVERB.DLL",*/
