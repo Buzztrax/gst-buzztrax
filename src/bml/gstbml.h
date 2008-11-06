@@ -79,18 +79,10 @@ struct _GstBML {
   gulong ticks_per_beat;
   gulong subticks_per_tick;
 
-  // buffer managment
-  BMLData **data_in;
-  BMLData **data_out;
-  GstBuffer **buffers_in;
-  GstBuffer **buffers_out;
-
+  // pads
   GstPad **sinkpads,**srcpads;
 
   gint samplerate, samples_per_buffer;
-  // machines that can't put result into the same buffer as input
-  // we don't use that right now
-  //gboolean inplace_broken;
 
   /* < private > */
   gboolean tags_pushed;			/* send tags just once ? */

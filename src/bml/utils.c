@@ -183,7 +183,7 @@ void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bm, const gch
   gchar *str;
 
   /* construct the element details struct */
-  details = g_new0(GstElementDetails, 1);
+  details=g_new(GstElementDetails,1);
   bml(get_machine_info(bm,BM_PROP_SHORT_NAME,(void *)&str));
   details->longname=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   bml(get_machine_info(bm,BM_PROP_NAME,(void *)&str));
@@ -568,25 +568,6 @@ void bml(gstbml_init(GstBML *bml,GstBMLClass *klass,GstElement *element)) {
 
   gst_bml_init_voices(bml,klass);
 
-  // allocate data buffers
-  if (klass->numsinkpads > 0) {
-    bml->data_in = g_new0 (BMLData *, klass->numsinkpads);
-    bml->buffers_in = g_new0 (GstBuffer *, klass->numsinkpads);
-  }
-  else {
-    bml->data_in = NULL;
-    bml->buffers_in = NULL;
-  }
-
-  if (klass->numsrcpads > 0) {
-    bml->data_out = g_new0 (BMLData *, klass->numsrcpads);
-    bml->buffers_out = g_new0 (GstBuffer *, klass->numsrcpads);
-  }
-  else {
-    bml->data_out = NULL;
-    bml->buffers_out = NULL;
-  }
-
   // allocate the various arrays
   bml->srcpads=g_new0(GstPad *,klass->numsrcpads);
   bml->sinkpads=g_new0(GstPad *,klass->numsinkpads);
@@ -639,6 +620,9 @@ void bml(gstbml_finalize(GstBML *bml)) {
     g_list_free(bml->voices);
     bml->voices=NULL;
   }
+  
+  g_free(bml->srcpads);
+  g_free(bml->sinkpads);
 
   /* @todo: free here */
   bml(free(bml->bm));

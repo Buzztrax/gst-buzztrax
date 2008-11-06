@@ -1,3 +1,9 @@
+2008-11-07  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.h:
+	* src/bml/utils.c:
+	  Remove some dead code that even leaks.
+
 2008-10-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:
