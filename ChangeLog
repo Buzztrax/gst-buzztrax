@@ -1,3 +1,9 @@
+2008-11-11  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	  Fix type name leak. gst_elemnt_register and g_type_register_static
+	  don't need it to be kept.
+
 2008-11-07  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.h:

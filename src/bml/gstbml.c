@@ -158,11 +158,14 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     }
 
     voice_type = 0L;
-    if(voice_type_name && bml(gstbml_is_polyphonic(bm))) {
-      // create the voice type now
-      voice_type = bml(v_get_type(voice_type_name));
-      GST_INFO("  voice type \"%s\" is 0x%p!", voice_type_name,voice_type);
-      g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bm);
+    if(voice_type_name) {
+      if(bml(gstbml_is_polyphonic(bm))) {
+        // create the voice type now
+        voice_type = bml(v_get_type(voice_type_name));
+        GST_INFO("  voice type \"%s\" is 0x%p!", voice_type_name,voice_type);
+        g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bm);
+      }
+      g_free(voice_type_name);
     }
     if(element_type_name) {
       GType element_type=0L;
@@ -193,14 +196,11 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
           res=TRUE;
         }
       }
+      g_free(element_type_name);
     }
     g_hash_table_remove(bml_dllpath_by_element_type, GINT_TO_POINTER(0));
     g_hash_table_remove(bml_descriptors_by_voice_type, GINT_TO_POINTER(0));
     g_hash_table_remove(bml_descriptors_by_element_type, GINT_TO_POINTER(0));
-
-    // we have to leak those
-    //g_free(element_type_name);
-    //g_free(voice_type_name);
   }
   return(res);
 }
