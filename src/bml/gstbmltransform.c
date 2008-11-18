@@ -390,6 +390,8 @@ static gboolean gst_bml_transform_get_unit_size (GstBaseTransform *base, GstCaps
 }
 
 static GstCaps *gst_bml_transform_transform_caps(GstBaseTransform * base, GstPadDirection direction, GstCaps * caps) {
+  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(base);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
   GstCaps *res;
   GstStructure *structure;
 
@@ -399,14 +401,14 @@ static GstCaps *gst_bml_transform_transform_caps(GstBaseTransform * base, GstPad
   structure = gst_caps_get_structure (res, 0);
   /* if we should produce this output, what can we accept */
   if (direction == GST_PAD_SRC) {
-    GST_INFO_OBJECT (base, "allow 1 input channel");
+    GST_INFO_OBJECT (base, "allow %d input channel", bml_class->input_channels);
     gst_structure_set (structure, 
-      "channels", G_TYPE_INT, 1, 
+      "channels", G_TYPE_INT, bml_class->input_channels,
       NULL);
   } else {
-    GST_INFO_OBJECT (base, "allow 2 output channels");
+    GST_INFO_OBJECT (base, "allow %d output channels", bml_class->output_channels);
     gst_structure_set (structure, 
-      "channels", G_TYPE_INT, 2, 
+      "channels", G_TYPE_INT, bml_class->output_channels,
       NULL);
   }
 
@@ -622,7 +624,7 @@ static void gst_bml_transform_base_init(GstBMLTransformClass *klass) {
     gst_element_class_add_pad_template(element_class,gst_static_pad_template_get(&bml_pad_caps_stereo_src_template));
     GST_INFO("  added stereo src pad template");
   }
-  if(bml_class->output_channels==1) {
+  if(bml_class->input_channels==1) {
     gst_element_class_add_pad_template(element_class,gst_static_pad_template_get(&bml_pad_caps_mono_sink_template));
     GST_INFO("  added mono sink pad template");
   }
