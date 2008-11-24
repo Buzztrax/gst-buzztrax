@@ -58,7 +58,7 @@ static int blacklist_compare(const void *node1, const void *node2) {
 static gboolean dir_scan(const gchar *dir_name) {
   DIR *dir;
   struct dirent *dir_entry;
-  gchar *file_name,*entry_name;
+  gchar *file_name,*entry_name,*ext;
   gpointer bm;
   gboolean res=FALSE,ok;
 
@@ -169,50 +169,53 @@ static gboolean dir_scan(const gchar *dir_name) {
     }
 
     entry_name=dir_entry->d_name;
-    if(entry_name && (entry_name[0]!='.') && (g_str_has_suffix(entry_name,".dll") || g_str_has_suffix(entry_name,".so"))) {
-      /* test against blacklist */
-      if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
-        file_name=g_build_filename (dir_name, entry_name, NULL);
-        GST_INFO("trying plugin '%s','%s'",entry_name,file_name);
-        ok=FALSE;
-        if(g_str_has_suffix(entry_name,".dll")) {
-#if HAVE_BMLW
-          if((bm=bmlw_new(file_name))) {
-            bmlw_init(bm,0,NULL);
-            if(bmlw_describe_plugin(file_name,bm)) {
-              /* @todo: free here, or leave on instance open to be used in class init
-               * bmlw_free(bm); */
-              res=ok=TRUE;
+    if(entry_name && (entry_name[0]!='.')) {
+      ext=strrchr(entry_name,'.');
+      if (ext && (!strcasecmp(ext,".dll") || !strcmp(ext,".so"))) {
+        /* test against blacklist */
+        if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
+          file_name=g_build_filename (dir_name, entry_name, NULL);
+          GST_INFO("trying plugin '%s','%s'",entry_name,file_name);
+          ok=FALSE;
+          if(!strcasecmp(ext,".dll")) {
+  #if HAVE_BMLW
+            if((bm=bmlw_new(file_name))) {
+              bmlw_init(bm,0,NULL);
+              if(bmlw_describe_plugin(file_name,bm)) {
+                /* @todo: free here, or leave on instance open to be used in class init
+                 * bmlw_free(bm); */
+                res=ok=TRUE;
+              }
+              else {
+                bmlw_free(bm);
+              }
             }
-            else {
-              bmlw_free(bm);
+  #else
+            GST_WARNING("no dll emulation on non x86 platforms");
+  #endif
+          }
+          else {
+            if((bm=bmln_new(file_name))) {
+              bmln_init(bm,0,NULL);
+              if(bmln_describe_plugin(file_name,bm)) {
+                /* @todo: free here, or leave on instance open to be used in class init
+                 * bmln_free(bm); */
+                res=ok=TRUE;
+              }
+              else {
+                bmln_free(bm);
+              }
             }
           }
-#else
-          GST_WARNING("no dll emulation on non x86 platforms");
-#endif
+          if(!ok) {
+            GST_WARNING("machine %s could not be loaded",entry_name);
+            /* @todo: only free here, as we put that into a hashmap in the callback above */
+            g_free(file_name);file_name=NULL;
+          }
         }
         else {
-          if((bm=bmln_new(file_name))) {
-            bmln_init(bm,0,NULL);
-            if(bmln_describe_plugin(file_name,bm)) {
-              /* @todo: free here, or leave on instance open to be used in class init
-               * bmln_free(bm); */
-              res=ok=TRUE;
-            }
-            else {
-              bmln_free(bm);
-            }
-          }
+          GST_WARNING("machine %s is black-listed",entry_name);
         }
-        if(!ok) {
-          GST_WARNING("machine %s could not be loaded",entry_name);
-          /* @todo: only free here, as we put that into a hashmap in the callback above */
-          g_free(file_name);file_name=NULL;
-        }
-      }
-      else {
-        GST_WARNING("machine %s is black-listed",entry_name);
       }
     }
   }

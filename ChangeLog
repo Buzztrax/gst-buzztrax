@@ -1,3 +1,8 @@
+2008-11-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Also take machines with uppercase DLL extension.
+
 2008-11-18  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmltransform.c:
