@@ -1,6 +1,6 @@
-0.4.0 the light in your eyes (??.???.2008)
+0.4.0 the light in your eyes (26.Nov.2008)
 ================================================================================
-API renaming.
+API renaming to cleanup gst namespace usage. Now includes former gst-bml module.
 
 0.3.0 a tale of ice and darkness (26.Mar.2008)
 ================================================================================
