@@ -11,12 +11,12 @@ dnl 3: when the interface has changed (removing functions) : MAJOR++, MINOR=0, M
 dnl
 
 dnl Initialise the autoconf/automake tool
-AC_INIT([gst-buzztard], [0.4.0], [buzztard-devel@lists.sourceforge.net])
+AC_INIT([gst-buzztard], [0.5.0], [buzztard-devel@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([ChangeLog])
 AC_CONFIG_HEADERS(config.h)
 
 GSTBT_MAJOR_VERSION=0
-GSTBT_MINOR_VERSION=4
+GSTBT_MINOR_VERSION=5
 GSTBT_MICRO_VERSION=0
 GSTBT_VERSION=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION.$GSTBT_MICRO_VERSION
 GSTBT_VERSION_INFO=`expr $GSTBT_MAJOR_VERSION + $GSTBT_MINOR_VERSION`:$GSTBT_MICRO_VERSION:$GSTBT_MINOR_VERSION
@@ -25,7 +25,7 @@ GSTBT_VERSION_NUMBER=`expr $GSTBT_MAJOR_VERSION \* 10000 + $GSTBT_MINOR_VERSION 
 dnl our libraries and install dirs use major.minor as a version
 GSTBT_MAJORMINOR=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION
 dnl we override it here for release candidates
-dnl GSTBT_MAJORMINOR=0.10
+dnl GSTBT_MAJORMINOR=0.5
 
 dnl that is needed to figure the directory name, where the plugin goes to
 GST_MAJORMINOR=0.10
@@ -229,7 +229,7 @@ AC_SUBST(PRESET_DOC_TYPES)
 
 
 dnl - Check for buzzmachineloader (bml)
-PKG_CHECK_MODULES(BML, libbml >= 0.4.0 liboil-0.3 >= 0.3.8,
+PKG_CHECK_MODULES(BML, libbml >= 0.5.0 liboil-0.3 >= 0.3.8,
     HAVE_BML=1, HAVE_BML=0)
 AC_SUBST(BML_CFLAGS)
 AC_SUBST(BML_LIBS)
