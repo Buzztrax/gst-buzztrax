@@ -66,16 +66,17 @@ static gboolean dir_scan(const gchar *dir_name) {
     "2NDPROCESS NUMBIRD 1.4.DLL",
     "ANEURYSM DISTGARB.DLL",
     "ARGUELLES FX2.DLL",
-    /* does not crash anymore, but produce NAN */
-    /*"ARGUELLES KFILTER.DLL",*/
     "ARGUELLES ROVOX.DLL",
     "AUTOMATON COMPRESSOR MKII.DLL",
-    /* crashes on CMachineInterface::SetNumTracks(1) */
-    /*"AUTOMATON PARAMETRIC EQ.DLL",*/
+    /*"AUTOMATON PARAMETRIC EQ.DLL",
+      - crashes on CMachineInterface::SetNumTracks(1)
+      */
     "AUTOMATON VCF.DLL",
     "BUZZINAMOVIE.DLL",
-    /* hangs after GetInfo(), should be fixed after installing msvcr70.dll and with new function implemented */
-    /*"CHEAPO SPREAD.DLL",*/
+    /*"CHEAPO SPREAD.DLL",
+      - hangs after GetInfo(), should be fixed after installing msvcr70.dll and
+        with new function implemented 
+      */
     "CHIMP REPLAY.DLL",
     "CYANPHASE AUXRETURN.DLL",
     "CYANPHASE DMO EFFECT ADAPTER.DLL",
@@ -106,8 +107,6 @@ static gboolean dir_scan(const gchar *dir_name) {
     "JESKOLA AUXSEND.DLL",
     "JESKOLA EQ-3 XP.DLL",
     "JESKOLA MULTIPLIER.DLL",
-    /* has issues with dsplib on some platforms, produces buffers full of NAN */
-    /*"JESKOLA NINJA DELAY.DLL",*/
     "JESKOLA REVERB 2.DLL",
     /*"JESKOLA REVERB.DLL",*/
     /*"JESKOLA STEREO REVERB.DLL",*/
@@ -139,6 +138,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     "ROUT VST PLUGIN LOADER.DLL",
     "SHAMAN CHORUS.DLL",
     "STATIC DUAFILT II.DLL",
+      // *** glibc detected *** /home/ensonic/projects/buzztard/bml/src/.libs/lt-bmltest_info: free(): invalid next size (normal): 0x0805cc18 ***
     "TRACK ORGANIZER.DLL",
     "VGRAPHITY.DLL",
     "WHITENOISE AUXRETURN.DLL",

@@ -1,5 +1,10 @@
 2008-12-04  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/plugin.c:
+	  Update blacklist.
+
+2008-12-04  Stefan Kost  <ensonic@users.sf.net>
+
 	patch by: Thomas Klausner <thomasklausner at users.sourceforge.net>
 
 	* src/audiodelay/audiodelay.c:
