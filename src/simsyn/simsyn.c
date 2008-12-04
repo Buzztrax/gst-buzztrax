@@ -213,7 +213,7 @@ static void gst_sim_syn_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_mi
     }
   }
   if(changed) {
-    GST_DEBUG("changing tempo to %d BPM  %d TPB  %d STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
+    GST_DEBUG("changing tempo to %ld BPM  %ld TPB  %ld STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
     gst_sim_syn_calculate_buffer_frames(self);
   }
 }

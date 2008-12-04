@@ -1,3 +1,11 @@
+2008-12-04  Stefan Kost  <ensonic@users.sf.net>
+
+	patch by: Thomas Klausner <thomasklausner at users.sourceforge.net>
+
+	* src/audiodelay/audiodelay.c:
+	* src/simsyn/simsyn.c:
+	  Fix format strings.
+
 2008-11-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
