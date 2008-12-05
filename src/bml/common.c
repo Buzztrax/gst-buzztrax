@@ -78,7 +78,7 @@ gchar** gstbml_preset_get_preset_names(GstBML *bml,GstBMLClass *klass) {
 
         if(!(fread(&count,sizeof(count),1,in))) goto eof_error;
 
-        GST_INFO("reading %ld presets for machine '%s' (version %ld, dllname '%s')",
+        GST_INFO("reading %u presets for machine '%s' (version %u, dllname '%s')",
           count,machine_name,version,klass->dll_name);
 
         // create data hash if its not there
@@ -99,7 +99,7 @@ gchar** gstbml_preset_get_preset_names(GstBML *bml,GstBMLClass *klass) {
           if(!(fread(&tracks,sizeof(tracks),1,in))) goto eof_error;
           if(!(fread(&params,sizeof(params),1,in))) goto eof_error;
           // read preset data
-          GST_INFO("  data size %ld",(4*(2+params)));
+          GST_INFO("  data size %u",(4*(2+params)));
           data=g_malloc(4*(2+params));
           data[0]=tracks;
           data[1]=params;
@@ -115,7 +115,7 @@ gchar** gstbml_preset_get_preset_names(GstBML *bml,GstBMLClass *klass) {
           }
           else comment=NULL;
 
-          GST_INFO("    %ld tracks, %d params, comment '%s'",tracks,params,comment);
+          GST_INFO("    %u tracks, %u params, comment '%s'",tracks,params,comment);
 
           klass->presets=g_list_insert_sorted(klass->presets,(gpointer)preset_name,(GCompareFunc)strcmp);
         }
@@ -333,13 +333,13 @@ gboolean gstbml_preset_save_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
 
   // create new preset
   params=numglobalparams+bml->num_voices*numtrackparams;
-  GST_INFO("  data size %ld",(4*(2+params)));
+  GST_INFO("  data size %u",(4*(2+params)));
   data=g_malloc(4*(2+params));
   data[0]=bml->num_voices;
   data[1]=params;
   ptr=&data[2];
 
-  GST_INFO("about to add new preset '%s' with %d tracks and %d total params",name,bml->num_voices,params);
+  GST_INFO("about to add new preset '%s' with %lu tracks and %u total params",name,bml->num_voices,params);
 
   // take copies of current gobject properties from self
   if((properties=g_object_class_list_properties(G_OBJECT_CLASS(GST_ELEMENT_GET_CLASS(self)),&number_of_properties))) {
@@ -406,7 +406,7 @@ gboolean gstbml_preset_rename_preset(GstBMLClass *klass, const gchar *old_name, 
     // readd under new name
     klass->presets=g_list_delete_link(klass->presets,node);
     klass->presets=g_list_insert_sorted(klass->presets,(gpointer)new_name,(GCompareFunc)strcmp);
-    GST_INFO("preset moved 's' -> '%s'",old_name,new_name);
+    GST_INFO("preset moved '%s' -> '%s'",old_name,new_name);
     return(gstbml_preset_save_presets_file(klass));
   }
   return(FALSE);
@@ -766,7 +766,7 @@ void gstbml_sync_values(GstBML *bml) {
   GList *node;
   //gboolean res;
 
-  GST_DEBUG_OBJECT(bml->self,"  sync_values(%p), voices=%d,%p",bml->self,bml->num_voices,bml->voices);
+  GST_DEBUG_OBJECT(bml->self,"  sync_values(%p), voices=%lu,%p",bml->self,bml->num_voices,bml->voices);
 
   /*res=*/gst_object_sync_values(G_OBJECT(bml->self),bml->running_time);
   //GST_WARNING("glob sync %d",res);

@@ -66,6 +66,12 @@ static gboolean dir_scan(const gchar *dir_name) {
     "2NDPROCESS NUMBIRD 1.4.DLL",
     "ANEURYSM DISTGARB.DLL",
     "ARGUELLES FX2.DLL",
+    /*"ARGUELLES PRO3.DLL",
+     * is disguised as an effect (stereo)
+     * I patched @2d28 : 02 00 00 00 0c 00 00 00 -> 01 00 ...
+     * segfault still :/
+     * bml ../gstbmlsrc.c:512:gst_bml_src_create_stereo:   calling work_m2s(5292)
+     */
     "ARGUELLES ROVOX.DLL",
     "AUTOMATON COMPRESSOR MKII.DLL",
     /*"AUTOMATON PARAMETRIC EQ.DLL",

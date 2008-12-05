@@ -162,7 +162,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       if(bml(gstbml_is_polyphonic(bm))) {
         // create the voice type now
         voice_type = bml(v_get_type(voice_type_name));
-        GST_INFO("  voice type \"%s\" is 0x%p!", voice_type_name,voice_type);
+        GST_INFO("  voice type \"%s\" is 0x%lu", voice_type_name,(gulong)voice_type);
         g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bm);
       }
       g_free(voice_type_name);

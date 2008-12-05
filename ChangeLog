@@ -1,3 +1,14 @@
+2008-12-05  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	* src/bml/gstbml.c:
+	* src/bml/utils.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	  Fix format string warnings.
+
+	* src/bml/plugin.c:
+	  Describe Arguelles Pro3 issue.
+
 2008-12-04  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:

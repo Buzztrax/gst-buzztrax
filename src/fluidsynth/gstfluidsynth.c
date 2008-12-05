@@ -252,7 +252,7 @@ static void gst_fluidsynth_tempo_change_tempo(GstBtTempo *tempo, glong beats_per
     }
   }
   if(changed) {
-    GST_DEBUG("changing tempo to %d BPM  %d TPB  %d STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
+    GST_DEBUG("changing tempo to %lu BPM  %lu TPB  %lu STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
     gst_fluidsynth_calculate_buffer_frames(self);
   }
 }

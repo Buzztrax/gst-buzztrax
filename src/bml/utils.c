@@ -120,7 +120,7 @@ void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per
     }
   }
   if(changed) {
-    GST_INFO("changing tempo to %d BPM  %d TPB  %d STPT",bml->beats_per_minute,bml->ticks_per_beat,bml->subticks_per_tick);
+    GST_INFO("changing tempo to %lu BPM  %lu TPB  %lu STPT",bml->beats_per_minute,bml->ticks_per_beat,bml->subticks_per_tick);
     gstbml_calculate_buffer_frames(bml);
     // update timevalues in buzzmachine
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
@@ -139,7 +139,7 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   gpointer bm;
   gchar *dll_name;
 
-  GST_INFO("initializing base: type=0x%p, voice_type=0x%p",type,voice_type);
+  GST_INFO("initializing base: type=0x%lu, voice_type=0x%lu",(gulong)type,(gulong)voice_type);
 
   bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(type));
   if(!bm) bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(0));
@@ -474,7 +474,7 @@ static GstBMLV *gst_bml_add_voice(GstBML *bml,GType voice_type) {
   GstBMLV *bmlv;
   gchar *name;
 
-  GST_DEBUG("adding a new voice to %p, current nr of voices is %d",bml->self,bml->num_voices);
+  GST_DEBUG("adding a new voice to %p, current nr of voices is %lu",bml->self,bml->num_voices);
 
   bmlv=g_object_new(voice_type,NULL);
   //bmlv->parent=bml;
@@ -505,7 +505,7 @@ static void gst_bml_del_voice(GstBML *bml,GType voice_type) {
   GList *node;
   GstObject *obj;
 
-  GST_DEBUG("removing last voice to %p, current nr of voices is %d",bml->self,bml->num_voices);
+  GST_DEBUG("removing last voice to %p, current nr of voices is %lu",bml->self,bml->num_voices);
 
   node=g_list_last(bml->voices);
   obj=node->data;
@@ -579,7 +579,7 @@ void bml(gstbml_init(GstBML *bml,GstBMLClass *klass,GstElement *element)) {
   bml->subticks_per_tick=1;
   gstbml_calculate_buffer_frames(bml);
   bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
-  GST_DEBUG("activating %d voice(s)",bml->num_voices);
+  GST_DEBUG("activating %lu voice(s)",bml->num_voices);
   //bml(set_num_tracks(bml,bml->num_voices));
 }
 
@@ -656,7 +656,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
           gulong i;
           gulong old_num_voices=bml->num_voices;
           gulong new_num_voices = g_value_get_ulong(value);
-          GST_DEBUG ("change number of voices from %d to %d", old_num_voices,new_num_voices);
+          GST_DEBUG ("change number of voices from %lu to %lu", old_num_voices,new_num_voices);
           // add or free voices
           if(old_num_voices<new_num_voices) {
             for(i=old_num_voices;i<new_num_voices;i++) {
@@ -745,17 +745,17 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
     // handle properties <ARG_LAST first
     case ARG_BPM:
       g_value_set_ulong(value, bml->beats_per_minute);
-      GST_DEBUG("requested BPM = %d", bml->beats_per_minute);
+      GST_DEBUG("requested BPM = %lu", bml->beats_per_minute);
       handled=TRUE;
       break;
     case ARG_TPB:
       g_value_set_ulong(value, bml->ticks_per_beat);
-      GST_DEBUG("requested TPB = %d", bml->ticks_per_beat);
+      GST_DEBUG("requested TPB = %lu", bml->ticks_per_beat);
       handled=TRUE;
       break;
     case ARG_STPT:
       g_value_set_ulong(value, bml->subticks_per_tick);
-      GST_DEBUG("requested STPB = %d", bml->subticks_per_tick);
+      GST_DEBUG("requested STPB = %lu", bml->subticks_per_tick);
       handled=TRUE;
       break;
     /*case ARG_HOST_CALLBACKS:
@@ -766,7 +766,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
       if(bml(gstbml_is_polyphonic(bm))) {
         if(prop_id==(props_skip+1)) {
           g_value_set_ulong(value, bml->num_voices);
-          GST_DEBUG("requested number of voices = %d", bml->num_voices);
+          GST_DEBUG("requested number of voices = %lu", bml->num_voices);
           handled=TRUE;
         }
         props_skip++;
