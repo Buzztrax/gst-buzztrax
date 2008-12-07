@@ -410,6 +410,8 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
   paramspec = g_param_spec_string ("note", _("Musical note"),
                                    _("Musical note (e.g. 'c-3', 'd#4')"),
                                    NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
+  g_param_spec_set_qdata (paramspec, gstbt_property_meta_quark,
+                          GINT_TO_POINTER (TRUE));
   g_param_spec_set_qdata (paramspec, gstbt_property_meta_quark_flags,
                           GINT_TO_POINTER (GSTBT_PROPERTY_META_NONE));
   g_param_spec_set_qdata (paramspec, gstbt_property_meta_quark_no_val, NULL);
