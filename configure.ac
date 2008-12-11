@@ -230,11 +230,11 @@ AC_SUBST(PRESET_DOC_TYPES)
 
 dnl - Check for buzzmachineloader (bml)
 PKG_CHECK_MODULES(BML, libbml >= 0.5.0 liboil-0.3 >= 0.3.8,
-    HAVE_BML=1, HAVE_BML=0)
+    have_bml=yes, have_bml=no)
 AC_SUBST(BML_CFLAGS)
 AC_SUBST(BML_LIBS)
-AM_CONDITIONAL(BML_SUPPORT, test "x$HAVE_BML" = "x1")
-if test "x$HAVE_BML" = "x1"
+AM_CONDITIONAL(BML_SUPPORT, test "x$have_bml" = "xyes")
+if test "x$have_bml" = "xyes"
 then
   BML_DOC_TYPES=
 else
@@ -247,24 +247,24 @@ ac_ldflags_save="$LDFLAGS"
 CFLAGS="$CFLAGS $BML_CFLAGS"
 LDFLAGS="$LDFLAGS $BML_LIBS"
 AC_CHECK_LIB( bml, bmlw_init, [
-    HAVE_BMLW=1
+    have_bmlw=yes
     AC_DEFINE(HAVE_BMLW, [1], [Define to 1 if bml has been build with wrapper]) \
   ],[
-    HAVE_BMLW=0
+    have_bmlw=no
   ]
 )
-AM_CONDITIONAL(BUILD_BMLW, test "x$HAVE_BMLW" = "x1")
+AM_CONDITIONAL(BUILD_BMLW, test "x$have_bmlw" = "xyes")
 CFLAGS="$ac_cflags_save"
 LDFLAGS="$ac_ldflags_save"
 
 
 dnl - Check for FluidSynth
 PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
-    HAVE_FLUIDSYNTH=1, HAVE_FLUIDSYNTH=0)
+    have_fluidsynth=yes, have_fluidsynth=no)
 AC_SUBST(FLUIDSYNTH_CFLAGS)
 AC_SUBST(FLUIDSYNTH_LIBS)
-AM_CONDITIONAL(FLUIDSYNTH_SUPPORT, test "$HAVE_FLUIDSYNTH" = "1")
-if test "x$HAVE_FLUIDSYNTH" = "x1"
+AM_CONDITIONAL(FLUIDSYNTH_SUPPORT, test "x$have_fluidsynth" = "xyes")
+if test "x$have_fluidsynth" = "xyes"
 then
   FLUIDSYNTH_DOC_TYPES=
 else
@@ -338,6 +338,8 @@ Configuration
 	Compiler                   : ${CC}
 
 	Documentation (API)        : ${enable_gtk_doc}
+	Buzzmachine support        : ${have_bml}
+	FluidSynth support         : ${have_fluidsynth}
 
 	Debug                      : ${enable_debug}
 	Coverage profiling         : ${enable_coverage}

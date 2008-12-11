@@ -769,10 +769,10 @@ void gstbml_sync_values(GstBML *bml) {
   GST_DEBUG_OBJECT(bml->self,"  sync_values(%p), voices=%lu,%p",bml->self,bml->num_voices,bml->voices);
 
   /*res=*/gst_object_sync_values(G_OBJECT(bml->self),bml->running_time);
-  //GST_WARNING("glob sync %d",res);
+  //if(G_UNLIKELY(!res)) { GST_WARNING("global sync failed"); }
   for(node=bml->voices;node;node=g_list_next(node)) {
     /*res=*/gst_object_sync_values(G_OBJECT(node->data),bml->running_time);
-    //GST_WARNING("voice sync %d",res);
+    //if(G_UNLIKELY(!res)) { GST_WARNING("voice sync failed"); }
   }
 }
 

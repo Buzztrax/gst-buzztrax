@@ -1,3 +1,11 @@
+2008-12-11  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  More configure reporting.
+
+	* src/bml/common.c:
+	  Logging.
+
 2008-12-07  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c:
