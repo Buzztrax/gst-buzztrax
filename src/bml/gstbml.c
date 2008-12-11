@@ -113,6 +113,13 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       return(TRUE);
     }
 
+    /* @todo: this is for wrapped mode, use
+     * #ifdef BML_WRAPPED
+     *   // code below
+     * #else
+     *   // use $prefix/share/???
+     * #endif
+     */
     // probe additional files (need full path here)
     ext=g_strrstr(pathname,".");
     *ext='\0';  // temporarily terminate

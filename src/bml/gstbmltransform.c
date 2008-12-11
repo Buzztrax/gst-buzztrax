@@ -488,7 +488,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
     GST_BUFFER_FLAG_UNSET(outbuf,GST_BUFFER_FLAG_GAP);
     //for(i=0;i<samples_per_buffer;i++) datao[i]/=32768.0;
     gfloat fc=1.0/32768.0;
-    oil_scalarmultiply_f32_ns (datao, datao, &fc, samples_per_buffer);
+    oil_scalarmultiply_f32_ns (datao, datao, &fc, samples_per_buffer*2);
   }
 
   return(GST_FLOW_OK);

@@ -1,5 +1,16 @@
 2008-12-11  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/gstbml.c:
+	  Plan datafile handling improvements.
+
+	* src/bml/gstbmltransform.c:
+	  Fix level of mono_to_stereo effects.
+
+	* src/bml/plugin.c:
+	  Make conditional.
+
+2008-12-11  Stefan Kost  <ensonic@users.sf.net>
+
 	* configure.ac:
 	  More configure reporting.
 

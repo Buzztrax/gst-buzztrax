@@ -40,7 +40,9 @@ GType voice_type;
 
 GQuark gst_bml_property_meta_quark_type;
 
+#if HAVE_BMLW
 extern gboolean bmlw_describe_plugin(gchar *pathname, gpointer bm);
+#endif
 extern gboolean bmln_describe_plugin(gchar *pathname, gpointer bm);
 
 typedef int (*bsearchcomparefunc)(const void *,const void *);
