@@ -50,7 +50,7 @@
 #include <liboil/liboil.h>
 
 //-- libbml
-#include <bml.h>
+#include <libbml/bml.h>
 
 #ifdef BML_WRAPPED
 #define bml(a) bmlw_ ## a

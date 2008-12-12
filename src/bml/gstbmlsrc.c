@@ -215,11 +215,13 @@ static gboolean gst_bml_src_set_caps(GstBaseSrc *base, GstCaps *caps) {
   GstBML *bml=GST_BML(bml_src);
   GstStructure *structure;
   gboolean ret;
+  gint samplerate=bml->samplerate;
 
   structure = gst_caps_get_structure (caps, 0);
-  if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate))) {
+  if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate)) && (samplerate!=bml->samplerate)) {
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
-    bml(init(bml->bm,0,NULL));
+    // @todo: irks, this resets all parameter to their default
+    //bml(init(bml->bm,0,NULL));
   }
   
   return ret;

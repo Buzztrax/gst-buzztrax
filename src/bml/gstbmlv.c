@@ -84,37 +84,32 @@ static void gst_bmlv_property_meta_interface_init(gpointer g_iface, gpointer ifa
 //-- gstbmlvoice class implementation
 
 static void gst_bmlv_set_property(GObject *object, guint prop_id, const GValue * value, GParamSpec * pspec) {
-  gpointer bm;
   GstBMLV *bmlv=GST_BMLV(object);
+  gpointer bm=bmlv->bm;
   gint *addr;
   gint type;
-
-  bm=bmlv->bm;
 
   // property ids have an offset of 1
   prop_id--;
 
   addr=(gint *)bml(get_track_parameter_location(bm,bmlv->voice,prop_id));
   type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
-
   // @todo cache this info
   //bml(get_track_parameter_info(bm,prop_id,BM_PARA_TYPE,(void *)&type));
   gstbml_set_param(type,addr,value);
 
-  {
+  /*{ DEBUG
     gchar *valstr=g_strdup_value_contents(value);
     GST_DEBUG("set track param %d:%d to %s", prop_id, bmlv->voice, valstr);
     g_free(valstr);
-  }
+  } DEBUG */
 }
 
 static void gst_bmlv_get_property(GObject * object, guint prop_id, GValue * value, GParamSpec * pspec) {
-  gpointer bm;
   GstBMLV *bmlv=GST_BMLV(object);
+  gpointer bm=bmlv->bm;
   gint *addr;
   gint type;
-
-  bm=bmlv->bm;
 
   // property ids have an offset of 1
   prop_id--;
@@ -124,7 +119,11 @@ static void gst_bmlv_get_property(GObject * object, guint prop_id, GValue * valu
   // @todo cache this info
   //bml(get_track_parameter_info(bm,prop_id,BM_PARA_TYPE,(void *)&type));
   gstbml_get_param(type,addr,value);
-  GST_DEBUG_OBJECT (object, "got track param %d.%d as %d", prop_id, bmlv->voice, *addr);
+  /*{ DEBUG
+    gchar *valstr=g_strdup_value_contents(value);
+    GST_DEBUG("got track param %d:%d as %s", prop_id, bmlv->voice, valstr);
+    g_free(valstr);
+  } DEBUG */
 }
 
 static void gst_bmlv_dispose(GObject *object) {

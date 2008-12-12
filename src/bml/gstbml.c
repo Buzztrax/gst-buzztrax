@@ -117,8 +117,9 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
      * #ifdef BML_WRAPPED
      *   // code below
      * #else
-     *   // use $prefix/share/???
+     *   // use DATADIR/???
      * #endif
+     * for presets we need a fallback tog_get_user_config_dir()/bml in any case
      */
     // probe additional files (need full path here)
     ext=g_strrstr(pathname,".");

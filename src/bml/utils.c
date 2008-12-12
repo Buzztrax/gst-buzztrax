@@ -693,7 +693,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
     gpointer addr;
     gint type;
     // DEBUG
-    gchar *valstr;
+    //gchar *valstr;
     // DEBUG
 
     g_assert(prop_id>0);
@@ -704,30 +704,32 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
      // is it an attribute ?
     if(prop_id<bml_class->numattributes) {
       bml(set_attribute_value(bm,prop_id,g_value_get_int(value)));
-      GST_DEBUG("set attribute %d to %d", prop_id, g_value_get_int(value));
+      //GST_DEBUG("set attribute %d to %d", prop_id, g_value_get_int(value));
     }
     else {
       prop_id-=bml_class->numattributes;
       // is it a global param
       if(prop_id<bml_class->numglobalparams) {
+        // @todo cache this info
         addr=bml(get_global_parameter_location(bm,prop_id));
-        //bml(get_global_parameter_info(bm,prop_id,BM_PARA_TYPE,(void *)&type));
         gstbml_set_param(type,addr,value);
-        valstr=g_strdup_value_contents(value);
-        GST_DEBUG("set global param %d to %s (%p)", prop_id, valstr,addr);
-        g_free(valstr);
+        // DEBUG
+        //valstr=g_strdup_value_contents(value);
+        //GST_DEBUG("set global param %d to %s (%p)", prop_id, valstr,addr);
+        //g_free(valstr);
+        // DEBUG
       }
       else {
         prop_id-=bml_class->numglobalparams;
         // is it a voice00 param
         if(prop_id<bml_class->numtrackparams) {
-          addr=bml(get_track_parameter_location(bm,0,prop_id));
           // @todo cache this info
-          //bml(get_track_parameter_info(bm,prop_id,BM_PARA_TYPE,(void *)&type));
+          addr=bml(get_track_parameter_location(bm,0,prop_id));
           gstbml_set_param(type,addr,value);
-          valstr=g_strdup_value_contents(value);
-          GST_DEBUG("set track param %d:0 to %s (%p)", prop_id, valstr,addr);
-          g_free(valstr);
+          // DEBUG
+          //valstr=g_strdup_value_contents(value);
+          //GST_DEBUG("set track param %d:0 to %s (%p)", prop_id, valstr,addr);
+          //g_free(valstr);
         }
       }
     }
@@ -787,7 +789,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
     gpointer addr;
     gint type;
     // DEBUG
-    gchar *valstr;
+    //gchar *valstr;
     // DEBUG
 
     g_assert(prop_id>0);
@@ -798,19 +800,34 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
      // is it an attribute ?
     if(prop_id<bml_class->numattributes) {
       g_value_set_int(value,bml(get_attribute_value(bm,prop_id)));
-      GST_DEBUG("got attribute as %d", g_value_get_int(value));
+      //GST_DEBUG("got attribute as %d", g_value_get_int(value));
     }
     else {
       prop_id-=bml_class->numattributes;
       // is it a global param
       if(prop_id<bml_class->numglobalparams) {
-        addr=bml(get_global_parameter_location(bm,prop_id));
         // @todo cache this info
-        //bml(get_global_parameter_info(bm,prop_id,BM_PARA_TYPE,(void *)&type));
+        addr=bml(get_global_parameter_location(bm,prop_id));
         gstbml_get_param(type,addr,value);
-        valstr=g_strdup_value_contents(value);
-        GST_DEBUG ("got track param as %s (%p)", valstr,addr);
-          g_free(valstr);
+        // DEBUG
+        //valstr=g_strdup_value_contents(value);
+        //GST_DEBUG ("got global param as %s (%p)", valstr,addr);
+        //g_free(valstr);
+        // DEBUG
+      }
+      else {
+        prop_id-=bml_class->numglobalparams;
+        // is it a voice00 param
+        if(prop_id<bml_class->numtrackparams) {
+          // @todo cache this info
+          addr=bml(get_track_parameter_location(bm,0,prop_id));
+          gstbml_get_param(type,addr,value);
+          // DEBUG
+          //valstr=g_strdup_value_contents(value);
+          //GST_DEBUG ("got track param as %s (%p)", valstr,addr);
+          //g_free(valstr);
+          // DEBUG
+        }
       }
     }
   }

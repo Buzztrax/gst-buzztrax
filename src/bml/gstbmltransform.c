@@ -229,24 +229,16 @@ static gboolean gst_bml_transform_set_caps(GstBaseTransform * base, GstCaps * in
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
   GstBML *bml=GST_BML(bml_transform);
   GstStructure *structure;
-  const gchar *mimetype;
   gboolean ret;
+  gint samplerate=bml->samplerate;
 
-  GST_INFO("set_caps: in %"GST_PTR_FORMAT"  out %"GST_PTR_FORMAT, incaps, outcaps);
-
+  GST_DEBUG("set_caps: in %"GST_PTR_FORMAT"  out %"GST_PTR_FORMAT, incaps, outcaps);
   structure=gst_caps_get_structure(incaps,0);
   
-  // given our caps, this should actually never happen
-  mimetype=gst_structure_get_name(structure);
-  if(strcmp(mimetype,"audio/x-raw-float")) {
-    GST_ELEMENT_ERROR (bml_transform, CORE, NEGOTIATION,
-        ("Unsupported incoming caps: %" GST_PTR_FORMAT, incaps), (NULL));
-    return FALSE;
-  }
-  
-  if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate))) {
+  if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate)) && (samplerate!=bml->samplerate)) {
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
-    bml(init(bml->bm,0,NULL));
+    // @todo: irks, this resets all parameter to their default
+    //bml(init(bml->bm,0,NULL));
   }
 
   return ret;
@@ -371,59 +363,6 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
   return(GST_FLOW_OK);
 }
 
-static gboolean gst_bml_transform_get_unit_size (GstBaseTransform *base, GstCaps *caps, guint *size) {
-  gint width, channels;
-  GstStructure *structure;
-  gboolean ret;
-
-  g_assert (size);
-  GST_INFO("get_unit_size: for %"GST_PTR_FORMAT, caps);
-
-  /* this works for both float and int */
-  structure = gst_caps_get_structure (caps, 0);
-  ret = gst_structure_get_int (structure, "width", &width);
-  ret &= gst_structure_get_int (structure, "channels", &channels);
-
-  *size = width * channels / 8;
-
-  return ret;
-}
-
-static GstCaps *gst_bml_transform_transform_caps(GstBaseTransform * base, GstPadDirection direction, GstCaps * caps) {
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(base);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-  GstCaps *res;
-  GstStructure *structure;
-
-  /* transform caps gives one single caps so we can just replace
-   * the channel property with our range. */
-  res = gst_caps_copy (caps);
-  structure = gst_caps_get_structure (res, 0);
-  /* if we should produce this output, what can we accept */
-  if (direction == GST_PAD_SRC) {
-    GST_INFO_OBJECT (base, "allow %d input channel", bml_class->input_channels);
-    gst_structure_set (structure, 
-      "channels", G_TYPE_INT, bml_class->input_channels,
-      NULL);
-  } else {
-    GST_INFO_OBJECT (base, "allow %d output channels", bml_class->output_channels);
-    gst_structure_set (structure, 
-      "channels", G_TYPE_INT, bml_class->output_channels,
-      NULL);
-  }
-
-  return res;
-}
-
-static gboolean gst_bml_transform_stop(GstBaseTransform * base) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
-  GstBML *bml=GST_BML(bml_transform);
-  gpointer bm=bml->bm;
-  
-  bml(stop(bm));
-  return TRUE;
-}
-
 static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform *base, GstBuffer *inbuf, GstBuffer *outbuf) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
   GstBML *bml=GST_BML(bml_transform);
@@ -492,6 +431,107 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   }
 
   return(GST_FLOW_OK);
+}
+
+static gboolean gst_bml_transform_get_unit_size (GstBaseTransform *base, GstCaps *caps, guint *size) {
+  gint width, channels;
+  GstStructure *structure;
+  gboolean ret;
+
+  g_assert (size);
+  GST_INFO("get_unit_size: for %"GST_PTR_FORMAT, caps);
+
+  /* this works for both float and int */
+  structure = gst_caps_get_structure (caps, 0);
+  ret = gst_structure_get_int (structure, "width", &width);
+  ret &= gst_structure_get_int (structure, "channels", &channels);
+
+  *size = width * channels / 8;
+
+  return ret;
+}
+
+static GstCaps *gst_bml_transform_transform_caps(GstBaseTransform * base, GstPadDirection direction, GstCaps * caps) {
+  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(base);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+  GstCaps *res;
+  GstStructure *structure;
+
+  /* transform caps gives one single caps so we can just replace
+   * the channel property with our range. */
+  res = gst_caps_copy (caps);
+  structure = gst_caps_get_structure (res, 0);
+  /* if we should produce this output, what can we accept */
+  if (direction == GST_PAD_SRC) {
+    GST_INFO_OBJECT (base, "allow %d input channel", bml_class->input_channels);
+    gst_structure_set (structure, 
+      "channels", G_TYPE_INT, bml_class->input_channels,
+      NULL);
+  } else {
+    GST_INFO_OBJECT (base, "allow %d output channels", bml_class->output_channels);
+    gst_structure_set (structure, 
+      "channels", G_TYPE_INT, bml_class->output_channels,
+      NULL);
+  }
+
+  return res;
+}
+
+#if 0
+static gboolean gst_bml_transform_start(GstBaseTransform * base) {
+  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
+  GstBML *bml=GST_BML(bml_transform);
+  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+  gpointer bm=bml->bm;
+  gint i;
+  gpointer addr;
+  gint type;
+  gchar *pname;
+
+  GST_WARNING_OBJECT(base,"dump params");
+  // dump global parameters
+  for(i=0;i<bml_class->numglobalparams;i++) {
+    bml(get_track_parameter_info(bm,i,BM_PARA_TYPE,(void *)&type));
+    bml(get_global_parameter_info(bm,i,BM_PARA_NAME,(void *)&pname));
+    addr=bml(get_global_parameter_location(bm,i));
+    switch(type) {
+      case PT_NOTE:
+        GST_WARNING("global note   param %2d:%p:%s = %s",
+          i,addr,pname, gstbt_tone_conversion_note_number_2_string ((guint)(*(guint8 *)addr)));
+        break;
+      case PT_SWITCH:
+        GST_WARNING("global switch param %2d:%p:%s = %u",
+          i,addr,pname, (guint)(*(guint8 *)addr));
+        break;
+      case PT_BYTE:
+        GST_WARNING("global byte   param %2d:%p:%s = %u",
+          i,addr,pname, (guint)(*(guint8 *)addr));
+        break;
+      case PT_WORD:
+        GST_WARNING("global word   param %2d:%p:%s = %u",
+          i,addr,pname, (guint)(*(guint16 *)addr));
+        break;
+      case PT_ENUM:
+        GST_WARNING("global enum   param %2d:%p:%s = %u",
+          i,addr,pname, (guint)(*(guint8 *)addr));
+        break;
+      default:
+        GST_WARNING("unhandled type : %d",type);
+    }
+  }
+  
+  return TRUE;
+}
+#endif
+
+static gboolean gst_bml_transform_stop(GstBaseTransform * base) {
+  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
+  GstBML *bml=GST_BML(bml_transform);
+  gpointer bm=bml->bm;
+  
+  bml(stop(bm));
+  return TRUE;
 }
 
 static void gst_bml_transform_set_property(GObject * object, guint prop_id, const GValue * value, GParamSpec * pspec) {
@@ -587,6 +627,8 @@ static void gst_bml_transform_class_init(GstBMLTransformClass *klass) {
   gobject_class->dispose               = GST_DEBUG_FUNCPTR(gst_bml_transform_dispose);
   gobject_class->finalize              = GST_DEBUG_FUNCPTR(gst_bml_transform_finalize);
   gstbasetransform_class->set_caps     = GST_DEBUG_FUNCPTR(gst_bml_transform_set_caps);
+  // only used here for debugging
+  //gstbasetransform_class->start        = GST_DEBUG_FUNCPTR(gst_bml_transform_start);
   gstbasetransform_class->stop         = GST_DEBUG_FUNCPTR(gst_bml_transform_stop);
   if(bml_class->output_channels==1) {
     gstbasetransform_class->transform_ip = GST_DEBUG_FUNCPTR(gst_bml_transform_transform_ip_mono);

@@ -1,3 +1,15 @@
+2008-12-13  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/gstbmlv.c:
+	* src/bml/plugin.c:
+	* src/bml/plugin.h:
+	* src/bml/utils.c:
+	  Clean machine property logging. Don't call init again after changing the
+	  caps - this resets all parameter to their defaults.
+
 2008-12-11  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.c:

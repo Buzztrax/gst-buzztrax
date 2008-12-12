@@ -183,10 +183,10 @@ static gboolean dir_scan(const gchar *dir_name) {
         /* test against blacklist */
         if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
           file_name=g_build_filename (dir_name, entry_name, NULL);
-          GST_INFO("trying plugin '%s','%s'",entry_name,file_name);
+          GST_WARNING("trying plugin '%s','%s'",entry_name,file_name);
           ok=FALSE;
           if(!strcasecmp(ext,".dll")) {
-  #if HAVE_BMLW
+#if HAVE_BMLW
             if((bm=bmlw_new(file_name))) {
               bmlw_init(bm,0,NULL);
               if(bmlw_describe_plugin(file_name,bm)) {
@@ -198,9 +198,9 @@ static gboolean dir_scan(const gchar *dir_name) {
                 bmlw_free(bm);
               }
             }
-  #else
+#else
             GST_WARNING("no dll emulation on non x86 platforms");
-  #endif
+#endif
           }
           else {
             if((bm=bmln_new(file_name))) {
