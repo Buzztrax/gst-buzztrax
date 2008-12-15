@@ -418,7 +418,7 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
   g_object_class_install_property (gobject_class, PROP_NOTE, paramspec);
 
   g_object_class_install_property (gobject_class, PROP_NOTE_LENGTH,
-                        g_param_spec_long ("note-length", _("Note length"),
+                        g_param_spec_int ("note-length", _("Note length"),
                                           _("Length of a note in ticks (buffers)"),
                                           1, 100, 4,
                                           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
