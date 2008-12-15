@@ -1,3 +1,11 @@
+2008-12-15  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c:
+	  Only scale if outgoing buffer is non-empty.
+
+	* src/bml/gstbmltransform.c:
+	  memset 2*num_samples for stereo.
+
 2008-12-13  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.c:

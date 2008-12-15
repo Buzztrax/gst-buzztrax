@@ -272,7 +272,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
     mode=2; /* WM_WRITE */
   }
   else {
-    // buzz generates relative loud output
+    // buzz generates loud output
     //for(i=0;i<samples_per_buffer;i++) data[i]*=32768.0f;
     gfloat fc=32768.0;
     oil_scalarmultiply_f32_ns (data, data, &fc, samples_per_buffer);
@@ -378,8 +378,8 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   samples_per_buffer=GST_BUFFER_SIZE(inbuf)/sizeof(BMLData);
   
   // some buzzmachines expect a cleared buffer
-  //for(i=0;i<samples_per_buffer;i++) datao[i]=0.0f;
-  memset(datao,0,samples_per_buffer*sizeof(BMLData));
+  //for(i=0;i<samples_per_buffer*2;i++) datao[i]=0.0f;
+  memset(datao,0,samples_per_buffer*2*sizeof(BMLData));
   
   GST_DEBUG("input : %p,%d  output: %p,%d",
     datai,GST_BUFFER_SIZE(inbuf),
