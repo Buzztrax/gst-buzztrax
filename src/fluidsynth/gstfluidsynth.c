@@ -602,7 +602,7 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       }
       break;
     case PROP_NOTE_LENGTH:
-      gstsynth->note_length = g_value_get_long (value);
+      gstsynth->note_length = g_value_get_int (value);
       break;
     case PROP_NOTE_VELOCITY:
       gstsynth->velocity = g_value_get_int (value);
@@ -758,7 +758,7 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
       g_value_set_string (value, gstsynth->note);
       break;
     case PROP_NOTE_LENGTH:
-      g_value_set_long (value, gstsynth->note_length);
+      g_value_set_int (value, gstsynth->note_length);
       break;
     case PROP_NOTE_VELOCITY:
       g_value_set_int (value, gstsynth->velocity);

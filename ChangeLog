@@ -1,6 +1,11 @@
 2008-12-15  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c:
+	  Fix previous commit, that changed it in only half the places.
+
+2008-12-15  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c:
 	  Change Note-length to int, which really is enought for 1..100 :).
 
 2008-12-15  Stefan Kost  <ensonic@users.sf.net>
