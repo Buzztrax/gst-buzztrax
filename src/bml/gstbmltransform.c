@@ -391,10 +391,14 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   gstbml_sync_values(bml);
   bml(tick(bm));
 
-  /* don't process data in passthrough-mode
-  if (gst_base_transform_is_passthrough (base))
-    return GST_FLOW_OK;
-  */
+  /* don't process data in passthrough-mode */
+  if (gst_base_transform_is_passthrough (base)) {
+    // we would actually need to convert mono to stereo here
+    // but this is not even called
+    GST_WARNING("m2s in passthrough mode");
+    //return GST_FLOW_OK;
+  }
+  /**/
 
   /* if buffer has only silence process with different mode */
   if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_GAP)) {

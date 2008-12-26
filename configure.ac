@@ -11,7 +11,8 @@ dnl 3: when the interface has changed (removing functions) : MAJOR++, MINOR=0, M
 dnl
 
 dnl Initialise the autoconf/automake tool
-AC_INIT([gst-buzztard], [0.5.0], [buzztard-devel@lists.sourceforge.net])
+AC_PREREQ(2.61)
+AC_INIT([gst-buzztard],[0.5.0],[buzztard-devel@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([ChangeLog])
 AC_CONFIG_HEADERS(config.h)
 
@@ -69,14 +70,13 @@ AC_PROG_LN_S
 AC_PROG_SED
 AC_ISC_POSIX
 AC_PROG_LIBTOOL
-AM_PROG_CC_STDC
 PKG_PROG_PKG_CONFIG
 
 dnl enable runtime debugging code
 AC_MSG_CHECKING(whether to enable runtime debugging code)
 AC_ARG_ENABLE(
   debug,
-  AC_HELP_STRING([--enable-debug],[enable runtime debugging code (default=no)]),
+  AS_HELP_STRING([--enable-debug],[enable runtime debugging code (default=no)]),
   ,
   [enable_debug="no"])
 AC_MSG_RESULT($enable_debug)
@@ -94,7 +94,7 @@ fi
 dnl compile with disable-deprecated switches
 AC_MSG_CHECKING([whether to disable deprecated glib/gtk+/gst/etc. features])
 AC_ARG_ENABLE(deprecated,
-	AC_HELP_STRING([--disable-deprecated],[disable deprecated glib/gtk+/gst/etc. features]),
+	AS_HELP_STRING([--disable-deprecated],[disable deprecated glib/gtk+/gst/etc. features]),
 	set_enable_deprecated="$enableval",[
 		if test -f $srcdir/autogen.sh; then
 			is_cvs_version=true
@@ -118,7 +118,7 @@ dnl enable coverage analysis
 AC_MSG_CHECKING(whether to enable coverage analysis)
 AC_ARG_ENABLE(
   coverage,
-  AC_HELP_STRING([--enable-coverage],[enable coverage analysis (default=no)]),
+  AS_HELP_STRING([--enable-coverage],[enable coverage analysis (default=no)]),
   ,
   [enable_coverage="no"])
 AC_MSG_RESULT($enable_coverage)
@@ -150,8 +150,7 @@ AM_CONDITIONAL(USE_LCOV, test ! x$lcov_path = xyes)
 dnl valgrind integration for tests
 AC_MSG_CHECKING(where Valgrind is installed on your system)
 AC_ARG_WITH([valgrind],
-        AC_HELP_STRING([--with-valgrind],
-        [where Valgrind is installed on your system (default is no)]),
+        AS_HELP_STRING([--with-valgrind],[where Valgrind is installed on your system (default is no)]),
         [ac_cv_use_valgrind=$withval], [ac_cv_use_valgrind=no])dnl
 AC_MSG_RESULT($ac_cv_use_valgrind)
 VALGRIND=$ac_cv_use_valgrind
