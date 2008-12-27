@@ -13,6 +13,8 @@ dnl
 dnl Initialise the autoconf/automake tool
 AC_PREREQ(2.61)
 AC_INIT([gst-buzztard],[0.5.0],[buzztard-devel@lists.sourceforge.net])
+AM_INIT_AUTOMAKE([-Wall -Werror check-news std-options])
+
 AC_CONFIG_SRCDIR([ChangeLog])
 AC_CONFIG_HEADERS(config.h)
 
@@ -44,9 +46,6 @@ AC_SUBST(GSTBT_MAJORMINOR)
 
 VERSION=${GSTBT_VERSION}
 
-dnl Initialise the automake tool
-AM_INIT_AUTOMAKE([check-news])
-
 dnl m4 - everyone who develops should have aclocal installed
 AC_PATH_PROG(PROG_ACLOCAL, aclocal, no)
 AC_MSG_CHECKING(where to install .m4 files to)
@@ -70,6 +69,7 @@ AC_PROG_LN_S
 AC_PROG_SED
 AC_ISC_POSIX
 AC_PROG_LIBTOOL
+AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
 
 dnl enable runtime debugging code
