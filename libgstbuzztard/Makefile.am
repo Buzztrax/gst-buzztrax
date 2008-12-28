@@ -18,7 +18,7 @@ libgstbuzztard_la_SOURCES = \
 	propertymeta.c \
 	tempo.c
 libgstbuzztard_la_CFLAGS = \
-	-I@srcdir@ \
+	-I$(srcdir) \
 	$(BASE_DEPS_CFLAGS)
 
 libgstbuzztardincludedir = $(includedir)/libgstbuzztard

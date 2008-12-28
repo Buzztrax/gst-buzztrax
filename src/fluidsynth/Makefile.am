@@ -6,7 +6,7 @@ plugin_LTLIBRARIES = libgstfluidsynth.la
 libgstfluidsynth_la_SOURCES = gstfluidsynth.c gstfluidsynth.h
 
 # flags used to compile this plugin
-libgstfluidsynth_la_CFLAGS = -I@srcdir@ -I$(top_srcdir) \
+libgstfluidsynth_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS) \
 	$(FLUIDSYNTH_CFLAGS)

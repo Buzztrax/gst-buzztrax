@@ -1,3 +1,15 @@
+2008-12-28  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/Makefile.am:
+	* src/audiodelay/Makefile.am:
+	* src/bml/Makefile.am:
+	* src/bml/native/Makefile.am:
+	* src/bml/wrapped/Makefile.am:
+	* src/fluidsynth/Makefile.am:
+	* src/simsyn/Makefile.am:
+	* tests/Makefile.am:
+	  Replace @srcdir@ with $(srcdir).
+
 2008-12-27  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

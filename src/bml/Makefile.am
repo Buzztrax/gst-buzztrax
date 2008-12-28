@@ -13,7 +13,7 @@ plugin_LTLIBRARIES = libgstbml.la
 libgstbml_la_SOURCES = \
   plugin.c common.c
 
-libgstbml_la_CFLAGS = -I@srcdir@ -I$(top_srcdir) \
+libgstbml_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) \
   -DLIBDIR=\"\${libdir}\" \
   $(GST_PLUGIN_CFLAGS) \
   $(BASE_DEPS_CFLAGS) \

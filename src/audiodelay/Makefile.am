@@ -6,7 +6,7 @@ plugin_LTLIBRARIES = libgstaudiodelay.la
 libgstaudiodelay_la_SOURCES = audiodelay.c
 
 # flags used to compile this plugin
-libgstaudiodelay_la_CFLAGS =  -I@srcdir@ -I$(top_srcdir) \
+libgstaudiodelay_la_CFLAGS =  -I$(srcdir) -I$(top_srcdir) \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstaudiodelay_la_LIBADD = $(GST_BASE_LIBS) \
