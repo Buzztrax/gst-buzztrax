@@ -14,9 +14,9 @@ dnl Initialise the autoconf/automake tool
 AC_PREREQ(2.61)
 AC_INIT([gst-buzztard],[0.5.0],[buzztard-devel@lists.sourceforge.net])
 AM_INIT_AUTOMAKE([-Wall -Werror check-news std-options])
-
 AC_CONFIG_SRCDIR([ChangeLog])
 AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_MACRO_DIR(m4)
 
 GSTBT_MAJOR_VERSION=0
 GSTBT_MINOR_VERSION=5
