@@ -1,3 +1,8 @@
+2009-01-07  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/childbin.c:
+	  Allow 0 voices.
+
 2008-12-30  Stefan Kost  <ensonic@users.sf.net>
 
 	* Makefile.am:
@@ -111,7 +116,7 @@
 
 2008-11-26  Stefan Kost  <ensonic@users.sf.net>
 
-	* configure.ac:
+	* configure.ac:Improve playback position handling to work like in buzz.
 	  Back to development.
 	  
 === release 0.4.0 ===

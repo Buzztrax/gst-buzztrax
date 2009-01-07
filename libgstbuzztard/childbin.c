@@ -76,7 +76,7 @@ gstbt_child_bin_base_init(gpointer g_class)
       g_param_spec_ulong ("children",
       "children count property",
       "the number of children this element uses",
-      1,
+      0,
       G_MAXULONG,
       1,
       G_PARAM_READWRITE));
