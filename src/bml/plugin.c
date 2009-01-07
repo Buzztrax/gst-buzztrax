@@ -52,6 +52,14 @@ static int blacklist_compare(const void *node1, const void *node2) {
   return (strcasecmp((gchar *)node1,*(gchar**)node2));
 }
 
+static const gchar *get_bml_path(void) {
+#if HAVE_BMLW
+  return(LIBDIR G_DIR_SEPARATOR_S "Gear:" LIBDIR G_DIR_SEPARATOR_S "Gear" G_DIR_SEPARATOR_S "Generators:" LIBDIR G_DIR_SEPARATOR_S "Gear" G_DIR_SEPARATOR_S "Effects");
+#else
+  return(LIBDIR G_DIR_SEPARATOR_S "Gear");
+#endif
+}
+
 /*
  * dir_scan:
  *
@@ -249,11 +257,7 @@ static gboolean bml_scan(void) {
   bml_path = g_getenv("BML_PATH");
 
   if(!bml_path || !*bml_path) {
-#if HAVE_BMLW
-    bml_path = LIBDIR G_DIR_SEPARATOR_S "Gear:" LIBDIR G_DIR_SEPARATOR_S "Gear" G_DIR_SEPARATOR_S "Generators:" LIBDIR G_DIR_SEPARATOR_S "Gear" G_DIR_SEPARATOR_S "Effects";
-#else
-    bml_path = LIBDIR G_DIR_SEPARATOR_S "Gear";
-#endif
+    bml_path = get_bml_path();
     GST_WARNING("You do not have a BML_PATH environment variable set, using default: '%s'", bml_path);
   }
 
@@ -281,6 +285,14 @@ static gboolean plugin_init (GstPlugin * plugin) {
   GST_INFO("lets go ===========================================================");
   
   oil_init ();
+  
+#if GST_CHECK_VERSION(0,10,22)
+  gst_plugin_add_dependency_simple (plugin, 
+    "BML_PATH",
+    get_bml_path(),
+    "so,dll",
+    GST_PLUGIN_DEPENDENCY_FLAG_PATHS_ARE_DEFAULT_ONLY|GST_PLUGIN_DEPENDENCY_FLAG_FILE_NAME_IS_SUFFIX);
+#endif
 
   // init bml library
   if(!bml_setup(0)) {

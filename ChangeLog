@@ -1,5 +1,10 @@
 2009-01-07  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/plugin.c:
+	  Support automatic plugin dependency updates, added in gstreamer-0.10.22.
+
+2009-01-07  Stefan Kost  <ensonic@users.sf.net>
+
 	* libgstbuzztard/childbin.c:
 	  Allow 0 voices.
 
