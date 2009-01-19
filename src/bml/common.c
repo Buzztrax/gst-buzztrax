@@ -594,6 +594,7 @@ gboolean gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GTyp
   }
   if(def_val>max_val) {
     GST_WARNING("par=%d:%s, def_val > max_val",type,name);
+    // this does not work for enum types
     saved_max_val=max_val;
     max_val=def_val;
   }
