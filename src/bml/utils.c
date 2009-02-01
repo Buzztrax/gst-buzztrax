@@ -29,6 +29,7 @@ extern GHashTable *bml_descriptors_by_element_type;
 extern GHashTable *bml_help_uri_by_descriptor;
 extern GHashTable *bml_preset_path_by_descriptor;
 extern GHashTable *bml_dllpath_by_element_type;
+extern GHashTable *bml_category_by_machine_name;
 
 //-- helper
 
@@ -193,7 +194,12 @@ void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bm, const gch
   details->description=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   bml(get_machine_info(bm,BM_PROP_AUTHOR,(void *)&str));
   details->author=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-  details->klass = (gchar *)category;
+  /* @todo: use extra categories (see plugin.c:read_index)
+   * extra_categories=g_hash_table_lookup(bml_category_by_machine_name,BM_PROP_SHORT_NAME);
+   * if(extra_categories)
+   *   details->klass = g_strdup_printf("%s/%s",category,extra_categories);
+   */
+  details->klass = g_strdup((gchar *)category);
   gst_element_class_set_details(klass, details);
   GST_DEBUG("  element_class details have been set");
 }

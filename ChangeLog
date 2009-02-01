@@ -1,3 +1,13 @@
+2009-02-01  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	  Indenting.
+
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	  Starting index.txt support.
+
 2009-01-19  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:

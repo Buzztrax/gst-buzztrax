@@ -36,6 +36,7 @@ GHashTable *bml_descriptors_by_element_type;
 GHashTable *bml_descriptors_by_voice_type;
 GHashTable *bml_help_uri_by_descriptor;
 GHashTable *bml_preset_path_by_descriptor;
+GHashTable *bml_category_by_machine_name;
 GType voice_type;
 
 GQuark gst_bml_property_meta_quark_type;
@@ -46,6 +47,40 @@ extern gboolean bmlw_describe_plugin(gchar *pathname, gpointer bm);
 extern gboolean bmln_describe_plugin(gchar *pathname, gpointer bm);
 
 typedef int (*bsearchcomparefunc)(const void *,const void *);
+
+
+static gboolean read_index(const gchar *dir_name) {
+  gchar *file_name;
+  FILE *file;
+  gboolean res=FALSE;
+  
+  file_name=g_build_filename(dir_name,"index.txt",NULL);
+  if((file=fopen(file_name,"rt"))) {
+    GST_INFO("found buzz machine index at \"%s\"",file_name);
+    
+    /* the format
+     * there are:
+     *   level-lines: "1,-----"     *   categories : "/Peer Control"
+     *   end-of-cat.: "/.."
+     *   separators : "-----" or "--- Dx ---"
+     *   machines   : "Arguelles Pro3"
+     *   mach.+alias: "Argüelles Pro2, Arguelles Pro2"
+     */
+    /* what we want is a GHashTable bml_category_by_machine_name
+     * with the plugin-name (BM_PROP_SHORT_NAME) as a key and the categories as
+     * values.
+     * this can be used in utils.c: gstbml_class_set_details()
+     *
+     * maybe we can also filter some plugins based on categories
+     */
+     // g_hash_table_insert(bml_category_by_machine_name,machine_name,extra_categories);
+    
+    res=TRUE;
+    fclose(file);
+  }
+  g_free(file_name);
+  return(res);
+}
 
 static int blacklist_compare(const void *node1, const void *node2) {
   //GST_WARNING("comparing '%s' '%s'",node1,*(gchar**)node2);
@@ -249,9 +284,9 @@ static gboolean dir_scan(const gchar *dir_name) {
  */
 
 static gboolean bml_scan(void) {
-  gchar *dir;
   const gchar *bml_path;
-  const gchar *end_pos, *cur_pos;
+  gchar **paths;
+  gint i,path_entries;
   gboolean res=FALSE;
 
   bml_path = g_getenv("BML_PATH");
@@ -260,21 +295,22 @@ static gboolean bml_scan(void) {
     bml_path = get_bml_path();
     GST_WARNING("You do not have a BML_PATH environment variable set, using default: '%s'", bml_path);
   }
-
-  // scan each path component
-  cur_pos = bml_path;
-  while(*cur_pos != '\0') {
-    end_pos = cur_pos;
-    while(*end_pos != ':' && *end_pos != '\0') end_pos++;
-
-    if(end_pos > cur_pos) {
-      dir=g_strndup(cur_pos,(end_pos-cur_pos));
-      res|=dir_scan(dir);
-      g_free(dir);
-      cur_pos=end_pos;
-    }
-    if(*cur_pos==':') cur_pos++;
+  
+  paths=g_strsplit(bml_path,G_SEARCHPATH_SEPARATOR_S,0);
+  path_entries=g_strv_length(paths);
+  GST_INFO("%d dirs in search paths \"%s\"",path_entries,bml_path);
+  
+  // check of index.txt in any of the paths
+  for(i=0;i<path_entries;i++) {
+    if(read_index(paths[i]))
+      break;
   }
+
+  for(i=0;i<path_entries;i++) {
+    res|=dir_scan(paths[i]);
+  }
+  g_strfreev(paths);
+
   GST_INFO("after scanning path \"%s\", res=%d",bml_path,res);
   return(res);
 }
@@ -308,6 +344,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
   bml_descriptors_by_voice_type=g_hash_table_new(NULL, NULL);
   bml_help_uri_by_descriptor=g_hash_table_new(NULL, NULL);
   bml_preset_path_by_descriptor=g_hash_table_new(NULL, NULL);
+  bml_category_by_machine_name=g_hash_table_new(g_str_hash, g_str_equal);
   bml_plugin=plugin;
 
   // @todo this is a hack

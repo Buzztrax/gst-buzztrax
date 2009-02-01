@@ -167,7 +167,7 @@ static gboolean gst_bml_preset_delete_preset(GstPreset *preset, const gchar *nam
   return(gstbml_preset_delete_preset(bml_class,name));
 }
 
-static gboolean gst_bml_set_meta (GstPreset *preset,const gchar *name, const gchar *tag, const gchar *value) {
+static gboolean gst_bml_set_meta(GstPreset *preset,const gchar *name, const gchar *tag, const gchar *value) {
   GstBMLSrc *bml_src=GST_BML_SRC(preset);
   GstBMLSrcClass *klass=GST_BML_SRC_GET_CLASS(bml_src);
   GstBMLClass *bml_class=GST_BML_CLASS(klass);
@@ -175,7 +175,7 @@ static gboolean gst_bml_set_meta (GstPreset *preset,const gchar *name, const gch
   return(gstbml_preset_set_meta(bml_class,name,tag,value));
 }
 
-static gboolean gst_bml_get_meta (GstPreset *preset,const gchar *name, const gchar *tag, gchar **value) {
+static gboolean gst_bml_get_meta(GstPreset *preset,const gchar *name, const gchar *tag, gchar **value) {
   GstBMLSrc *bml_src=GST_BML_SRC(preset);
   GstBMLSrcClass *klass=GST_BML_SRC_GET_CLASS(bml_src);
   GstBMLClass *bml_class=GST_BML_CLASS(klass);

@@ -192,7 +192,7 @@ static gboolean gst_bml_preset_delete_preset(GstPreset *preset, const gchar *nam
   return(gstbml_preset_delete_preset(bml_class,name));
 }
 
-static gboolean gst_bml_set_meta (GstPreset *preset,const gchar *name, const gchar *tag, const gchar *value) {
+static gboolean gst_bml_set_meta(GstPreset *preset,const gchar *name, const gchar *tag, const gchar *value) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
   GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
   GstBMLClass *bml_class=GST_BML_CLASS(klass);
@@ -200,7 +200,7 @@ static gboolean gst_bml_set_meta (GstPreset *preset,const gchar *name, const gch
   return(gstbml_preset_set_meta(bml_class,name,tag,value));
 }
 
-static gboolean gst_bml_get_meta (GstPreset *preset,const gchar *name, const gchar *tag, gchar **value) {
+static gboolean gst_bml_get_meta(GstPreset *preset,const gchar *name, const gchar *tag, gchar **value) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
   GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
   GstBMLClass *bml_class=GST_BML_CLASS(klass);
@@ -437,7 +437,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   return(GST_FLOW_OK);
 }
 
-static gboolean gst_bml_transform_get_unit_size (GstBaseTransform *base, GstCaps *caps, guint *size) {
+static gboolean gst_bml_transform_get_unit_size(GstBaseTransform *base, GstCaps *caps, guint *size) {
   gint width, channels;
   GstStructure *structure;
   gboolean ret;
