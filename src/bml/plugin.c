@@ -54,26 +54,73 @@ static gboolean read_index(const gchar *dir_name) {
   FILE *file;
   gboolean res=FALSE;
   
+  /* we want a GHashTable bml_category_by_machine_name
+   * with the plugin-name (BM_PROP_SHORT_NAME) as a key
+   * and the categories as values.
+   *
+   * this can be used in utils.c: gstbml_class_set_details()
+   *
+   * maybe we can also filter some plugins based on categories
+   */
+
   file_name=g_build_filename(dir_name,"index.txt",NULL);
   if((file=fopen(file_name,"rt"))) {
     GST_INFO("found buzz machine index at \"%s\"",file_name);
+     gchar line[500],*entry;
+     gchar categories[1000]="";
+     gint cat_pos=0,i,len;
     
     /* the format
      * there are:
+     *   comments?  : ","
      *   level-lines: "1,-----"     *   categories : "/Peer Control"
      *   end-of-cat.: "/.."
      *   separators : "-----" or "--- Dx ---"
      *   machines   : "Arguelles Pro3"
      *   mach.+alias: "Argüelles Pro2, Arguelles Pro2"
      */
-    /* what we want is a GHashTable bml_category_by_machine_name
-     * with the plugin-name (BM_PROP_SHORT_NAME) as a key and the categories as
-     * values.
-     * this can be used in utils.c: gstbml_class_set_details()
-     *
-     * maybe we can also filter some plugins based on categories
-     */
-     // g_hash_table_insert(bml_category_by_machine_name,machine_name,extra_categories);
+     
+    while(!feof(file)) {
+      if(fgets(line,500,file)) {
+        // strip leading and trailing spaces and convert
+        entry=g_convert(g_strstrip(line),-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
+        if(entry[0]=='/') {
+          if(entry[1]=='.' && entry[2]=='.') {
+            // pop stack
+            if(cat_pos>0) {
+              while(cat_pos>0 && categories[cat_pos]!='/')
+                cat_pos--;
+              categories[cat_pos]='\0';
+            }
+            GST_DEBUG("- %4d %s",cat_pos,categories);
+          }
+          else {
+            // push stack
+            len=strlen(entry);
+            if((cat_pos+len)<1000) {
+              categories[cat_pos++]='/';
+              for(i=1;i<len;i++) {
+                categories[cat_pos++]=(entry[i]!='/')?entry[i]:'+';
+              }
+              categories[cat_pos]='\0';
+            }
+            GST_DEBUG("+ %4d %s",cat_pos,categories);
+          }
+        }
+        else {
+          if(entry[0]=='-' || g_ascii_isdigit(entry[0])) {
+            // skip for now
+          }
+          else {
+            // for machines
+            //GST_DEBUG("  %s",entry);
+            // check for "'" and cut the alias
+            // g_hash_table_insert(bml_category_by_machine_name,entry,extra_categories);
+          }
+        }
+        g_free(entry);
+      }
+    }
     
     res=TRUE;
     fclose(file);

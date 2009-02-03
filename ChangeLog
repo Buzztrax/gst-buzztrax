@@ -1,3 +1,8 @@
+2009-02-03  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Basic parsing implemented.
+
 2009-02-01  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlsrc.c:
