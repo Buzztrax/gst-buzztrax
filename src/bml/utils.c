@@ -185,6 +185,9 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
 void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bm, const gchar *category)) {
   GstElementDetails *details;
   gchar *str;
+#if 1
+  gchar *extra_categories;
+#endif
 
   /* construct the element details struct */
   details=g_new(GstElementDetails,1);
@@ -194,12 +197,26 @@ void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bm, const gch
   details->description=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   bml(get_machine_info(bm,BM_PROP_AUTHOR,(void *)&str));
   details->author=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-  /* @todo: use extra categories (see plugin.c:read_index)
-   * extra_categories=g_hash_table_lookup(bml_category_by_machine_name,BM_PROP_SHORT_NAME);
-   * if(extra_categories)
-   *   details->klass = g_strdup_printf("%s/%s",category,extra_categories);
+  /* use extra categories (see plugin.c:read_index) */
+#if 1
+  /* this does not yet match all machines, e.g. Elak SVF
+   * we could try ("%s %s",author,longname) in addition?
    */
-  details->klass = g_strdup((gchar *)category);
+  bml(get_machine_info(bm,BM_PROP_NAME,(void *)&str));
+  str=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
+  extra_categories=g_hash_table_lookup(bml_category_by_machine_name,str);
+  if(extra_categories) {
+    GST_DEBUG("  %s/%s -> %s",str,details->longname,extra_categories);
+    details->klass = g_strconcat(category,extra_categories,NULL);
+  }
+  else {
+    GST_DEBUG("  %s/%s -> ''",str,details->longname);
+#endif
+    details->klass = g_strdup((gchar *)category);
+#if 1
+  }
+  g_free(str);
+#endif
   gst_element_class_set_details(klass, details);
   GST_DEBUG("  element_class details have been set");
 }

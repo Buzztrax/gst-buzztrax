@@ -108,14 +108,41 @@ static gboolean read_index(const gchar *dir_name) {
           }
         }
         else {
-          if(entry[0]=='-' || g_ascii_isdigit(entry[0])) {
+          if(entry[0]=='-' || entry[0]==',' || g_ascii_isdigit(entry[0])) {
             // skip for now
           }
-          else {
-            // for machines
-            //GST_DEBUG("  %s",entry);
+          else if (g_ascii_isalpha(entry[0])) {
+            // machines
             // check for "'" and cut the alias
-            // g_hash_table_insert(bml_category_by_machine_name,entry,extra_categories);
+            gchar **names=g_strsplit(entry,",",-1);
+            gchar *cat=g_strdup(categories),*beg,*end;
+            gint a;
+            
+            /* we need to filter 'Generators,Effects,Gear' from the categories */
+            if ((beg=strstr(cat,"/Generator"))) {
+              end=&beg[strlen("/Generator")];
+              memmove(beg,end,strlen(end)+1);
+            }
+            if ((beg=strstr(cat,"/Effect"))) {
+              end=&beg[strlen("/Effect")];
+              memmove(beg,end,strlen(end)+1);
+            }
+            if ((beg=strstr(cat,"/Gear"))) {
+              end=&beg[strlen("/Gear")];
+              memmove(beg,end,strlen(end)+1);
+            }
+
+            for(a=0;a<g_strv_length(names);a++) {
+              if(names[a] && *names[a]) {
+                GST_DEBUG("  %s -> %s",names[a],categories);
+                g_hash_table_insert(bml_category_by_machine_name,names[a],cat);
+              }
+              else {
+                g_free(names[a]);
+              }
+              names[a]=NULL;
+            }
+            g_free(names);
           }
         }
         g_free(entry);

@@ -1,3 +1,16 @@
+2009-02-06  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	  Filter some categories from index and enable it.
+
+2009-02-04  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	  Implement more of it, but don't yet enable as it causes quite some
+	  issues in buzztard menu code.
+
 2009-02-03  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:
