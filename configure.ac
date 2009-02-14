@@ -345,3 +345,13 @@ Configuration
 	Coverage profiling         : ${enable_coverage}
 	Use of deprecated API      : ${set_enable_deprecated}
 "
+
+if test "x${have_bml}" = "xno" -o "x${have_fluidsynth}" = "xno" ; then
+echo "
+
+Some features are not built. If you like to have them built, please check that
+you have the required -devel packages installed and that they can be found in
+your PKG_CONFIG_PATH ($PKG_CONFIG_PATH).
+"
+fi
+
