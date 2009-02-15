@@ -66,22 +66,17 @@ gstbt_child_bin_remove_child (GstBtChildBin * self, GstObject *child)
 }
 
 static void
-gstbt_child_bin_base_init(gpointer g_class)
+gstbt_child_bin_class_init(gpointer g_class)
 {
-  static gboolean initialized = FALSE;
-
-  if (!initialized) {
-    /* create interface signals and properties here. */
-   g_object_interface_install_property (g_class,
-      g_param_spec_ulong ("children",
-      "children count property",
-      "the number of children this element uses",
-      0,
-      G_MAXULONG,
-      1,
-      G_PARAM_READWRITE));
-    initialized = TRUE;
-  }
+  /* create interface signals and properties here. */
+  g_object_interface_install_property (g_class,
+    g_param_spec_ulong ("children",
+    "children count property",
+    "the number of children this element uses",
+    0,
+    G_MAXULONG,
+    1,
+    G_PARAM_READWRITE));
 }
 
 GType
@@ -89,12 +84,12 @@ gstbt_child_bin_get_type (void)
 {
   static GType type = 0;
 
-  if (type == 0) {
+  if(G_UNLIKELY(!type)) {
     const GTypeInfo info = {
       sizeof (GstBtChildBinInterface),
-      (GBaseInitFunc) gstbt_child_bin_base_init,   /* base_init */
+      NULL,   /* base_init */
       NULL,   /* base_finalize */
-      NULL,   /* class_init */
+      (GClassInitFunc)gstbt_child_bin_class_init,   /* class_init */
       NULL,   /* class_finalize */
       NULL,   /* class_data */
       0,

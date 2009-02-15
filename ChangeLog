@@ -1,3 +1,14 @@
+2009-02-15  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/childbin.c:
+	* libgstbuzztard/envelope.c:
+	* libgstbuzztard/help.c:
+	* libgstbuzztard/musicenums.c:
+	* libgstbuzztard/preset.c:
+	* libgstbuzztard/propertymeta.c:
+	* libgstbuzztard/tempo.c:
+	  Micro optimisations and cleanup of gobject usage.
+
 2009-02-14  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

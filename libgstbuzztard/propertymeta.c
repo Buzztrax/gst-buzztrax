@@ -96,33 +96,15 @@ gstbt_property_meta_describe_property (GstBtPropertyMeta *self, glong index, GVa
   }
 }
 
-static void
-gstbt_property_meta_base_init(gpointer g_class)
-{
-  static gboolean initialized = FALSE;
-
-  if (!initialized) {
-    /* create quarks for use with g_param_spec_{g,s}et_qdata() */
-    gstbt_property_meta_quark=g_quark_from_string("GstBtPropertyMeta::");
-    gstbt_property_meta_quark_min_val=g_quark_from_string("GstBtPropertyMeta::min-val");
-    gstbt_property_meta_quark_max_val=g_quark_from_string("GstBtPropertyMeta::max-val");
-    gstbt_property_meta_quark_def_val=g_quark_from_string("GstBtPropertyMeta::def-val");
-    gstbt_property_meta_quark_no_val=g_quark_from_string("GstBtPropertyMeta::no-val");
-    gstbt_property_meta_quark_flags=g_quark_from_string("GstBtPropertyMeta::flags");
-
-    initialized = TRUE;
-  }
-}
-
 GType
 gstbt_property_meta_get_type (void)
 {
   static GType type = 0;
 
-  if (type == 0) {
+  if(G_UNLIKELY(!type)) {
     const GTypeInfo info = {
       sizeof (GstBtPropertyMetaInterface),
-      (GBaseInitFunc) gstbt_property_meta_base_init,   /* base_init */
+      NULL,   /* base_init */
       NULL,   /* base_finalize */
       NULL,   /* class_init */
       NULL,   /* class_finalize */
@@ -132,6 +114,13 @@ gstbt_property_meta_get_type (void)
       NULL    /* instance_init */
     };
     type = g_type_register_static (G_TYPE_INTERFACE,"GstBtPropertyMeta",&info,0);
+
+    gstbt_property_meta_quark=g_quark_from_string("GstBtPropertyMeta::");
+    gstbt_property_meta_quark_min_val=g_quark_from_string("GstBtPropertyMeta::min-val");
+    gstbt_property_meta_quark_max_val=g_quark_from_string("GstBtPropertyMeta::max-val");
+    gstbt_property_meta_quark_def_val=g_quark_from_string("GstBtPropertyMeta::def-val");
+    gstbt_property_meta_quark_no_val=g_quark_from_string("GstBtPropertyMeta::no-val");
+    gstbt_property_meta_quark_flags=g_quark_from_string("GstBtPropertyMeta::flags");
   }
   return type;
 }

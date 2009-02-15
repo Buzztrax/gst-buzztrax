@@ -58,38 +58,33 @@ gstbt_tempo_change_tempo (GstBtTempo *self, glong beats_per_minute, glong ticks_
 }
 
 static void
-gstbt_tempo_base_init(gpointer g_class)
+gstbt_tempo_class_init(gpointer g_class)
 {
-  static gboolean initialized = FALSE;
-
-  if (!initialized) {
-    /* create interface signals and properties here. */
-    g_object_interface_install_property (g_class,
-      g_param_spec_ulong ("beats-per-minute",
-      "beat-per-minute tempo property",
-      "the number of beats per minute the top level pipeline uses",
-      1,
-      G_MAXULONG,
-      120,
-      G_PARAM_READWRITE));
-    g_object_interface_install_property (g_class,
-      g_param_spec_ulong ("ticks-per-beat",
-      "ticks-per-beat tempo property",
-      "the number of ticks (events) per beat the top level pipeline uses",
-      1,
-      G_MAXULONG,
-      4,
-      G_PARAM_READWRITE));
-    g_object_interface_install_property (g_class,
-      g_param_spec_ulong ("subticks-per-tick",
-      "subticks-per-tick tempo property",
-      "the number of subticks (for smoothing) per tick the top level pipeline uses",
-      1,
-      G_MAXULONG,
-      1,
-      G_PARAM_READWRITE));
-    initialized = TRUE;
-  }
+  /* create interface signals and properties here. */
+  g_object_interface_install_property (g_class,
+    g_param_spec_ulong ("beats-per-minute",
+    "beat-per-minute tempo property",
+    "the number of beats per minute the top level pipeline uses",
+    1,
+    G_MAXULONG,
+    120,
+    G_PARAM_READWRITE));
+  g_object_interface_install_property (g_class,
+    g_param_spec_ulong ("ticks-per-beat",
+    "ticks-per-beat tempo property",
+    "the number of ticks (events) per beat the top level pipeline uses",
+    1,
+    G_MAXULONG,
+    4,
+    G_PARAM_READWRITE));
+  g_object_interface_install_property (g_class,
+    g_param_spec_ulong ("subticks-per-tick",
+    "subticks-per-tick tempo property",
+    "the number of subticks (for smoothing) per tick the top level pipeline uses",
+    1,
+    G_MAXULONG,
+    1,
+    G_PARAM_READWRITE));
 }
 
 GType
@@ -97,12 +92,12 @@ gstbt_tempo_get_type (void)
 {
   static GType type = 0;
 
-  if (type == 0) {
+  if(G_UNLIKELY(!type)) {
     const GTypeInfo info = {
       sizeof (GstBtTempoInterface),
-      (GBaseInitFunc) gstbt_tempo_base_init,   /* base_init */
+      NULL,   /* base_init */
       NULL,   /* base_finalize */
-      NULL,   /* class_init */
+      (GClassInitFunc)gstbt_tempo_class_init,   /* class_init */
       NULL,   /* class_finalize */
       NULL,   /* class_data */
       0,

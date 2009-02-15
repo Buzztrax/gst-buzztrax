@@ -150,7 +150,8 @@ gstbt_envelope_class_init (GstBtEnvelopeClass * klass)
 GType gstbt_envelope_get_type (void)
 {
   static GType type = 0;
-  if (type == 0) {
+
+  if(G_UNLIKELY(!type)) {
     const GTypeInfo element_type_info = {
       sizeof (GstBtEnvelopeClass),
       NULL,               /* base_init */

@@ -922,7 +922,7 @@ gst_preset_get_type (void)
 {
   static GType type = 0;
 
-  if (type == 0) {
+  if(G_UNLIKELY(!type)) {
     const GTypeInfo info = {
       sizeof (GstPresetInterface),
       (GBaseInitFunc) gst_preset_base_init,     /* base_init */

@@ -32,7 +32,8 @@
 
 GType gstGSTBT_TRIGGER_SWITCH_get_type(void) {
   static GType type = 0;
-  if(type==0) {
+
+  if(G_UNLIKELY(!type)) {
     static const GEnumValue values[] = {
       { GSTGSTBT_TRIGGER_SWITCH_OFF,  "OFF","0" },
       { GSTGSTBT_TRIGGER_SWITCH_ON,   "ON","1" },

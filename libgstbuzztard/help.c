@@ -28,20 +28,15 @@
 #include "help.h"
 
 static void
-gstbt_help_base_init(gpointer g_class)
+gstbt_help_class_init(gpointer g_class)
 {
-  static gboolean initialized = FALSE;
-
-  if (!initialized) {
-    /* create interface signals and properties here. */
-    g_object_interface_install_property (g_class,
-      g_param_spec_string ("documentation-uri",
-      "documentation uri help property",
-      "uri of the user documentation",
-      NULL,
-      G_PARAM_READABLE));
-    initialized = TRUE;
-  }
+  /* create interface signals and properties here. */
+  g_object_interface_install_property (g_class,
+    g_param_spec_string ("documentation-uri",
+    "documentation uri help property",
+    "uri of the user documentation",
+    NULL,
+    G_PARAM_READABLE));
 }
 
 GType
@@ -49,12 +44,12 @@ gstbt_help_get_type (void)
 {
   static GType type = 0;
   
-  if (type == 0) {
+  if(G_UNLIKELY(!type)) {
     const GTypeInfo info = {
       sizeof (GstBtHelpInterface),
-      (GBaseInitFunc) gstbt_help_base_init,   /* base_init */
+      NULL,   /* base_init */
       NULL,   /* base_finalize */
-      NULL,   /* class_init */
+      (GClassInitFunc)gstbt_help_class_init,   /* class_init */
       NULL,   /* class_finalize */
       NULL,   /* class_data */
       0,
