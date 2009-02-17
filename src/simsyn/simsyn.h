@@ -39,6 +39,19 @@ G_BEGIN_DECLS
 #define GST_IS_SIM_SYN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GST_TYPE_SIM_SYN))
 #define GST_SIM_SYN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GST_TYPE_SIM_SYN,GstSimSynClass))
 
+/**
+ * GstSimSynWave:
+ * @GST_SIM_SYN_WAVE_SINE: sine wave
+ * @GST_SIM_SYN_WAVE_SQUARE: square wave
+ * @GST_SIM_SYN_WAVE_SAW: saw wave
+ * @GST_SIM_SYN_WAVE_TRIANGLE: triangle wave
+ * @GST_SIM_SYN_WAVE_SILENCE: silence
+ * @GST_SIM_SYN_WAVE_WHITE_NOISE: white noise
+ * @GST_SIM_SYN_WAVE_PINK_NOISE: pink noise
+ * @GST_SIM_SYN_WAVE_SINE_TAB: sine wave (precalculated)
+ *
+ * Oscillator wave forms.
+ */
 typedef enum {
   GST_SIM_SYN_WAVE_SINE,
   GST_SIM_SYN_WAVE_SQUARE,
@@ -50,6 +63,16 @@ typedef enum {
   GST_SIM_SYN_WAVE_SINE_TAB
 } GstSimSynWave; 
 
+/**
+ * GstSimSynFilter:
+ * @GST_SIM_SYN_FILTER_NONE: no filtering
+ * @GST_SIM_SYN_FILTER_LOWPASS: low pass
+ * @GST_SIM_SYN_FILTER_HIPASS: high pass
+ * @GST_SIM_SYN_FILTER_BANDPASS: band pass 
+ * @GST_SIM_SYN_FILTER_BANDSTOP: band stop (notch)
+ *
+ * Filter types.
+ */
 typedef enum {
   GST_SIM_SYN_FILTER_NONE,
   GST_SIM_SYN_FILTER_LOWPASS,
@@ -73,6 +96,11 @@ typedef struct {
 typedef struct _GstSimSyn GstSimSyn;
 typedef struct _GstSimSynClass GstSimSynClass;
 
+/**
+ * GstSimSyn:
+ *
+ * Class instance data.
+ */
 struct _GstSimSyn {
   GstBaseSrc parent;
 

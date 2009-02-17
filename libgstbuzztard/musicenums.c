@@ -19,9 +19,10 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:musicenums
+ * SECTION:gstbtmusicenums
  * @short_description: various enum types
  *
+ * Music/Audio related enumerations.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -30,7 +31,15 @@
 
 #include "musicenums.h"
 
-GType gstGSTBT_TRIGGER_SWITCH_get_type(void) {
+/**
+ * GstBtTriggerSwitch:
+ * @GSTGSTBT_TRIGGER_SWITCH_OFF: turn switch off
+ * @GSTGSTBT_TRIGGER_SWITCH_ON: turn switch on
+ * @GSTGSTBT_TRIGGER_SWITCH_EMPTY: do not change switch
+ *
+ * Switch event commands.
+ */
+GType gstbt_trigger_switch_get_type(void) {
   static GType type = 0;
 
   if(G_UNLIKELY(!type)) {
@@ -40,7 +49,7 @@ GType gstGSTBT_TRIGGER_SWITCH_get_type(void) {
       { GSTGSTBT_TRIGGER_SWITCH_EMPTY,"EMPTY","" },
       { 0, NULL, NULL},
     };
-    type = g_enum_register_static("BtTriggerSwitch", values);
+    type = g_enum_register_static("GstBtTriggerSwitch", values);
   }
   return type;
 }

@@ -36,6 +36,11 @@ G_BEGIN_DECLS
 typedef struct _GstBtEnvelope GstBtEnvelope;
 typedef struct _GstBtEnvelopeClass GstBtEnvelopeClass;
 
+/**
+ * GstBtEnvelope:
+ *
+ * Class instance data.
+ */
 struct _GstBtEnvelope {
   GObject parent;
 

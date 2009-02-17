@@ -37,6 +37,11 @@ G_BEGIN_DECLS
 typedef struct _GstAudioDelay      GstAudioDelay;
 typedef struct _GstAudioDelayClass GstAudioDelayClass;
 
+/**
+ * GstAudioDelay:
+ *
+ * Class instance data.
+ */
 struct _GstAudioDelay {
   GstBaseTransform element;
 

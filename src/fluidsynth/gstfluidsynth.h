@@ -44,6 +44,11 @@ G_BEGIN_DECLS
 typedef struct _GstFluidsynth GstFluidsynth;
 typedef struct _GstFluidsynthClass GstFluidsynthClass;
 
+/**
+ * GstFluidsynth:
+ *
+ * Class instance data.
+ */
 struct _GstFluidsynth {
   GstBaseSrc parent;
 

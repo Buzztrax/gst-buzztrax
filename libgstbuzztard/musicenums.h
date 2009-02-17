@@ -26,15 +26,23 @@
 
 G_BEGIN_DECLS
 
+/**
+ * GstBtTriggerSwitch:
+ * @GSTGSTBT_TRIGGER_SWITCH_OFF: turn switch off
+ * @GSTGSTBT_TRIGGER_SWITCH_ON: turn switch on
+ * @GSTGSTBT_TRIGGER_SWITCH_EMPTY: do not change switch
+ *
+ * Switch event commands.
+ */
 typedef enum {
   GSTGSTBT_TRIGGER_SWITCH_OFF=0,
   GSTGSTBT_TRIGGER_SWITCH_ON=1,
   GSTGSTBT_TRIGGER_SWITCH_EMPTY=255,
-} BtTriggerSwitch;
+} GstBtTriggerSwitch;
 
-#define GSTBT_TYPE_TRIGGER_SWITCH   (gstGSTBT_TRIGGER_SWITCH_get_type())
+#define GSTBT_TYPE_TRIGGER_SWITCH   (gstbt_trigger_switch_get_type())
 
-extern GType gstGSTBT_TRIGGER_SWITCH_get_type(void);
+extern GType gstbt_trigger_switch_get_type(void);
 
 G_END_DECLS
 

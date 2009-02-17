@@ -68,10 +68,10 @@ gst_sim_syn_get_type
 <SECTION>
 <FILE>gstbtchildbin</FILE>
 <TITLE>GstBtChildBin</TITLE>
-GstBtChildBin
 gstbt_child_bin_add_child
 gstbt_child_bin_remove_child
 <SUBSECTION Standard>
+GstBtChildBin
 GstBtChildBinInterface
 GSTBT_CHILD_BIN
 GSTBT_IS_CHILD_BIN
@@ -83,8 +83,8 @@ gstbt_child_bin_get_type
 <SECTION>
 <FILE>gstbthelp</FILE>
 <TITLE>GstBtHelp</TITLE>
-GstBtHelp
 <SUBSECTION Standard>
+GstBtHelp
 GstBtHelpInterface
 GSTBT_HELP
 GSTBT_IS_HELP
@@ -96,9 +96,9 @@ gstbt_help_get_type
 <SECTION>
 <FILE>gstbttempo</FILE>
 <TITLE>GstBtTempo</TITLE>
-GstBtTempo
 gstbt_tempo_change_tempo
 <SUBSECTION Standard>
+GstBtTempo
 GstBtTempoInterface
 GSTBT_TEMPO
 GSTBT_IS_TEMPO
@@ -110,7 +110,6 @@ gstbt_tempo_get_type
 <SECTION>
 <FILE>gstbtpropertymeta</FILE>
 <TITLE>GstBtPropertyMeta</TITLE>
-GstBtPropertyMeta
 GstBtPropertyMetaFlags
 gstbt_property_meta_describe_property
 gstbt_property_meta_quark
@@ -120,6 +119,7 @@ gstbt_property_meta_quark_def_val
 gstbt_property_meta_quark_no_val
 gstbt_property_meta_quark_flags
 <SUBSECTION Standard>
+GstBtPropertyMeta
 GstBtPropertyMetaInterface
 GSTBT_PROPERTY_META
 GSTBT_IS_PROPERTY_META
@@ -134,7 +134,6 @@ gstbt_property_meta_get_type
 <SECTION>
 <FILE>gstpreset</FILE>
 <TITLE>GstPreset</TITLE>
-GstPreset
 gst_preset_get_preset_names
 gst_preset_load_preset
 gst_preset_save_preset
@@ -143,6 +142,7 @@ gst_preset_delete_preset
 gst_preset_set_meta
 gst_preset_get_meta
 <SUBSECTION Standard>
+GstPreset
 GstPresetInterface
 GST_PRESET
 GST_IS_PRESET
@@ -168,6 +168,12 @@ GSTBT_IS_ENVELOPE_CLASS
 GSTBT_ENVELOPE_GET_CLASS
 GSTBT_TYPE_ENVELOPE
 gstbt_envelope_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstbtmusicenums</FILE>
+<TITLE>GstBtMusicEnums</TITLE>
+GstBtTriggerSwitch
 </SECTION>
 
 <SECTION>

@@ -55,6 +55,15 @@ extern GQuark gstbt_property_meta_quark_flags;
 
 G_END_DECLS
 
+/**
+ * GstBtPropertyMetaFlags:
+ * @GSTBT_PROPERTY_META_NONE: no special treatment needed
+ * @GSTBT_PROPERTY_META_WAVE: parameter value references a wavetable slot
+ * @GSTBT_PROPERTY_META_STATE: parameter is continuously changing (not used for notes and triggers)
+ * @GSTBT_PROPERTY_META_TICK_ON_EDIT: need to call tick after editing it
+ *
+ * Parameter flags to describe their behaviour.
+ */
 typedef enum {
   GSTBT_PROPERTY_META_NONE=0,
   GSTBT_PROPERTY_META_WAVE=1,		/* parameter value references a wavetable slot */

@@ -1,3 +1,22 @@
+2009-02-17  Stefan Kost  <ensonic@users.sf.net>
+
+	* NEWS:
+	  bump to be able to test make distcheck.
+
+	* docs/reference/Makefile.am:
+	* docs/reference/gst-buzztard-docs.sgml:
+	* docs/reference/gst-buzztard-sections.txt:
+	* libgstbuzztard/envelope.h:
+	* libgstbuzztard/musicenums.c:
+	* libgstbuzztard/musicenums.h:
+	* libgstbuzztard/propertymeta.h:
+	* src/audiodelay/audiodelay.h:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/simsyn/simsyn.h:
+	* tests/Makefile.am:
+	 Update docs and cleanup some garbage.
+	  
+
 2009-02-15  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/childbin.c:

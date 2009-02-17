@@ -7,8 +7,7 @@ else
 endif
 
 TESTS = \
-	$(TESTS_BIN) \
-	gtkdoccomplete.sh
+	$(TESTS_BIN)
 
 # prevent endless loops
 TESTS_ENVIRONMENT = ulimit -St20; \
