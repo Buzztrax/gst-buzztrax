@@ -1,3 +1,9 @@
+2009-02-18  Stefan Kost  <ensonic@users.sf.net>
+
+	* README:
+	* configure.ac:
+	  Give a hint if user installs into a non know location.
+
 2009-02-17  Stefan Kost  <ensonic@users.sf.net>
 
 	* NEWS:

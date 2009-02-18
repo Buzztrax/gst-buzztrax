@@ -330,7 +330,6 @@ AC_CONFIG_FILES( \
 AC_OUTPUT
 
 echo "
-
 Configuration
 	Version                    : ${VERSION}
 	Source code location       : ${srcdir}
@@ -348,10 +347,21 @@ Configuration
 
 if test "x${have_bml}" = "xno" -o "x${have_fluidsynth}" = "xno" ; then
 echo "
-
 Some features are not built. If you like to have them built, please check that
 you have the required -devel packages installed and that they can be found in
 your PKG_CONFIG_PATH ($PKG_CONFIG_PATH).
+"
+fi
+
+if test ! `echo $PKG_CONFIG_PATH  | grep $prefix` ; then
+echo "
+You are installing buzztard libraries into a location that is not yet known to
+system. In order for other buzztard modules to find them and the application to
+work with all features please register the location (see README for details):
+export LD_LIBRARY_PATH=$prefix/lib:\$LD_LIBRARY_PATH
+export DEVHELP_SEARCH_PATH="\$DEVHELP_SEARCH_PATH:$prefix/share/gtk-doc/html"
+export PKG_CONFIG_PATH="\$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"
+export GST_PLUGIN_PATH="\$GST_PLUGIN_PATH:$prefix/lib/gstreamer-0.10"
 "
 fi
 

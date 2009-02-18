@@ -17,10 +17,16 @@ Use following option for ./autogen.sh or ./configure
   --prefix=$HOME/buzztard
 When installing the package to e.g. $HOME/buzztard remember to set these
 environment options:
+libraries:
+  export LD_LIBRARY_PATH=$HOME/buzztard/lib:$LD_LIBRARY_PATH
 devhelp:
   export DEVHELP_SEARCH_PATH="$DEVHELP_SEARCH_PATH:$HOME/buzztard/share/gtk-doc/html"
 pkg-config:
   export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOME/buzztard/lib/pkgconfig"
 gstreamer
   export GST_PLUGIN_PATH="$HOME/buzztard/lib/gstreamer-0.10"
+
+= installing in /usr/local =
+The default value for the --prefix configure option is /usr/local. Also in that
+case the variables mentioned in the last example need to be exported.
 
