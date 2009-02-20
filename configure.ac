@@ -311,9 +311,9 @@ done
 AC_DEFINE_UNQUOTED(DATADIR, "$full_var", [data dir])
 AC_SUBST(DATADIR)
 
-AC_CONFIG_FILES( \
+SHAVE_INIT([.])
+AC_CONFIG_FILES(Makefile shave shave-libtool \
 	libgstbuzztard.pc \
-	Makefile \
 	docs/Makefile \
 	docs/reference/Makefile \
 	docs/reference/gst-buzztard.types \
