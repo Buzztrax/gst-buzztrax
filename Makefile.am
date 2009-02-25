@@ -3,7 +3,8 @@
 SUBDIRS = libgstbuzztard src docs tests
 
 ACLOCAL_AMFLAGS = -I m4
-DISTCHECK_CONFIGURE_FLAGS=--enable-gtk-doc
+DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
+CONFIG_CLEAN_FILES = shave·shave-libtool
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgstbuzztard.pc
