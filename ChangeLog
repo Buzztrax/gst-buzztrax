@@ -1,3 +1,8 @@
+2009-03-04  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Use glib stuff for dir-scans.
+
 2009-02-25  Stefan Kost  <ensonic@users.sf.net>
 
 	* Makefile.am:

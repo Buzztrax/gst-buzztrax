@@ -19,12 +19,9 @@
 
 #include "plugin.h"
 
-#include <dirent.h>
-#include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #define GST_CAT_DEFAULT bml_debug
@@ -73,7 +70,8 @@ static gboolean read_index(const gchar *dir_name) {
     /* the format
      * there are:
      *   comments?  : ","
-     *   level-lines: "1,-----"     *   categories : "/Peer Control"
+     *   level-lines: "1,-----"
+     *   categories : "/Peer Control"
      *   end-of-cat.: "/.."
      *   separators : "-----" or "--- Dx ---"
      *   machines   : "Arguelles Pro3"
@@ -175,9 +173,9 @@ static const gchar *get_bml_path(void) {
  * Search the given directory.
  */
 static gboolean dir_scan(const gchar *dir_name) {
-  DIR *dir;
-  struct dirent *dir_entry;
-  gchar *file_name,*entry_name,*ext;
+  GDir *dir;
+  gchar *file_name,*ext;
+  const gchar *entry_name;
   gpointer bm;
   gboolean res=FALSE,ok;
 
@@ -283,67 +281,60 @@ static gboolean dir_scan(const gchar *dir_name) {
 
   GST_INFO("scanning directory \"%s\"",dir_name);
 
-  dir = opendir(dir_name);
+  dir = g_dir_open (dir_name, 0, NULL);
   if (!dir) return(res);
 
-  while(TRUE) {
-    dir_entry = readdir (dir);
-    if (!dir_entry) {
-      closedir(dir);
-      return(res);
-    }
-
-    entry_name=dir_entry->d_name;
-    if(entry_name && (entry_name[0]!='.')) {
-      ext=strrchr(entry_name,'.');
-      if (ext && (!strcasecmp(ext,".dll") || !strcmp(ext,".so"))) {
-        /* test against blacklist */
-        if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
-          file_name=g_build_filename (dir_name, entry_name, NULL);
-          GST_WARNING("trying plugin '%s','%s'",entry_name,file_name);
-          ok=FALSE;
-          if(!strcasecmp(ext,".dll")) {
+  while((entry_name=g_dir_read_name(dir))) {
+    ext=strrchr(entry_name,'.');
+    if (ext && (!strcasecmp(ext,".dll") || !strcmp(ext,".so"))) {
+      /* test against blacklist */
+      if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
+        file_name=g_build_filename (dir_name, entry_name, NULL);
+        GST_WARNING("trying plugin '%s','%s'",entry_name,file_name);
+        ok=FALSE;
+        if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
-            if((bm=bmlw_new(file_name))) {
-              bmlw_init(bm,0,NULL);
-              if(bmlw_describe_plugin(file_name,bm)) {
-                /* @todo: free here, or leave on instance open to be used in class init
-                 * bmlw_free(bm); */
-                res=ok=TRUE;
-              }
-              else {
-                bmlw_free(bm);
-              }
+          if((bm=bmlw_new(file_name))) {
+            bmlw_init(bm,0,NULL);
+            if(bmlw_describe_plugin(file_name,bm)) {
+              /* @todo: free here, or leave on instance open to be used in class init
+               * bmlw_free(bm); */
+              res=ok=TRUE;
             }
+            else {
+              bmlw_free(bm);
+            }
+          }
 #else
-            GST_WARNING("no dll emulation on non x86 platforms");
+          GST_WARNING("no dll emulation on non x86 platforms");
 #endif
-          }
-          else {
-            if((bm=bmln_new(file_name))) {
-              bmln_init(bm,0,NULL);
-              if(bmln_describe_plugin(file_name,bm)) {
-                /* @todo: free here, or leave on instance open to be used in class init
-                 * bmln_free(bm); */
-                res=ok=TRUE;
-              }
-              else {
-                bmln_free(bm);
-              }
-            }
-          }
-          if(!ok) {
-            GST_WARNING("machine %s could not be loaded",entry_name);
-            /* @todo: only free here, as we put that into a hashmap in the callback above */
-            g_free(file_name);file_name=NULL;
-          }
         }
         else {
-          GST_WARNING("machine %s is black-listed",entry_name);
+          if((bm=bmln_new(file_name))) {
+            bmln_init(bm,0,NULL);
+            if(bmln_describe_plugin(file_name,bm)) {
+              /* @todo: free here, or leave on instance open to be used in class init
+               * bmln_free(bm); */
+              res=ok=TRUE;
+            }
+            else {
+              bmln_free(bm);
+            }
+          }
         }
+        if(!ok) {
+          GST_WARNING("machine %s could not be loaded",entry_name);
+          /* @todo: only free here, as we put that into a hashmap in the callback above */
+          g_free(file_name);file_name=NULL;
+        }
+      }
+      else {
+        GST_WARNING("machine %s is black-listed",entry_name);
       }
     }
   }
+  g_dir_close (dir);
+  
   GST_INFO("after scanning dir \"%s\", res=%d",dir_name,res);
   return(res);
 }
