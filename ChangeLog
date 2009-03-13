@@ -1,3 +1,10 @@
+2009-03-13  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	  Don't store dll-name twice. We have it in the plugin.
+
 2009-03-04  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:

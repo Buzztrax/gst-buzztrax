@@ -23,7 +23,6 @@
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
 extern GstPlugin *bml_plugin;
-extern GHashTable *bml_dllpath_by_element_type;
 extern GHashTable *bml_descriptors_by_element_type;
 extern GHashTable *bml_descriptors_by_voice_type;
 extern GHashTable *bml_help_uri_by_descriptor;
@@ -149,7 +148,6 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     // temporarily storing it for base-init
     g_hash_table_insert(bml_descriptors_by_element_type,GINT_TO_POINTER(0),(gpointer)bm);
     g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(0),(gpointer)bm);
-    g_hash_table_insert(bml_dllpath_by_element_type,GINT_TO_POINTER(0),(gpointer)pathname);
 
     // store help uri
     if(help_filename) {
@@ -200,13 +198,11 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
         else {
           GST_INFO("succefully registered new plugin : \"%s\"", element_type_name);
           g_hash_table_insert(bml_descriptors_by_element_type,GINT_TO_POINTER(element_type),(gpointer)bm);
-          g_hash_table_insert(bml_dllpath_by_element_type,GINT_TO_POINTER(element_type),(gpointer)pathname);
           res=TRUE;
         }
       }
       g_free(element_type_name);
     }
-    g_hash_table_remove(bml_dllpath_by_element_type, GINT_TO_POINTER(0));
     g_hash_table_remove(bml_descriptors_by_voice_type, GINT_TO_POINTER(0));
     g_hash_table_remove(bml_descriptors_by_element_type, GINT_TO_POINTER(0));
   }

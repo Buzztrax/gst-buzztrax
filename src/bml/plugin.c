@@ -28,7 +28,6 @@
 GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
 
 GstPlugin *bml_plugin;
-GHashTable *bml_dllpath_by_element_type;
 GHashTable *bml_descriptors_by_element_type;
 GHashTable *bml_descriptors_by_voice_type;
 GHashTable *bml_help_uri_by_descriptor;
@@ -133,6 +132,7 @@ static gboolean read_index(const gchar *dir_name) {
             for(a=0;a<g_strv_length(names);a++) {
               if(names[a] && *names[a]) {
                 GST_DEBUG("  %s -> %s",names[a],categories);
+                // this takes ownership of the key and value, which is never freed
                 g_hash_table_insert(bml_category_by_machine_name,names[a],cat);
               }
               else {
@@ -324,9 +324,10 @@ static gboolean dir_scan(const gchar *dir_name) {
         }
         if(!ok) {
           GST_WARNING("machine %s could not be loaded",entry_name);
-          /* @todo: only free here, as we put that into a hashmap in the callback above */
-          g_free(file_name);file_name=NULL;
+          /* only free here, as we put that into a hashmap in the callback above */
+          //g_free(file_name);file_name=NULL;
         }
+        g_free(file_name);
       }
       else {
         GST_WARNING("machine %s is black-listed",entry_name);
@@ -404,7 +405,6 @@ static gboolean plugin_init (GstPlugin * plugin) {
   // init global data
   // @todo can we make these static again and associate the pointer with the
   // GstPlugin-structure (GstPlugin is not a GObject)?
-  bml_dllpath_by_element_type=g_hash_table_new(NULL, NULL);
   bml_descriptors_by_element_type=g_hash_table_new(NULL, NULL);
   bml_descriptors_by_voice_type=g_hash_table_new(NULL, NULL);
   bml_help_uri_by_descriptor=g_hash_table_new(NULL, NULL);

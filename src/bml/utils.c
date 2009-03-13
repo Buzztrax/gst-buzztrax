@@ -28,7 +28,6 @@ extern GType voice_type;
 extern GHashTable *bml_descriptors_by_element_type;
 extern GHashTable *bml_help_uri_by_descriptor;
 extern GHashTable *bml_preset_path_by_descriptor;
-extern GHashTable *bml_dllpath_by_element_type;
 extern GHashTable *bml_category_by_machine_name;
 
 //-- helper
@@ -141,7 +140,6 @@ void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per
  */
 gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcpads, gint numsinkpads)) {
   gpointer bm;
-  gchar *dll_name;
 
   GST_INFO("initializing base: type=0x%lu, voice_type=0x%lu",(gulong)type,(gulong)voice_type);
 
@@ -149,14 +147,11 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   if(!bm) bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(0));
   g_assert(bm);
 
-  dll_name=g_hash_table_lookup(bml_dllpath_by_element_type,GINT_TO_POINTER(type));
-  if(!dll_name) dll_name=g_hash_table_lookup(bml_dllpath_by_element_type,GINT_TO_POINTER(0));
-  g_assert(dll_name);
+  bml(get_machine_info(bm,BM_PROP_DLL_NAME,(void *)&klass->dll_name));
 
-  GST_INFO("initializing base: bm=0x%p, dll_name=%s",bm,dll_name);
+  GST_INFO("initializing base: bm=0x%p, dll_name=%s",bm,((klass->dll_name)?klass->dll_name:"?"));
 
   klass->bm=bm;
-  klass->dll_name=dll_name;
   klass->help_uri=g_hash_table_lookup(bml_help_uri_by_descriptor,GINT_TO_POINTER(bm));
   klass->preset_path=g_hash_table_lookup(bml_preset_path_by_descriptor,GINT_TO_POINTER(bm));
   klass->voice_type=voice_type;
