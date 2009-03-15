@@ -425,7 +425,8 @@ static gboolean plugin_init (GstPlugin * plugin) {
   g_hash_table_destroy(bml_category_by_machine_name);
   g_hash_table_destroy(bml_preset_path_by_descriptor);
   g_hash_table_destroy(bml_help_uri_by_descriptor);
-  g_hash_table_destroy(bml_descriptors_by_voice_type);
+  // @todo: we can release this (yet)
+  //g_hash_table_destroy(bml_descriptors_by_voice_type);
   g_hash_table_destroy(bml_descriptors_by_element_type);
   return(res);
 }

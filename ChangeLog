@@ -1,5 +1,10 @@
 2009-03-15  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/plugin.c:
+	  Keep one hastable, otherwise we segfault.
+
+2009-03-15  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/bml/common.c:
 	* src/bml/common.h:
 	* src/bml/gstbmlsrc.c:
