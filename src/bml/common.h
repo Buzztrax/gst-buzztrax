@@ -30,7 +30,6 @@ G_BEGIN_DECLS
 //-- helper
 
 extern const gchar *gstbml_get_help_uri(gpointer bm);
-extern const gchar *gstbml_get_preset_path(gpointer bm);
 
 //-- preset iface
 

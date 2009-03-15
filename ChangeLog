@@ -1,3 +1,13 @@
+2009-03-15  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	* src/bml/common.h:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	  Refactor to get rid of static one-time leaks.
+
 2009-03-13  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.c:

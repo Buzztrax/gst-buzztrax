@@ -25,7 +25,6 @@
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
 extern GHashTable *bml_help_uri_by_descriptor;
-extern GHashTable *bml_preset_path_by_descriptor;
 
 //-- helper
 
@@ -38,17 +37,6 @@ extern GHashTable *bml_preset_path_by_descriptor;
  */
 const gchar *gstbml_get_help_uri(gpointer bm) {
   return((const gchar *)g_hash_table_lookup(bml_help_uri_by_descriptor,bm));
-}
-
-/*
- * gstbml_get_preset_path:
- *
- * Get the filepath of the presets for a buzzmachine.
- *
- * Returns: the path or %NULL if machine has no presets. Do not modify.
- */
-const gchar *gstbml_get_preset_path(gpointer bm) {
-  return((const gchar *)g_hash_table_lookup(bml_preset_path_by_descriptor,bm));
 }
 
 //-- preset iface

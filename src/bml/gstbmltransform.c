@@ -79,10 +79,6 @@ GST_STATIC_PAD_TEMPLATE ("sink",
 
 static GstBaseTransformClass *parent_class = NULL;
 
-extern GHashTable *bml_descriptors_by_element_type;
-extern GHashTable *bml_descriptors_by_voice_type;
-extern GType voice_type;
-
 //-- child bin interface implementations
 
 

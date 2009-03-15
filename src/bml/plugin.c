@@ -115,7 +115,7 @@ static gboolean read_index(const gchar *dir_name) {
             gchar *cat=g_strdup(categories),*beg,*end;
             gint a;
             
-            /* we need to filter 'Generators,Effects,Gear' from the categories */
+            // we need to filter 'Generators,Effects,Gear' from the categories
             if ((beg=strstr(cat,"/Generator"))) {
               end=&beg[strlen("/Generator")];
               memmove(beg,end,strlen(end)+1);
@@ -132,15 +132,11 @@ static gboolean read_index(const gchar *dir_name) {
             for(a=0;a<g_strv_length(names);a++) {
               if(names[a] && *names[a]) {
                 GST_DEBUG("  %s -> %s",names[a],categories);
-                // this takes ownership of the key and value, which is never freed
-                g_hash_table_insert(bml_category_by_machine_name,names[a],cat);
+                 g_hash_table_insert(bml_category_by_machine_name,g_strdup(names[a]),g_strdup(cat));
               }
-              else {
-                g_free(names[a]);
-              }
-              names[a]=NULL;
             }
-            g_free(names);
+            g_free(cat);
+            g_strfreev(names);
           }
         }
         g_free(entry);
@@ -382,6 +378,8 @@ static gboolean bml_scan(void) {
 }
 
 static gboolean plugin_init (GstPlugin * plugin) {
+  gboolean res;
+
   GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "bml", GST_DEBUG_FG_GREEN | GST_DEBUG_BG_BLACK | GST_DEBUG_BOLD, "BML");
 
   GST_INFO("lets go ===========================================================");
@@ -403,13 +401,11 @@ static gboolean plugin_init (GstPlugin * plugin) {
   }
 
   // init global data
-  // @todo can we make these static again and associate the pointer with the
-  // GstPlugin-structure (GstPlugin is not a GObject)?
   bml_descriptors_by_element_type=g_hash_table_new(NULL, NULL);
   bml_descriptors_by_voice_type=g_hash_table_new(NULL, NULL);
-  bml_help_uri_by_descriptor=g_hash_table_new(NULL, NULL);
-  bml_preset_path_by_descriptor=g_hash_table_new(NULL, NULL);
-  bml_category_by_machine_name=g_hash_table_new(g_str_hash, g_str_equal);
+  bml_help_uri_by_descriptor=g_hash_table_new_full(NULL, NULL, NULL, g_free);
+  bml_preset_path_by_descriptor=g_hash_table_new_full(NULL, NULL, NULL, g_free);
+  bml_category_by_machine_name=g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
   bml_plugin=plugin;
 
   // @todo this is a hack
@@ -424,7 +420,14 @@ static gboolean plugin_init (GstPlugin * plugin) {
   gst_bml_property_meta_quark_type=g_quark_from_string("GstBMLPropertyMeta::type");
 
   GST_INFO("scan for plugins");
-  return(bml_scan());
+  res=bml_scan();
+  
+  g_hash_table_destroy(bml_category_by_machine_name);
+  g_hash_table_destroy(bml_preset_path_by_descriptor);
+  g_hash_table_destroy(bml_help_uri_by_descriptor);
+  g_hash_table_destroy(bml_descriptors_by_voice_type);
+  g_hash_table_destroy(bml_descriptors_by_element_type);
+  return(res);
 }
 
 GST_PLUGIN_DEFINE(
