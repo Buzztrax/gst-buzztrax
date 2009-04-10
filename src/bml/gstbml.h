@@ -121,7 +121,7 @@ struct _GstBMLClass {
   gint input_channels,output_channels;
   
   // param specs
-  GParamSpec **global_property;
+  GParamSpec **global_property,**track_property;
 };
 
 G_END_DECLS

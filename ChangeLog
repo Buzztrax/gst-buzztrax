@@ -1,5 +1,11 @@
 2009-04-11  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/gstbml.h:
+	* src/bml/utils.c:
+	  FIx array size and also handle global copy of track-params.
+
+2009-04-11  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/bml/common.c:
 	* src/bml/common.h:
 	* src/bml/gstbml.h:
