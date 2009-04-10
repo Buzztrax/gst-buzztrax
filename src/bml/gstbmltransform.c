@@ -242,7 +242,9 @@ static gboolean gst_bml_transform_set_caps(GstBaseTransform * base, GstCaps * in
 
 static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base, GstBuffer *outbuf) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
+  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
   GstBML *bml=GST_BML(bml_transform);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
   BMLData *data,*seg_data;
   gpointer bm=bml->bm;
   guint todo,seg_size,samples_per_buffer;
@@ -258,6 +260,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
    */
   gstbml_sync_values(bml);
   bml(tick(bm));
+  bml(gstbml_reset_triggers(bml,bml_class));
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base))
@@ -302,7 +305,9 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
 
 static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *base, GstBuffer *outbuf) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
+  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
   GstBML *bml=GST_BML(bml_transform);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
   BMLData *data,*seg_data;
   gpointer bm=bml->bm;
   guint todo,seg_size,samples_per_buffer;
@@ -318,6 +323,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
    */
   gstbml_sync_values(bml);
   bml(tick(bm));
+  bml(gstbml_reset_triggers(bml,bml_class));
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base))
@@ -361,7 +367,9 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
 
 static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform *base, GstBuffer *inbuf, GstBuffer *outbuf) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
+  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
   GstBML *bml=GST_BML(bml_transform);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
   BMLData *datai,*datao,*seg_datai,*seg_datao;
   gpointer bm=bml->bm;
   guint todo,seg_size,samples_per_buffer;
@@ -386,6 +394,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
    */
   gstbml_sync_values(bml);
   bml(tick(bm));
+  bml(gstbml_reset_triggers(bml,bml_class));
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base)) {

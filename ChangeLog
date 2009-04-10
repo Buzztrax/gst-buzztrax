@@ -1,3 +1,17 @@
+2009-04-11  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	* src/bml/common.h:
+	* src/bml/gstbml.h:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/gstbmlv.c:
+	* src/bml/gstbmlv.h:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	* src/bml/utils.h:
+	  Implement resetting trigger params after triggering (needed for play live).
+
 2009-03-15  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:

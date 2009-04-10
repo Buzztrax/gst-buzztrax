@@ -568,9 +568,8 @@ void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc,
  *
  * normalize data and register property
  */
-gboolean gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val) {
+GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val) {
   GParamSpec *paramspec = NULL;
-  gboolean res=FALSE;
   gint saved_min_val=min_val,saved_max_val=max_val,saved_def_val=def_val;
 
   GST_DEBUG("        name='%s', nick='%s', type=%d, flags=0x%x : val [%d ... d=%d/n=%d ... %d]",name,nick,type,flags, min_val,def_val,no_val,max_val);
@@ -678,9 +677,8 @@ gboolean gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GTyp
     g_param_spec_set_qdata(paramspec,gst_bml_property_meta_quark_type,GINT_TO_POINTER(type));
     g_object_class_install_property(klass,prop_id,paramspec);
     GST_DEBUG("registered paramspec=%p",paramspec);
-    res=TRUE;
   }
-  return(res);
+  return(paramspec);
 }
 
 //-- common element functions

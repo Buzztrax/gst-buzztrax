@@ -91,14 +91,20 @@ static void gst_bmlv_set_property(GObject *object, guint prop_id, const GValue *
   gpointer bm=bmlv->bm;
   gint *addr;
   gint type;
+  guint flags;
 
   // property ids have an offset of 1
   prop_id--;
 
+  // @todo cache this info
   addr=(gint *)bml(get_track_parameter_location(bm,bmlv->voice,prop_id));
   type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
-  // @todo cache this info
-  //bml(get_track_parameter_info(bm,prop_id,BM_PARA_TYPE,(void *)&type));
+  flags=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gstbt_property_meta_quark_flags));
+  
+  if(!(flags&GSTBT_PROPERTY_META_STATE) && !g_param_value_defaults(pspec,(GValue*)value)) {
+    // flag triggered triggers
+    g_atomic_int_set(&bmlv->triggers_changed[prop_id],1);
+  }
   gstbml_set_param(type,addr,value);
 
   /*{ DEBUG
@@ -146,6 +152,8 @@ static void gst_bmlv_finalize(GObject *object) {
   GstBMLV *bmlv=GST_BMLV(object);
 
   GST_DEBUG("!!!! bmlv=%p",bmlv);
+  
+  g_free(bmlv->triggers_changed);
 
   if(G_OBJECT_CLASS(parent_class)->finalize) {
     (G_OBJECT_CLASS(parent_class)->finalize)(object);
@@ -191,6 +199,7 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
 
     //klass->numtrackparams=num;
     GST_INFO("  machine has %d track params ",num);
+    klass->track_property=g_new(GParamSpec*,num);
     for(i=0;i<num;i++,prop_id++) {
       GST_DEBUG("      track_param=%02i",i);
       if(bml(get_track_parameter_info(bm,i,BM_PARA_TYPE,(void *)&type)) &&
@@ -210,7 +219,7 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
           }
         }
 
-        if(gstbml_register_param(gobject_class, prop_id, type, enum_type, name, nick, desc, flags, min_val, max_val, no_val, def_val)) {
+        if((klass->track_property[klass->numtrackparams]=gstbml_register_param(gobject_class, prop_id, type, enum_type, name, nick, desc, flags, min_val, max_val, no_val, def_val))) {
           klass->numtrackparams++;
         }
         else {
@@ -224,7 +233,10 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
 }
 
 static void gst_bmlv_init(GstBMLV *bmlv) {
+  GstBMLVClass *klass=GST_BMLV_GET_CLASS(bmlv);
   GST_INFO("initializing instance");
+  
+  bmlv->triggers_changed=g_new0(gint,klass->numtrackparams);
 }
 
 //--

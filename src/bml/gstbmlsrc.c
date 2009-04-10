@@ -350,7 +350,9 @@ static gboolean gst_bml_src_is_seekable(GstBaseSrc * base) {
 static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offset, guint length, GstBuffer ** buffer) {
   GstFlowReturn res;
   GstBMLSrc *bml_src=GST_BML_SRC(base);
+  GstBMLSrcClass *klass=GST_BML_SRC_GET_CLASS(bml_src);
   GstBML *bml=GST_BML(bml_src);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);  
   GstBuffer *buf;
   GstClockTime next_time;
   gint64 n_samples;
@@ -406,6 +408,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
    */
   gstbml_sync_values(bml);
   bml(tick(bm));
+  bml(gstbml_reset_triggers(bml,bml_class));
 
   bml->running_time += bml->ticktime;
   //bml->running_time = next_time;
@@ -449,7 +452,9 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
 static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime offset, guint length, GstBuffer ** buffer) {
   GstFlowReturn res;
   GstBMLSrc *bml_src=GST_BML_SRC(base);
+  GstBMLSrcClass *klass=GST_BML_SRC_GET_CLASS(bml_src);
   GstBML *bml=GST_BML(bml_src);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);  
   GstBuffer *buf;
   GstClockTime next_time;
   gint64 n_samples;
@@ -503,6 +508,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
    */
   gstbml_sync_values(bml);
   bml(tick(bm));
+  bml(gstbml_reset_triggers(bml,bml_class));
 
   bml->running_time += bml->ticktime;
   //bml->running_time = next_time;

@@ -83,6 +83,10 @@ struct _GstBML {
   GstPad **sinkpads,**srcpads;
 
   gint samplerate, samples_per_buffer;
+  
+  // array with an entry for each parameter
+  // flags that a g_object_set has set a value for a trigger param
+  gint * volatile triggers_changed;
 
   /* < private > */
   gboolean tags_pushed;			/* send tags just once ? */
@@ -115,6 +119,9 @@ struct _GstBMLClass {
   gint numattributes,numglobalparams,numtrackparams;
 
   gint input_channels,output_channels;
+  
+  // param specs
+  GParamSpec **global_property;
 };
 
 G_END_DECLS

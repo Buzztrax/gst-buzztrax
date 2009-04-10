@@ -27,8 +27,11 @@
 
 G_BEGIN_DECLS
 
+// this is a bit weak, but better that nothing
 #define GST_BMLV(obj) ((GstBMLV *)obj)
 #define GST_BMLV_CLASS(klass) ((GstBMLVClass *)klass)
+#define GST_BMLV_GET_CLASS(obj)  ((GstBMLVClass *)G_TYPE_INSTANCE_GET_CLASS ((obj), GST_TYPE_OBJECT, GstObjectClass))
+
 
 typedef struct _GstBMLV GstBMLV;
 typedef struct _GstBMLVClass GstBMLVClass;
@@ -45,6 +48,10 @@ struct _GstBMLV {
   //GstElement *parent;
   // the voice number
   guint voice;
+
+  // array with an entry for each parameter
+  // flags that a g_object_set has set a value for a trigger param
+  gint * volatile triggers_changed;
 };
 
 struct _GstBMLVClass {
@@ -54,6 +61,9 @@ struct _GstBMLVClass {
   void *bm;
   
   gint numtrackparams;
+
+  // param specs
+  GParamSpec **track_property;
 };
 
 extern GType bml(v_get_type(gchar *voice_type_name));

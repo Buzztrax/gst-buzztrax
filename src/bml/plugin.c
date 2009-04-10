@@ -173,7 +173,7 @@ static gboolean dir_scan(const gchar *dir_name) {
   gchar *file_name,*ext;
   const gchar *entry_name;
   gpointer bm;
-  gboolean res=FALSE,ok;
+  gboolean res=FALSE;
 
   const gchar *blacklist[] ={
     "2NDPROCESS NUMBIRD 1.4.DLL",
@@ -286,8 +286,8 @@ static gboolean dir_scan(const gchar *dir_name) {
       /* test against blacklist */
       if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
         file_name=g_build_filename (dir_name, entry_name, NULL);
+        //file_name=g_strconcat(dir_name, G_DIR_SEPARATOR_S, entry_name, NULL);
         GST_WARNING("trying plugin '%s','%s'",entry_name,file_name);
-        ok=FALSE;
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
           if((bm=bmlw_new(file_name))) {
@@ -295,9 +295,10 @@ static gboolean dir_scan(const gchar *dir_name) {
             if(bmlw_describe_plugin(file_name,bm)) {
               /* @todo: free here, or leave on instance open to be used in class init
                * bmlw_free(bm); */
-              res=ok=TRUE;
+              res=TRUE;
             }
             else {
+              GST_WARNING("machine %s could not be loaded",entry_name);
               bmlw_free(bm);
             }
           }
@@ -311,17 +312,13 @@ static gboolean dir_scan(const gchar *dir_name) {
             if(bmln_describe_plugin(file_name,bm)) {
               /* @todo: free here, or leave on instance open to be used in class init
                * bmln_free(bm); */
-              res=ok=TRUE;
+              res=TRUE;
             }
             else {
+              GST_WARNING("machine %s could not be loaded",entry_name);
               bmln_free(bm);
             }
           }
-        }
-        if(!ok) {
-          GST_WARNING("machine %s could not be loaded",entry_name);
-          /* only free here, as we put that into a hashmap in the callback above */
-          //g_free(file_name);file_name=NULL;
         }
         g_free(file_name);
       }

@@ -53,6 +53,8 @@ extern void bml(gstbml_finalize(GstBML *bml));
 extern void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id, const GValue *value, GParamSpec * pspec));
 extern void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id, GValue *value, GParamSpec * pspec));
 
+extern void bml(gstbml_reset_triggers(GstBML *bml, GstBMLClass *bml_class));
+
 G_END_DECLS
 
 #endif /* __GST_BML_UTILS_H__ */
