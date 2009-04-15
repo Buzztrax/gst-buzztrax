@@ -16,3 +16,6 @@ $Id$
 - can be removed once we get around added a GstStructure *meta to
   GstElementFactory
 
+= debugging =
+G_SLICE=always-malloc G_DEBUG=gc-friendly GLIBCPP_FORCE_NEW=1 GLIBCXX_FORCE_NEW=1 valgrind --tool=memcheck --leak-check=full --leak-resolution=high --trace-children=yes --num-callers=20 --suppressions=$HOME/projects/gstreamer/gstreamer/common/gst.supp gst-launch -q >/dev/null audiotestsrc num-buffers=10 ! bml-EQ-10 ! fakesink
+

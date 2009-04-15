@@ -58,7 +58,7 @@ GType gstbt_tone_conversion_tuning_get_type(void) {
 
 //-- helpers
 
-static gboolean note_string_2_value (const gchar *note, guint *tone, guint *octave) {
+static gboolean note_string_to_values (const gchar *note, guint *tone, guint *octave) {
   if(!note) return(FALSE);
   if((strlen(note)!=3)) return(FALSE);
   if(!(note[1]=='-' || note[1]=='#')) return (FALSE);
@@ -105,7 +105,7 @@ static gboolean note_string_2_value (const gchar *note, guint *tone, guint *octa
   return(TRUE);
 }
 
-static gboolean note_value_2_string (guint note, guint *tone, guint *octave) {
+static gboolean note_number_to_values (guint note, guint *tone, guint *octave) {
   g_return_val_if_fail(note<((16*9)+12),0);
   g_assert(tone);
   g_assert(octave);
@@ -189,7 +189,11 @@ static gstbt_tone_conversion_change_tuning(GstBtToneConversion *self) {
 gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gchar *note) {
   guint tone, octave;
 
-  if(note_string_2_value(note,&tone,&octave))
+  if(note[0]=='o' && note[1]=='f' && note[2]=='f') {
+    return(-1.0);
+  }
+
+  if(note_string_to_values(note,&tone,&octave))
     return(self->translate(self,octave,tone));
   else
     return(0.0);
@@ -209,8 +213,10 @@ gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gc
  */
 gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,guint note) {
   guint tone, octave;
+  
+  if(note==GSTBT_TONE_CONVERSION_NOTE_OFF) return (-1.0);
 
-  if(note_value_2_string(note,&tone,&octave))
+  if(note_number_to_values(note,&tone,&octave))
     return(self->translate(self,octave,tone));
   else
     return(0.0);
@@ -227,8 +233,12 @@ gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,gu
  */
 guint gstbt_tone_conversion_note_string_2_number(const gchar *note) {
   guint tone, octave;
+
+  if(note[0]=='o' && note[1]=='f' && note[2]=='f') {
+    return(GSTBT_TONE_CONVERSION_NOTE_OFF);
+  }
   
-  if(note_string_2_value(note,&tone,&octave))
+  if(note_string_to_values(note,&tone,&octave))
     return (1+(octave<<4)+tone);
   else
     return(0);
@@ -250,7 +260,9 @@ const gchar *gstbt_tone_conversion_note_number_2_string(guint note) {
   static const gchar *key[12]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
   guint tone, octave;
   
-  if(note_value_2_string(note,&tone,&octave)) {
+  if(note==GSTBT_TONE_CONVERSION_NOTE_OFF) return ("off");
+  
+  if(note_number_to_values(note,&tone,&octave)) {
     sprintf(str,"%2s%1d",key[tone],octave);
     return(str);
   }

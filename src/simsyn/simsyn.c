@@ -1043,36 +1043,46 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       g_free (src->note);
       src->note = g_value_dup_string (value);
       if(src->note) {
-        guint64 attack,decay;
-        GValue val = { 0, };
+        gdouble freq;
 
         GST_DEBUG("new note -> '%s'",src->note);
-        src->freq = gstbt_tone_conversion_translate_from_string (src->n2f, src->note);
-        /* trigger volume 'envelope' */
-        src->volenv->value=0.001;
-        src->note_count=0L;
-        src->flt_low=src->flt_mid=src->flt_high=0.0;
-        /* src->samplerate will be one second */
-        attack=src->samplerate/100;
-        decay=src->samplerate*src->decay;
-        if(attack>decay) attack=decay-1;
-        g_value_init (&val, G_TYPE_DOUBLE);
-        gst_controller_unset_all(src->volenv_controller,"value");
-                g_value_set_double(&val,0.001);
-        gst_controller_set(src->volenv_controller,"value",0,&val);
-                g_value_set_double(&val,1.0);
-        gst_controller_set(src->volenv_controller,"value",attack,&val);
-                g_value_set_double(&val,0.0);
-        gst_controller_set(src->volenv_controller,"value",decay,&val);
+        freq = gstbt_tone_conversion_translate_from_string (src->n2f, src->note);
+        if(freq>=0.0) {
+          guint64 attack,decay;
+          GValue val = { 0, };
 
-        /* @todo: more advanced envelope
-        if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
-        gst_controller_set(src->volenv_controller,"value",0,0.0);
-        gst_controller_set(src->volenv_controller,"value",attack_time,1.0);
-        gst_controller_set(src->volenv_controller,"value",attack_time+decay_time,sustain_level);
-        gst_controller_set(src->volenv_controller,"value",note_time,sustain_level);
-        gst_controller_set(src->volenv_controller,"value",note_time+release_time,0.0);
-        */
+          src->freq=freq;
+          /* trigger volume 'envelope' */
+          src->volenv->value=0.001;
+          src->note_count=0L;
+          src->flt_low=src->flt_mid=src->flt_high=0.0;
+          /* src->samplerate will be one second */
+          attack=src->samplerate/100;
+          decay=src->samplerate*src->decay;
+          if(attack>decay) attack=decay-1;
+          g_value_init (&val, G_TYPE_DOUBLE);
+          gst_controller_unset_all(src->volenv_controller,"value");
+                  g_value_set_double(&val,0.001);
+          gst_controller_set(src->volenv_controller,"value",0,&val);
+                  g_value_set_double(&val,1.0);
+          gst_controller_set(src->volenv_controller,"value",attack,&val);
+                  g_value_set_double(&val,0.0);
+          gst_controller_set(src->volenv_controller,"value",decay,&val);
+  
+          /* @todo: more advanced envelope
+          if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
+          gst_controller_set(src->volenv_controller,"value",0,0.0);
+          gst_controller_set(src->volenv_controller,"value",attack_time,1.0);
+          gst_controller_set(src->volenv_controller,"value",attack_time+decay_time,sustain_level);
+          gst_controller_set(src->volenv_controller,"value",note_time,sustain_level);
+          gst_controller_set(src->volenv_controller,"value",note_time+release_time,0.0);
+          */
+        }
+        else {
+          src->freq=0.0;
+          /* stop volume 'envelope' */
+          src->volenv->value=0.0;
+        }
       }
       break;
     case PROP_WAVE:

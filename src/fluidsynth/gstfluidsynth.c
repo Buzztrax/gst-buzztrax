@@ -278,6 +278,7 @@ static guint gst_fluidsynth_note_string_2_value (const gchar *note) {
 
   g_return_val_if_fail(note,0);
   g_return_val_if_fail((strlen(note)==3),0);
+  
   g_return_val_if_fail((note[1]=='-' || note[1]=='#'),0);
 
   // parse note
@@ -600,11 +601,16 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       g_free (gstsynth->note);
       gstsynth->note = g_value_dup_string (value);
       if (gstsynth->note) {
-        // start note-off counter
-        gstsynth->cur_note_length = gstsynth->note_length;
-        gstsynth->key = gst_fluidsynth_note_string_2_value(gstsynth->note);
-        GST_INFO("new note: '%s' = %d",gstsynth->note,gstsynth->key);
-        fluid_synth_noteon (gstsynth->fluid, /*chan*/ 0,  gstsynth->key, gstsynth->velocity);
+        if(gstsynth->note[0]=='o' && gstsynth->note[1]=='f' && gstsynth->note[2]=='f') {
+          fluid_synth_noteoff (gstsynth->fluid, /*chan*/ 0,  gstsynth->key);
+        }
+        else {
+          // start note-off counter
+          gstsynth->cur_note_length = gstsynth->note_length;
+          gstsynth->key = gst_fluidsynth_note_string_2_value(gstsynth->note);
+          GST_INFO("new note: '%s' = %d",gstsynth->note,gstsynth->key);
+          fluid_synth_noteon (gstsynth->fluid, /*chan*/ 0,  gstsynth->key, gstsynth->velocity);
+        }
       }
       break;
     case PROP_NOTE_LENGTH:
