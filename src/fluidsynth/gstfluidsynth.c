@@ -52,7 +52,13 @@
 /*
  * for API look at /usr/share/doc/libfluidsynth-dev/examples/example.c
  * TODO:
- * - what about LIB_INSTPATCH_PATH to look for soundfonts
+ * - we should implement the preset interface and list known sounds fonts
+ *   - soundfont
+ *   - ubuntu seems to use /usr/share/sounds/sf2
+ *   - what about LIB_INSTPATCH_PATH to look for soundfonts
+ *   - http://help.lockergnome.com/linux/Bug-348290-asfxload-handle-soundfont-search-path--ftopict218300.html
+ *     SFBANKDIR
+ * 
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
