@@ -258,9 +258,9 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
   /* split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
    */
+  bml(gstbml_reset_triggers(bml,bml_class));
   gstbml_sync_values(bml);
   bml(tick(bm));
-  bml(gstbml_reset_triggers(bml,bml_class));
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base))
@@ -321,9 +321,9 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
   /* split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
    */
+  bml(gstbml_reset_triggers(bml,bml_class));
   gstbml_sync_values(bml);
   bml(tick(bm));
-  bml(gstbml_reset_triggers(bml,bml_class));
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base))
@@ -392,9 +392,9 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   /* split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
    */
+  bml(gstbml_reset_triggers(bml,bml_class));
   gstbml_sync_values(bml);
   bml(tick(bm));
-  bml(gstbml_reset_triggers(bml,bml_class));
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base)) {

@@ -1,3 +1,14 @@
+2009-04-17  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/propertymeta.h:
+	  Comments.
+
+	* src/bml/common.c:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/utils.c:
+	  Temporarily disable trigger resets. Needs proper fix.
+
 2009-04-15  Stefan Kost  <ensonic@users.sf.net>
 
 	* TODO:

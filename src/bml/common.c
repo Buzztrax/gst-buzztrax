@@ -512,6 +512,7 @@ void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc,
   gchar *name,*ptr1,*ptr2;
 
   GST_DEBUG("        tmp_name='%s'",tmp_name);
+  // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE? 
   name=g_convert(tmp_name,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
   if(nick) {
     *nick=g_convert(tmp_name,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);

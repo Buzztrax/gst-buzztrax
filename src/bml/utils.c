@@ -183,12 +183,14 @@ void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bm, const gch
   gchar *extra_categories;
 
   /* construct the element details struct */
+  // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE? 
   bml(get_machine_info(bm,BM_PROP_SHORT_NAME,(void *)&str));
   details.longname=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   bml(get_machine_info(bm,BM_PROP_NAME,(void *)&str));
   details.description=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   bml(get_machine_info(bm,BM_PROP_AUTHOR,(void *)&str));
   details.author=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
+
   /* use extra categories (see plugin.c:read_index) */
   /* this does not yet match all machines, e.g. Elak SVF
    * we could try ("%s %s",author,longname) in addition?
@@ -885,6 +887,7 @@ static void reset_triggers(GParamSpec *pspec,gpointer addr) {
  * set trigger parameter back to no-value
  */
 void bml(gstbml_reset_triggers(GstBML *bml, GstBMLClass *bml_class)) {
+#if 0
   GList *node;
   gpointer bm=bml->bm;
   GstBMLV *bmlv;
@@ -918,5 +921,6 @@ void bml(gstbml_reset_triggers(GstBML *bml, GstBMLClass *bml_class)) {
       }
     }
   }
+#endif
 }
 

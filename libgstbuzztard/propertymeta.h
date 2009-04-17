@@ -68,7 +68,7 @@ typedef enum {
   GSTBT_PROPERTY_META_NONE=0,
   GSTBT_PROPERTY_META_WAVE=1,		/* parameter value references a wavetable slot */
   GSTBT_PROPERTY_META_STATE=2,		/* parameter is continuously changing (not used for notes and triggers) */
-  GSTBT_PROPERTY_META_TICK_ON_EDIT=4
+  GSTBT_PROPERTY_META_TICK_ON_EDIT=4 /* causes the host to send you a Tick() message immediatly after the user enters a value in the pattern or machine editor */
 } GstBtPropertyMetaFlags;
 
 #endif /* __GSTBT_PROPERTY_META_H__ */
