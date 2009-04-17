@@ -407,7 +407,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
    * be updated when required (e.g. for the subticks-feature).
    */
   bml(gstbml_reset_triggers(bml,bml_class));
-  gstbml_sync_values(bml);
+  bml(gstbml_sync_values(bml,bml_class));
   bml(tick(bm));
 
   bml->running_time += bml->ticktime;
@@ -507,7 +507,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
    * be updated when required (e.g. for the subticks-feature).
    */
   bml(gstbml_reset_triggers(bml,bml_class));
-  gstbml_sync_values(bml);
+  bml(gstbml_sync_values(bml,bml_class));
   bml(tick(bm));
 
   bml->running_time += bml->ticktime;

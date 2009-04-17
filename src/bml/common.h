@@ -52,7 +52,6 @@ extern GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint 
 extern void gstbml_set_param(gint type,gpointer addr,const GValue *value);
 extern void gstbml_get_param(gint type,gpointer addr,GValue *value);
 extern void gstbml_calculate_buffer_frames(GstBML *bml);
-extern void gstbml_sync_values(GstBML *bml);
 
 extern void gstbml_dispose(GstBML *bml);
 

@@ -861,6 +861,43 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
   }
 }
 
+
+/*
+ * gstbml_sync_values:
+ *
+ * updates the global and voice params
+ */
+void bml(gstbml_sync_values(GstBML *bml, GstBMLClass *bml_class)) {
+  GList *node;
+  gulong i;
+  GstBMLV *bmlv;
+  GstBMLVClass *bmlv_class;
+  //gboolean res;
+
+  GST_DEBUG_OBJECT(bml->self,"  sync_values(%p), voices=%lu,%p",bml->self,bml->num_voices,bml->voices);
+
+  for(i=0;i<bml_class->numglobalparams+bml_class->numtrackparams;i++) {
+    g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],1,2);
+  }
+  /*res=*/gst_object_sync_values(G_OBJECT(bml->self),bml->running_time);
+  for(i=0;i<bml_class->numglobalparams+bml_class->numtrackparams;i++) {
+    g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],1,0);
+  }
+  //if(G_UNLIKELY(!res)) { GST_WARNING("global sync failed"); }
+  for(node=bml->voices;node;node=g_list_next(node)) {
+    bmlv=node->data;
+    bmlv_class=GST_BMLV_GET_CLASS(bmlv);  
+    for(i=0;i<bmlv_class->numtrackparams;i++) {
+      g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],1,2);
+    }
+    /*res=*/gst_object_sync_values(G_OBJECT(bmlv),bml->running_time);
+    //if(G_UNLIKELY(!res)) { GST_WARNING("voice sync failed"); }
+    for(i=0;i<bmlv_class->numtrackparams;i++) {
+      g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],1,0);
+    }
+  }
+}
+
 static void reset_triggers(GParamSpec *pspec,gpointer addr) {
   gint no_val,type;
 
@@ -887,7 +924,6 @@ static void reset_triggers(GParamSpec *pspec,gpointer addr) {
  * set trigger parameter back to no-value
  */
 void bml(gstbml_reset_triggers(GstBML *bml, GstBMLClass *bml_class)) {
-#if 0
   GList *node;
   gpointer bm=bml->bm;
   GstBMLV *bmlv;
@@ -897,14 +933,14 @@ void bml(gstbml_reset_triggers(GstBML *bml, GstBMLClass *bml_class)) {
   gpointer addr;
   
   for(i=0;i<bml_class->numglobalparams;i++) {
-    if(g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],1,0)) {
+    if(g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],2,0)) {
       pspec=bml_class->global_property[i];
       addr=bml(get_global_parameter_location(bm,i));
       reset_triggers(pspec,addr);
     }
   }
   for(i=0;i<bml_class->numtrackparams;i++) {
-    if(g_atomic_int_compare_and_exchange(&bml->triggers_changed[bml_class->numglobalparams+i],1,0)) {
+    if(g_atomic_int_compare_and_exchange(&bml->triggers_changed[bml_class->numglobalparams+i],2,0)) {
       pspec=bml_class->track_property[i];
       addr=bml(get_track_parameter_location(bm,0,i));
       reset_triggers(pspec,addr);
@@ -914,13 +950,12 @@ void bml(gstbml_reset_triggers(GstBML *bml, GstBMLClass *bml_class)) {
     bmlv=node->data;
     bmlv_class=GST_BMLV_GET_CLASS(bmlv);  
     for(i=0;i<bmlv_class->numtrackparams;i++) {
-      if(g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],1,0)) {
+      if(g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],2,0)) {
         pspec=bmlv_class->track_property[i];
         addr=bml(get_track_parameter_location(bm,v,i));
         reset_triggers(pspec,addr);
       }
     }
   }
-#endif
 }
 
