@@ -52,12 +52,21 @@
 /*
  * for API look at /usr/share/doc/libfluidsynth-dev/examples/example.c
  * TODO:
- * - we should implement the preset interface and list known sounds fonts
- *   - soundfont
- *   - ubuntu seems to use /usr/share/sounds/sf2
- *   - what about LIB_INSTPATCH_PATH to look for soundfonts
- *   - http://help.lockergnome.com/linux/Bug-348290-asfxload-handle-soundfont-search-path--ftopict218300.html
- *     SFBANKDIR
+ * - make it easier to load sounds fonts
+ *   - where to get them from:
+ *     - local files
+ *       - ubuntu/suse use /usr/share/sounds/sf2
+ *       - what about LIB_INSTPATCH_PATH to look for soundfonts
+ *       - http://help.lockergnome.com/linux/Bug-348290-asfxload-handle-soundfont-search-path--ftopict218300.html
+ *         SFBANKDIR
+ *     - internet
+ *       - http://sounds.resonance.org/patches.py
+ *   - preset iface?
+ *     - we would need a way to hide the name property
+ *     - also the presets would be read-only, otherwise
+ *       - rename would store it localy as new name
+ *       - saving is sort of fake still as one can't change the content of the
+ *         patch anyway
  * 
  */
 #ifdef HAVE_CONFIG_H
@@ -603,6 +612,7 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       if (gstsynth->note) {
         if(gstsynth->note[0]=='o' && gstsynth->note[1]=='f' && gstsynth->note[2]=='f') {
           fluid_synth_noteoff (gstsynth->fluid, /*chan*/ 0,  gstsynth->key);
+          gstsynth->cur_note_length = 0;
         }
         else {
           // start note-off counter

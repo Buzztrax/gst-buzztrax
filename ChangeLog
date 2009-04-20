@@ -1,3 +1,8 @@
+2009-04-20  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c:
+	  Fix copy'n'paste error in var-name, that broke the build.
+
 2009-04-17  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:
