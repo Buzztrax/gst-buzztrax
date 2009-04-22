@@ -327,7 +327,7 @@ static void gstbt_tone_conversion_dispose(GObject *object) {
 }
 
 static void gstbt_tone_conversion_finalize(GObject *object) {
-  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
+  //GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
 
   if(G_OBJECT_CLASS(parent_class)->finalize) {
     (G_OBJECT_CLASS(parent_class)->finalize)(object);

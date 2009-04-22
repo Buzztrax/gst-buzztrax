@@ -609,7 +609,6 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, G
        */
       break;
     case PT_SWITCH:
-      if(min_val==-1) min_val=0;
       //if(!(flags&GSTBT_PROPERTY_META_STATE)) {
         /* @todo use better type for triggers
          * this is how its define for buzz
@@ -626,6 +625,7 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, G
          * - what about an enum OFF,ON,NO_VALUE?
          */
         /*
+        if(min_val==-1) min_val=0;
         paramspec=g_param_spec_uint(name, nick, desc,
           min_val,max_val,def_val,
           G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);

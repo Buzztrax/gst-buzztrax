@@ -1,3 +1,9 @@
+2009-04-22  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/toneconversion.c:
+	* src/bml/common.c:
+	  Clang checker fixes.
+
 2009-04-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c:
