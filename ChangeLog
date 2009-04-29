@@ -1,3 +1,11 @@
+2009-04-29  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/gstbmlv.c:
+	* src/bml/utils.c:
+	  Fix format string warnings, by removing some obsolte log.
+
 2009-04-22  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/toneconversion.c:

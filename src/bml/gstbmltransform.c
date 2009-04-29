@@ -594,7 +594,7 @@ static void gst_bml_transform_init(GstBMLTransform *bml_transform) {
   GstBMLClass *bml_class=GST_BML_CLASS(klass);
   GstBML *bml=GST_BML(bml_transform);
 
-  GST_INFO("initializing instance: elem=%p, bml=%p, bml_class=%p, size=%d",bml_transform,bml,bml_class,sizeof (GstBMLTransform));
+  GST_INFO("initializing instance: elem=%p, bml=%p, bml_class=%p",bml_transform,bml,bml_class);
   GST_INFO("bm=0x%p, src=%d, sink=%d",bml_class->bm,bml_class->numsrcpads,bml_class->numsinkpads);
 
   bml(gstbml_init(bml,bml_class,GST_ELEMENT(bml_transform)));

@@ -62,7 +62,7 @@ static gchar *bml(v_property_meta_describe_property(gpointer bm, glong index, GV
       return(g_strdup_value_contents(event));
       break;
     default:
-      GST_ERROR("unsupported GType=%d:'%s'",G_VALUE_TYPE(event),G_VALUE_TYPE_NAME(event));
+      GST_ERROR("unsupported GType='%s'",G_VALUE_TYPE_NAME(event));
       return(g_strdup_value_contents(event));
   }
   GST_INFO("formatted track parameter : '%s'",str);

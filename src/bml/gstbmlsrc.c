@@ -601,7 +601,7 @@ static void gst_bml_src_init(GstBMLSrc *bml_src) {
   GstBML *bml=GST_BML(bml_src);
   GstPad *srcpad;
 
-  GST_INFO("initializing instance: elem=%p, bml=%p, bml_class=%p, size=%d",bml_src,bml,bml_class,sizeof (GstBMLSrc));
+  GST_INFO("initializing instance: elem=%p, bml=%p, bml_class=%p",bml_src,bml,bml_class);
   GST_INFO("bm=0x%p, src=%d, sink=%d",bml_class->bm,bml_class->numsrcpads,bml_class->numsinkpads);
 
   bml(gstbml_init(bml,bml_class,GST_ELEMENT(bml_src)));
@@ -621,7 +621,7 @@ static void gst_bml_src_class_init(GstBMLSrcClass * klass) {
   GObjectClass *gobject_class=G_OBJECT_CLASS(klass);
   GstBaseSrcClass *gstbasesrc_class=GST_BASE_SRC_CLASS(klass);
 
-  GST_INFO("initializing class: size=%d",sizeof (GstBMLSrcClass));
+  GST_INFO("initializing class");
   parent_class=g_type_class_peek_parent(klass);
 
   // override methods
