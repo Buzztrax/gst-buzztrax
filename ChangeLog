@@ -1,3 +1,13 @@
+2009-04-30  Stefan Kost  <ensonic@users.sf.net>
+
+	* NEWS:
+	  Prepare for pre-releasing.
+
+	* src/bml/gstbml.c:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	  Look for data files in data dirs too.
+
 2009-04-29  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlsrc.c:

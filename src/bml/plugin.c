@@ -398,10 +398,12 @@ static gboolean plugin_init (GstPlugin * plugin) {
   }
 
   // init global data
+  // we have to keep help_uri & preset_path loaded for whole time, as the
+  // strings can be accessed at any time (that includes after plugin_init()
   bml_descriptors_by_element_type=g_hash_table_new(NULL, NULL);
   bml_descriptors_by_voice_type=g_hash_table_new(NULL, NULL);
-  bml_help_uri_by_descriptor=g_hash_table_new_full(NULL, NULL, NULL, g_free);
-  bml_preset_path_by_descriptor=g_hash_table_new_full(NULL, NULL, NULL, g_free);
+  bml_help_uri_by_descriptor=g_hash_table_new(NULL, NULL);
+  bml_preset_path_by_descriptor=g_hash_table_new(NULL, NULL);
   bml_category_by_machine_name=g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
   bml_plugin=plugin;
 

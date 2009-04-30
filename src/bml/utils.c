@@ -158,6 +158,8 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   klass->numsrcpads=numsrcpads;
   klass->numsinkpads=numsinkpads;
 
+  GST_INFO("initializing base: docs='%s', presets='%s'",klass->help_uri,klass->preset_path);
+
   if(!bml(get_machine_info(bm,BM_PROP_NUM_INPUT_CHANNELS,(void *)&klass->input_channels)) ||
     !bml(get_machine_info(bm,BM_PROP_NUM_OUTPUT_CHANNELS,(void *)&klass->output_channels))) {
 

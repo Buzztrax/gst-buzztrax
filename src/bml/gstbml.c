@@ -67,8 +67,9 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     gchar *name,*filename,*ext;
     gchar *element_type_name,*voice_type_name;
     gchar *help_filename,*preset_filename;
+    gchar *data_pathname=NULL;
 
-    if((filename=g_strrstr(dllname,"/"))) {
+    if((filename=strrchr(dllname,'/'))) {
       filename++;
     }
     else {
@@ -76,7 +77,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     }
     GST_INFO("  dll-name: '%s', flags are: %x",filename,flags);
     if(flags&0xFE) {
-      GST_INFO("  machine is not yet fully supported");
+      GST_WARNING("  machine is not yet fully supported");
     }
 
     // get basename
@@ -112,27 +113,38 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       return(TRUE);
     }
 
-    /* @todo: this is for wrapped mode, use
-     * #ifdef BML_WRAPPED
-     *   // code below
-     * #else
-     *   // use DATADIR/???
-     * #endif
-     * for presets we need a fallback tog_get_user_config_dir()/bml in any case
-     */
-    // probe additional files (need full path here)
-    ext=g_strrstr(pathname,".");
-    *ext='\0';  // temporarily terminate
+    // use right path for emulated and native machines
+#ifdef BML_WRAPPED
+    data_pathname=g_strdup(pathname);
+#else
+    {
+      gchar *pos;
+      // replace lib in path-name wth share (should we use DATADIR/???)
+      pos=strstr(pathname,"/lib/");
+      if(pos) {
+        *pos='\0';
+        data_pathname=g_strdup_printf("%s/share/%s",pathname,&pos[5]);
+        *pos='/';
+      }
+      else {
+        GST_WARNING("failed to map plugin lib path '%s' to a datadir",pathname);
+        data_pathname=g_strdup(pathname);
+      }
+    }
+#endif
+    // data files have same basename as plugin, but different extension
+    ext=strrchr(data_pathname,'.');
+    *ext='\0';
     // try various help uris
-    help_filename = g_strdup_printf("%s.html",pathname);
+    help_filename = g_strdup_printf("%s.html",data_pathname);
     if(!g_file_test(help_filename, G_FILE_TEST_EXISTS)) {
       GST_INFO("no user docs at '%s'",help_filename);
       g_free(help_filename);
-      help_filename = g_strdup_printf("%s.htm",pathname);
+      help_filename = g_strdup_printf("%s.htm",data_pathname);
       if(!g_file_test(help_filename, G_FILE_TEST_EXISTS)) {
         GST_INFO("no user docs at '%s'",help_filename);
         g_free(help_filename);
-        help_filename = g_strdup_printf("%s.txt",pathname);
+        help_filename = g_strdup_printf("%s.txt",data_pathname);
         if(!g_file_test(help_filename, G_FILE_TEST_EXISTS)) {
           GST_INFO("no user docs at '%s'",help_filename);
           g_free(help_filename);
@@ -141,9 +153,9 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       }
     }
     // generate preset name
-    preset_filename = g_strdup_printf("%s.prs",pathname);
-    // restore path
-    *ext='.';
+    // we need a fallback to g_get_user_config_dir()/??? in any case
+    preset_filename = g_strdup_printf("%s.prs",data_pathname);
+    g_free(data_pathname);
 
     // temporarily storing it for base-init
     g_hash_table_insert(bml_descriptors_by_element_type,GINT_TO_POINTER(0),(gpointer)bm);
