@@ -1,3 +1,9 @@
+2009-05-14  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/utils.c:
+	  Don't call bm_init() when the tempo changes. This resets parameters and
+	  voices. We might need more fine-grained api here.
+
 2009-05-10  Stefan Kost  <ensonic@users.sf.net>
 
 	* autogen.sh:

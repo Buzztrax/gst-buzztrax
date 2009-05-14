@@ -127,7 +127,11 @@ void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per
     gstbml_calculate_buffer_frames(bml);
     // update timevalues in buzzmachine
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
-    bml(init(bml->bm,0,NULL));
+    // if we call init here, it resets all parameter to deaults
+    // including the voices to zero
+    // @todo: we need to do a test in EnsonicBCT to see what buzz calls when a machine
+    //        exists and one changes the tempo
+    //bml(init(bml->bm,0,NULL));
   }
 }
 
