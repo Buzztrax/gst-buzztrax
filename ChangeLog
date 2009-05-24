@@ -1,3 +1,8 @@
+2009-05-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Planning for better plugin detail caching.
+
 2009-05-14  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/utils.c:

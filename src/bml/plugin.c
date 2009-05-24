@@ -419,6 +419,28 @@ static gboolean plugin_init (GstPlugin * plugin) {
   gst_bml_property_meta_quark_type=g_quark_from_string("GstBMLPropertyMeta::type");
 
   GST_INFO("scan for plugins");
+  /* we need a mechanism in the registry (or an own registry) to avoid scanning
+   * when not building/updating a registry
+   * see http://bugzilla.gnome.org/show_bug.cgi?id=570233
+   * we could implement this as a plugin feature (or interface?).
+   *
+   * Plugin init:
+   * At this point we would request the cache data. If its NULL, we scan.
+   * During scanning we would build the cache data.
+   *
+   * Registering types:
+   * In any case we now have the cache data and  we iterate over it
+   * (a hierarchical structure with the plugin name as major keys) and call
+   * bml?_describe_plugin(...) for each entry. _describe_plugin() registers the
+   * gobject type. It needs to be changed to take the parameters from the cache
+   * data.
+   *
+   * Other changes:
+   * When instantiating a type, we need to obtain the descriptors (we won't have
+   * bml_descriptors_by_element_type, bml_descriptors_by_voice_type cached)
+   * We should also cache the help-uri and preset path checks to get rid of
+   * those hastables.
+   */
   res=bml_scan();
   
   g_hash_table_destroy(bml_category_by_machine_name);
