@@ -22,6 +22,12 @@
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
+// see http://bugzilla.gnome.org/show_bug.cgi?id=570233
+//#define BUILD_STRUCTURE 1
+#ifdef BUILD_STRUCTURE
+extern GstStructure *bml_meta_all;
+#endif
+
 extern GstPlugin *bml_plugin;
 extern GHashTable *bml_descriptors_by_element_type;
 extern GHashTable *bml_descriptors_by_voice_type;
@@ -53,8 +59,12 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
   gint type,flags;
   gboolean res=FALSE;
 
-  GST_INFO("describing 0x%p",bm);
+  GST_INFO("describing %p : %s",bm, pathname);
 
+#ifdef BUILD_STRUCTURE
+  GstStructure *bml_meta=gst_structure_empty_new("bml");
+#endif
+  
   // use dllname to register
   // 'M3.dll' and 'M3 Pro.dll' both use the name M3 :(
   // BM_PROP_DLL_NAME instead of BM_PROP_SHORT_NAME
@@ -65,9 +75,10 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     bml(get_machine_info(bm,BM_PROP_FLAGS,(void *)&flags))
   ) {
     gchar *name,*filename,*ext;
-    gchar *element_type_name,*voice_type_name;
+    gchar *element_type_name,*voice_type_name=NULL;
     gchar *help_filename,*preset_filename;
     gchar *data_pathname=NULL;
+    gboolean type_names_ok=TRUE;
 
     if((filename=strrchr(dllname,'/'))) {
       filename++;
@@ -90,24 +101,30 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
 
     // construct the type name
     element_type_name = g_strdup_printf("bml-%s",name);
-    voice_type_name = g_strdup_printf("bmlv-%s",name);
+    if(bml(gstbml_is_polyphonic(bm))) {
+      voice_type_name = g_strdup_printf("bmlv-%s",name);
+    }
     g_free(name);
     // if it's already registered, skip (mean e.g. native element has been registered)
     g_strcanon(element_type_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-+", '-');
     remove_double_def_chars(element_type_name);
     if(g_type_from_name(element_type_name)) {
-      GST_INFO("already registered type : \"%s\"", element_type_name);
+      GST_WARNING("already registered type : \"%s\"", element_type_name);
       g_free(element_type_name);
       element_type_name=NULL;
+        type_names_ok=FALSE;
     }
-    g_strcanon(voice_type_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-+", '-');
-    remove_double_def_chars(voice_type_name);
-    if(g_type_from_name(voice_type_name)) {
-      GST_INFO("already registered type : \"%s\"", voice_type_name);
-      g_free(voice_type_name);
-      voice_type_name=NULL;
+    if(voice_type_name) {
+      g_strcanon(voice_type_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-+", '-');
+      remove_double_def_chars(voice_type_name);
+      if(g_type_from_name(voice_type_name)) {
+        GST_WARNING("already registered type : \"%s\"", voice_type_name);
+        g_free(voice_type_name);
+        voice_type_name=NULL;
+        type_names_ok=FALSE;
+      }
     }
-    if(!element_type_name || !voice_type_name) {
+    if(!type_names_ok) {
       g_free(element_type_name);
       g_free(voice_type_name);
       return(TRUE);
@@ -175,14 +192,34 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       GST_INFO("machine %p preset path '%s'",bm,preset_filename);
     }
 
+#ifdef BUILD_STRUCTURE
+    gst_structure_set(bml_meta,"element-type-name",G_TYPE_STRING,element_type_name,NULL);
+    if(voice_type_name) {
+      gst_structure_set(bml_meta,"voice-type-name",G_TYPE_STRING,voice_type_name,NULL);
+    }
+    if(help_filename) {
+      gst_structure_set(bml_meta,"help-filename",G_TYPE_STRING,help_filename,NULL);
+    }
+    if(preset_filename) {
+      gst_structure_set(bml_meta,"preset-filename",G_TYPE_STRING,preset_filename,NULL);
+    }
+
+    {
+      GValue value={0,};
+    
+      g_value_init(&value, GST_TYPE_STRUCTURE);
+      g_value_set_boxed(&value,bml_meta);
+      gst_structure_set_value(bml_meta_all,pathname,&value);
+      g_value_unset(&value);
+    }
+#endif
+
     voice_type = 0L;
     if(voice_type_name) {
-      if(bml(gstbml_is_polyphonic(bm))) {
-        // create the voice type now
-        voice_type = bml(v_get_type(voice_type_name));
-        GST_INFO("  voice type \"%s\" is 0x%lu", voice_type_name,(gulong)voice_type);
-        g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bm);
-      }
+      // create the voice type now
+      voice_type = bml(v_get_type(voice_type_name));
+      GST_INFO("  voice type \"%s\" is 0x%lu", voice_type_name,(gulong)voice_type);
+      g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bm);
       g_free(voice_type_name);
     }
     if(element_type_name) {

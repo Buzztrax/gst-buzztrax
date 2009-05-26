@@ -27,6 +27,12 @@
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
 
+// see http://bugzilla.gnome.org/show_bug.cgi?id=570233
+//#define BUILD_STRUCTURE 1
+#ifdef BUILD_STRUCTURE
+GstStructure *bml_meta_all;
+#endif
+
 GstPlugin *bml_plugin;
 GHashTable *bml_descriptors_by_element_type;
 GHashTable *bml_descriptors_by_voice_type;
@@ -422,7 +428,8 @@ static gboolean plugin_init (GstPlugin * plugin) {
   /* we need a mechanism in the registry (or an own registry) to avoid scanning
    * when not building/updating a registry
    * see http://bugzilla.gnome.org/show_bug.cgi?id=570233
-   * we could implement this as a plugin feature (or interface?).
+   * until that implemneted there, we could easily store the structure in a
+   * extra file ourself 
    *
    * Plugin init:
    * At this point we would request the cache data. If its NULL, we scan.
@@ -441,7 +448,51 @@ static gboolean plugin_init (GstPlugin * plugin) {
    * We should also cache the help-uri and preset path checks to get rid of
    * those hastables.
    */
+#ifdef BUILD_STRUCTURE
+  // we get this from the registry later on
+  bml_meta_all=gst_structure_empty_new("bml");
+#endif
   res=bml_scan();
+#ifdef BUILD_STRUCTURE
+  // dump structure
+  {
+    gint i,n=gst_structure_n_fields(bml_meta_all);
+    const gchar *name;
+    const GValue *value;
+    gchar *desc;
+    
+    printf("%3d entries\n",n);
+    
+    for(i=0;i<n;i++) {
+      name=gst_structure_nth_field_name(bml_meta_all,i); 
+      value=gst_structure_get_value(bml_meta_all,name);
+      printf("%3d: %20s: %s\n",i,name,G_VALUE_TYPE_NAME(value));
+      if(G_VALUE_TYPE(value)==GST_TYPE_STRUCTURE) {
+        GstStructure *bml_meta=g_value_get_boxed(value);
+        gint j,m=gst_structure_n_fields(bml_meta);
+        
+        // here we will call
+        //   bml{n|w}_register_element(name,bml_meta);
+        // depending on name (maybe we can use the structure name)
+        //
+        // in common:gstbml_class_base_init
+        // we need to do the
+        // bm=bml(new(file_name)))) { bml(init(bm,0,NULL)); ... }
+        //
+
+        printf("  %3d entries\n",m);
+        for(j=0;j<m;j++) {
+          name=gst_structure_nth_field_name(bml_meta,j); 
+          value=gst_structure_get_value(bml_meta,name);
+          desc=g_strdup_value_contents(value);
+          printf("  %3d: %20s: %s; %s\n",j,name,G_VALUE_TYPE_NAME(value),desc);
+          g_free(desc);
+        }
+      }
+    }
+    
+  }
+#endif
   
   g_hash_table_destroy(bml_category_by_machine_name);
   g_hash_table_destroy(bml_preset_path_by_descriptor);

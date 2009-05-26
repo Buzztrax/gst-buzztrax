@@ -1,3 +1,10 @@
+2009-05-26  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	* src/bml/plugin.c:
+	  Don't build typename for monophonic machines. Start big refactoring to
+	  support adding wrapped plugin data to registry.
+
 2009-05-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:
