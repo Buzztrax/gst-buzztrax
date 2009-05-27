@@ -160,16 +160,11 @@ static void gst_bmlv_finalize(GObject *object) {
   }
 }
 
-static void gst_bmlv_base_init(GstBMLVClass *klass) {
-  gpointer bm;
-  GST_INFO("initializing base");
-
-  bm=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(G_TYPE_FROM_CLASS(klass)));
-  if(!bm) bm=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(0));
-  g_assert(bm);
-
-  GST_INFO("  bm=0x%p",bm);
-  klass->bm = bm;
+static void gst_bmlv_init(GstBMLV *bmlv) {
+  GstBMLVClass *klass=GST_BMLV_GET_CLASS(bmlv);
+  GST_INFO("initializing instance");
+  
+  bmlv->triggers_changed=g_new0(gint,klass->numtrackparams);
 }
 
 static void gst_bmlv_class_init(GstBMLVClass *klass) {
@@ -179,7 +174,12 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
   gint num;
 
   GST_INFO("initializing class");
-  bm=klass->bm;
+  bm=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(G_TYPE_FROM_CLASS(klass)));
+  if(!bm) bm=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(0));
+  g_assert(bm);
+
+  GST_INFO("  bm=0x%p",bm);
+  klass->bm = bm;
 
   parent_class=g_type_class_peek_parent(klass);
 
@@ -232,20 +232,12 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
   GST_INFO("  %d track params installed",klass->numtrackparams);
 }
 
-static void gst_bmlv_init(GstBMLV *bmlv) {
-  GstBMLVClass *klass=GST_BMLV_GET_CLASS(bmlv);
-  GST_INFO("initializing instance");
-  
-  bmlv->triggers_changed=g_new0(gint,klass->numtrackparams);
-}
 
-//--
-
-GType bml(v_get_type(gchar *voice_type_name)) {
+GType bml(v_get_type(const gchar *name)) {
   GType type;
   const GTypeInfo voice_type_info = {
     sizeof (GstBMLVClass),
-    (GBaseInitFunc) gst_bmlv_base_init,
+    NULL,
     NULL,
     (GClassInitFunc) gst_bmlv_class_init,
     NULL,
@@ -259,8 +251,8 @@ GType bml(v_get_type(gchar *voice_type_name)) {
     NULL,               /* interface_finalize */
     NULL                /* interface_data */
   };
-  // @todo should we have a hashmap by voice_type_name ?
-  type = g_type_register_static(GST_TYPE_OBJECT, voice_type_name, &voice_type_info, 0);
+
+  type = g_type_register_static(GST_TYPE_OBJECT, name, &voice_type_info, 0);
   g_type_add_interface_static(type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
   return(type);
 }

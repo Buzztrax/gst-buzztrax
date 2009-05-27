@@ -38,6 +38,8 @@ extern void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong be
 
 //-- common class functions
 
+extern gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta));
+
 extern gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcpads, gint numsinkpads));
 extern void bml(gstbml_class_set_details(GstElementClass *element_class, gpointer bm, const gchar *category));
 extern void bml(gstbml_class_prepare_properties(GObjectClass *klass, GstBMLClass *bml_class));

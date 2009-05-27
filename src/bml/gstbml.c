@@ -60,10 +60,6 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
   gboolean res=FALSE;
 
   GST_INFO("describing %p : %s",bm, pathname);
-
-#ifdef BUILD_STRUCTURE
-  GstStructure *bml_meta=gst_structure_empty_new("bml");
-#endif
   
   // use dllname to register
   // 'M3.dll' and 'M3 Pro.dll' both use the name M3 :(
@@ -193,27 +189,38 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     }
 
 #ifdef BUILD_STRUCTURE
-    gst_structure_set(bml_meta,"element-type-name",G_TYPE_STRING,element_type_name,NULL);
-    if(voice_type_name) {
-      gst_structure_set(bml_meta,"voice-type-name",G_TYPE_STRING,voice_type_name,NULL);
-    }
-    if(help_filename) {
-      gst_structure_set(bml_meta,"help-filename",G_TYPE_STRING,help_filename,NULL);
-    }
-    if(preset_filename) {
-      gst_structure_set(bml_meta,"preset-filename",G_TYPE_STRING,preset_filename,NULL);
-    }
-
     {
+#ifdef BML_WRAPPED
+      GstStructure *bml_meta=gst_structure_empty_new("bmlw");
+#else
+      GstStructure *bml_meta=gst_structure_empty_new("bmln");
+#endif
       GValue value={0,};
+    
+      gst_structure_set(bml_meta,
+        "plugin-filename",G_TYPE_STRING,pathname,
+        "machine-type",G_TYPE_INT,type,
+        "element-type-name",G_TYPE_STRING,element_type_name,
+        NULL);
+      if(voice_type_name) {
+        gst_structure_set(bml_meta,"voice-type-name",G_TYPE_STRING,voice_type_name,NULL);
+      }
+      if(help_filename) {
+        gst_structure_set(bml_meta,"help-filename",G_TYPE_STRING,help_filename,NULL);
+      }
+      if(preset_filename) {
+        gst_structure_set(bml_meta,"preset-filename",G_TYPE_STRING,preset_filename,NULL);
+      }
     
       g_value_init(&value, GST_TYPE_STRUCTURE);
       g_value_set_boxed(&value,bml_meta);
-      gst_structure_set_value(bml_meta_all,pathname,&value);
+      gst_structure_set_value(bml_meta_all,element_type_name,&value);
       g_value_unset(&value);
     }
 #endif
-
+//#ifdef BUILD_STRUCTURE
+// res=TRUE;
+//#else
     voice_type = 0L;
     if(voice_type_name) {
       // create the voice type now
@@ -228,17 +235,17 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       switch(type) {
         case MT_MASTER: // (Sink)
           //element_type = bml(sink_get_type(element_type_name,bm));
-          GST_WARNING("  unimplemented plugin type %d for '%s'",type,name);
+          GST_WARNING("  unimplemented plugin type %d for '%s'",type,element_type_name);
           break;
         case MT_GENERATOR: // (Source)
-          element_type = bml(src_get_type(element_type_name,bm));
+          element_type = bml(src_get_type(element_type_name,(voice_type!=0),(help_filename!=NULL)));
           break;
         case MT_EFFECT: // (Processor)
           // base transform only supports elements with one source and one sink pad
-          element_type = bml(transform_get_type(element_type_name,bm));
+          element_type = bml(transform_get_type(element_type_name,(voice_type!=0),(help_filename!=NULL)));
           break;
         default:
-          GST_WARNING("  invalid plugin type %d for '%s'",type,name);
+          GST_WARNING("  invalid plugin type %d for '%s'",type,element_type_name);
       }
       if(element_type) {
         if(!gst_element_register(bml_plugin, element_type_name, GST_RANK_NONE, element_type)) {
@@ -255,6 +262,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     g_hash_table_remove(bml_descriptors_by_voice_type, GINT_TO_POINTER(0));
     g_hash_table_remove(bml_descriptors_by_element_type, GINT_TO_POINTER(0));
   }
+//#endif
   return(res);
 }
 

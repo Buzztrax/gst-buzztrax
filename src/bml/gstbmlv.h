@@ -66,7 +66,7 @@ struct _GstBMLVClass {
   GParamSpec **track_property;
 };
 
-extern GType bml(v_get_type(gchar *voice_type_name));
+extern GType bml(v_get_type(const gchar *name));
 
 G_END_DECLS
 

@@ -299,8 +299,10 @@ static gboolean dir_scan(const gchar *dir_name) {
           if((bm=bmlw_new(file_name))) {
             bmlw_init(bm,0,NULL);
             if(bmlw_describe_plugin(file_name,bm)) {
-              /* @todo: free here, or leave on instance open to be used in class init
-               * bmlw_free(bm); */
+              /* @todo: free here, or leave on instance open to be used in class init */
+#ifdef BUILD_STRUCTURE
+              bmlw_free(bm);
+#endif
               res=TRUE;
             }
             else {
@@ -316,8 +318,10 @@ static gboolean dir_scan(const gchar *dir_name) {
           if((bm=bmln_new(file_name))) {
             bmln_init(bm,0,NULL);
             if(bmln_describe_plugin(file_name,bm)) {
-              /* @todo: free here, or leave on instance open to be used in class init
-               * bmln_free(bm); */
+              /* @todo: free here, or leave on instance open to be used in class init */
+#ifdef BUILD_STRUCTURE
+              bmln_free(bm);
+#endif
               res=TRUE;
             }
             else {
@@ -460,25 +464,25 @@ static gboolean plugin_init (GstPlugin * plugin) {
     const gchar *name;
     const GValue *value;
     gchar *desc;
+    GQuark bmln_type=g_quark_from_static_string("bmln");
     
     printf("%3d entries\n",n);
     
     for(i=0;i<n;i++) {
       name=gst_structure_nth_field_name(bml_meta_all,i); 
       value=gst_structure_get_value(bml_meta_all,name);
-      printf("%3d: %20s: %s\n",i,name,G_VALUE_TYPE_NAME(value));
+      printf("%3d: %20s\n",i,name);
       if(G_VALUE_TYPE(value)==GST_TYPE_STRUCTURE) {
         GstStructure *bml_meta=g_value_get_boxed(value);
         gint j,m=gst_structure_n_fields(bml_meta);
+        GQuark bml_type=gst_structure_get_name_id(bml_meta);
         
-        // here we will call
-        //   bml{n|w}_register_element(name,bml_meta);
-        // depending on name (maybe we can use the structure name)
-        //
-        // in common:gstbml_class_base_init
-        // we need to do the
-        // bm=bml(new(file_name)))) { bml(init(bm,0,NULL)); ... }
-        //
+        if(bml_type==bmln_type) {
+          //bmln_gstbml_register_element(plugin,bml_meta);
+        }
+        else {
+          //bmlw_gstbml_register_element(plugin,bml_meta);
+        }
 
         printf("  %3d entries\n",m);
         for(j=0;j<m;j++) {

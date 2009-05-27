@@ -1,3 +1,18 @@
+2009-05-28  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmlsrc.h:
+	* src/bml/gstbmltransform.c:
+	* src/bml/gstbmltransform.h:
+	* src/bml/gstbmlv.c:
+	* src/bml/gstbmlv.h:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	* src/bml/utils.h:
+	  Remove base_init for voice types. Refactor the _get_type funaction to
+	  reuse existing data. More (hidden) feactoring for new registry feature.
+
 2009-05-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.c:

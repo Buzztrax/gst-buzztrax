@@ -24,8 +24,15 @@
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
+// see http://bugzilla.gnome.org/show_bug.cgi?id=570233
+//#define BUILD_STRUCTURE 1
+#ifdef BUILD_STRUCTURE
+extern GstStructure *bml_meta_all;
+#endif
+
 extern GType voice_type;
 extern GHashTable *bml_descriptors_by_element_type;
+extern GHashTable *bml_descriptors_by_voice_type;
 extern GHashTable *bml_help_uri_by_descriptor;
 extern GHashTable *bml_preset_path_by_descriptor;
 extern GHashTable *bml_category_by_machine_name;
@@ -137,6 +144,53 @@ void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per
 
 //-- common class functions
 
+gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta)) {
+  const gchar *element_type_name=gst_structure_get_string(bml_meta,"element-type-name");
+  const gchar *voice_type_name=gst_structure_get_string(bml_meta,"voice-type-name");
+  const gchar *help_filename=gst_structure_get_string(bml_meta,"help-filename");
+  gint type;
+  GType element_type=0L;
+  gboolean res=FALSE;
+
+  gst_structure_get_int(bml_meta,"machine-type",&type);
+
+  // FIXME: check if we can make voice_type now static
+  voice_type = 0L;
+  // create the voice type, if needed
+  if(voice_type_name) {
+    // create the voice type now
+    voice_type = bml(v_get_type(voice_type_name));
+    GST_INFO("  voice type \"%s\" is 0x%lu", voice_type_name,(gulong)voice_type);
+  }
+    
+  // create the element type
+  switch(type) {
+    case MT_MASTER: // (Sink)
+      //element_type = bml(sink_get_type(element_type_name,bm));
+      GST_WARNING("  unimplemented plugin type %d for '%s'",type,element_type_name);
+      break;
+    case MT_GENERATOR: // (Source)
+      element_type = bml(src_get_type(element_type_name,(voice_type_name!=NULL),(help_filename!=NULL)));
+      break;
+    case MT_EFFECT: // (Processor)
+      // base transform only supports elements with one source and one sink pad
+      element_type = bml(transform_get_type(element_type_name,(voice_type_name!=NULL),(help_filename!=NULL)));
+      break;
+    default:
+      GST_WARNING("  invalid plugin type %d for '%s'",type,element_type_name);
+  }
+  if(element_type) {
+    if(!gst_element_register(plugin, element_type_name, GST_RANK_NONE, element_type)) {
+      GST_ERROR("error registering new type : \"%s\"", element_type_name);
+    }
+    else {
+      GST_INFO("succefully registered new plugin : \"%s\"", element_type_name);
+      res=TRUE;
+    }
+  }
+  return res;
+}
+
 /*
  * gstbml_class_base_init:
  *
@@ -147,17 +201,38 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
 
   GST_INFO("initializing base: type=0x%lu, voice_type=0x%lu",(gulong)type,(gulong)voice_type);
 
+#ifdef BUILD_STRUCTURE
+  const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
+  GstStructure *bml_meta=g_value_get_boxed(value);
+  
+  klass->dll_name=(gchar*)gst_structure_get_string(bml_meta,"plugin-filename");
+  klass->help_uri=(gchar*)gst_structure_get_string(bml_meta,"help-filename");
+  klass->preset_path=(gchar*)gst_structure_get_string(bml_meta,"preset-filename");
+  GST_INFO("initializing base: file_name=%s",klass->dll_name);
+
+  bm=bml(new(klass->dll_name));
+  g_assert(bm);
+  bml(init(bm,0,NULL));
+  
+  /* we now need to ensure that gst_bmlv_class_init() get bm
+   * we could make bm a global var
+   * and call g_type_class_ref(g_type_from_name(voice_type_name));
+   */
+  g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(0),(gpointer)bm);
+  
+#else
   bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(type));
   if(!bm) bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(0));
   g_assert(bm);
 
   bml(get_machine_info(bm,BM_PROP_DLL_NAME,(void *)&klass->dll_name));
+  klass->help_uri=g_hash_table_lookup(bml_help_uri_by_descriptor,GINT_TO_POINTER(bm));
+  klass->preset_path=g_hash_table_lookup(bml_preset_path_by_descriptor,GINT_TO_POINTER(bm));
+#endif
 
   GST_INFO("initializing base: bm=0x%p, dll_name=%s",bm,((klass->dll_name)?klass->dll_name:"?"));
 
   klass->bm=bm;
-  klass->help_uri=g_hash_table_lookup(bml_help_uri_by_descriptor,GINT_TO_POINTER(bm));
-  klass->preset_path=g_hash_table_lookup(bml_preset_path_by_descriptor,GINT_TO_POINTER(bm));
   klass->voice_type=voice_type;
   klass->numsrcpads=numsrcpads;
   klass->numsinkpads=numsinkpads;

@@ -688,7 +688,7 @@ static void gst_bml_transform_base_init(GstBMLTransformClass *klass) {
 }
 
 
-GType bml(transform_get_type(const char *element_type_name, gpointer bm)) {
+GType bml(transform_get_type(const char *element_type_name, gboolean is_polyphonic, gboolean has_help)) {
   const GTypeInfo element_type_info = {
     sizeof (GstBMLTransformClass),
     (GBaseInitFunc) gst_bml_transform_base_init,
@@ -732,9 +732,7 @@ GType bml(transform_get_type(const char *element_type_name, gpointer bm)) {
   };
   GType element_type;
 
-  GST_INFO("registering transform-plugin 0x%p: \"%s\"",bm,element_type_name);
-
-  g_assert(bm);
+  GST_INFO("registering transform-plugin: \"%s\"",element_type_name);
 
   // create the element type now
   element_type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, element_type_name, &element_type_info, 0);
@@ -743,12 +741,12 @@ GType bml(transform_get_type(const char *element_type_name, gpointer bm)) {
   g_type_add_interface_static(element_type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
 
   // check if this plugin can do multiple voices
-  if(bml(gstbml_is_polyphonic(bm))) {
+  if(is_polyphonic) {
     g_type_add_interface_static(element_type, GST_TYPE_CHILD_PROXY, &child_proxy_interface_info);
     g_type_add_interface_static(element_type, GSTBT_TYPE_CHILD_BIN, &child_bin_interface_info);
   }
   // check if this plugin has user docs
-  if(gstbml_get_help_uri(bm)) {
+  if(has_help) {
     g_type_add_interface_static(element_type, GSTBT_TYPE_HELP, &help_interface_info);
   }
   // add presets iface
