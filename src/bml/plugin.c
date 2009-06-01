@@ -36,17 +36,19 @@ GstStructure *bml_meta_all;
 GstPlugin *bml_plugin;
 GHashTable *bml_descriptors_by_element_type;
 GHashTable *bml_descriptors_by_voice_type;
+GHashTable *bml_voice_type_by_element_type;
 GHashTable *bml_help_uri_by_descriptor;
 GHashTable *bml_preset_path_by_descriptor;
 GHashTable *bml_category_by_machine_name;
-GType voice_type;
 
 GQuark gst_bml_property_meta_quark_type;
 
 #if HAVE_BMLW
 extern gboolean bmlw_describe_plugin(gchar *pathname, gpointer bm);
+extern gboolean bmlw_gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta);
 #endif
 extern gboolean bmln_describe_plugin(gchar *pathname, gpointer bm);
+extern gboolean bmln_gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta);
 
 typedef int (*bsearchcomparefunc)(const void *,const void *);
 
@@ -157,7 +159,7 @@ static gboolean read_index(const gchar *dir_name) {
 }
 
 static int blacklist_compare(const void *node1, const void *node2) {
-  //GST_WARNING("comparing '%s' '%s'",node1,*(gchar**)node2);
+  //GST_DEBUG("comparing '%s' '%s'",node1,*(gchar**)node2);
   return (strcasecmp((gchar *)node1,*(gchar**)node2));
 }
 
@@ -172,7 +174,8 @@ static const gchar *get_bml_path(void) {
 /*
  * dir_scan:
  *
- * Search the given directory.
+ * Search the given directory for plugins. Supress some based on a built-in
+ * blacklist.
  */
 static gboolean dir_scan(const gchar *dir_name) {
   GDir *dir;
@@ -412,6 +415,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
   // strings can be accessed at any time (that includes after plugin_init()
   bml_descriptors_by_element_type=g_hash_table_new(NULL, NULL);
   bml_descriptors_by_voice_type=g_hash_table_new(NULL, NULL);
+  bml_voice_type_by_element_type=g_hash_table_new(NULL, NULL);
   bml_help_uri_by_descriptor=g_hash_table_new(NULL, NULL);
   bml_preset_path_by_descriptor=g_hash_table_new(NULL, NULL);
   bml_category_by_machine_name=g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
@@ -446,64 +450,99 @@ static gboolean plugin_init (GstPlugin * plugin) {
    * gobject type. It needs to be changed to take the parameters from the cache
    * data.
    *
-   * Other changes:
-   * When instantiating a type, we need to obtain the descriptors (we won't have
-   * bml_descriptors_by_element_type, bml_descriptors_by_voice_type cached)
-   * We should also cache the help-uri and preset path checks to get rid of
-   * those hastables.
+   * FIXME: check if we can get tid of the hashtables once this all works
+   * 
+   * FIXME: defer dll loading more
+   * utils:gstbml_class_base_init() loads the dll now, unfortunately
+   * gst_element_register() refs the class, we need to cache more info (almost
+   * the full machine-info :/
+   *
    */
 #ifdef BUILD_STRUCTURE
-  // we get this from the registry later on
-  bml_meta_all=gst_structure_empty_new("bml");
-#endif
-  res=bml_scan();
-#ifdef BUILD_STRUCTURE
-  // dump structure
   {
-    gint i,n=gst_structure_n_fields(bml_meta_all);
-    const gchar *name;
-    const GValue *value;
-    gchar *desc;
-    GQuark bmln_type=g_quark_from_static_string("bmln");
-    
-    printf("%3d entries\n",n);
-    
-    for(i=0;i<n;i++) {
-      name=gst_structure_nth_field_name(bml_meta_all,i); 
-      value=gst_structure_get_value(bml_meta_all,name);
-      printf("%3d: %20s\n",i,name);
-      if(G_VALUE_TYPE(value)==GST_TYPE_STRUCTURE) {
-        GstStructure *bml_meta=g_value_get_boxed(value);
-        gint j,m=gst_structure_n_fields(bml_meta);
-        GQuark bml_type=gst_structure_get_name_id(bml_meta);
-        
-        if(bml_type==bmln_type) {
-          //bmln_gstbml_register_element(plugin,bml_meta);
-        }
-        else {
-          //bmlw_gstbml_register_element(plugin,bml_meta);
-        }
+    // we get this from the registry later on
+    gchar *registry_filename=g_build_filename(g_get_home_dir(),".gstreamer-0.10/bml-registry.bin",NULL);
+    gchar *bml_meta_str;
+    gint n;
 
-        printf("  %3d entries\n",m);
-        for(j=0;j<m;j++) {
-          name=gst_structure_nth_field_name(bml_meta,j); 
-          value=gst_structure_get_value(bml_meta,name);
-          desc=g_strdup_value_contents(value);
-          printf("  %3d: %20s: %s; %s\n",j,name,G_VALUE_TYPE_NAME(value),desc);
-          g_free(desc);
+    if(g_file_get_contents(registry_filename,&bml_meta_str,NULL,NULL)) {
+      /* FIXME: this does not deserialize correctly */
+      bml_meta_all=gst_structure_from_string(bml_meta_str,NULL);
+      g_free(bml_meta_str);
+    }
+    else {
+      bml_meta_all=gst_structure_empty_new("bml");
+    }
+    n=gst_structure_n_fields(bml_meta_all);
+    GST_INFO("%d entries in cache",n);
+    if(!n) {
+#endif
+      res=bml_scan();
+#ifdef BUILD_STRUCTURE
+      if(res) {
+        n=gst_structure_n_fields(bml_meta_all);
+        GST_INFO("%d entries after scanning",n);
+        bml_meta_str=gst_structure_to_string(bml_meta_all);
+        g_file_set_contents(registry_filename,bml_meta_str,-1,NULL);
+        g_free(bml_meta_str);
+      }
+    }
+    else {
+      res=TRUE;
+    }
+    g_free(registry_filename);
+    
+    {
+      // dump structure
+      gint i;
+      const gchar *name;
+      const GValue *value;
+      gchar *desc;
+      GQuark bmln_type=g_quark_from_static_string("bmln");
+      
+      printf("%3d entries\n",n);
+      
+      for(i=0;i<n;i++) {
+        name=gst_structure_nth_field_name(bml_meta_all,i); 
+        value=gst_structure_get_value(bml_meta_all,name);
+        printf("%3d: %20s\n",i,name);
+        if(G_VALUE_TYPE(value)==GST_TYPE_STRUCTURE) {
+          GstStructure *bml_meta=g_value_get_boxed(value);
+          gint j,m=gst_structure_n_fields(bml_meta);
+          GQuark bml_type=gst_structure_get_name_id(bml_meta);
+          
+          if(bml_type==bmln_type) {
+            res&=bmln_gstbml_register_element(plugin,bml_meta);
+          }
+#if HAVE_BMLW
+          else {
+            res&=bmlw_gstbml_register_element(plugin,bml_meta);
+          }
+#endif
+  
+          printf("  %3d entries\n",m);
+          for(j=0;j<m;j++) {
+            name=gst_structure_nth_field_name(bml_meta,j); 
+            value=gst_structure_get_value(bml_meta,name);
+            desc=g_strdup_value_contents(value);
+            printf("  %3d: %20s: %s; %s\n",j,name,G_VALUE_TYPE_NAME(value),desc);
+            g_free(desc);
+          }
         }
       }
     }
-    
   }
 #endif
-  
+
+  /* @todo: we need to reconsider this when BUILD_STRUCTURE is done
   g_hash_table_destroy(bml_category_by_machine_name);
   g_hash_table_destroy(bml_preset_path_by_descriptor);
   g_hash_table_destroy(bml_help_uri_by_descriptor);
-  // @todo: we can release this (yet)
-  //g_hash_table_destroy(bml_descriptors_by_voice_type);
   g_hash_table_destroy(bml_descriptors_by_element_type);
+  */
+  /* @todo: we can't release this (yet)
+  g_hash_table_destroy(bml_descriptors_by_voice_type);
+  */
   return(res);
 }
 

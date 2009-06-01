@@ -31,9 +31,9 @@ extern GstStructure *bml_meta_all;
 extern GstPlugin *bml_plugin;
 extern GHashTable *bml_descriptors_by_element_type;
 extern GHashTable *bml_descriptors_by_voice_type;
+extern GHashTable *bml_voice_type_by_element_type;
 extern GHashTable *bml_help_uri_by_descriptor;
 extern GHashTable *bml_preset_path_by_descriptor;
-extern GType voice_type;
 
 static void remove_double_def_chars(gchar *name) {
   gchar *ptr1,*ptr2;
@@ -75,6 +75,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     gchar *help_filename,*preset_filename;
     gchar *data_pathname=NULL;
     gboolean type_names_ok=TRUE;
+    GType voice_type=G_TYPE_INVALID;
 
     if((filename=strrchr(dllname,'/'))) {
       filename++;
@@ -218,10 +219,9 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       g_value_unset(&value);
     }
 #endif
-//#ifdef BUILD_STRUCTURE
-// res=TRUE;
-//#else
-    voice_type = 0L;
+#ifdef BUILD_STRUCTURE
+ res=TRUE;
+#else
     if(voice_type_name) {
       // create the voice type now
       voice_type = bml(v_get_type(voice_type_name));
@@ -248,12 +248,15 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
           GST_WARNING("  invalid plugin type %d for '%s'",type,element_type_name);
       }
       if(element_type) {
+        if(voice_type) {
+          g_hash_table_insert(bml_voice_type_by_element_type,GINT_TO_POINTER(element_type),(gpointer)voice_type);
+        }
+        g_hash_table_insert(bml_descriptors_by_element_type,GINT_TO_POINTER(element_type),(gpointer)bm);
         if(!gst_element_register(bml_plugin, element_type_name, GST_RANK_NONE, element_type)) {
           GST_ERROR("error registering new type : \"%s\"", element_type_name);
         }
         else {
           GST_INFO("succefully registered new plugin : \"%s\"", element_type_name);
-          g_hash_table_insert(bml_descriptors_by_element_type,GINT_TO_POINTER(element_type),(gpointer)bm);
           res=TRUE;
         }
       }
@@ -261,8 +264,8 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     }
     g_hash_table_remove(bml_descriptors_by_voice_type, GINT_TO_POINTER(0));
     g_hash_table_remove(bml_descriptors_by_element_type, GINT_TO_POINTER(0));
+#endif
   }
-//#endif
   return(res);
 }
 

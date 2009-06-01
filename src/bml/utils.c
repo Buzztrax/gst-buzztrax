@@ -30,9 +30,9 @@ GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 extern GstStructure *bml_meta_all;
 #endif
 
-extern GType voice_type;
 extern GHashTable *bml_descriptors_by_element_type;
 extern GHashTable *bml_descriptors_by_voice_type;
+extern GHashTable *bml_voice_type_by_element_type;
 extern GHashTable *bml_help_uri_by_descriptor;
 extern GHashTable *bml_preset_path_by_descriptor;
 extern GHashTable *bml_category_by_machine_name;
@@ -149,13 +149,11 @@ gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta))
   const gchar *voice_type_name=gst_structure_get_string(bml_meta,"voice-type-name");
   const gchar *help_filename=gst_structure_get_string(bml_meta,"help-filename");
   gint type;
-  GType element_type=0L;
+  GType element_type=G_TYPE_INVALID,voice_type=G_TYPE_INVALID;
   gboolean res=FALSE;
 
   gst_structure_get_int(bml_meta,"machine-type",&type);
 
-  // FIXME: check if we can make voice_type now static
-  voice_type = 0L;
   // create the voice type, if needed
   if(voice_type_name) {
     // create the voice type now
@@ -198,12 +196,14 @@ gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta))
  */
 gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcpads, gint numsinkpads)) {
   gpointer bm;
+  GType voice_type=G_TYPE_INVALID;
 
-  GST_INFO("initializing base: type=0x%lu, voice_type=0x%lu",(gulong)type,(gulong)voice_type);
+  GST_INFO("initializing base: type=0x%lu",(gulong)type);
 
 #ifdef BUILD_STRUCTURE
   const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
   GstStructure *bml_meta=g_value_get_boxed(value);
+  const gchar *voice_type_name=gst_structure_get_string(bml_meta,"voice-type-name");
   
   klass->dll_name=(gchar*)gst_structure_get_string(bml_meta,"plugin-filename");
   klass->help_uri=(gchar*)gst_structure_get_string(bml_meta,"help-filename");
@@ -214,23 +214,37 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   g_assert(bm);
   bml(init(bm,0,NULL));
   
+  GST_INFO("  bm=0x%p",bm);
+  
   /* we now need to ensure that gst_bmlv_class_init() get bm
    * we could make bm a global var
    * and call g_type_class_ref(g_type_from_name(voice_type_name));
    */
-  g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(0),(gpointer)bm);
+  if(voice_type_name) {
+    GST_INFO("prepare voice-type %s",voice_type_name);
+
+    voice_type=g_type_from_name(voice_type_name);
+    g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(0),(gpointer)bm);
+    g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bm);
+    g_type_class_ref(voice_type);
+  }
   
 #else
   bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(type));
-  if(!bm) bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(0));
+  if(!bm) {
+    GST_WARNING("no bm for type, trying fallback");
+    bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(0));
+  }
   g_assert(bm);
+  
+  voice_type=GPOINTER_TO_INT(g_hash_table_lookup(bml_voice_type_by_element_type,GINT_TO_POINTER(type)));
 
   bml(get_machine_info(bm,BM_PROP_DLL_NAME,(void *)&klass->dll_name));
   klass->help_uri=g_hash_table_lookup(bml_help_uri_by_descriptor,GINT_TO_POINTER(bm));
   klass->preset_path=g_hash_table_lookup(bml_preset_path_by_descriptor,GINT_TO_POINTER(bm));
 #endif
 
-  GST_INFO("initializing base: bm=0x%p, dll_name=%s",bm,((klass->dll_name)?klass->dll_name:"?"));
+  GST_INFO("initializing base: bm=0x%p, dll_name=%s, voice_type=0x%lu",bm,((klass->dll_name)?klass->dll_name:"?"),(gulong)voice_type);
 
   klass->bm=bm;
   klass->voice_type=voice_type;
