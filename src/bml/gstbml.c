@@ -171,10 +171,6 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     preset_filename = g_strdup_printf("%s.prs",data_pathname);
     g_free(data_pathname);
 
-    // temporarily storing it for base-init
-    g_hash_table_insert(bml_descriptors_by_element_type,GINT_TO_POINTER(0),(gpointer)bm);
-    g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(0),(gpointer)bm);
-
     // store help uri
     if(help_filename) {
       gchar *help_uri;
@@ -262,8 +258,6 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       }
       g_free(element_type_name);
     }
-    g_hash_table_remove(bml_descriptors_by_voice_type, GINT_TO_POINTER(0));
-    g_hash_table_remove(bml_descriptors_by_element_type, GINT_TO_POINTER(0));
 #endif
   }
   return(res);

@@ -224,17 +224,12 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
     GST_INFO("prepare voice-type %s",voice_type_name);
 
     voice_type=g_type_from_name(voice_type_name);
-    g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(0),(gpointer)bm);
     g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bm);
     g_type_class_ref(voice_type);
   }
   
 #else
   bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(type));
-  if(!bm) {
-    GST_WARNING("no bm for type, trying fallback");
-    bm=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(0));
-  }
   g_assert(bm);
   
   voice_type=GPOINTER_TO_INT(g_hash_table_lookup(bml_voice_type_by_element_type,GINT_TO_POINTER(type)));

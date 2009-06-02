@@ -175,10 +175,6 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
 
   GST_INFO("initializing class");
   bm=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(G_TYPE_FROM_CLASS(klass)));
-  if(!bm) {
-    GST_WARNING("no bm for type, trying fallback");
-    bm=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(0));
-  }
   g_assert(bm);
 
   GST_INFO("  bm=0x%p",bm);

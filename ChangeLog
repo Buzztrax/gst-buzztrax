@@ -2,6 +2,13 @@
 
 	* src/bml/gstbml.c:
 	* src/bml/gstbmlv.c:
+	* src/bml/utils.c:
+	  Now that all initialization is properly ordered, remove zero index hack.
+
+2009-06-01  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	* src/bml/gstbmlv.c:
 	* src/bml/plugin.c:
 	* src/bml/utils.c:
 	  Get rid of global voice_type var. This was enforcing that we need to
