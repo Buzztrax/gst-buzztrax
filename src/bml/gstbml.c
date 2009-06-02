@@ -34,6 +34,7 @@ extern GHashTable *bml_descriptors_by_voice_type;
 extern GHashTable *bml_voice_type_by_element_type;
 extern GHashTable *bml_help_uri_by_descriptor;
 extern GHashTable *bml_preset_path_by_descriptor;
+extern GHashTable *bml_category_by_machine_name;
 
 static void remove_double_def_chars(gchar *name) {
   gchar *ptr1,*ptr2;
@@ -75,7 +76,9 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     gchar *help_filename,*preset_filename;
     gchar *data_pathname=NULL;
     gboolean type_names_ok=TRUE;
+#ifndef BUILD_STRUCTURE
     GType voice_type=G_TYPE_INVALID;
+#endif
 
     if((filename=strrchr(dllname,'/'))) {
       filename++;
@@ -193,6 +196,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       GstStructure *bml_meta=gst_structure_empty_new("bmln");
 #endif
       GValue value={0,};
+      gchar *str,*extra_categories;
     
       gst_structure_set(bml_meta,
         "plugin-filename",G_TYPE_STRING,pathname,
@@ -207,6 +211,15 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       }
       if(preset_filename) {
         gst_structure_set(bml_meta,"preset-filename",G_TYPE_STRING,preset_filename,NULL);
+      }
+      /* this does not yet match all machines, e.g. Elak SVF
+       * we could try ("%s %s",author,longname) in addition? */
+      bml(get_machine_info(bm,BM_PROP_NAME,(void *)&str));
+      str=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
+      extra_categories=g_hash_table_lookup(bml_category_by_machine_name,str);
+      g_free(str);
+      if(extra_categories) {
+        gst_structure_set(bml_meta,"categories",G_TYPE_STRING,extra_categories,NULL);
       }
     
       g_value_init(&value, GST_TYPE_STRUCTURE);

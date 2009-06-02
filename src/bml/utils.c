@@ -270,7 +270,24 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
 void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bm, const gchar *category)) {
   GstElementDetails details;
   gchar *str;
+#ifdef BUILD_STRUCTURE
+  GType type=G_TYPE_FROM_CLASS(klass);
+  const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
+  GstStructure *bml_meta=g_value_get_boxed(value);
+  const gchar *extra_categories=gst_structure_get_string(bml_meta,"categories");
+#else
   gchar *extra_categories;
+
+  /* use extra categories (see plugin.c:read_index) */
+  /* this does not yet match all machines, e.g. Elak SVF
+   * we could try ("%s %s",author,longname) in addition?
+   */
+  bml(get_machine_info(bm,BM_PROP_NAME,(void *)&str));
+  str=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
+  extra_categories=g_hash_table_lookup(bml_category_by_machine_name,str);
+  GST_DEBUG("  %s/%s -> ''",str,details.longname);
+  g_free(str);
+#endif
 
   /* construct the element details struct */
   // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE? 
@@ -280,23 +297,13 @@ void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bm, const gch
   details.description=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   bml(get_machine_info(bm,BM_PROP_AUTHOR,(void *)&str));
   details.author=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-
-  /* use extra categories (see plugin.c:read_index) */
-  /* this does not yet match all machines, e.g. Elak SVF
-   * we could try ("%s %s",author,longname) in addition?
-   */
-  bml(get_machine_info(bm,BM_PROP_NAME,(void *)&str));
-  str=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-  extra_categories=g_hash_table_lookup(bml_category_by_machine_name,str);
   if(extra_categories) {
-    GST_DEBUG("  %s/%s -> %s",str,details.longname,extra_categories);
+    GST_DEBUG(" -> %s",extra_categories);
     details.klass = g_strconcat(category,extra_categories,NULL);
   }
   else {
-    GST_DEBUG("  %s/%s -> ''",str,details.longname);
     details.klass = g_strdup((gchar *)category);
   }
-  g_free(str);
   gst_element_class_set_details(klass, &details);
   g_free(details.longname);
   g_free(details.description);

@@ -1,3 +1,9 @@
+2009-06-02  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	* src/bml/utils.c:
+	  Also cache category. Now we can do the registry api and enable this.
+
 2009-06-01  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.c:
