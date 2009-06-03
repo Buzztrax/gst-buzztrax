@@ -44,10 +44,10 @@ GHashTable *bml_category_by_machine_name;
 GQuark gst_bml_property_meta_quark_type;
 
 #if HAVE_BMLW
-extern gboolean bmlw_describe_plugin(gchar *pathname, gpointer bm);
+extern gboolean bmlw_describe_plugin(gchar *pathname, gpointer bmh);
 extern gboolean bmlw_gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta);
 #endif
-extern gboolean bmln_describe_plugin(gchar *pathname, gpointer bm);
+extern gboolean bmln_describe_plugin(gchar *pathname, gpointer bmh);
 extern gboolean bmln_gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta);
 
 typedef int (*bsearchcomparefunc)(const void *,const void *);
@@ -181,7 +181,7 @@ static gboolean dir_scan(const gchar *dir_name) {
   GDir *dir;
   gchar *file_name,*ext;
   const gchar *entry_name;
-  gpointer bm;
+  gpointer bmh,bm;
   gboolean res=FALSE;
 
   const gchar *blacklist[] ={
@@ -299,18 +299,28 @@ static gboolean dir_scan(const gchar *dir_name) {
         GST_WARNING("trying plugin '%s','%s'",entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
-          if((bm=bmlw_new(file_name))) {
-            bmlw_init(bm,0,NULL);
-            if(bmlw_describe_plugin(file_name,bm)) {
-              /* @todo: free here, or leave on instance open to be used in class init */
+          if((bmh=bmlw_open(file_name))) {
+            if((bm=bmlw_new(bmh))) {
+              bmlw_init(bm,0,NULL);
+              if(bmlw_describe_plugin(file_name,bmh)) {
+                res=TRUE;
+                /* @todo: free here, or leave instance open to be used in class init */
 #ifdef BUILD_STRUCTURE
-              bmlw_free(bm);
+                /* once we switch to the ifdefs, move the close() down and remove else {} */ 
+                bmlw_free(bm);
 #endif
-              res=TRUE;
+              }
+              else {
+                bmlw_free(bm);
+              }
+#ifdef BUILD_STRUCTURE
+              /* once we switch to the ifdefs, move the close() down and remove else {} */ 
+              bmlw_close(bmh);
+#endif
             }
             else {
               GST_WARNING("machine %s could not be loaded",entry_name);
-              bmlw_free(bm);
+              bmlw_close(bmh);
             }
           }
 #else
@@ -318,18 +328,28 @@ static gboolean dir_scan(const gchar *dir_name) {
 #endif
         }
         else {
-          if((bm=bmln_new(file_name))) {
-            bmln_init(bm,0,NULL);
-            if(bmln_describe_plugin(file_name,bm)) {
-              /* @todo: free here, or leave on instance open to be used in class init */
+          if((bmh=bmln_open(file_name))) {
+            if((bm=bmln_new(bmh))) {
+              bmln_init(bm,0,NULL);
+              if(bmln_describe_plugin(file_name,bmh)) {
+                res=TRUE;
+                /* @todo: free here, or leave instance open to be used in class init */
 #ifdef BUILD_STRUCTURE
-              bmln_free(bm);
+                /* once we switch to the ifdefs, move the close() down and remove else {} */ 
+                bmln_free(bm);
 #endif
-              res=TRUE;
+              }
+              else {
+                bmln_free(bm);
+              }
+#ifdef BUILD_STRUCTURE
+              /* once we switch to the ifdefs, move the close() down and remove else {} */ 
+              bmln_close(bmh);
+#endif
             }
             else {
               GST_WARNING("machine %s could not be loaded",entry_name);
-              bmln_free(bm);
+              bmln_close(bmh);
             }
           }
         }

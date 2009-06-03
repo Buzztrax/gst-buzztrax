@@ -101,7 +101,8 @@ struct _GstBML {
 
 struct _GstBMLClass {
   // the buzz machine handle (to use with libbml API)
-  void *bm;
+  gpointer bmh;
+
   gchar *dll_name;
   gchar *help_uri;
   gchar *preset_path;

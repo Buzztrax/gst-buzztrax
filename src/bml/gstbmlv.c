@@ -31,7 +31,7 @@ extern GHashTable *bml_descriptors_by_voice_type;
 
 //-- property meta interface implementations
 
-static gchar *bml(v_property_meta_describe_property(gpointer bm, glong index, GValue *event)) {
+static gchar *bml(v_property_meta_describe_property(gpointer bmh, glong index, GValue *event)) {
   const gchar *str=NULL;
   gchar def[20];
   GType base,type=G_VALUE_TYPE(event);
@@ -40,19 +40,19 @@ static gchar *bml(v_property_meta_describe_property(gpointer bm, glong index, GV
 
   switch(type) {
     case G_TYPE_INT:
-      if(!(str=bml(describe_track_value(bm, index, g_value_get_int(event)))) || !*str) {
+      if(!(str=bml(describe_track_value(bmh, index, g_value_get_int(event)))) || !*str) {
         sprintf(def,"%d",g_value_get_int(event));
         str=def;
       }
       break;
     case G_TYPE_UINT:
-      if(!(str=bml(describe_track_value(bm, index, (gint)g_value_get_uint(event)))) || !*str) {
+      if(!(str=bml(describe_track_value(bmh, index, (gint)g_value_get_uint(event)))) || !*str) {
         sprintf(def,"%u",g_value_get_uint(event));
         str=def;
       }
       break;
     case G_TYPE_ENUM:
-      if(!(str=bml(describe_track_value(bm, index, g_value_get_enum(event)))) || !*str) {
+      if(!(str=bml(describe_track_value(bmh, index, g_value_get_enum(event)))) || !*str) {
         // @todo: get blurb for enum value
         sprintf(def,"%d",g_value_get_enum(event));
         str=def;
@@ -71,8 +71,9 @@ static gchar *bml(v_property_meta_describe_property(gpointer bm, glong index, GV
 
 static gchar *gst_bmlv_property_meta_describe_property(GstBtPropertyMeta *property_meta, glong index, GValue *event) {
   GstBMLV *bmlv=GST_BMLV(property_meta);
+  GstBMLVClass *klass=GST_BMLV_GET_CLASS(bmlv);
 
-  return(bml(v_property_meta_describe_property(bmlv->bm,index,event)));
+  return(bml(v_property_meta_describe_property(klass->bmh,index,event)));
 }
 
 static void gst_bmlv_property_meta_interface_init(gpointer g_iface, gpointer iface_data) {
@@ -168,17 +169,17 @@ static void gst_bmlv_init(GstBMLV *bmlv) {
 }
 
 static void gst_bmlv_class_init(GstBMLVClass *klass) {
-  gpointer bm;
+  gpointer bmh;
   GType enum_type = 0;
   GObjectClass *gobject_class;
   gint num;
 
   GST_INFO("initializing class");
-  bm=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(G_TYPE_FROM_CLASS(klass)));
-  g_assert(bm);
+  bmh=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(G_TYPE_FROM_CLASS(klass)));
+  g_assert(bmh);
 
-  GST_INFO("  bm=0x%p",bm);
-  klass->bm = bm;
+  GST_INFO("  bmh=0x%p",bmh);
+  klass->bmh = bmh;
 
   parent_class=g_type_class_peek_parent(klass);
 
@@ -189,7 +190,7 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
   gobject_class->dispose      = gst_bmlv_dispose;
   gobject_class->finalize     = gst_bmlv_finalize;
 
-  if(bml(get_machine_info(bm,BM_PROP_NUM_TRACK_PARAMS,(void *)&num))) {
+  if(bml(get_machine_info(bmh,BM_PROP_NUM_TRACK_PARAMS,(void *)&num))) {
     gint min_val,max_val,def_val,no_val;
     gint type,flags;
     gchar *tmp_name,*tmp_desc;
@@ -201,19 +202,19 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
     klass->track_property=g_new(GParamSpec*,num);
     for(i=0;i<num;i++,prop_id++) {
       GST_DEBUG("      track_param=%02i",i);
-      if(bml(get_track_parameter_info(bm,i,BM_PARA_TYPE,(void *)&type)) &&
-        bml(get_track_parameter_info(bm,i,BM_PARA_NAME,(void *)&tmp_name)) &&
-        bml(get_track_parameter_info(bm,i,BM_PARA_DESCRIPTION,(void *)&tmp_desc)) &&
-        bml(get_track_parameter_info(bm,i,BM_PARA_FLAGS,(void *)&flags)) &&
-        bml(get_track_parameter_info(bm,i,BM_PARA_MIN_VALUE,(void *)&min_val)) &&
-        bml(get_track_parameter_info(bm,i,BM_PARA_MAX_VALUE,(void *)&max_val)) &&
-        bml(get_track_parameter_info(bm,i,BM_PARA_NO_VALUE,(void *)&no_val)) &&
-        bml(get_track_parameter_info(bm,i,BM_PARA_DEF_VALUE,(void *)&def_val))
+      if(bml(get_track_parameter_info(bmh,i,BM_PARA_TYPE,(void *)&type)) &&
+        bml(get_track_parameter_info(bmh,i,BM_PARA_NAME,(void *)&tmp_name)) &&
+        bml(get_track_parameter_info(bmh,i,BM_PARA_DESCRIPTION,(void *)&tmp_desc)) &&
+        bml(get_track_parameter_info(bmh,i,BM_PARA_FLAGS,(void *)&flags)) &&
+        bml(get_track_parameter_info(bmh,i,BM_PARA_MIN_VALUE,(void *)&min_val)) &&
+        bml(get_track_parameter_info(bmh,i,BM_PARA_MAX_VALUE,(void *)&max_val)) &&
+        bml(get_track_parameter_info(bmh,i,BM_PARA_NO_VALUE,(void *)&no_val)) &&
+        bml(get_track_parameter_info(bmh,i,BM_PARA_DEF_VALUE,(void *)&def_val))
       ) {
         gstbml_convert_names(gobject_class, tmp_name, tmp_desc, &name, &nick, &desc);
         // create an enum on the fly
         if(type==PT_BYTE) {
-          if((enum_type = bml(gstbml_register_track_enum_type(gobject_class, bm, i, name, min_val, max_val, no_val)))) {
+          if((enum_type = bml(gstbml_register_track_enum_type(gobject_class, bmh, i, name, min_val, max_val, no_val)))) {
             type = PT_ENUM;
           }
         }

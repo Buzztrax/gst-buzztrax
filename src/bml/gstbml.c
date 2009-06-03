@@ -55,21 +55,21 @@ static void remove_double_def_chars(gchar *name) {
   while(*ptr1=='-') *ptr1++='\0';
 }
 
-gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
+gboolean bml(describe_plugin(gchar *pathname, gpointer bmh)) {
   gchar *dllname;
   gint type,flags;
   gboolean res=FALSE;
 
-  GST_INFO("describing %p : %s",bm, pathname);
+  GST_INFO("describing %p : %s",bmh, pathname);
   
   // use dllname to register
   // 'M3.dll' and 'M3 Pro.dll' both use the name M3 :(
   // BM_PROP_DLL_NAME instead of BM_PROP_SHORT_NAME
 
-  g_assert(bm);
-  if(bml(get_machine_info(bm,BM_PROP_DLL_NAME,(void *)&dllname)) &&
-    bml(get_machine_info(bm,BM_PROP_TYPE,(void *)&type)) &&
-    bml(get_machine_info(bm,BM_PROP_FLAGS,(void *)&flags))
+  g_assert(bmh);
+  if(bml(get_machine_info(bmh,BM_PROP_DLL_NAME,(void *)&dllname)) &&
+    bml(get_machine_info(bmh,BM_PROP_TYPE,(void *)&type)) &&
+    bml(get_machine_info(bmh,BM_PROP_FLAGS,(void *)&flags))
   ) {
     gchar *name,*filename,*ext;
     gchar *element_type_name,*voice_type_name=NULL;
@@ -101,7 +101,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
 
     // construct the type name
     element_type_name = g_strdup_printf("bml-%s",name);
-    if(bml(gstbml_is_polyphonic(bm))) {
+    if(bml(gstbml_is_polyphonic(bmh))) {
       voice_type_name = g_strdup_printf("bmlv-%s",name);
     }
     g_free(name);
@@ -178,14 +178,14 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
     if(help_filename) {
       gchar *help_uri;
       help_uri=g_strdup_printf("file://%s",help_filename);
-      g_hash_table_insert(bml_help_uri_by_descriptor,(gpointer)bm,(gpointer)help_uri);
-      GST_INFO("machine %p has user docs at '%s'",bm,help_uri);
+      g_hash_table_insert(bml_help_uri_by_descriptor,(gpointer)bmh,(gpointer)help_uri);
+      GST_INFO("machine %p has user docs at '%s'",bmh,help_uri);
       g_free(help_filename);
     }
     // store preset path
     if(preset_filename) {
-      g_hash_table_insert(bml_preset_path_by_descriptor,(gpointer)bm,(gpointer)preset_filename);
-      GST_INFO("machine %p preset path '%s'",bm,preset_filename);
+      g_hash_table_insert(bml_preset_path_by_descriptor,(gpointer)bmh,(gpointer)preset_filename);
+      GST_INFO("machine %p preset path '%s'",bmh,preset_filename);
     }
 
 #ifdef BUILD_STRUCTURE
@@ -214,7 +214,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       }
       /* this does not yet match all machines, e.g. Elak SVF
        * we could try ("%s %s",author,longname) in addition? */
-      bml(get_machine_info(bm,BM_PROP_NAME,(void *)&str));
+      bml(get_machine_info(bmh,BM_PROP_NAME,(void *)&str));
       str=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
       extra_categories=g_hash_table_lookup(bml_category_by_machine_name,str);
       g_free(str);
@@ -235,7 +235,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       // create the voice type now
       voice_type = bml(v_get_type(voice_type_name));
       GST_INFO("  voice type \"%s\" is 0x%lu", voice_type_name,(gulong)voice_type);
-      g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bm);
+      g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bmh);
       g_free(voice_type_name);
     }
     if(element_type_name) {
@@ -243,7 +243,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
       // create the element type now
       switch(type) {
         case MT_MASTER: // (Sink)
-          //element_type = bml(sink_get_type(element_type_name,bm));
+          //element_type = bml(sink_get_type(element_type_name));
           GST_WARNING("  unimplemented plugin type %d for '%s'",type,element_type_name);
           break;
         case MT_GENERATOR: // (Source)
@@ -260,7 +260,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bm)) {
         if(voice_type) {
           g_hash_table_insert(bml_voice_type_by_element_type,GINT_TO_POINTER(element_type),(gpointer)voice_type);
         }
-        g_hash_table_insert(bml_descriptors_by_element_type,GINT_TO_POINTER(element_type),(gpointer)bm);
+        g_hash_table_insert(bml_descriptors_by_element_type,GINT_TO_POINTER(element_type),(gpointer)bmh);
         if(!gst_element_register(bml_plugin, element_type_name, GST_RANK_NONE, element_type)) {
           GST_ERROR("error registering new type : \"%s\"", element_type_name);
         }

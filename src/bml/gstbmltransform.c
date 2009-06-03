@@ -595,7 +595,7 @@ static void gst_bml_transform_init(GstBMLTransform *bml_transform) {
   GstBML *bml=GST_BML(bml_transform);
 
   GST_INFO("initializing instance: elem=%p, bml=%p, bml_class=%p",bml_transform,bml,bml_class);
-  GST_INFO("bm=0x%p, src=%d, sink=%d",bml_class->bm,bml_class->numsrcpads,bml_class->numsinkpads);
+  GST_INFO("bmh=0x%p, src=%d, sink=%d",bml_class->bmh,bml_class->numsrcpads,bml_class->numsinkpads);
 
   bml(gstbml_init(bml,bml_class,GST_ELEMENT(bml_transform)));
   /* this is not nedded when using the base class
@@ -661,11 +661,11 @@ static void gst_bml_transform_base_init(GstBMLTransformClass *klass) {
   GstBMLClass *bml_class=GST_BML_CLASS(klass);
   GstElementClass *element_class=GST_ELEMENT_CLASS(klass);
   //GstPadTemplate *templ;
-  gpointer bm;
+  gpointer bmh;
 
   GST_INFO("initializing base");
 
-  bm=bml(gstbml_class_base_init(bml_class,G_TYPE_FROM_CLASS(klass),1,1));
+  bmh=bml(gstbml_class_base_init(bml_class,G_TYPE_FROM_CLASS(klass),1,1));
 
   if(bml_class->output_channels==1) {
     gst_element_class_add_pad_template(element_class,gst_static_pad_template_get(&bml_pad_caps_mono_src_template));
@@ -684,7 +684,7 @@ static void gst_bml_transform_base_init(GstBMLTransformClass *klass) {
     GST_INFO("  added stereo sink pad template");
   }
 
-  bml(gstbml_class_set_details(element_class,bm,"Filter/Effect/Audio/BML"));
+  bml(gstbml_class_set_details(element_class,bmh,"Filter/Effect/Audio/BML"));
 }
 
 

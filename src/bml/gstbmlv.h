@@ -42,7 +42,7 @@ struct _GstBMLV {
   gboolean dispose_has_run;
 
   // the buzz machine handle (to use with libbml API)
-  void *bm;
+  gpointer bm;
 
   // the parent gst-element
   //GstElement *parent;
@@ -58,7 +58,7 @@ struct _GstBMLVClass {
   GstObjectClass parent_class;
 
   // the buzz machine handle (to use with libbml API)
-  void *bm;
+  gpointer bmh;
   
   gint numtrackparams;
 

@@ -1,3 +1,16 @@
+2009-06-04  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	* src/bml/gstbml.h:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/gstbmlv.c:
+	* src/bml/gstbmlv.h:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	* src/bml/utils.h:
+	  Rewrite to use new bml api. Yet untested.
+
 2009-06-02  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.c:

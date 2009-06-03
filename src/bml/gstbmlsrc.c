@@ -19,8 +19,6 @@
  * Boston, MA 02111-1307, USA.
  */
 
-// see also: gstfakesrc, gstfilesrc, gsttestaudiosrc
-
 #include "plugin.h"
 
 #define GST_CAT_DEFAULT bml_debug
@@ -88,9 +86,11 @@ static void gst_bml_child_proxy_interface_init(gpointer g_iface, gpointer iface_
 //-- property meta interface implementations
 
 static gchar *gst_bml_property_meta_describe_property(GstBtPropertyMeta *property_meta, glong index, GValue *event) {
-  GstBML *bml=GST_BML(GST_BML_SRC(property_meta));
+  GstBMLSrc *bml_src=GST_BML_SRC(property_meta);
+  GstBMLSrcClass *klass=GST_BML_SRC_GET_CLASS(bml_src);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
 
-  return(bml(gstbml_property_meta_describe_property(bml->bm,index,event)));
+  return(bml(gstbml_property_meta_describe_property(bml_class->bmh,index,event)));
 }
 
 static void gst_bml_property_meta_interface_init(gpointer g_iface, gpointer iface_data) {
@@ -602,7 +602,7 @@ static void gst_bml_src_init(GstBMLSrc *bml_src) {
   GstPad *srcpad;
 
   GST_INFO("initializing instance: elem=%p, bml=%p, bml_class=%p",bml_src,bml,bml_class);
-  GST_INFO("bm=0x%p, src=%d, sink=%d",bml_class->bm,bml_class->numsrcpads,bml_class->numsinkpads);
+  GST_INFO("bmh=0x%p, src=%d, sink=%d",bml_class->bmh,bml_class->numsrcpads,bml_class->numsinkpads);
 
   bml(gstbml_init(bml,bml_class,GST_ELEMENT(bml_src)));
   /* we operate in time */
@@ -650,11 +650,11 @@ static void gst_bml_src_base_init(GstBMLSrcClass *klass) {
   GstBMLClass *bml_class=GST_BML_CLASS(klass);
   GstElementClass *element_class=GST_ELEMENT_CLASS(klass);
   //GstPadTemplate *templ;
-  gpointer bm;
+  gpointer bmh;
 
   GST_INFO("initializing base");
 
-  bm=bml(gstbml_class_base_init(bml_class,G_TYPE_FROM_CLASS(klass),1,0));
+  bmh=bml(gstbml_class_base_init(bml_class,G_TYPE_FROM_CLASS(klass),1,0));
 
   if(bml_class->output_channels==1) {
     gst_element_class_add_pad_template(element_class, gst_static_pad_template_get (&bml_pad_caps_mono_src_template));
@@ -665,7 +665,7 @@ static void gst_bml_src_base_init(GstBMLSrcClass *klass) {
     GST_INFO("  added stereo src pad template");
   }
 
-  bml(gstbml_class_set_details(element_class,bm,"Source/Audio/BML"));
+  bml(gstbml_class_set_details(element_class,bmh,"Source/Audio/BML"));
 }
 
 
