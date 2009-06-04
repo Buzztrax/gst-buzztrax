@@ -181,7 +181,7 @@ static gboolean dir_scan(const gchar *dir_name) {
   GDir *dir;
   gchar *file_name,*ext;
   const gchar *entry_name;
-  gpointer bmh,bm;
+  gpointer bmh;
   gboolean res=FALSE;
 
   const gchar *blacklist[] ={
@@ -300,28 +300,17 @@ static gboolean dir_scan(const gchar *dir_name) {
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
           if((bmh=bmlw_open(file_name))) {
-            if((bm=bmlw_new(bmh))) {
-              bmlw_init(bm,0,NULL);
-              if(bmlw_describe_plugin(file_name,bmh)) {
-                res=TRUE;
-                /* @todo: free here, or leave instance open to be used in class init */
-#ifdef BUILD_STRUCTURE
-                /* once we switch to the ifdefs, move the close() down and remove else {} */ 
-                bmlw_free(bm);
-#endif
-              }
-              else {
-                bmlw_free(bm);
-              }
-#ifdef BUILD_STRUCTURE
-              /* once we switch to the ifdefs, move the close() down and remove else {} */ 
-              bmlw_close(bmh);
-#endif
+            if(bmlw_describe_plugin(file_name,bmh)) {
+              res=TRUE;
             }
-            else {
-              GST_WARNING("machine %s could not be loaded",entry_name);
-              bmlw_close(bmh);
-            }
+            /* @todo: free here, or leave instance open to be used in class init */
+#ifdef BUILD_STRUCTURE
+            /* once we switch to the ifdefs, move the close() down and remove else {} */ 
+            bmlw_close(bmh);
+#endif
+          }
+          else {
+            GST_WARNING("machine %s could not be loaded",file_name);
           }
 #else
           GST_WARNING("no dll emulation on non x86 platforms");
@@ -329,28 +318,17 @@ static gboolean dir_scan(const gchar *dir_name) {
         }
         else {
           if((bmh=bmln_open(file_name))) {
-            if((bm=bmln_new(bmh))) {
-              bmln_init(bm,0,NULL);
-              if(bmln_describe_plugin(file_name,bmh)) {
-                res=TRUE;
-                /* @todo: free here, or leave instance open to be used in class init */
-#ifdef BUILD_STRUCTURE
-                /* once we switch to the ifdefs, move the close() down and remove else {} */ 
-                bmln_free(bm);
-#endif
-              }
-              else {
-                bmln_free(bm);
-              }
-#ifdef BUILD_STRUCTURE
-              /* once we switch to the ifdefs, move the close() down and remove else {} */ 
-              bmln_close(bmh);
-#endif
+            if(bmln_describe_plugin(file_name,bmh)) {
+              res=TRUE;
             }
-            else {
-              GST_WARNING("machine %s could not be loaded",entry_name);
-              bmln_close(bmh);
-            }
+            /* @todo: free here, or leave instance open to be used in class init */
+#ifdef BUILD_STRUCTURE
+            /* once we switch to the ifdefs, move the close() down and remove else {} */ 
+            bmln_close(bmh);
+#endif
+          }
+          else {
+            GST_WARNING("machine %s could not be loaded",file_name);
           }
         }
         g_free(file_name);

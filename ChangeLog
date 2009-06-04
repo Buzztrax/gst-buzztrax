@@ -1,5 +1,10 @@
 2009-06-04  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/plugin.c:
+	  No need to create an instance here anymore.
+
+2009-06-04  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/bml/gstbml.c:
 	* src/bml/gstbml.h:
 	* src/bml/gstbmlsrc.c:
