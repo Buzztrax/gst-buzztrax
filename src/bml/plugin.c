@@ -235,7 +235,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     "JESKOLA AUXSEND.DLL",
     "JESKOLA EQ-3 XP.DLL",
     "JESKOLA MULTIPLIER.DLL",
-    "JESKOLA REVERB 2.DLL",
+    /*"JESKOLA REVERB 2.DLL",*/
     /*"JESKOLA REVERB.DLL",*/
     /*"JESKOLA STEREO REVERB.DLL",*/
     "JESKOLA WAVE SHAPER.DLL",
