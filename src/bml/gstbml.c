@@ -23,7 +23,7 @@
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
 // see http://bugzilla.gnome.org/show_bug.cgi?id=570233
-//#define BUILD_STRUCTURE 1
+#define BUILD_STRUCTURE 1
 #ifdef BUILD_STRUCTURE
 extern GstStructure *bml_meta_all;
 #endif

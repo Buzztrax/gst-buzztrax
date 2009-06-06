@@ -28,7 +28,7 @@
 GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
 
 // see http://bugzilla.gnome.org/show_bug.cgi?id=570233
-//#define BUILD_STRUCTURE 1
+#define BUILD_STRUCTURE 1
 #ifdef BUILD_STRUCTURE
 GstStructure *bml_meta_all;
 #endif
@@ -431,24 +431,9 @@ static gboolean plugin_init (GstPlugin * plugin) {
   gst_bml_property_meta_quark_type=g_quark_from_string("GstBMLPropertyMeta::type");
 
   GST_INFO("scan for plugins");
-  /* we need a mechanism in the registry (or an own registry) to avoid scanning
-   * when not building/updating a registry
-   * see http://bugzilla.gnome.org/show_bug.cgi?id=570233
-   * until that implemneted there, we could easily store the structure in a
-   * extra file ourself 
+  /* see http://bugzilla.gnome.org/show_bug.cgi?id=570233
    *
-   * Plugin init:
-   * At this point we would request the cache data. If its NULL, we scan.
-   * During scanning we would build the cache data.
-   *
-   * Registering types:
-   * In any case we now have the cache data and  we iterate over it
-   * (a hierarchical structure with the plugin name as major keys) and call
-   * bml?_describe_plugin(...) for each entry. _describe_plugin() registers the
-   * gobject type. It needs to be changed to take the parameters from the cache
-   * data.
-   *
-   * FIXME: check if we can get tid of the hashtables once this all works
+   * FIXME: check if we can get rid of the hashtables once this all works
    * 
    * FIXME: defer dll loading more
    * utils:gstbml_class_base_init() loads the dll now, unfortunately
@@ -458,55 +443,46 @@ static gboolean plugin_init (GstPlugin * plugin) {
    */
 #ifdef BUILD_STRUCTURE
   {
-    // we get this from the registry later on
-    gchar *registry_filename=g_build_filename(g_get_home_dir(),".gstreamer-0.10/bml-registry.bin",NULL);
-    gchar *bml_meta_str;
-    gint n;
+    gint n=0;
 
-    if(g_file_get_contents(registry_filename,&bml_meta_str,NULL,NULL)) {
-      /* FIXME: this does not deserialize correctly */
-      bml_meta_all=gst_structure_from_string(bml_meta_str,NULL);
-      g_free(bml_meta_str);
+#if GST_CHECK_VERSION(0,10,23) && (GST_VERSION_NANO == 1)
+    /* see http://bugzilla.gnome.org/show_bug.cgi?id=570233 */
+    bml_meta_all=gst_plugin_get_cache_data(plugin);
+    if(bml_meta_all) {
+      n=gst_structure_n_fields(bml_meta_all);
     }
-    else {
-      bml_meta_all=gst_structure_empty_new("bml");
-    }
-    n=gst_structure_n_fields(bml_meta_all);
+#endif
     GST_INFO("%d entries in cache",n);
     if(!n) {
+      bml_meta_all=gst_structure_empty_new("bml");
 #endif
       res=bml_scan();
 #ifdef BUILD_STRUCTURE
       if(res) {
         n=gst_structure_n_fields(bml_meta_all);
         GST_INFO("%d entries after scanning",n);
-        bml_meta_str=gst_structure_to_string(bml_meta_all);
-        g_file_set_contents(registry_filename,bml_meta_str,-1,NULL);
-        g_free(bml_meta_str);
+#if GST_CHECK_VERSION(0,10,23) && (GST_VERSION_NANO == 1)
+        gst_plugin_set_cache_data(plugin,bml_meta_all);
+#endif
       }
     }
     else {
       res=TRUE;
     }
-    g_free(registry_filename);
     
-    {
-      // dump structure
+    // register types
+    if(n) {
       gint i;
       const gchar *name;
       const GValue *value;
-      gchar *desc;
       GQuark bmln_type=g_quark_from_static_string("bmln");
-      
-      printf("%3d entries\n",n);
       
       for(i=0;i<n;i++) {
         name=gst_structure_nth_field_name(bml_meta_all,i); 
         value=gst_structure_get_value(bml_meta_all,name);
-        printf("%3d: %20s\n",i,name);
+        //printf("%3d: %20s\n",i,name);
         if(G_VALUE_TYPE(value)==GST_TYPE_STRUCTURE) {
           GstStructure *bml_meta=g_value_get_boxed(value);
-          gint j,m=gst_structure_n_fields(bml_meta);
           GQuark bml_type=gst_structure_get_name_id(bml_meta);
           
           if(bml_type==bmln_type) {
@@ -517,15 +493,6 @@ static gboolean plugin_init (GstPlugin * plugin) {
             res&=bmlw_gstbml_register_element(plugin,bml_meta);
           }
 #endif
-  
-          printf("  %3d entries\n",m);
-          for(j=0;j<m;j++) {
-            name=gst_structure_nth_field_name(bml_meta,j); 
-            value=gst_structure_get_value(bml_meta,name);
-            desc=g_strdup_value_contents(value);
-            printf("  %3d: %20s: %s; %s\n",j,name,G_VALUE_TYPE_NAME(value),desc);
-            g_free(desc);
-          }
         }
       }
     }

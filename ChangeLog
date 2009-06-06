@@ -1,3 +1,11 @@
+2009-06-07  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	  Use new plugin API for cache data, if available. Remove intermediate
+	  printfs and make BUILD_STRUCTURE code path default.
+
 2009-06-05  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:
