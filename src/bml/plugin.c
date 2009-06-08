@@ -290,6 +290,11 @@ static gboolean dir_scan(const gchar *dir_name) {
   if (!dir) return(res);
 
   while((entry_name=g_dir_read_name(dir))) {
+    if(!g_utf8_validate(entry_name,-1,NULL)) {
+      GST_WARNING("file %s is not a valid file-name",entry_name);
+      continue;
+    }
+
     ext=strrchr(entry_name,'.');
     if (ext && (!strcasecmp(ext,".dll") || !strcmp(ext,".so"))) {
       /* test against blacklist */
@@ -447,7 +452,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
 
 #if GST_CHECK_VERSION(0,10,23) && (GST_VERSION_NANO == 1)
     /* see http://bugzilla.gnome.org/show_bug.cgi?id=570233 */
-    bml_meta_all=gst_plugin_get_cache_data(plugin);
+    bml_meta_all=(GstStructure *)gst_plugin_get_cache_data(plugin);
     if(bml_meta_all) {
       n=gst_structure_n_fields(bml_meta_all);
     }

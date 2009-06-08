@@ -1,3 +1,15 @@
+2009-06-08  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.c:
+	  More logging and fixing a early machine feature check.
+
+	* src/bml/plugin.c:
+	  Fix a build warning and skip non supported filenames.
+
+	* src/bml/gstbmlv.c:
+	* src/bml/utils.c:
+	  More logging.
+
 2009-06-07  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.c:

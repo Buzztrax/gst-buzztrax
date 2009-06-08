@@ -87,8 +87,9 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bmh)) {
       filename=dllname;
     }
     GST_INFO("  dll-name: '%s', flags are: %x",filename,flags);
-    if(flags&0xFE) {
-      GST_WARNING("  machine is not yet fully supported");
+    if(flags&0xFC) {
+      // we only support, MONO_TO_STEREO(1), PLAYS_WAVES(2) yet
+      GST_WARNING("  machine is not yet fully supported, flags: %x",flags);
     }
 
     // get basename
@@ -221,7 +222,8 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bmh)) {
       if(extra_categories) {
         gst_structure_set(bml_meta,"categories",G_TYPE_STRING,extra_categories,NULL);
       }
-    
+
+      GST_INFO("caching data: type_name=%s, file_name=%s",element_type_name,pathname);
       g_value_init(&value, GST_TYPE_STRUCTURE);
       g_value_set_boxed(&value,bml_meta);
       gst_structure_set_value(bml_meta_all,element_type_name,&value);

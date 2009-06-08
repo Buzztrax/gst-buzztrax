@@ -208,7 +208,7 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   klass->dll_name=(gchar*)gst_structure_get_string(bml_meta,"plugin-filename");
   klass->help_uri=(gchar*)gst_structure_get_string(bml_meta,"help-filename");
   klass->preset_path=(gchar*)gst_structure_get_string(bml_meta,"preset-filename");
-  GST_INFO("initializing base: file_name=%s",klass->dll_name);
+  GST_INFO("initializing base: type_name=%s, file_name=%s",g_type_name(type),klass->dll_name);
 
   bmh=bml(open(klass->dll_name));
   g_assert(bmh);

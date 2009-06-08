@@ -96,6 +96,8 @@ static void gst_bmlv_set_property(GObject *object, guint prop_id, const GValue *
 
   // property ids have an offset of 1
   prop_id--;
+  GST_DEBUG("id: %d", prop_id);
+  GST_INFO("  bm=0x%p",bm);
 
   // @todo cache this info
   addr=(gint *)bml(get_track_parameter_location(bm,bmlv->voice,prop_id));
@@ -123,6 +125,8 @@ static void gst_bmlv_get_property(GObject * object, guint prop_id, GValue * valu
 
   // property ids have an offset of 1
   prop_id--;
+  GST_DEBUG("id: %d", prop_id);
+  GST_INFO("  bm=0x%p",bm);
 
   addr=(gint *)bml(get_track_parameter_location(bm,bmlv->voice,prop_id));
   type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
