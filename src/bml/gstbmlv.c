@@ -70,7 +70,7 @@ static gchar *bml(v_property_meta_describe_property(gpointer bmh, glong index, G
     res=g_strdup(str);
   }
   else {
-    res=g_convert(str,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
+    res=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   }
   GST_INFO("formatted track parameter : '%s'",res);
   return(res);

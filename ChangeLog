@@ -1,5 +1,11 @@
 2009-06-11  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/gstbmlv.c:
+	* src/bml/utils.c:
+	  Actually use UTF-8 and not ASCII for the conversion.
+
+2009-06-11  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/bml/plugin.c:
 	  Don't store empty categories.
 

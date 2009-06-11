@@ -106,7 +106,7 @@ gchar *bml(gstbml_property_meta_describe_property(gpointer bmh, glong index, GVa
     res=g_strdup(str);
   }
   else {
-    res=g_convert(str,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
+    res=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   }
   GST_INFO("formatted global parameter : '%s'",res);
   return(res);
@@ -357,7 +357,7 @@ static GType gst_bml_register_global_enum_type(GObjectClass *klass, gpointer bmh
           if(desc && g_ascii_isalpha(desc[0])) {
             enums[k].value=min_val+j;
             // we have to copy these as buzzmachines can reuse the memory we get from describe()
-            enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
+            enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
             k++;
           }
         }
@@ -427,7 +427,7 @@ GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bmh, gin
           if(desc && g_ascii_isalpha(desc[0])) {
             enums[k].value=min_val+j;
             // we have to copy these as buzzmachines can reuse the memory we get from describe()
-            enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
+            enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
             k++;
           }
         }
