@@ -33,6 +33,7 @@ extern GHashTable *bml_descriptors_by_voice_type;
 
 static gchar *bml(v_property_meta_describe_property(gpointer bmh, glong index, GValue *event)) {
   const gchar *str=NULL;
+  gchar *res;
   gchar def[20];
   GType base,type=G_VALUE_TYPE(event);
 
@@ -65,8 +66,14 @@ static gchar *bml(v_property_meta_describe_property(gpointer bmh, glong index, G
       GST_ERROR("unsupported GType='%s'",G_VALUE_TYPE_NAME(event));
       return(g_strdup_value_contents(event));
   }
-  GST_INFO("formatted track parameter : '%s'",str);
-  return(g_strdup(str));
+  if(str==def) {
+    res=g_strdup(str);
+  }
+  else {
+    res=g_convert(str,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
+  }
+  GST_INFO("formatted track parameter : '%s'",res);
+  return(res);
 }
 
 static gchar *gst_bmlv_property_meta_describe_property(GstBtPropertyMeta *property_meta, glong index, GValue *event) {

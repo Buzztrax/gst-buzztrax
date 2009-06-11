@@ -69,6 +69,7 @@ gboolean bml(gstbml_is_polyphonic(gpointer bmh)) {
 
 gchar *bml(gstbml_property_meta_describe_property(gpointer bmh, glong index, GValue *event)) {
   const gchar *str=NULL;
+  gchar *res;
   gchar def[20];
   GType base,type=G_VALUE_TYPE(event);
 
@@ -101,8 +102,14 @@ gchar *bml(gstbml_property_meta_describe_property(gpointer bmh, glong index, GVa
       GST_ERROR("unsupported GType='%s'",G_VALUE_TYPE_NAME(event));
       return(g_strdup_value_contents(event));
   }
-  GST_INFO("formatted global parameter : '%s'",str);
-  return(g_strdup(str));
+  if(str==def) {
+    res=g_strdup(str);
+  }
+  else {
+    res=g_convert(str,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
+  }
+  GST_INFO("formatted global parameter : '%s'",res);
+  return(res);
 }
 
 void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick)) {
@@ -350,7 +357,7 @@ static GType gst_bml_register_global_enum_type(GObjectClass *klass, gpointer bmh
           if(desc && g_ascii_isalpha(desc[0])) {
             enums[k].value=min_val+j;
             // we have to copy these as buzzmachines can reuse the memory we get from describe()
-            enums[k].value_nick=enums[k].value_name=g_strdup((gchar *)desc);
+            enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
             k++;
           }
         }
@@ -420,7 +427,7 @@ GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bmh, gin
           if(desc && g_ascii_isalpha(desc[0])) {
             enums[k].value=min_val+j;
             // we have to copy these as buzzmachines can reuse the memory we get from describe()
-            enums[k].value_nick=enums[k].value_name=g_strdup((gchar *)desc);
+            enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
             k++;
           }
         }
