@@ -1,3 +1,12 @@
+2009-06-12  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmltransform.c:
+	  Don't crash in describe for effects. That was missing from recent
+	  refactoring.
+
+	* src/bml/utils.c:
+	  Improved heuristics for enum detection.
+
 2009-06-11  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlv.c:

@@ -316,26 +316,31 @@ void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bmh, const gc
 }
 
 static GType gst_bml_register_global_enum_type(GObjectClass *klass, gpointer bmh, gint i, gchar *name, gint min_val, gint max_val, gint no_val) {
-  GType enum_type=0;
+  GType enum_type=G_TYPE_INVALID;
   const gchar *desc;
 
   desc=bml(describe_global_value(bmh, i, min_val));
   GST_INFO("check enum, description='%s', (entries=(%d-%d)=%d), no_val=%d",desc,max_val,min_val,((max_val+1)-min_val),no_val);
-  if(desc && g_ascii_isalpha(desc[0])) {
+
+  //if(desc && g_ascii_isalpha(desc[0])) {
     gchar *type_name;
 
     // build type name
     type_name=g_strdup_printf("%s%s",g_type_name(G_TYPE_FROM_CLASS(klass)),name);
     if(!(enum_type=g_type_from_name(type_name))) {
-      gint j,k,total=(max_val+1)-min_val,count=0;
+      gint j,k,total=(max_val+1)-min_val,vcount=0,tcount=0;
       GEnumValue *enums;
 
+      // count entries that start with a character
       for(j=0;j<total;j++) {
         desc=bml(describe_global_value(bmh, i, min_val+j));
         //if((j==no_val) && !desc) desc=" ";
-        if(desc && g_ascii_isalpha(desc[0])) {
-          count++;
-          GST_DEBUG("check enum, description[%2d]='%s'",j,desc);
+        if(desc) {
+          vcount++;
+          if(g_ascii_isalpha(desc[0])) {
+            tcount++;
+            GST_DEBUG("check enum, description[%2d]='%s'",j,desc);
+          }
         }
       }
 
@@ -346,15 +351,18 @@ static GType gst_bml_register_global_enum_type(GObjectClass *klass, gpointer bmh
       //}
       // DEBUG
       
-      // some plugins just have text for val=min, or val=min/max
-      if(total-count<2) {
+      // some plugins just have text for only val=min/max
+      // don't make an enum for those
+      //if(total-tcount<=2) {
+      if(tcount>=(total>>1)) {
         // this we can never free :(
-        enums=g_new(GEnumValue, count+2);
+        enums=g_new(GEnumValue, vcount+2);
         // create an enum type
         for(j=k=0;j<total;j++) {
           desc=bml(describe_global_value(bmh, i, min_val+j));
           //if((j==no_val) && !desc) desc=" ";
-          if(desc && g_ascii_isalpha(desc[0])) {
+          //if(desc && g_ascii_isalpha(desc[0])) {
+          if(desc) {
             enums[k].value=min_val+j;
             // we have to copy these as buzzmachines can reuse the memory we get from describe()
             enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
@@ -371,27 +379,28 @@ static GType gst_bml_register_global_enum_type(GObjectClass *klass, gpointer bmh
         enums[k].value_nick=NULL;
   
         enum_type = g_enum_register_static (type_name, enums);
-        GST_INFO("register enum '%s' with %d values",type_name,count);
+        GST_INFO("register enum '%s' with %d values",type_name,vcount);
       }
       else {
-        GST_INFO("not making enum '%s' with %d of %d values",type_name,count,total);
+        GST_INFO("not making enum '%s' with %d text of %d total values",type_name,tcount,total);
       }
     }
     else {
       GST_INFO("existing enum '%s'",type_name);
     }
     g_free(type_name);
-  }
+  //}
   return(enum_type);
 }
 
 GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bmh, gint i, gchar *name, gint min_val, gint max_val, gint no_val)) {
-  GType enum_type=0;
+  GType enum_type=G_TYPE_INVALID;
   const gchar *desc;
 
   desc=bml(describe_track_value(bmh, i, min_val));
   GST_INFO("check enum, description= '%s', (entries=(%d-%d)=%d), no_val=%d",desc,max_val,min_val,((max_val+1)-min_val),no_val);
-  if(desc && g_ascii_isalpha(desc[0])) {
+  
+  //if(desc && g_ascii_isalpha(desc[0])) {
     gchar *type_name;
     const gchar *class_type_name;
 
@@ -406,25 +415,31 @@ GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bmh, gin
       type_name=g_strdup_printf("bmlv-%s%s",&class_type_name[5],name);
     }
     if(!(enum_type=g_type_from_name(type_name))) {
-      gint j,k,total=(max_val+1)-min_val,count=0;
+      gint j,k,total=(max_val+1)-min_val,vcount=0,tcount=0;
       GEnumValue *enums;
 
+      // count entries that start with a character
       for(j=0;j<total;j++) {
         desc=bml(describe_track_value(bmh, i, min_val+j));
-        if(desc && g_ascii_isalpha(desc[0])) {
-          count++;
-          GST_DEBUG("check enum, description[%2d]='%s'",j,desc);
+        if(desc) {
+          vcount++;
+          if(g_ascii_isalpha(desc[0])) {
+            tcount++;
+            GST_DEBUG("check enum, description[%2d]='%s'",j,desc);
+          }
         }
       }
 
-      // some plugins just have text for val=min, or val=min/max
-      if(total-count<2) {
+      // some plugins just have text for only val=min/max
+      // don't make an enum for those
+      if(tcount>=(total>>1)) {
         // this we can never free :(
-        enums=g_new(GEnumValue, count+2);
+        enums=g_new(GEnumValue, vcount+2);
         // create an enum type
         for(j=k=0;j<total;j++) {
           desc=bml(describe_track_value(bmh, i, min_val+j));
-          if(desc && g_ascii_isalpha(desc[0])) {
+          //if(desc && g_ascii_isalpha(desc[0])) {
+          if(desc) {
             enums[k].value=min_val+j;
             // we have to copy these as buzzmachines can reuse the memory we get from describe()
             enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
@@ -441,17 +456,17 @@ GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bmh, gin
         enums[k].value_nick=NULL;
   
         enum_type = g_enum_register_static (type_name, enums);
-        GST_INFO("register enum '%s' with %d values",type_name,count);
+        GST_INFO("register enum '%s' with %d values",type_name,vcount);
       }
       else {
-        GST_INFO("not making enum '%s' with %d of %d values",type_name,count,total);
+        GST_INFO("not making enum '%s' with %d text of %d total values",type_name,tcount,total);
       }
     }
     else {
       GST_INFO("existing enum '%s'",type_name);
     }
     g_free(type_name);
-  }
+  //}
   return(enum_type);
 }
 

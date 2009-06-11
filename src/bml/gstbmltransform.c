@@ -113,9 +113,11 @@ static void gst_bml_child_proxy_interface_init(gpointer g_iface, gpointer iface_
 //-- property meta interface implementations
 
 static gchar *gst_bml_property_meta_describe_property(GstBtPropertyMeta *property_meta, glong index, GValue *event) {
-  GstBML *bml=GST_BML(GST_BML_TRANSFORM(property_meta));
+  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(property_meta);
+  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
 
-  return(bml(gstbml_property_meta_describe_property(bml->bm,index,event)));
+  return(bml(gstbml_property_meta_describe_property(bml_class->bmh,index,event)));
 }
 
 static void gst_bml_property_meta_interface_init(gpointer g_iface, gpointer iface_data) {
