@@ -137,10 +137,12 @@ static gboolean read_index(const gchar *dir_name) {
               memmove(beg,end,strlen(end)+1);
             }
 
-            for(a=0;a<g_strv_length(names);a++) {
-              if(names[a] && *names[a]) {
-                GST_DEBUG("  %s -> %s",names[a],categories);
-                 g_hash_table_insert(bml_category_by_machine_name,g_strdup(names[a]),g_strdup(cat));
+            if(cat && *cat) {
+              for(a=0;a<g_strv_length(names);a++) {
+                if(names[a] && *names[a]) {
+                  GST_DEBUG("  %s -> %s",names[a],categories);
+                   g_hash_table_insert(bml_category_by_machine_name,g_strdup(names[a]),g_strdup(cat));
+                }
               }
             }
             g_free(cat);

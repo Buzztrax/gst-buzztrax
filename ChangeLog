@@ -1,5 +1,10 @@
 2009-06-11  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/plugin.c:
+	  Don't store empty categories.
+
+2009-06-11  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/bml/gstbmlv.c:
 	* src/bml/utils.c:
 	  Fix non UTF-8 strings from describe() calls.
