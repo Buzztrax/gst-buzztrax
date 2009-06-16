@@ -24,21 +24,6 @@
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
-extern GHashTable *bml_help_uri_by_descriptor;
-
-//-- helper
-
-/*
- * gstbml_get_help_uri:
- *
- * Get the uri of the user-docs for a buzzmachine.
- *
- * Returns: the uri or %NULL if machine has no docs. Do not modify.
- */
-const gchar *gstbml_get_help_uri(gpointer bm) {
-  return((const gchar *)g_hash_table_lookup(bml_help_uri_by_descriptor,bm));
-}
-
 //-- preset iface
 
 gchar** gstbml_preset_get_preset_names(GstBML *bml,GstBMLClass *klass) {

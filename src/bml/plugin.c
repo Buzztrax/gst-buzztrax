@@ -27,18 +27,9 @@
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
 
-// see http://bugzilla.gnome.org/show_bug.cgi?id=570233
-#define BUILD_STRUCTURE 1
-#ifdef BUILD_STRUCTURE
 GstStructure *bml_meta_all;
-#endif
 
 GstPlugin *bml_plugin;
-GHashTable *bml_descriptors_by_element_type;
-GHashTable *bml_descriptors_by_voice_type;
-GHashTable *bml_voice_type_by_element_type;
-GHashTable *bml_help_uri_by_descriptor;
-GHashTable *bml_preset_path_by_descriptor;
 GHashTable *bml_category_by_machine_name;
 
 GQuark gst_bml_property_meta_quark_type;
@@ -292,6 +283,7 @@ static gboolean dir_scan(const gchar *dir_name) {
   if (!dir) return(res);
 
   while((entry_name=g_dir_read_name(dir))) {
+    // @todo: use g_filename_to_utf8
     if(!g_utf8_validate(entry_name,-1,NULL)) {
       GST_WARNING("file %s is not a valid file-name",entry_name);
       continue;
@@ -310,11 +302,7 @@ static gboolean dir_scan(const gchar *dir_name) {
             if(bmlw_describe_plugin(file_name,bmh)) {
               res=TRUE;
             }
-            /* @todo: free here, or leave instance open to be used in class init */
-#ifdef BUILD_STRUCTURE
-            /* once we switch to the ifdefs, move the close() down and remove else {} */ 
             bmlw_close(bmh);
-#endif
           }
           else {
             GST_WARNING("machine %s could not be loaded",file_name);
@@ -328,11 +316,7 @@ static gboolean dir_scan(const gchar *dir_name) {
             if(bmln_describe_plugin(file_name,bmh)) {
               res=TRUE;
             }
-            /* @todo: free here, or leave instance open to be used in class init */
-#ifdef BUILD_STRUCTURE
-            /* once we switch to the ifdefs, move the close() down and remove else {} */ 
             bmln_close(bmh);
-#endif
           }
           else {
             GST_WARNING("machine %s could not be loaded",file_name);
@@ -377,6 +361,8 @@ static gboolean bml_scan(void) {
   path_entries=g_strv_length(paths);
   GST_INFO("%d dirs in search paths \"%s\"",path_entries,bml_path);
   
+  bml_category_by_machine_name=g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+  
   // check of index.txt in any of the paths
   for(i=0;i<path_entries;i++) {
     if(read_index(paths[i]))
@@ -387,13 +373,16 @@ static gboolean bml_scan(void) {
     res|=dir_scan(paths[i]);
   }
   g_strfreev(paths);
+  
+  g_hash_table_destroy(bml_category_by_machine_name);
 
   GST_INFO("after scanning path \"%s\", res=%d",bml_path,res);
   return(res);
 }
 
 static gboolean plugin_init (GstPlugin * plugin) {
-  gboolean res;
+  gboolean res=FALSE;
+  gint n=0;
 
   GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "bml", GST_DEBUG_FG_GREEN | GST_DEBUG_BG_BLACK | GST_DEBUG_BOLD, "BML");
 
@@ -416,14 +405,6 @@ static gboolean plugin_init (GstPlugin * plugin) {
   }
 
   // init global data
-  // we have to keep help_uri & preset_path loaded for whole time, as the
-  // strings can be accessed at any time (that includes after plugin_init()
-  bml_descriptors_by_element_type=g_hash_table_new(NULL, NULL);
-  bml_descriptors_by_voice_type=g_hash_table_new(NULL, NULL);
-  bml_voice_type_by_element_type=g_hash_table_new(NULL, NULL);
-  bml_help_uri_by_descriptor=g_hash_table_new(NULL, NULL);
-  bml_preset_path_by_descriptor=g_hash_table_new(NULL, NULL);
-  bml_category_by_machine_name=g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
   bml_plugin=plugin;
 
   // @todo this is a hack
@@ -438,83 +419,56 @@ static gboolean plugin_init (GstPlugin * plugin) {
   gst_bml_property_meta_quark_type=g_quark_from_string("GstBMLPropertyMeta::type");
 
   GST_INFO("scan for plugins");
-  /* see http://bugzilla.gnome.org/show_bug.cgi?id=570233
-   *
-   * FIXME: check if we can get rid of the hashtables once this all works
-   * 
-   * FIXME: defer dll loading more
-   * utils:gstbml_class_base_init() loads the dll now, unfortunately
-   * gst_element_register() refs the class, we need to cache more info (almost
-   * the full machine-info :/
-   *
-   */
-#ifdef BUILD_STRUCTURE
-  {
-    gint n=0;
-
 #if GST_CHECK_VERSION(0,10,23) && (GST_VERSION_NANO == 1)
-    /* see http://bugzilla.gnome.org/show_bug.cgi?id=570233 */
-    bml_meta_all=(GstStructure *)gst_plugin_get_cache_data(plugin);
-    if(bml_meta_all) {
+  bml_meta_all=(GstStructure *)gst_plugin_get_cache_data(plugin);
+  if(bml_meta_all) {
+    n=gst_structure_n_fields(bml_meta_all);
+  }
+#endif
+  GST_INFO("%d entries in cache",n);
+  if(!n) {
+    bml_meta_all=gst_structure_empty_new("bml");
+    res=bml_scan();
+    if(res) {
       n=gst_structure_n_fields(bml_meta_all);
-    }
-#endif
-    GST_INFO("%d entries in cache",n);
-    if(!n) {
-      bml_meta_all=gst_structure_empty_new("bml");
-#endif
-      res=bml_scan();
-#ifdef BUILD_STRUCTURE
-      if(res) {
-        n=gst_structure_n_fields(bml_meta_all);
-        GST_INFO("%d entries after scanning",n);
+      GST_INFO("%d entries after scanning",n);
 #if GST_CHECK_VERSION(0,10,23) && (GST_VERSION_NANO == 1)
-        gst_plugin_set_cache_data(plugin,bml_meta_all);
+      gst_plugin_set_cache_data(plugin,bml_meta_all);
 #endif
-      }
     }
-    else {
-      res=TRUE;
-    }
+  }
+  else {
+    res=TRUE;
+  }
     
-    // register types
-    if(n) {
-      gint i;
-      const gchar *name;
-      const GValue *value;
-      GQuark bmln_type=g_quark_from_static_string("bmln");
-      
-      for(i=0;i<n;i++) {
-        name=gst_structure_nth_field_name(bml_meta_all,i); 
-        value=gst_structure_get_value(bml_meta_all,name);
-        //printf("%3d: %20s\n",i,name);
-        if(G_VALUE_TYPE(value)==GST_TYPE_STRUCTURE) {
-          GstStructure *bml_meta=g_value_get_boxed(value);
-          GQuark bml_type=gst_structure_get_name_id(bml_meta);
-          
-          if(bml_type==bmln_type) {
-            res&=bmln_gstbml_register_element(plugin,bml_meta);
-          }
-#if HAVE_BMLW
-          else {
-            res&=bmlw_gstbml_register_element(plugin,bml_meta);
-          }
-#endif
+  if(n) {
+    gint i;
+    const gchar *name;
+    const GValue *value;
+    GQuark bmln_type=g_quark_from_static_string("bmln");
+    
+    GST_INFO("register types");
+
+    for(i=0;i<n;i++) {
+      name=gst_structure_nth_field_name(bml_meta_all,i); 
+      value=gst_structure_get_value(bml_meta_all,name);
+      //printf("%3d: %20s\n",i,name);
+      if(G_VALUE_TYPE(value)==GST_TYPE_STRUCTURE) {
+        GstStructure *bml_meta=g_value_get_boxed(value);
+        GQuark bml_type=gst_structure_get_name_id(bml_meta);
+        
+        if(bml_type==bmln_type) {
+          res&=bmln_gstbml_register_element(plugin,bml_meta);
         }
+#if HAVE_BMLW
+        else {
+          res&=bmlw_gstbml_register_element(plugin,bml_meta);
+        }
+#endif
       }
     }
   }
-#endif
 
-  /* @todo: we need to reconsider this when BUILD_STRUCTURE is done
-  g_hash_table_destroy(bml_category_by_machine_name);
-  g_hash_table_destroy(bml_preset_path_by_descriptor);
-  g_hash_table_destroy(bml_help_uri_by_descriptor);
-  g_hash_table_destroy(bml_descriptors_by_element_type);
-  */
-  /* @todo: we can't release this (yet)
-  g_hash_table_destroy(bml_descriptors_by_voice_type);
-  */
   return(res);
 }
 

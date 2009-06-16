@@ -27,10 +27,6 @@
 
 G_BEGIN_DECLS
 
-//-- helper
-
-extern const gchar *gstbml_get_help_uri(gpointer bm);
-
 //-- preset iface
 
 extern gchar** gstbml_preset_get_preset_names(GstBML *bml, GstBMLClass *klass);

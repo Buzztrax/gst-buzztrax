@@ -1,3 +1,15 @@
+2009-06-16  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	* src/bml/common.h:
+	* src/bml/gstbml.c:
+	* src/bml/gstbmlv.c:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	  Remove old code. With that almost all the hashtables go and we're closing
+	  all th related one-time leaks. Also fix wrong-ly registered help-file-uri.
+	  Add a todo: for file-name conversion.
+
 2009-06-12  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmltransform.c:

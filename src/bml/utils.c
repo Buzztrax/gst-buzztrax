@@ -24,18 +24,9 @@
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
-// see http://bugzilla.gnome.org/show_bug.cgi?id=570233
-#define BUILD_STRUCTURE 1
-#ifdef BUILD_STRUCTURE
 extern GstStructure *bml_meta_all;
-#endif
-
-extern GHashTable *bml_descriptors_by_element_type;
-extern GHashTable *bml_descriptors_by_voice_type;
-extern GHashTable *bml_voice_type_by_element_type;
-extern GHashTable *bml_help_uri_by_descriptor;
-extern GHashTable *bml_preset_path_by_descriptor;
-extern GHashTable *bml_category_by_machine_name;
+/* needed in gstbmlv.c */
+gpointer voice_class_bmh;
 
 //-- helper
 
@@ -204,13 +195,11 @@ gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta))
 gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcpads, gint numsinkpads)) {
   gpointer bmh;
   GType voice_type=G_TYPE_INVALID;
-
-  GST_INFO("initializing base: type=0x%lu",(gulong)type);
-
-#ifdef BUILD_STRUCTURE
   const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
   GstStructure *bml_meta=g_value_get_boxed(value);
   const gchar *voice_type_name=gst_structure_get_string(bml_meta,"voice-type-name");
+
+  GST_INFO("initializing base: type=0x%lu",(gulong)type);
   
   klass->dll_name=(gchar*)gst_structure_get_string(bml_meta,"plugin-filename");
   klass->help_uri=(gchar*)gst_structure_get_string(bml_meta,"help-filename");
@@ -227,21 +216,11 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
     GST_INFO("prepare voice-type %s",voice_type_name);
 
     voice_type=g_type_from_name(voice_type_name);
-    g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bmh);
+    voice_class_bmh=bmh;
+    //g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bmh);
     g_type_class_ref(voice_type);
   }
   
-#else
-  bmh=g_hash_table_lookup(bml_descriptors_by_element_type,GINT_TO_POINTER(type));
-  g_assert(bmh);
-  
-  voice_type=GPOINTER_TO_INT(g_hash_table_lookup(bml_voice_type_by_element_type,GINT_TO_POINTER(type)));
-
-  bml(get_machine_info(bmh,BM_PROP_DLL_NAME,(void *)&klass->dll_name));
-  klass->help_uri=g_hash_table_lookup(bml_help_uri_by_descriptor,GINT_TO_POINTER(bmh));
-  klass->preset_path=g_hash_table_lookup(bml_preset_path_by_descriptor,GINT_TO_POINTER(bmh));
-#endif
-
   GST_INFO("initializing base: bmh=0x%p, dll_name=%s, voice_type=0x%lu",bmh,((klass->dll_name)?klass->dll_name:"?"),(gulong)voice_type);
 
   klass->bmh=bmh;
@@ -273,24 +252,10 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
 void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bmh, const gchar *category)) {
   GstElementDetails details;
   gchar *str;
-#ifdef BUILD_STRUCTURE
   GType type=G_TYPE_FROM_CLASS(klass);
   const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
   GstStructure *bml_meta=g_value_get_boxed(value);
   const gchar *extra_categories=gst_structure_get_string(bml_meta,"categories");
-#else
-  gchar *extra_categories;
-
-  /* use extra categories (see plugin.c:read_index) */
-  /* this does not yet match all machines, e.g. Elak SVF
-   * we could try ("%s %s",author,longname) in addition?
-   */
-  bml(get_machine_info(bmh,BM_PROP_NAME,(void *)&str));
-  str=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-  extra_categories=g_hash_table_lookup(bml_category_by_machine_name,str);
-  GST_DEBUG("  %s/%s -> ''",str,details.longname);
-  g_free(str);
-#endif
 
   /* construct the element details struct */
   // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE? 

@@ -24,7 +24,8 @@ GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
 static GstElementClass *parent_class = NULL;
 
-extern GHashTable *bml_descriptors_by_voice_type;
+/* set by utils.c */
+extern gpointer voice_class_bmh;
 
 //-- local helper
 
@@ -186,7 +187,7 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
   gint num;
 
   GST_INFO("initializing class");
-  bmh=g_hash_table_lookup(bml_descriptors_by_voice_type,GINT_TO_POINTER(G_TYPE_FROM_CLASS(klass)));
+  bmh = voice_class_bmh;
   g_assert(bmh);
 
   GST_INFO("  bmh=0x%p",bmh);
