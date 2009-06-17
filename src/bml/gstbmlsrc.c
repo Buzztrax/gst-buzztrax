@@ -593,6 +593,7 @@ static void gst_bml_src_base_finalize(GstBMLSrcClass *klass) {
   GstBMLClass *bml_class=GST_BML_CLASS(klass);
 
   gstbml_preset_finalize(bml_class);
+  bml(gstbml_base_finalize(bml_class));
 }
 
 static void gst_bml_src_init(GstBMLSrc *bml_src) {

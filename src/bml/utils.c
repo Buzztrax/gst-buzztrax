@@ -198,10 +198,13 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
   GstStructure *bml_meta=g_value_get_boxed(value);
   const gchar *voice_type_name=gst_structure_get_string(bml_meta,"voice-type-name");
+  const gchar *dll_name;
 
   GST_INFO("initializing base: type=0x%lu",(gulong)type);
   
-  klass->dll_name=(gchar*)gst_structure_get_string(bml_meta,"plugin-filename");
+  dll_name=(gchar*)gst_structure_get_string(bml_meta,"plugin-filename");
+  
+  klass->dll_name=g_filename_from_utf8(dll_name,-1,NULL,NULL,NULL);
   klass->help_uri=(gchar*)gst_structure_get_string(bml_meta,"help-filename");
   klass->preset_path=(gchar*)gst_structure_get_string(bml_meta,"preset-filename");
   GST_INFO("initializing base: type_name=%s, file_name=%s",g_type_name(type),klass->dll_name);
@@ -242,6 +245,11 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   }
 
   return(bmh);
+}
+
+void bml(gstbml_base_finalize(GstBMLClass *klass)) {
+  bml(close(klass->bmh));
+  g_free(klass->dll_name);
 }
 
 /*

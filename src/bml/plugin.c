@@ -172,7 +172,7 @@ static const gchar *get_bml_path(void) {
  */
 static gboolean dir_scan(const gchar *dir_name) {
   GDir *dir;
-  gchar *file_name,*ext;
+  gchar *file_name,*ext,*conv_entry_name;
   const gchar *entry_name;
   gpointer bmh;
   gboolean res=FALSE;
@@ -283,18 +283,17 @@ static gboolean dir_scan(const gchar *dir_name) {
   if (!dir) return(res);
 
   while((entry_name=g_dir_read_name(dir))) {
-    // @todo: use g_filename_to_utf8
     if(!g_utf8_validate(entry_name,-1,NULL)) {
       GST_WARNING("file %s is not a valid file-name",entry_name);
-      continue;
+      conv_entry_name=g_filename_to_utf8(entry_name,-1,NULL,NULL,NULL);
+      //continue;
     }
 
     ext=strrchr(entry_name,'.');
     if (ext && (!strcasecmp(ext,".dll") || !strcmp(ext,".so"))) {
       /* test against blacklist */
       if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
-        file_name=g_build_filename (dir_name, entry_name, NULL);
-        //file_name=g_strconcat(dir_name, G_DIR_SEPARATOR_S, entry_name, NULL);
+        file_name=g_build_filename (dir_name, conv_entry_name?conv_entry_name:entry_name, NULL);
         GST_WARNING("trying plugin '%s','%s'",entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
@@ -328,6 +327,8 @@ static gboolean dir_scan(const gchar *dir_name) {
         GST_WARNING("machine %s is black-listed",entry_name);
       }
     }
+    g_free(conv_entry_name);
+    conv_entry_name=NULL;
   }
   g_dir_close (dir);
   

@@ -589,6 +589,7 @@ static void gst_bml_transform_base_finalize(GstBMLTransformClass *klass) {
   GstBMLClass *bml_class=GST_BML_CLASS(klass);
 
   gstbml_preset_finalize(bml_class);
+  bml(gstbml_base_finalize(bml_class));
 }
 
 static void gst_bml_transform_init(GstBMLTransform *bml_transform) {

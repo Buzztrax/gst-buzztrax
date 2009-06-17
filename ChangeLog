@@ -1,3 +1,12 @@
+2009-06-17  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/plugin.c:
+	* src/bml/utils.c:
+	* src/bml/utils.h:
+	  Also close dll when last instance is gone. Handle non UTF-8 filenames.
+
 2009-06-16  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:
