@@ -257,7 +257,7 @@ guint gstbt_tone_conversion_note_string_2_number(const gchar *note) {
  */
 const gchar *gstbt_tone_conversion_note_number_2_string(guint note) {
   static gchar str[4];
-  static const gchar *key[12]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
+  static const gchar key[12][3]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
   guint tone, octave;
   
   if(note==GSTBT_TONE_CONVERSION_NOTE_OFF) return ("off");

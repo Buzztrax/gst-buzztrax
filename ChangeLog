@@ -1,3 +1,8 @@
+2009-06-20  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/toneconversion.c:
+	  Save rellocs.
+
 2009-06-17  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlsrc.c:
