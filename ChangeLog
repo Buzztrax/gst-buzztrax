@@ -1,3 +1,8 @@
+2009-06-21  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	  Return TRUE when preset loading was successful.
+
 2009-06-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/toneconversion.c:

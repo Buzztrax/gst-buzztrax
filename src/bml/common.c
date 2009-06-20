@@ -188,6 +188,7 @@ gboolean gstbml_preset_load_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
       }
 
       if(voice_class) g_type_class_unref(voice_class);
+      return(TRUE);
     }
     else {
       GST_WARNING("no preset data for '%s'",name);
