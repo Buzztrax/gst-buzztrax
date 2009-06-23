@@ -1,3 +1,8 @@
+2009-06-24  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  Sync requered versions with buzztard module.
+
 2009-06-21  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:

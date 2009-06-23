@@ -177,10 +177,10 @@ AC_SUBST(VALGRIND_CFLAGS)dnl
 
 dnl Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
-  glib-2.0 >= 2.6.0 gobject-2.0  >= 2.6.0 gthread-2.0 >= 2.6.0 gmodule-2.0 >= 2.6.0 \
-  gstreamer-0.10 >= 0.10.7 gstreamer-base-0.10 >= 0.10.7 \
-  gstreamer-controller-0.10 >= 0.10.7 \
-  gstreamer-plugins-base-0.10 >= 0.10.7 \
+  glib-2.0 >= 2.10.0 gobject-2.0  >= 2.10.0 gthread-2.0 >= 2.10.0 gmodule-2.0 >= 2.10.0 \
+  gstreamer-0.10 >= 0.10.10 gstreamer-base-0.10 >= 0.10.10 \
+  gstreamer-controller-0.10 >= 0.10.10 \
+  gstreamer-plugins-base-0.10 >= 0.10.10 \
 )
 
 dnl GStreamer plugin build
