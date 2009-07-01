@@ -53,7 +53,7 @@
 #include "simsyn.h"
 
 #define M_PI_M2 ( M_PI + M_PI )
-#define INNER_LOOP 32
+#define INNER_LOOP 64
 
 #define GST_CAT_DEFAULT sim_syn_debug
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
@@ -479,18 +479,18 @@ gst_sim_syn_send_event (GstElement *elem, GstEvent *event) {
 static void
 gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
 {
-  guint i=0, j;
+  guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   ampf = src->volume * 32767.0;
 
-  while (i < src->generate_samples_per_buffer) {
-	/* the volume envelope */
+  while (i < ct) {
+    /* the volume envelope */
     gst_controller_sync_values (src->volenv_controller, src->note_count);
-	amp = src->volenv->value * ampf;
+    amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
-    for (j = 0; ((j < INNER_LOOP) && (i<src->generate_samples_per_buffer)); j++, i++) {
+    for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       src->accumulator += step;
       /* @todo: move out of inner loop? */
       if (G_UNLIKELY (src->accumulator >= M_PI_M2))
@@ -504,18 +504,18 @@ gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
 {
-  guint i=0, j;
+  guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   ampf = src->volume * 32767.0;
 
-  while (i < src->generate_samples_per_buffer) {
-	/* the volume envelope */
+  while (i < ct) {
+    /* the volume envelope */
     gst_controller_sync_values (src->volenv_controller, src->note_count);
-	amp = src->volenv->value * ampf;
+    amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
-    for (j = 0; ((j < INNER_LOOP) && (i<src->generate_samples_per_buffer)); j++, i++) {
+    for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       src->accumulator += step;
       if (G_UNLIKELY (src->accumulator >= M_PI_M2))
         src->accumulator -= M_PI_M2;
@@ -528,18 +528,18 @@ gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
 {
-  guint i=0, j;
+  guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   ampf = src->volume * 32767.0 / M_PI;
 
-  while (i < src->generate_samples_per_buffer) {
-	/* the volume envelope */
+  while (i < ct) {
+    /* the volume envelope */
     gst_controller_sync_values (src->volenv_controller, src->note_count);
-	amp = src->volenv->value * ampf;
+    amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
-    for (j = 0; ((j < INNER_LOOP) && (i<src->generate_samples_per_buffer)); j++, i++) {
+    for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       src->accumulator += step;
       if (G_UNLIKELY (src->accumulator >= M_PI_M2))
         src->accumulator -= M_PI_M2;
@@ -556,18 +556,18 @@ gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_triangle (GstSimSyn * src, gint16 * samples)
 {
-  guint i=0, j;
+  guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble step, amp, ampf;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   ampf = src->volume * 32767.0 / M_PI;
 
-  while (i < src->generate_samples_per_buffer) {
-	/* the volume envelope */
+  while (i < ct) {
+    /* the volume envelope */
     gst_controller_sync_values (src->volenv_controller, src->note_count);
-	amp = src->volenv->value * ampf;
+    amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
-    for (j = 0; ((j < INNER_LOOP) && (i<src->generate_samples_per_buffer)); j++, i++) {
+    for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       src->accumulator += step;
       if (G_UNLIKELY (src->accumulator >= M_PI_M2))
         src->accumulator -= M_PI_M2;
@@ -592,17 +592,17 @@ gst_sim_syn_create_silence (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_white_noise (GstSimSyn * src, gint16 * samples)
 {
-  guint i=0, j;
+  guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble amp, ampf;
 
   ampf = src->volume * 65535.0;
 
-  while (i < src->generate_samples_per_buffer) {
-	/* the volume envelope */
+  while (i < ct) {
+    /* the volume envelope */
     gst_controller_sync_values (src->volenv_controller, src->note_count);
-	amp = src->volenv->value * ampf;
+    amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
-    for (j = 0; ((j < INNER_LOOP) && (i<src->generate_samples_per_buffer)); j++, i++) {
+    for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       samples[i] = (gint16) (32768 - (amp * rand () / (RAND_MAX + 1.0)));
     }
   }
@@ -676,17 +676,17 @@ gst_sim_syn_generate_pink_noise_value (GstPinkNoise * pink)
 static void
 gst_sim_syn_create_pink_noise (GstSimSyn * src, gint16 * samples)
 {
-  guint i=0, j;
+  guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble amp, ampf;
 
   ampf = src->volume * 32767.0;
 
-  while (i < src->generate_samples_per_buffer) {
-	/* the volume envelope */
+  while (i < ct) {
+    /* the volume envelope */
     gst_controller_sync_values (src->volenv_controller, src->note_count);
-	amp = src->volenv->value * ampf;
+    amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
-    for (j = 0; ((j < INNER_LOOP) && (i<src->generate_samples_per_buffer)); j++, i++) {
+    for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       samples[i] =
         (gint16) (gst_sim_syn_generate_pink_noise_value (&src->pink) *
         amp);
@@ -711,13 +711,13 @@ gst_sim_syn_init_sine_table (GstSimSyn * src)
 static void
 gst_sim_syn_create_sine_table (GstSimSyn * src, gint16 * samples)
 {
-  guint i;
+  guint i, ct=src->generate_samples_per_buffer;
   gdouble step, scl;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   scl = 1024.0 /  M_PI_M2;
 
-  for (i = 0; i < src->generate_samples_per_buffer; i++) {
+  for (i = 0; i < ct; i++) {
     /* @todo: add envelope */
 
     src->accumulator += step;
@@ -1057,16 +1057,16 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
           src->note_count=0L;
           src->flt_low=src->flt_mid=src->flt_high=0.0;
           /* src->samplerate will be one second */
-          attack=src->samplerate/100;
+          attack=src->samplerate/1000;
           decay=src->samplerate*src->decay;
-          if(attack>decay) attack=decay-1;
+          if(attack>decay) attack=decay-10;
           g_value_init (&val, G_TYPE_DOUBLE);
           gst_controller_unset_all(src->volenv_controller,"value");
-                  g_value_set_double(&val,0.001);
-          gst_controller_set(src->volenv_controller,"value",0,&val);
-                  g_value_set_double(&val,1.0);
+          g_value_set_double(&val,0.001); // why is this not 0.0?
+          gst_controller_set(src->volenv_controller,"value",G_GUINT64_CONSTANT(0),&val);
+          g_value_set_double(&val,1.0);
           gst_controller_set(src->volenv_controller,"value",attack,&val);
-                  g_value_set_double(&val,0.0);
+          g_value_set_double(&val,0.0);
           gst_controller_set(src->volenv_controller,"value",decay,&val);
   
           /* @todo: more advanced envelope
