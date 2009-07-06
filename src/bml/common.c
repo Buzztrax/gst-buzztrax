@@ -138,13 +138,17 @@ gboolean gstbml_preset_load_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
     if((data=g_hash_table_lookup(klass->preset_data,node->data))) {
       guint32 i,tracks,params;
       //GType param_type,base_type;
-      GObjectClass *voice_class=G_OBJECT_CLASS(g_type_class_ref(klass->voice_type));
+      GObjectClass *voice_class=NULL;
       GParamSpec **properties,*property;
       guint number_of_properties;
       guint flags;
 
       tracks=*data++;
       params=*data++;
+      
+      if(klass->voice_type) {
+        voice_class=G_OBJECT_CLASS(g_type_class_ref(klass->voice_type));
+      }
 
       GST_INFO("about to load preset '%s' with %d tracks and %d total params",name,tracks,params);
       GST_INFO("machine has %d global and %d voice params",klass->numglobalparams,klass->numtrackparams);

@@ -1,3 +1,8 @@
+2009-07-06  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	  Don't crash on switching presets on voice-less machines.
+
 2009-07-01  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/simsyn/simsyn.c:
