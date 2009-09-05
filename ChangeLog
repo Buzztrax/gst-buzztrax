@@ -1,3 +1,8 @@
+2009-09-05  Stefan Kost  <ensonic@users.sf.net>
+
+	* NEWS:
+	  Update NEWS.
+
 2009-07-06  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:
@@ -11,7 +16,7 @@
 2009-06-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
-	  Sync requered versions with buzztard module.
+	  Sync required versions with buzztard module.
 
 2009-06-21  Stefan Kost  <ensonic@users.sf.net>
 
@@ -41,7 +46,7 @@
 	* src/bml/plugin.c:
 	* src/bml/utils.c:
 	  Remove old code. With that almost all the hashtables go and we're closing
-	  all th related one-time leaks. Also fix wrong-ly registered help-file-uri.
+	  all the related one-time leaks. Also fix wrongly registered help-file-uri.
 	  Add a todo: for file-name conversion.
 
 2009-06-12  Stefan Kost  <ensonic@users.sf.net>
@@ -191,7 +196,7 @@
 	* src/bml/gstbmltransform.c:
 	* src/bml/gstbmlv.c:
 	* src/bml/utils.c:
-	  Fix format string warnings, by removing some obsolte log.
+	  Fix format string warnings, by removing some obsolete log.
 
 2009-04-22  Stefan Kost  <ensonic@users.sf.net>
 

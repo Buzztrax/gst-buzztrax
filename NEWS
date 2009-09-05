@@ -1,6 +1,7 @@
-0.5.0 crown of thorns (??.???.2009)
+0.5.0 crown of thorns (06.Sep.2009)
 ================================================================================
-<pre-relase>
+Lots of improvements in the buzzmachine wrapper. Buzz index support for
+categories. Make machines live-playable. More resource efficient.
 
 0.4.0 the light in your eyes (26.Nov.2008)
 ================================================================================
