@@ -1,3 +1,8 @@
+2009-10-13  Stefan Kost  <ensonic@users.sf.net>
+
+	* tests/Makefile.am:
+	  Use $(LIBTOOL) instead of hardcoded version.
+
 2009-09-28  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
