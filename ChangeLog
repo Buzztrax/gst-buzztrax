@@ -1,5 +1,11 @@
 2009-10-27  Stefan Kost  <ensonic@users.sf.net>
 
+	* configure.ac:
+	  Turn off -Werror for automake as it warns about gnu make portability
+	  issues.
+
+2009-10-27  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/bml/common.c:
 	  Add plain copy fallback when charset conversion fails.
 
