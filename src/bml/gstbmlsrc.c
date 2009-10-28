@@ -364,7 +364,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   gboolean has_data;
 
   if (G_UNLIKELY(bml->eos_reached)) {
-    GST_DEBUG("  EOS reached");
+    GST_DEBUG_OBJECT(bml_src,"  EOS reached");
     return GST_FLOW_UNEXPECTED;
   }
 
@@ -414,7 +414,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   //bml->running_time = next_time;
   bml->n_samples = n_samples;
 
-  GST_DEBUG("  calling work(%d)",samples_per_buffer);
+  GST_DEBUG_OBJECT(bml_src,"  calling work(%d)",samples_per_buffer);
   data = (BMLData *)GST_BUFFER_DATA(buf);
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer;i++) data[i]=0.0f;
@@ -436,6 +436,19 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
     GST_BUFFER_FLAG_SET(buf,GST_BUFFER_FLAG_GAP);
   }
   else {
+#ifdef USE_DEBUG
+    {
+      guint i;
+      for(i=0;i<samples_per_buffer;i++) {
+        if(isnan(data[i])) { GST_WARNING_OBJECT(bml_src,"data contains NaN"); }
+        if(isinf(data[i])) { GST_WARNING_OBJECT(bml_src,"data contains Inf"); }
+        if(fpclassify(data[i])==FP_SUBNORMAL) {
+          data[i]=0.0;
+          //GST_WARNING_OBJECT(bml_src,"data contains Denormal");
+        }
+      }
+    }
+#endif
     // buzz generates relative loud output
     //guint i;
     //for(i=0;i<samples_per_buffer;i++) data[i]/=32768.0f;
@@ -466,7 +479,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   gboolean has_data;
 
   if (G_UNLIKELY(bml->eos_reached)) {
-    GST_DEBUG("  EOS reached");
+    GST_DEBUG_OBJECT(bml_src,"  EOS reached");
     return GST_FLOW_UNEXPECTED;
   }
 
@@ -514,7 +527,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   //bml->running_time = next_time;
   bml->n_samples = n_samples;
 
-  GST_DEBUG("  calling work_m2s(%d)",samples_per_buffer);
+  GST_DEBUG_OBJECT(bml_src,"  calling work_m2s(%d)",samples_per_buffer);
   data=(BMLData *)GST_BUFFER_DATA(buf);
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer*2;i++) data[i]=0.0;
@@ -536,6 +549,19 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
     GST_BUFFER_FLAG_SET(buf,GST_BUFFER_FLAG_GAP);
   }
   else {
+#ifdef USE_DEBUG
+    {
+      guint i;
+      for(i=0;i<samples_per_buffer*2;i++) {
+        if(isnan(data[i])) { GST_WARNING_OBJECT(bml_src,"data contains NaN"); }
+        if(isinf(data[i])) { GST_WARNING_OBJECT(bml_src,"data contains Inf"); }
+        if(fpclassify(data[i])==FP_SUBNORMAL) {
+          data[i]=0.0;
+          //GST_WARNING_OBJECT(bml_src,"data contains Denormal");
+        }
+      }
+    }
+#endif
     // buzz generates relative loud output
     //guint i;
     //for(i=0;i<samples_per_buffer*2;i++) data[i]/=32768.0;

@@ -1,3 +1,11 @@
+2009-10-28  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/plugin.h:
+	  Add experimental buffer checking in debug build (and denormal fixing for
+	  now).
+
 2009-10-27  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

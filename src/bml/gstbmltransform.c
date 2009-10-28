@@ -279,7 +279,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
     oil_scalarmultiply_f32_ns (data, data, &fc, samples_per_buffer);
   }
 
-  GST_DEBUG("  calling work(%d,%d)",samples_per_buffer,mode);
+  GST_DEBUG_OBJECT(bml_transform,"  calling work(%d,%d)",samples_per_buffer,mode);
   todo = samples_per_buffer;
   seg_data = data;
   has_data=FALSE;
@@ -295,6 +295,19 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
     GST_BUFFER_FLAG_SET(outbuf,GST_BUFFER_FLAG_GAP);
   }
   else {
+#ifdef USE_DEBUG
+    {
+      guint i;
+      for(i=0;i<samples_per_buffer;i++) {
+        if(isnan(data[i])) { GST_WARNING_OBJECT(bml_transform,"data contains NaN"); }
+        if(isinf(data[i])) { GST_WARNING_OBJECT(bml_transform,"data contains Inf"); }
+        if(fpclassify(data[i])==FP_SUBNORMAL) { 
+          data[i]=0.0;
+          //GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
+        }
+      }
+    }
+#endif
     GST_BUFFER_FLAG_UNSET(outbuf,GST_BUFFER_FLAG_GAP);
     // buzz generates relative loud output
     //for(i=0;i<samples_per_buffer;i++) data[i]/=32768.0f;
@@ -341,7 +354,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
     oil_scalarmultiply_f32_ns (data, data, &fc, samples_per_buffer*2);
   }
 
-  GST_DEBUG("  calling work_m2s(%d,%d)",samples_per_buffer,mode);
+  GST_DEBUG_OBJECT(bml_transform,"  calling work_m2s(%d,%d)",samples_per_buffer,mode);
   todo = samples_per_buffer;
   seg_data = data;
   has_data=FALSE;
@@ -358,6 +371,19 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
     GST_BUFFER_FLAG_SET(outbuf,GST_BUFFER_FLAG_GAP);
   }
   else {
+#ifdef USE_DEBUG
+    {
+      guint i;
+      for(i=0;i<samples_per_buffer*2;i++) {
+        if(isnan(data[i])) { GST_WARNING_OBJECT(bml_transform,"data contains NaN"); }
+        if(isinf(data[i])) { GST_WARNING_OBJECT(bml_transform,"data contains Inf"); }
+        if(fpclassify(data[i])==FP_SUBNORMAL) { 
+          data[i]=0.0;
+          //GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
+        }
+      }
+    }
+#endif
     GST_BUFFER_FLAG_UNSET(outbuf,GST_BUFFER_FLAG_GAP);
     //for(i=0;i<samples_per_buffer*2;i++) data[i]/=32768.0;
     gfloat fc=1.0/32768.0;
@@ -387,7 +413,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   //for(i=0;i<samples_per_buffer*2;i++) datao[i]=0.0f;
   memset(datao,0,samples_per_buffer*2*sizeof(BMLData));
   
-  GST_DEBUG("input : %p,%d  output: %p,%d",
+  GST_DEBUG_OBJECT(bml_transform,"input : %p,%d  output: %p,%d",
     datai,GST_BUFFER_SIZE(inbuf),
     datao,GST_BUFFER_SIZE(outbuf));
 
@@ -402,7 +428,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   if (gst_base_transform_is_passthrough (base)) {
     // we would actually need to convert mono to stereo here
     // but this is not even called
-    GST_WARNING("m2s in passthrough mode");
+    GST_WARNING_OBJECT(bml_transform,"m2s in passthrough mode");
     //return GST_FLOW_OK;
   }
   /**/
@@ -417,7 +443,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
     oil_scalarmultiply_f32_ns (datai, datai, &fc, samples_per_buffer);
   }
 
-  GST_DEBUG("  calling work_m2s(%d,%d)",samples_per_buffer,mode);
+  GST_DEBUG_OBJECT(bml_transform,"  calling work_m2s(%d,%d)",samples_per_buffer,mode);
   todo = samples_per_buffer;
   seg_datai = datai;
   seg_datao = datao;
@@ -435,8 +461,21 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
     GST_BUFFER_FLAG_SET(outbuf,GST_BUFFER_FLAG_GAP);
   }
   else {
+#ifdef USE_DEBUG
+    {
+      guint i;
+      for(i=0;i<samples_per_buffer*2;i++) {
+        if(isnan(datao[i])) { GST_WARNING_OBJECT(bml_transform,"data contains NaN"); }
+        if(isinf(datao[i])) { GST_WARNING_OBJECT(bml_transform,"data contains Inf"); }
+        if(fpclassify(datao[i])==FP_SUBNORMAL) { 
+          datao[i]=0.0;
+          //GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
+        }
+      }
+    }
+#endif
     GST_BUFFER_FLAG_UNSET(outbuf,GST_BUFFER_FLAG_GAP);
-    //for(i=0;i<samples_per_buffer;i++) datao[i]/=32768.0;
+    //for(i=0;i<samples_per_buffer*2;i++) datao[i]/=32768.0;
     gfloat fc=1.0/32768.0;
     oil_scalarmultiply_f32_ns (datao, datao, &fc, samples_per_buffer*2);
   }
