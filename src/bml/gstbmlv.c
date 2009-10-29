@@ -154,7 +154,7 @@ static void gst_bmlv_dispose(GObject *object) {
   if(bmlv->dispose_has_run) return;
   bmlv->dispose_has_run = TRUE;
 
-  GST_DEBUG("!!!! bmlv=%p",bmlv);
+  GST_DEBUG_OBJECT(bmlv,"!!!! bmlv=%p",bmlv);
 
   if(G_OBJECT_CLASS(parent_class)->dispose) {
     (G_OBJECT_CLASS(parent_class)->dispose)(object);
@@ -164,7 +164,7 @@ static void gst_bmlv_dispose(GObject *object) {
 static void gst_bmlv_finalize(GObject *object) {
   GstBMLV *bmlv=GST_BMLV(object);
 
-  GST_DEBUG("!!!! bmlv=%p",bmlv);
+  GST_DEBUG_OBJECT(bmlv,"!!!! bmlv=%p",bmlv);
   
   g_free(bmlv->triggers_changed);
 

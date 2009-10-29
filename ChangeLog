@@ -1,3 +1,10 @@
+2009-10-29  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	* src/bml/gstbmlv.c:
+	* src/bml/utils.c:
+	  Log object names too.
+
 2009-10-28  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlsrc.c:

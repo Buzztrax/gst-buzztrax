@@ -745,7 +745,7 @@ void gstbml_dispose(GstBML *bml) {
   if(bml->dispose_has_run) return;
   bml->dispose_has_run = TRUE;
 
-  GST_DEBUG("!!!! bml=%p",bml);
+  GST_DEBUG_OBJECT(bml->self,"!!!! bml=%p",bml);
 
   // unref list of voices
   if(bml->voices) {

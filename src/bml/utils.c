@@ -579,7 +579,7 @@ static GstBMLV *gst_bml_add_voice(GstBML *bml,GType voice_type) {
   GstBMLV *bmlv;
   gchar *name;
 
-  GST_DEBUG("adding a new voice to %p, current nr of voices is %lu",bml->self,bml->num_voices);
+  GST_DEBUG_OBJECT(bml->self,"adding a new voice to %p, current nr of voices is %lu",bml->self,bml->num_voices);
 
   bmlv=g_object_new(voice_type,NULL);
   //bmlv->parent=bml;
@@ -596,7 +596,7 @@ static GstBMLV *gst_bml_add_voice(GstBML *bml,GType voice_type) {
   bml->voices=g_list_append(bml->voices,bmlv);
   bml->num_voices++;
 
-  GST_DEBUG("added a new voice");
+  GST_DEBUG_OBJECT(bml->self,"added a new voice");
   return(bmlv);
 }
 
@@ -610,11 +610,11 @@ static void gst_bml_del_voice(GstBML *bml,GType voice_type) {
   GList *node;
   GstObject *obj;
 
-  GST_DEBUG("removing last voice to %p, current nr of voices is %lu",bml->self,bml->num_voices);
+  GST_DEBUG_OBJECT(bml->self,"removing last voice to %p, current nr of voices is %lu",bml->self,bml->num_voices);
 
   node=g_list_last(bml->voices);
   obj=node->data;
-  GST_DEBUG("  free voice : %p (%d)",obj,G_OBJECT(obj)->ref_count);
+  GST_DEBUG_OBJECT(bml->self,"  free voice : %p (%d)",obj,G_OBJECT(obj)->ref_count);
   gst_object_unparent(obj);
   // no need to unref, the unparent does that
   //g_object_unref(node->data);
@@ -622,7 +622,7 @@ static void gst_bml_del_voice(GstBML *bml,GType voice_type) {
   bml->voices=g_list_delete_link(bml->voices,node);
   bml->num_voices--;
 
-  GST_DEBUG("removed last voice");
+  GST_DEBUG_OBJECT(bml->self,"removed last voice");
 }
 
 /*
@@ -633,24 +633,24 @@ static void gst_bml_del_voice(GstBML *bml,GType voice_type) {
 static void gst_bml_init_voices(GstBML *bml,GstBMLClass *klass) {
   gpointer bmh=klass->bmh;
 
-  GST_INFO("initializing voices: bml=%p, bml_class=%p",bml,klass);
+  GST_INFO_OBJECT(bml->self,"initializing voices: bml=%p, bml_class=%p",bml,klass);
 
   bml->num_voices=0;
   bml->voices=NULL;
   if(bml(gstbml_is_polyphonic(bmh))) {
     gint i,min_voices;
 
-    GST_DEBUG("instantiating default voices");
+    GST_DEBUG_OBJECT(bml->self,"instantiating default voices");
 
     // add voice instances
     if(bml(get_machine_info(bmh,BM_PROP_MIN_TRACKS,(void *)&min_voices))) {
-      GST_DEBUG("adding %d voices",min_voices);
+      GST_DEBUG_OBJECT(bml->self,"adding %d voices",min_voices);
       for(i=0;i<min_voices;i++) {
         gst_bml_add_voice(bml,klass->voice_type);
       }
     }
     else {
-      GST_WARNING("failed to get min voices");
+      GST_WARNING_OBJECT(bml->self,"failed to get min voices");
     }
   }
 }
@@ -661,7 +661,7 @@ static void gst_bml_init_voices(GstBML *bml,GstBMLClass *klass) {
  * initialize the new instance
  */
 void bml(gstbml_init(GstBML *bml,GstBMLClass *klass,GstElement *element)) {
-  GST_DEBUG("init: element=%p, bml=%p, bml_class=%p",element,bml,klass);
+  GST_DEBUG_OBJECT(element,"init: element=%p, bml=%p, bml_class=%p",element,bml,klass);
 
   bml->self=element;
 
@@ -684,7 +684,7 @@ void bml(gstbml_init(GstBML *bml,GstBMLClass *klass,GstElement *element)) {
   bml->subticks_per_tick=1;
   gstbml_calculate_buffer_frames(bml);
   bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
-  GST_DEBUG("activating %lu voice(s)",bml->num_voices);
+  GST_DEBUG_OBJECT(element,"activating %lu voice(s)",bml->num_voices);
   //bml(set_num_tracks(bml,bml->num_voices));
 }
 
@@ -707,18 +707,18 @@ void bml(gstbml_init_pads(GstElement *element, GstBML *bml, GstPadLinkFunction *
 
     if(GST_PAD_DIRECTION(pad)==GST_PAD_SINK) {
       bml->sinkpads[sinkcount++]=pad;
-      GST_INFO("  added sinkpad");
+      GST_INFO_OBJECT(element,"  added sinkpad");
     }
     else {
       bml->srcpads[srccount++]=pad;
-      GST_INFO("  added srcpad");
+      GST_INFO_OBJECT(element,"  added srcpad");
     }
   }
-  GST_INFO("  src_ct=%d, sink_ct=%d",srccount,sinkcount);
+  GST_INFO_OBJECT(element,"  src_ct=%d, sink_ct=%d",srccount,sinkcount);
 }
 
 void bml(gstbml_finalize(GstBML *bml)) {
-  GST_DEBUG("!!!! bml=%p",bml);
+  GST_DEBUG_OBJECT(bml->self,"!!!! bml=%p",bml);
 
   // free list of voices
   if(bml->voices) {
@@ -739,19 +739,19 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
   gpointer bm=bml->bm;
   guint props_skip=ARG_LAST-1;
 
-  GST_DEBUG ("prop-id %d", prop_id);
+  GST_DEBUG_OBJECT(bml->self,"prop-id %d",prop_id);
 
   switch(prop_id) {
     // handle properties <ARG_LAST first
     case ARG_BPM:
     case ARG_TPB:
     case ARG_STPT:
-      GST_WARNING("use gst_bml_tempo_change_tempo()");
+      GST_WARNING_OBJECT(bml->self,"use gst_bml_tempo_change_tempo()");
       handled=TRUE;
       break;
     case ARG_HOST_CALLBACKS:
       // supply the callbacks to bml
-      GST_DEBUG("passing callbacks to bml");
+      GST_DEBUG_OBJECT(bml->self,"passing callbacks to bml");
       bml(set_callbacks(bm,g_value_get_pointer(value)));
       handled=TRUE;
       break;      
@@ -761,7 +761,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
           gulong i;
           gulong old_num_voices=bml->num_voices;
           gulong new_num_voices = g_value_get_ulong(value);
-          GST_DEBUG ("change number of voices from %lu to %lu", old_num_voices,new_num_voices);
+          GST_DEBUG_OBJECT(bml->self,"change number of voices from %lu to %lu", old_num_voices,new_num_voices);
           // add or free voices
           if(old_num_voices<new_num_voices) {
             for(i=old_num_voices;i<new_num_voices;i++) {
@@ -784,7 +784,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
       }
       if(bml_class->help_uri) {
         if(prop_id==(props_skip+1)) {
-          GST_WARNING ("documentation-uri property is read only");
+          GST_WARNING_OBJECT(bml->self,"documentation-uri property is read only");
           handled=TRUE;
         }
         props_skip++;
@@ -806,7 +806,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
     type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
 
     prop_id--;
-    GST_LOG("id: %d, attr: %d, global: %d, voice: %d",prop_id,bml_class->numattributes,bml_class->numglobalparams,bml_class->numtrackparams);
+    GST_LOG_OBJECT(bml->self,"id: %d, attr: %d, global: %d, voice: %d",prop_id,bml_class->numattributes,bml_class->numglobalparams,bml_class->numtrackparams);
      // is it an attribute ?
     if(prop_id<bml_class->numattributes) {
       bml(set_attribute_value(bm,prop_id,g_value_get_int(value)));
@@ -853,23 +853,23 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
   gpointer bm=bml->bm;
   guint props_skip=ARG_LAST-1;
 
-  GST_DEBUG ("prop-id %d", prop_id);
+  GST_DEBUG_OBJECT(bml->self,"prop-id %d",prop_id);
 
   switch(prop_id) {
     // handle properties <ARG_LAST first
     case ARG_BPM:
       g_value_set_ulong(value, bml->beats_per_minute);
-      GST_DEBUG("requested BPM = %lu", bml->beats_per_minute);
+      GST_DEBUG_OBJECT(bml->self,"requested BPM = %lu", bml->beats_per_minute);
       handled=TRUE;
       break;
     case ARG_TPB:
       g_value_set_ulong(value, bml->ticks_per_beat);
-      GST_DEBUG("requested TPB = %lu", bml->ticks_per_beat);
+      GST_DEBUG_OBJECT(bml->self,"requested TPB = %lu", bml->ticks_per_beat);
       handled=TRUE;
       break;
     case ARG_STPT:
       g_value_set_ulong(value, bml->subticks_per_tick);
-      GST_DEBUG("requested STPB = %lu", bml->subticks_per_tick);
+      GST_DEBUG_OBJECT(bml->self,"requested STPB = %lu", bml->subticks_per_tick);
       handled=TRUE;
       break;
     /*case ARG_HOST_CALLBACKS:
@@ -880,7 +880,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
       if(bml(gstbml_is_polyphonic(bm))) {
         if(prop_id==(props_skip+1)) {
           g_value_set_ulong(value, bml->num_voices);
-          GST_DEBUG("requested number of voices = %lu", bml->num_voices);
+          GST_DEBUG_OBJECT(bml->self,"requested number of voices = %lu", bml->num_voices);
           handled=TRUE;
         }
         props_skip++;
@@ -908,7 +908,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
 
     type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
     prop_id--;
-    GST_DEBUG("id: %d, attr: %d, global: %d, voice: %d",prop_id,bml_class->numattributes,bml_class->numglobalparams,bml_class->numtrackparams);
+    GST_DEBUG_OBJECT(bml->self,"id: %d, attr: %d, global: %d, voice: %d",prop_id,bml_class->numattributes,bml_class->numglobalparams,bml_class->numtrackparams);
      // is it an attribute ?
     if(prop_id<bml_class->numattributes) {
       g_value_set_int(value,bml(get_attribute_value(bm,prop_id)));
