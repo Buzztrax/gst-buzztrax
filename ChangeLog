@@ -1,3 +1,11 @@
+2009-10-30  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	* src/bml/common.h:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	  Refactor to extra method. Also set buffers full of denormals to gap.
+
 2009-10-29  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:

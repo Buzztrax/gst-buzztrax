@@ -290,30 +290,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
     seg_data = &seg_data[seg_size];
     todo -= seg_size;
   }
-  if(!has_data) {
-    GST_INFO_OBJECT(bml_transform,"silent buffer");
-    GST_BUFFER_FLAG_SET(outbuf,GST_BUFFER_FLAG_GAP);
-  }
-  else {
-#ifdef USE_DEBUG
-    {
-      guint i;
-      for(i=0;i<samples_per_buffer;i++) {
-        if(isnan(data[i])) { GST_WARNING_OBJECT(bml_transform,"data contains NaN"); }
-        if(isinf(data[i])) { GST_WARNING_OBJECT(bml_transform,"data contains Inf"); }
-        if(fpclassify(data[i])==FP_SUBNORMAL) { 
-          data[i]=0.0;
-          //GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
-        }
-      }
-    }
-#endif
-    GST_BUFFER_FLAG_UNSET(outbuf,GST_BUFFER_FLAG_GAP);
-    // buzz generates relative loud output
-    //for(i=0;i<samples_per_buffer;i++) data[i]/=32768.0f;
-    gfloat fc=1.0/32768.0;
-    oil_scalarmultiply_f32_ns (data, data, &fc, samples_per_buffer);
-  }
+  gstbml_fix_data((GstElement*)bml_transform,outbuf,has_data);
 
   return(GST_FLOW_OK);
 }
@@ -366,29 +343,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
     seg_data = &seg_data[seg_size*2];
     todo -= seg_size;
   }
-  if(!has_data) {
-    GST_INFO_OBJECT(bml_transform,"silent buffer");
-    GST_BUFFER_FLAG_SET(outbuf,GST_BUFFER_FLAG_GAP);
-  }
-  else {
-#ifdef USE_DEBUG
-    {
-      guint i;
-      for(i=0;i<samples_per_buffer*2;i++) {
-        if(isnan(data[i])) { GST_WARNING_OBJECT(bml_transform,"data contains NaN"); }
-        if(isinf(data[i])) { GST_WARNING_OBJECT(bml_transform,"data contains Inf"); }
-        if(fpclassify(data[i])==FP_SUBNORMAL) { 
-          data[i]=0.0;
-          //GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
-        }
-      }
-    }
-#endif
-    GST_BUFFER_FLAG_UNSET(outbuf,GST_BUFFER_FLAG_GAP);
-    //for(i=0;i<samples_per_buffer*2;i++) data[i]/=32768.0;
-    gfloat fc=1.0/32768.0;
-    oil_scalarmultiply_f32_ns (data, data, &fc, samples_per_buffer*2);
-  }
+  gstbml_fix_data((GstElement*)bml_transform,outbuf,has_data);
 
   return(GST_FLOW_OK);
 }
@@ -456,29 +411,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
     seg_datao = &seg_datao[seg_size*2];
     todo -= seg_size;
   }
-  if(!has_data) {
-    GST_INFO_OBJECT(bml_transform,"silent buffer");
-    GST_BUFFER_FLAG_SET(outbuf,GST_BUFFER_FLAG_GAP);
-  }
-  else {
-#ifdef USE_DEBUG
-    {
-      guint i;
-      for(i=0;i<samples_per_buffer*2;i++) {
-        if(isnan(datao[i])) { GST_WARNING_OBJECT(bml_transform,"data contains NaN"); }
-        if(isinf(datao[i])) { GST_WARNING_OBJECT(bml_transform,"data contains Inf"); }
-        if(fpclassify(datao[i])==FP_SUBNORMAL) { 
-          datao[i]=0.0;
-          //GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
-        }
-      }
-    }
-#endif
-    GST_BUFFER_FLAG_UNSET(outbuf,GST_BUFFER_FLAG_GAP);
-    //for(i=0;i<samples_per_buffer*2;i++) datao[i]/=32768.0;
-    gfloat fc=1.0/32768.0;
-    oil_scalarmultiply_f32_ns (datao, datao, &fc, samples_per_buffer*2);
-  }
+  gstbml_fix_data((GstElement*)bml_transform,outbuf,has_data);
 
   return(GST_FLOW_OK);
 }

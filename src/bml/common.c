@@ -760,3 +760,37 @@ void gstbml_dispose(GstBML *bml) {
   }
 }
 
+void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
+  BMLData *data=(BMLData *)GST_BUFFER_DATA(buf);
+  guint num_samples=GST_BUFFER_SIZE(buf)/sizeof(BMLData);
+  guint i;
+
+  if(has_data) {
+    has_data=FALSE;
+
+    for(i=0;i<num_samples;i++) {
+#ifdef USE_DEBUG
+      if(isnan(data[i])) { GST_WARNING_OBJECT(elem,"data contains NaN"); }
+      if(isinf(data[i])) { GST_WARNING_OBJECT(elem,"data contains Inf"); }
+#endif
+      if(fpclassify(data[i])==FP_SUBNORMAL) { 
+        data[i]=0.0;
+        //GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
+      }
+      else {
+        has_data=TRUE;
+      }
+    }
+  }
+  if(!has_data) {
+    GST_INFO_OBJECT(elem,"silent buffer");
+    GST_BUFFER_FLAG_SET(buf,GST_BUFFER_FLAG_GAP);
+  }
+  else {
+    // buzz generates relative loud output
+    gfloat fc=1.0/32768.0;
+    oil_scalarmultiply_f32_ns (data, data, &fc, num_samples);
+    //for(i=0;i<num_samples;i++) datao[i]/=32768.0;
+    GST_BUFFER_FLAG_UNSET(buf,GST_BUFFER_FLAG_GAP);
+  }
+}

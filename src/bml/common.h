@@ -51,6 +51,8 @@ extern void gstbml_calculate_buffer_frames(GstBML *bml);
 
 extern void gstbml_dispose(GstBML *bml);
 
+extern void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data);
+
 G_END_DECLS
 
 #endif /* __GST_BML_COMMON_H__ */
