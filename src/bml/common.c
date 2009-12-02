@@ -769,16 +769,28 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
     has_data=FALSE;
 
     for(i=0;i<num_samples;i++) {
-#ifdef USE_DEBUG
-      if(isnan(data[i])) { GST_WARNING_OBJECT(elem,"data contains NaN"); }
-      if(isinf(data[i])) { GST_WARNING_OBJECT(elem,"data contains Inf"); }
-#endif
-      if(fpclassify(data[i])==FP_SUBNORMAL) { 
-        data[i]=0.0;
-        //GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
+      if(G_LIKELY(isnormal(data[i]))) {
+        has_data=TRUE;
+        break;
       }
       else {
-        has_data=TRUE;
+#if 0
+        if(isnan(data[i])) {
+          GST_WARNING_OBJECT(elem,"data contains NaN");
+        }
+        else if(isinf(data[i])) {
+          GST_WARNING_OBJECT(elem,"data contains Inf");
+        }
+        else if(data[i]!=0.0) { //fpclassify(data[i])==FP_SUBNORMAL
+          GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
+        }
+#endif
+        data[i]=0.0;
+      }
+    }
+    for(;i<num_samples;i++) {
+      if(G_UNLIKELY(!isnormal(data[i]))) {
+        data[i]=0.0;
       }
     }
   }
