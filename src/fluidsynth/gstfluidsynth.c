@@ -1167,6 +1167,7 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
     return res;
 
   GST_BUFFER_TIMESTAMP (buf) = src->running_time;
+  GST_BUFFER_OFFSET (buf) = src->n_samples;
   GST_BUFFER_OFFSET_END (buf) = n_samples;
   GST_BUFFER_DURATION (buf) = next_time - src->running_time;
 

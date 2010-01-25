@@ -72,15 +72,15 @@ AC_PROG_LIBTOOL
 AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
 
+
 dnl enable runtime debugging code
 AC_MSG_CHECKING(whether to enable runtime debugging code)
-AC_ARG_ENABLE(
-  debug,
+AC_ARG_ENABLE([debug],
   AS_HELP_STRING([--enable-debug],[enable runtime debugging code (default=no)]),
   ,
-  [enable_debug="no"])
+  [enable_debug=no])
 AC_MSG_RESULT($enable_debug)
-if test "$enable_debug" = "yes"; then
+if test "x$enable_debug" = "xyes"; then
   AC_DEFINE(USE_DEBUG, [1], [enable runtime debugging code])
   DEBUG_CFLAGS="-O0 -Wall -Werror -g"
 else
@@ -93,22 +93,22 @@ fi
 
 dnl compile with disable-deprecated switches
 AC_MSG_CHECKING([whether to disable deprecated glib/gtk+/gst/etc. features])
-AC_ARG_ENABLE(deprecated,
+AC_ARG_ENABLE([deprecated],
 	AS_HELP_STRING([--disable-deprecated],[disable deprecated glib/gtk+/gst/etc. features]),
-	set_enable_deprecated="$enableval",[
+	,
+	[
 		if test -f $srcdir/autogen.sh; then
 			is_cvs_version=true
-			set_enable_deprecated=no
+			enable_deprecated=no
 		else
-			set_enable_deprecated=yes
+			enable_deprecated=yes
 		fi
 	]
 )
-if test "$set_enable_deprecated" != "yes"; then
-	AC_MSG_RESULT(yes)
+AC_MSG_RESULT($enable_deprecated)
+if test "x$enable_deprecated" == "xyes"; then
 	BT_DISABLE_DEPRECATED="-DG_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DGST_DISABLE_DEPRECATED"
 else
-	AC_MSG_RESULT(no)
 	BT_DISABLE_DEPRECATED=""
 fi
 AC_SUBST(BT_DISABLE_DEPRECATED)
@@ -116,13 +116,12 @@ AC_SUBST(BT_DISABLE_DEPRECATED)
 
 dnl enable coverage analysis
 AC_MSG_CHECKING(whether to enable coverage analysis)
-AC_ARG_ENABLE(
-  coverage,
+AC_ARG_ENABLE([coverage],
   AS_HELP_STRING([--enable-coverage],[enable coverage analysis (default=no)]),
   ,
-  [enable_coverage="no"])
+  [enable_coverage=no])
 AC_MSG_RESULT($enable_coverage)
-if test "$enable_coverage" = "yes"; then
+if test "x$enable_coverage" = "xyes"; then
   COVERAGE_CFLAGS="-O0 -g -fprofile-arcs -ftest-coverage"
   COVERAGE_LIBS="-lgcov"
 
@@ -151,7 +150,8 @@ dnl valgrind integration for tests
 AC_MSG_CHECKING(where Valgrind is installed on your system)
 AC_ARG_WITH([valgrind],
         AS_HELP_STRING([--with-valgrind],[where Valgrind is installed on your system (default is no)]),
-        [ac_cv_use_valgrind=$withval], [ac_cv_use_valgrind=no])dnl
+        [ac_cv_use_valgrind=$withval],
+        [ac_cv_use_valgrind=no])
 AC_MSG_RESULT($ac_cv_use_valgrind)
 VALGRIND=$ac_cv_use_valgrind
 AC_SUBST(VALGRIND)dnl
@@ -340,9 +340,9 @@ Configuration
 	Buzzmachine support        : ${have_bml}
 	FluidSynth support         : ${have_fluidsynth}
 
-	Debug                      : ${enable_debug}
-	Coverage profiling         : ${enable_coverage}
-	Use of deprecated API      : ${set_enable_deprecated}
+	Debug                      : ${ac_cv_enable_debug}
+	Coverage profiling         : ${ac_cv_enable_coverage}
+	Use of deprecated API      : ${ac_cv_enable_deprecated}
 "
 
 if test "x${have_bml}" = "xno" -o "x${have_fluidsynth}" = "xno" ; then

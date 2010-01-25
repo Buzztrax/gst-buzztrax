@@ -1,3 +1,13 @@
+2010-01-25  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	   Autofoo cleanups.
+
+	* src/bml/gstbmlsrc.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Set BUFFER_OFFSET_END as we can.
+
 2009-12-03  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:

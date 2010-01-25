@@ -995,6 +995,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   }
 
   GST_BUFFER_TIMESTAMP (buf) = src->running_time;
+  GST_BUFFER_OFFSET (buf) = src->n_samples;
   GST_BUFFER_OFFSET_END (buf) = n_samples;
   GST_BUFFER_DURATION (buf) = next_time - src->running_time;
 

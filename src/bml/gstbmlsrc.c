@@ -348,7 +348,10 @@ static gboolean gst_bml_src_is_seekable(GstBaseSrc * base) {
 }
 
 static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offset, guint length, GstBuffer ** buffer) {
+#if 0
   GstFlowReturn res;
+  GstPad *srcpad=GST_BASE_SRC_PAD(base);
+#endif
   GstBMLSrc *bml_src=GST_BML_SRC(base);
   GstBMLSrcClass *klass=GST_BML_SRC_GET_CLASS(bml_src);
   GstBML *bml=GST_BML(bml_src);
@@ -357,7 +360,6 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   GstClockTime next_time;
   gint64 n_samples;
   gdouble samples_done;
-  GstPad *srcpad=GST_BASE_SRC_PAD(base);
   BMLData *data,*seg_data;
   gpointer bm=bml->bm;
   guint todo,seg_size,samples_per_buffer;
@@ -390,6 +392,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
 
   next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
 
+#if 0
   /* allocate a new buffer suitable for this pad */
   if ((res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
       samples_per_buffer * sizeof(BMLData),
@@ -398,8 +401,12 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   ) {
     return res;
   }
+#else
+  buf=gst_buffer_new_and_alloc (samples_per_buffer * sizeof(BMLData));
+#endif
 
   GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
+  GST_BUFFER_OFFSET(buf)=bml->n_samples;
   GST_BUFFER_OFFSET_END(buf)=n_samples;
   GST_BUFFER_DURATION(buf)=next_time - bml->running_time;
 
