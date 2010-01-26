@@ -288,6 +288,7 @@ static gboolean dir_scan(const gchar *dir_name) {
       conv_entry_name=g_filename_to_utf8(entry_name,-1,NULL,NULL,NULL);
       //continue;
     }
+    conv_entry_name=NULL;
 
     ext=strrchr(entry_name,'.');
     if (ext && (!strcasecmp(ext,".dll") || !strcmp(ext,".so"))) {

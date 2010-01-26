@@ -18,7 +18,7 @@ libgstbml_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) \
   $(GST_PLUGIN_CFLAGS) \
   $(BASE_DEPS_CFLAGS) \
   $(BML_CFLAGS)
-libgstbml_la_LIBADD = $(GST_BASE_LIBS)  $(BML_LIBS) \
+libgstbml_la_LIBADD = $(GST_BASE_LIBS)  $(BML_LIBS) -lm \
 	$(top_builddir)/libgstbuzztard/libgstbuzztard.la \
 	native/libgstbmln.la $(BMLW_LA)
 libgstbml_la_LDFLAGS =  $(GST_PLUGIN_LDFLAGS)

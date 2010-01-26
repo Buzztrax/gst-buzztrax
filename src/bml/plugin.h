@@ -23,9 +23,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#ifdef USE_DEBUG
+//#ifdef USE_DEBUG
 #define _ISOC99_SOURCE /* for isinf() and co. */
-#endif
+//#endif
 #include <string.h>
 #include <strings.h>
 #include <math.h>
