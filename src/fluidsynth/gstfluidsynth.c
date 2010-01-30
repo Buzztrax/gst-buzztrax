@@ -370,9 +370,8 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
 {
   GObjectClass *gobject_class;
   GstBaseSrcClass *gstbasesrc_class;
-  GParamSpec *paramspec;
   ForeachBag bag;
-  int count = 0;
+  gint count = 0;
 
   parent_class = (GstBaseSrcClass *) g_type_class_peek_parent (klass);
 
@@ -408,14 +407,14 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
   delete_fluid_settings (bag.settings);         /* not needed anymore */
 
   // override interface properties
-  g_object_class_override_property(gobject_class, PROP_BPM, "beats-per-minute");
-  g_object_class_override_property(gobject_class, PROP_TPB, "ticks-per-beat");
-  g_object_class_override_property(gobject_class, PROP_STPT, "subticks-per-tick");
+  g_object_class_override_property (gobject_class, PROP_BPM, "beats-per-minute");
+  g_object_class_override_property (gobject_class, PROP_TPB, "ticks-per-beat");
+  g_object_class_override_property (gobject_class, PROP_STPT, "subticks-per-tick");
 
   // register own properties
 
-  g_object_class_install_property(gobject_class, PROP_SAMPLES_PER_BUFFER,
-        g_param_spec_int("samplesperbuffer", _("Samples per buffer"),
+  g_object_class_install_property (gobject_class, PROP_SAMPLES_PER_BUFFER,
+      g_param_spec_int ("samplesperbuffer", _("Samples per buffer"),
           _("Number of samples in each outgoing buffer"),
           1, G_MAXINT, 1024, G_PARAM_READWRITE));
 
@@ -423,88 +422,84 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
       g_param_spec_boolean ("is-live", _("Is Live"),
           _("Whether to act as a live source"), FALSE, G_PARAM_READWRITE));
 
-  paramspec = g_param_spec_string ("note", _("Musical note"),
-                                   _("Musical note (e.g. 'c-3', 'd#4')"),
-                                   NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata (paramspec, gstbt_property_meta_quark,
-                          GINT_TO_POINTER (TRUE));
-  g_param_spec_set_qdata (paramspec, gstbt_property_meta_quark_flags,
-                          GINT_TO_POINTER (GSTBT_PROPERTY_META_NONE));
-  g_param_spec_set_qdata (paramspec, gstbt_property_meta_quark_no_val, NULL);
-  g_object_class_install_property (gobject_class, PROP_NOTE, paramspec);
+  g_object_class_install_property (gobject_class, PROP_NOTE,
+      g_param_spec_string ("note", _("Musical note"),
+                                         _("Musical note (e.g. 'c-3', 'd#4')"),
+                                         NULL,
+                                         G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE));
 
   g_object_class_install_property (gobject_class, PROP_NOTE_LENGTH,
-                        g_param_spec_int ("note-length", _("Note length"),
+      g_param_spec_int ("note-length", _("Note length"),
                                           _("Length of a note in ticks (buffers)"),
                                           1, 100, 4,
                                           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
   g_object_class_install_property (gobject_class, PROP_NOTE_VELOCITY,
-                        g_param_spec_int ("note-velocity", _("Note velocity"),
+      g_param_spec_int ("note-velocity", _("Note velocity"),
                                           _("Velocity of a note"),
                                           0, 127, 100,
                                           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
   g_object_class_install_property (gobject_class, PROP_PROGRAM,
-                        g_param_spec_int ("program", _("Sound program"),
+      g_param_spec_int ("program", _("Sound program"),
                                           _("Sound program number"),
                                           0, (0x7F<<7|0x7F), 0,
                                           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   g_object_class_install_property (gobject_class, PROP_INSTRUMENT_PATCH,
-                        g_param_spec_string ("instrument-patch", _("Instrument patch file"),
+      g_param_spec_string ("instrument-patch", _("Instrument patch file"),
                                           _("Path to soundfont intrument patch file"),
                                           NULL, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_INTERP,
-                        g_param_spec_enum ("interp", _("Interpolation"),
+      g_param_spec_enum ("interp", _("Interpolation"),
                                            _("Interpolation type"),
                                            INTERPOLATION_TYPE,
                                            FLUID_INTERP_DEFAULT,
                                            G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_REVERB_ENABLE,
-              g_param_spec_boolean ("reverb-enable", _("Reverb enable"),
+      g_param_spec_boolean ("reverb-enable", _("Reverb enable"),
                                    _("Reverb enable"),
                                    TRUE, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_REVERB_ROOM_SIZE,
-                g_param_spec_double ("reverb-room-size", _("Reverb room size"),
+      g_param_spec_double ("reverb-room-size", _("Reverb room size"),
                                      _("Reverb room size"),
                                      0.0, 1.2, 0.4, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_REVERB_DAMP,
-                g_param_spec_double ("reverb-damp", _("Reverb damp"),
+      g_param_spec_double ("reverb-damp", _("Reverb damp"),
                                      _("Reverb damp"),
                                      0.0, 1.0, 0.0, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_REVERB_WIDTH,
-                        g_param_spec_double ("reverb-width", _("Reverb width"),
+      g_param_spec_double ("reverb-width", _("Reverb width"),
                                              _("Reverb width"),
                                              0.0, 100.0, 2.0,
                                              G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_REVERB_LEVEL,
-                        g_param_spec_double ("reverb-level", _("Reverb level"),
+      g_param_spec_double ("reverb-level", _("Reverb level"),
                                              _("Reverb level"),
                                              -30.0, 30.0, 4.0,
                                              G_PARAM_READWRITE));
 
   g_object_class_install_property (gobject_class, PROP_CHORUS_ENABLE,
-                        g_param_spec_boolean ("chorus-enable", _("Chorus enable"),
+      g_param_spec_boolean ("chorus-enable", _("Chorus enable"),
                                              _("Chorus enable"),
                                              TRUE, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_CHORUS_COUNT,
-                        g_param_spec_int ("chorus-count", _("Chorus count"),
+      g_param_spec_int ("chorus-count", _("Chorus count"),
                                           _("Number of chorus delay lines"),
                                           1, 99, 3, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_CHORUS_LEVEL,
-                g_param_spec_double ("chorus-level", _("Chorus level"),
+      g_param_spec_double ("chorus-level", _("Chorus level"),
                                      _("Output level of each chorus line"),
                                      0.0, 10.0, 2.0, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_CHORUS_FREQ,
-                g_param_spec_double ("chorus-freq", _("Chorus freq"),
+      g_param_spec_double ("chorus-freq", _("Chorus freq"),
                                      _("Chorus modulation frequency (Hz)"),
                                      0.3, 5.0, 0.3, G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_CHORUS_DEPTH,
-                        g_param_spec_double ("chorus-depth", _("Chorus depth"),
+      g_param_spec_double ("chorus-depth", _("Chorus depth"),
                                              _("Chorus depth"),
                                              0.0, 10.0, 8.0,
                                              G_PARAM_READWRITE));
   g_object_class_install_property (gobject_class, PROP_CHORUS_WAVEFORM,
-                g_param_spec_enum ("chorus-waveform", _("Chorus waveform"),
+      g_param_spec_enum ("chorus-waveform", _("Chorus waveform"),
                                    _("Chorus waveform type"),
                                    CHORUS_WAVEFORM_TYPE,
                                    FLUID_CHORUS_MOD_SINE,

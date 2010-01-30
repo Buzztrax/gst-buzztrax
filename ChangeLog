@@ -1,3 +1,11 @@
+2010-01-30  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Mark trigger params as writeonly. This allows detecting them better
+	  without any custom param-spec magic.
+
 2010-01-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/Makefile.am:

@@ -246,7 +246,6 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
   GObjectClass *gobject_class;
   GstElementClass *gstelement_class;
   GstBaseSrcClass *gstbasesrc_class;
-  GParamSpec *paramspec;
 
   parent_class = (GstBaseSrcClass *) g_type_class_peek_parent (klass);
 
@@ -283,45 +282,42 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
           "Number of samples in each outgoing buffer",
           1, G_MAXINT, 1024, G_PARAM_READWRITE));
 
-  g_object_class_install_property (gobject_class, PROP_IS_LIVE,
-      g_param_spec_boolean ("is-live", "Is Live",
+  g_object_class_install_property(gobject_class, PROP_IS_LIVE,
+    g_param_spec_boolean("is-live", "Is Live",
           "Whether to act as a live source", FALSE, G_PARAM_READWRITE));
 
-  paramspec=g_param_spec_string("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
-          NULL, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark,GINT_TO_POINTER(TRUE));
-  g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_flags,GINT_TO_POINTER(GSTBT_PROPERTY_META_NONE));
-  g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_no_val,NULL);
-  g_object_class_install_property(gobject_class,PROP_NOTE, paramspec);
+  g_object_class_install_property(gobject_class,PROP_NOTE,
+    g_param_spec_string("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
+          NULL, G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE));
 
-  paramspec=g_param_spec_enum("wave", "Waveform", "Oscillator waveform",
+  g_object_class_install_property(gobject_class,PROP_WAVE,
+    g_param_spec_enum("wave", "Waveform", "Oscillator waveform",
           GST_TYPE_SIM_SYN_WAVE, /* enum type */
           GST_SIM_SYN_WAVE_SINE, /* default value */
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_object_class_install_property(gobject_class, PROP_WAVE, paramspec);
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
-  paramspec=g_param_spec_double("volume", "Volume", "Volume of tone",
-          0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_object_class_install_property(gobject_class, PROP_VOLUME, paramspec);
+  g_object_class_install_property(gobject_class,PROP_VOLUME,
+    g_param_spec_double("volume", "Volume", "Volume of tone",
+          0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
-  paramspec=g_param_spec_double("decay", "Decay", "Volume decay of the tone in seconds",
+  g_object_class_install_property(gobject_class,PROP_DECAY,
+    g_param_spec_double("decay", "Decay", "Volume decay of the tone in seconds",
           0.001, 4.0, 0.5,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_object_class_install_property(gobject_class, PROP_DECAY, paramspec);
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
-  paramspec=g_param_spec_enum("filter", "Filtertype", "Type of audio filter",
+  g_object_class_install_property(gobject_class,PROP_FILTER,
+    g_param_spec_enum("filter", "Filtertype", "Type of audio filter",
           GST_TYPE_SIM_SYN_FILTER,    /* enum type */
           GST_SIM_SYN_FILTER_LOWPASS, /* default value */
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_object_class_install_property(gobject_class, PROP_FILTER, paramspec);
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
-  paramspec=g_param_spec_double("cut-off", "Cut-Off", "Audio filter cut-off frequency",
-          0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_object_class_install_property(gobject_class, PROP_CUTOFF, paramspec);
+  g_object_class_install_property(gobject_class,PROP_CUTOFF,
+    g_param_spec_double("cut-off", "Cut-Off", "Audio filter cut-off frequency",
+          0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
-  paramspec=g_param_spec_double("resonance", "Resonance", "Audio filter resonance",
-          0.7, 25.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE);
-  g_object_class_install_property(gobject_class, PROP_RESONANCE, paramspec);
+  g_object_class_install_property(gobject_class,PROP_RESONANCE,
+    g_param_spec_double("resonance", "Resonance", "Audio filter resonance",
+          0.7, 25.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 }
 
 static void
@@ -1141,9 +1137,9 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
     case PROP_IS_LIVE:
       g_value_set_boolean (value, gst_base_src_is_live (GST_BASE_SRC (src)));
       break;
-    case PROP_NOTE:
+    /*case PROP_NOTE:
       g_value_set_string (value, src->note);
-      break;
+      break;*/
     case PROP_WAVE:
       g_value_set_enum (value, src->wave);
       break;

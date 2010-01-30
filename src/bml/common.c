@@ -566,6 +566,7 @@ void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc,
 GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val) {
   GParamSpec *paramspec = NULL;
   gint saved_min_val=min_val,saved_max_val=max_val,saved_def_val=def_val;
+  GParamFlags pspec_flags=G_PARAM_WRITABLE|GST_PARAM_CONTROLLABLE;
 
   GST_DEBUG("        name='%s', nick='%s', type=%d, flags=0x%x : val [%d ... d=%d/n=%d ... %d]",name,nick,type,flags, min_val,def_val,no_val,max_val);
   //*def = defval;
@@ -592,12 +593,15 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, G
     }
     def_val=no_val;
   }
+  else {
+    pspec_flags|=G_PARAM_READABLE;
+  }
   GST_DEBUG("        val [%d ... d=%d ... %d]",min_val,def_val,max_val);
 
   switch(type) {
     case PT_NOTE:
       paramspec=g_param_spec_string(name, nick, desc,
-          NULL, G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);
+          NULL, pspec_flags);
       /* @todo: what about using an enum type (define in gst-buzztard) here to
        * be able to detect this type in UIs
        */
@@ -622,36 +626,36 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, G
         if(min_val==-1) min_val=0;
         paramspec=g_param_spec_uint(name, nick, desc,
           min_val,max_val,def_val,
-          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);
+          pspec_flags);
         */
         type=PT_ENUM;
         paramspec=g_param_spec_enum(name, nick, desc,
           GSTBT_TYPE_TRIGGER_SWITCH, GSTGSTBT_TRIGGER_SWITCH_EMPTY,
-          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);
+          pspec_flags);
       /*}
       else {
         // non-triggers use this
         //min_val=0;max_val=1;
         paramspec=g_param_spec_boolean(name, nick, desc,
           def_val,
-          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);
+          pspec_flags);
       }*/
       break;
     case PT_BYTE:
-      // @todo gstreamer has no support for CHAR/UCHAR
+      // @todo: gstreamer has no support for CHAR/UCHAR
       paramspec=g_param_spec_uint(name, nick, desc,
         min_val,max_val,def_val,
-        G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);
+        pspec_flags);
       break;
     case PT_WORD:
       paramspec=g_param_spec_uint(name, nick, desc,
         min_val,max_val,def_val,
-        G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);
+        pspec_flags);
       break;
     case PT_ENUM:
       paramspec=g_param_spec_enum(name, nick, desc,
         enum_type, def_val,
-        G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE);
+        pspec_flags);
       break;
     case PT_ATTR: // Attribute
       paramspec=g_param_spec_int(name, nick, desc,
