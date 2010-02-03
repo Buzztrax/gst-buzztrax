@@ -667,6 +667,7 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, G
       break;
   }
   if(paramspec) {
+    // @todo: can we skip the gstbt_property_meta qdata business for some parameters
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark,GINT_TO_POINTER(TRUE));
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_min_val, GINT_TO_POINTER(saved_min_val));
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_max_val, GINT_TO_POINTER(saved_max_val));

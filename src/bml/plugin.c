@@ -273,6 +273,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     "ZEPHOD BLUE FILTER.DLL",
     "ZEPHOD GREEN FILTER.DLL",
     "ZEPHOD_RESAW.DLL",
+    "ZU PARAMETRIC EQ.DLL",
     "ZU ?TAPS.DLL",
     "ZU µTAPS.DLL"
   };

@@ -1,3 +1,11 @@
+2010-02-03  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	  Idea.
+
+	* src/bml/plugin.c:
+	  Update blacklist.
+
 2010-01-30  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:
