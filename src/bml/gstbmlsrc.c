@@ -338,6 +338,16 @@ static gboolean gst_bml_src_do_seek(GstBaseSrc * base, GstSegment * segment) {
   }
   bml->seek_flags = segment->flags;
   bml->eos_reached = FALSE;
+  bml->reverse = (segment->rate<0.0);
+  // should we swap here?
+  if (bml->reverse) {
+    gint64 t = bml->n_samples_stop;
+    bml->n_samples_stop = bml->n_samples;
+    bml->n_samples = t;
+  }
+
+  GST_WARNING("seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
+    GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop),GST_TIME_ARGS(segment->last_stop),segment->rate);
 
   return TRUE;
 }
@@ -357,7 +367,8 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   GstBML *bml=GST_BML(bml_src);
   GstBMLClass *bml_class=GST_BML_CLASS(klass);  
   GstBuffer *buf;
-  GstClockTime next_time;
+  //GstClockTime next_time;
+  GstClockTime next_running_time;
   gint64 n_samples;
   gdouble samples_done;
   BMLData *data,*seg_data;
@@ -387,10 +398,11 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
     }
   } else {
     /* calculate full buffer */
-    n_samples = bml->n_samples + samples_per_buffer;
+    n_samples = bml->n_samples + (bml->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
+  next_running_time = bml->running_time + (bml->reverse ? (-bml->ticktime) : bml->ticktime);
 
-  next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
+  //next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
 
 #if 0
   /* allocate a new buffer suitable for this pad */
@@ -408,7 +420,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
   GST_BUFFER_OFFSET(buf)=bml->n_samples;
   GST_BUFFER_OFFSET_END(buf)=n_samples;
-  GST_BUFFER_DURATION(buf)=next_time - bml->running_time;
+  GST_BUFFER_DURATION(buf)=next_running_time - bml->running_time;
 
   /* @todo: split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
@@ -417,7 +429,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   bml(gstbml_sync_values(bml,bml_class));
   bml(tick(bm));
 
-  bml->running_time += bml->ticktime;
+  bml->running_time = next_running_time;
   //bml->running_time = next_time;
   bml->n_samples = n_samples;
 
@@ -453,7 +465,8 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   GstBML *bml=GST_BML(bml_src);
   GstBMLClass *bml_class=GST_BML_CLASS(klass);  
   GstBuffer *buf;
-  GstClockTime next_time;
+  //GstClockTime next_time;
+  GstClockTime next_running_time;
   gint64 n_samples;
   gdouble samples_done;
   GstPad *srcpad=GST_BASE_SRC_PAD(base);
@@ -482,10 +495,11 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
     bml->eos_reached = TRUE;
   } else {
     /* calculate full buffer */
-    n_samples = bml->n_samples + samples_per_buffer;
+    n_samples = bml->n_samples + (bml->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
+  next_running_time = bml->running_time + (bml->reverse ? (-bml->ticktime) : bml->ticktime);
 
-  next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
+  //next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
 
   /* allocate a new buffer suitable for this pad */
   if ((res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
@@ -497,8 +511,9 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   }
 
   GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
+  GST_BUFFER_OFFSET(buf)=bml->n_samples;
   GST_BUFFER_OFFSET_END(buf)=n_samples;
-  GST_BUFFER_DURATION(buf)=next_time - bml->running_time;
+  GST_BUFFER_DURATION(buf)=next_running_time - bml->running_time;
 
   /* @todo: split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
@@ -507,7 +522,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   bml(gstbml_sync_values(bml,bml_class));
   bml(tick(bm));
 
-  bml->running_time += bml->ticktime;
+  bml->running_time = next_running_time;
   //bml->running_time = next_time;
   bml->n_samples = n_samples;
 

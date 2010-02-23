@@ -1077,15 +1077,16 @@ gst_fluidsynth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   GstFluidsynth *src = GST_FLUIDSYNTH (basesrc);
   GstClockTime time;
 
-  segment->time = segment->start;
-  time = segment->last_stop;
-
-  /* now move to the time indicated */
-  src->n_samples = gst_util_uint64_scale_int(time, src->samplerate, GST_SECOND);
-  src->running_time = time;
-
-  g_assert (src->running_time <= time);
-
+  if (GST_CLOCK_TIME_IS_VALID (segment->start)) {
+    segment->time = segment->start;
+    time = segment->last_stop;
+  
+    /* now move to the time indicated */
+    src->n_samples = gst_util_uint64_scale_int(time, src->samplerate, GST_SECOND);
+    src->running_time = time;
+  
+    g_assert (src->running_time <= time);
+  }
   if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
     time = segment->stop;
     src->n_samples_stop = gst_util_uint64_scale_int(time, src->samplerate,
@@ -1097,8 +1098,8 @@ gst_fluidsynth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   src->seek_flags = segment->flags;
   src->eos_reached = FALSE;
 
-  GST_DEBUG("seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT,
-    GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop));
+  GST_DEBUG("seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" rate: %lf",
+    GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop),segment->rate);
 
   return TRUE;
 }

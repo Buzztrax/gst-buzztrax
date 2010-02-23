@@ -895,7 +895,7 @@ gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
 {
   GstSimSyn *src = GST_SIM_SYN (basesrc);
   GstClockTime time;
-
+  
   segment->time = segment->start;
   time = segment->last_stop;
 
@@ -915,9 +915,16 @@ gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   }
   src->seek_flags = segment->flags;
   src->eos_reached = FALSE;
+  src->reverse = (segment->rate<0.0);
+  // should we swap here?
+  if (src->reverse) {
+    gint64 t = src->n_samples_stop;
+    src->n_samples_stop = src->n_samples;
+    src->n_samples = t;
+  }
 
-  GST_DEBUG("seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT,
-    GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop));
+  GST_WARNING("seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
+    GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop),GST_TIME_ARGS(segment->last_stop),segment->rate);
 
   return TRUE;
 }
@@ -946,7 +953,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   GstSimSyn *src = GST_SIM_SYN (basesrc);
   GstFlowReturn res;
   GstBuffer *buf;
-  GstClockTime next_time;
+  GstClockTime next_time, next_running_time;
   gint64 n_samples;
   gdouble samples_done;
   guint samples_per_buffer;
@@ -964,11 +971,15 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
 
   /* check for eos */
   if (G_UNLIKELY(src->check_seek_stop &&
-    (src->n_samples_stop > src->n_samples) &&
+    (src->n_samples_stop >= src->n_samples) &&
     (src->n_samples_stop < src->n_samples + samples_per_buffer))
   ) {
     /* calculate only partial buffer */
     src->generate_samples_per_buffer = (guint)(src->n_samples_stop - src->n_samples);
+    if(!src->generate_samples_per_buffer) {
+      src->eos_reached = TRUE;
+      return GST_FLOW_UNEXPECTED;
+    }
     n_samples = src->n_samples_stop;
     if (!(src->seek_flags&GST_SEEK_FLAG_SEGMENT)) {
       src->eos_reached = TRUE;
@@ -976,8 +987,9 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   } else {
     /* calculate full buffer */
     src->generate_samples_per_buffer = samples_per_buffer;
-    n_samples = src->n_samples + samples_per_buffer;
+    n_samples = src->n_samples + (src->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
+  next_running_time = src->running_time + (src->reverse ? (-src->ticktime) : src->ticktime);
 
   next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)src->samplerate);
 
@@ -1001,7 +1013,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     src->n_samples,src->generate_samples_per_buffer,
     GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
 
-  src->running_time += src->ticktime;
+  src->running_time = next_running_time;
   //src->running_time = next_time;
   src->n_samples = n_samples;
 

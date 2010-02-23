@@ -97,6 +97,7 @@ struct _GstBML {
   gboolean check_seek_stop;
   gboolean eos_reached;
   GstSeekFlags seek_flags;
+  gboolean reverse;                  /* play backwards */
 };
 
 struct _GstBMLClass {

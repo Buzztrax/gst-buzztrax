@@ -128,6 +128,7 @@ struct _GstSimSyn {
   gboolean eos_reached;
   guint generate_samples_per_buffer;	/* generate a partial buffer */
   GstSeekFlags seek_flags;
+  gboolean reverse;                  /* play backwards */
 
   GstBtToneConversion *n2f;
   gdouble freq;
