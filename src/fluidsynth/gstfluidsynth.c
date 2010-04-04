@@ -92,12 +92,6 @@
 #define GST_CAT_DEFAULT fluidsynth_debug
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
-static const GstElementDetails gst_fluidsynth_details =
-GST_ELEMENT_DETAILS ("FluidSynth",
-  "Source/Audio",
-  "FluidSynth wavetable synthesizer",
-  "Josh Green <josh@users.sf.net>");
-
 enum {
   // static class properties
   PROP_SAMPLES_PER_BUFFER=1,
@@ -353,7 +347,11 @@ gst_fluidsynth_base_init (gpointer g_class)
 
   gst_element_class_add_pad_template (element_class,
       gst_static_pad_template_get (&gst_fluidsynth_src_template));
-  gst_element_class_set_details (element_class, &gst_fluidsynth_details);
+  gst_element_class_set_details_simple (element_class, 
+      "FluidSynth",
+      "Source/Audio",
+      "FluidSynth wavetable synthesizer",
+      "Josh Green <josh@users.sf.net>");
 }
 
 /* used for passing multiple values to FluidSynth foreach function */

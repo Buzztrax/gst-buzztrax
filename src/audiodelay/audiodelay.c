@@ -175,24 +175,16 @@ static void
 gst_audio_delay_base_init (gpointer klass)
 {
   GstElementClass *element_class = GST_ELEMENT_CLASS (klass);
-  const GstElementDetails element_details =
-  GST_ELEMENT_DETAILS ("AudioDelay",
-    "Filter/Effect/Audio",
-    "Add echos to audio streams",
-    "Stefan Kost <ensonic@users.sf.net>");
 
   gst_element_class_add_pad_template (element_class,
       gst_static_pad_template_get (&src_template));
   gst_element_class_add_pad_template (element_class,
       gst_static_pad_template_get (&sink_template));
-  gst_element_class_set_details (element_class, &element_details);
-  /*
   gst_element_class_set_details_simple (element_class,
     "AudioDelay",
     "Filter/Effect/Audio",
     "Add echos to audio streams",
     "Stefan Kost <ensonic@users.sf.net>");
-  */
 }
 
 static void

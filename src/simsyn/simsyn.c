@@ -58,12 +58,6 @@
 #define GST_CAT_DEFAULT sim_syn_debug
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
-static const GstElementDetails gst_sim_syn_details =
-GST_ELEMENT_DETAILS ("Simple Synth",
-  "Source/Audio",
-  "Simple audio synthesizer",
-  "Stefan Kost <ensonic@users.sf.net>");
-
 
 enum {
   // static class properties
@@ -235,7 +229,11 @@ gst_sim_syn_base_init (gpointer g_class)
 
   gst_element_class_add_pad_template (element_class,
       gst_static_pad_template_get (&gst_sim_syn_src_template));
-  gst_element_class_set_details (element_class, &gst_sim_syn_details);
+  gst_element_class_set_details_simple (element_class, 
+      "Simple Synth",
+      "Source/Audio",
+      "Simple audio synthesizer",
+      "Stefan Kost <ensonic@users.sf.net>");
 }
 
 static void

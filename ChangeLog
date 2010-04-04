@@ -1,5 +1,12 @@
 2010-04-04  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/audiodelay/audiodelay.c: (gst_audio_delay_base_init):
+	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_base_init):
+	* src/simsyn/simsyn.c: (gst_sim_syn_base_init):
+	  Use gst_element_class_set_details_simple to save some relocs.
+
+2010-04-04  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/bml/gstbmlsrc.c: (gst_bml_src_class_init):
 	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_class_init):
 	* src/simsyn/simsyn.c: (gst_sim_syn_class_init):
