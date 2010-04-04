@@ -1,3 +1,10 @@
+2010-04-04  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c: (gst_bml_src_class_init):
+	* src/fluidsynth/gstfluidsynth.c: (gst_fluidsynth_class_init):
+	* src/simsyn/simsyn.c: (gst_sim_syn_class_init):
+	  Remove unneded _get_times vmethods.
+
 2010-03-30  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

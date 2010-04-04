@@ -285,26 +285,6 @@ error:
   }
 }
 
-static void gst_bml_src_get_times(GstBaseSrc * base, GstBuffer * buffer, GstClockTime * start, GstClockTime * end) {
-  /* for live sources, sync on the timestamp of the buffer */
-  if (gst_base_src_is_live (base)) {
-    GstClockTime timestamp = GST_BUFFER_TIMESTAMP (buffer);
-
-    if (GST_CLOCK_TIME_IS_VALID (timestamp)) {
-      /* get duration to calculate end time */
-      GstClockTime duration = GST_BUFFER_DURATION (buffer);
-
-      if (GST_CLOCK_TIME_IS_VALID (duration)) {
-        *end = timestamp + duration;
-      }
-      *start = timestamp;
-    }
-  } else {
-    *start = -1;
-    *end = -1;
-  }
-}
-
 static gboolean gst_bml_src_stop(GstBaseSrc * base) {
   GstBMLSrc *bml_src=GST_BML_SRC(base);
   GstBML *bml=GST_BML(bml_src);
@@ -636,7 +616,6 @@ static void gst_bml_src_class_init(GstBMLSrcClass * klass) {
   gstbasesrc_class->is_seekable = GST_DEBUG_FUNCPTR(gst_bml_src_is_seekable);
   gstbasesrc_class->do_seek     = GST_DEBUG_FUNCPTR(gst_bml_src_do_seek);
   gstbasesrc_class->query       = GST_DEBUG_FUNCPTR(gst_bml_src_query);
-  gstbasesrc_class->get_times   = GST_DEBUG_FUNCPTR(gst_bml_src_get_times);
   gstbasesrc_class->stop        = GST_DEBUG_FUNCPTR(gst_bml_src_stop);
   if(bml_class->output_channels==1) {
     gstbasesrc_class->create    = GST_DEBUG_FUNCPTR(gst_bml_src_create_mono);

@@ -174,8 +174,6 @@ static gboolean gst_fluidsynth_do_seek (GstBaseSrc * basesrc,
                                         GstSegment * segment);
 static gboolean gst_fluidsynth_query (GstBaseSrc * basesrc, GstQuery * query);
 
-static void gst_fluidsynth_get_times (GstBaseSrc * basesrc,
-    GstBuffer * buffer, GstClockTime * start, GstClockTime * end);
 static GstFlowReturn gst_fluidsynth_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
@@ -386,7 +384,6 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
   gstbasesrc_class->is_seekable = GST_DEBUG_FUNCPTR (gst_fluidsynth_is_seekable);
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_fluidsynth_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_fluidsynth_query);
-  gstbasesrc_class->get_times = GST_DEBUG_FUNCPTR (gst_fluidsynth_get_times);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_fluidsynth_create);
 
   /* used for dynamically installing settings (required for settings queries) */
@@ -1045,29 +1042,6 @@ error:
   {
     GST_DEBUG_OBJECT (src, "query failed");
     return FALSE;
-  }
-}
-
-static void
-gst_fluidsynth_get_times (GstBaseSrc * basesrc, GstBuffer * buffer,
-    GstClockTime * start, GstClockTime * end)
-{
-  /* for live sources, sync on the timestamp of the buffer */
-  if (gst_base_src_is_live (basesrc)) {
-    GstClockTime timestamp = GST_BUFFER_TIMESTAMP (buffer);
-
-    if (GST_CLOCK_TIME_IS_VALID (timestamp)) {
-      /* get duration to calculate end time */
-      GstClockTime duration = GST_BUFFER_DURATION (buffer);
-
-      if (GST_CLOCK_TIME_IS_VALID (duration)) {
-        *end = timestamp + duration;
-      }
-      *start = timestamp;
-    }
-  } else {
-    *start = -1;
-    *end = -1;
   }
 }
 
