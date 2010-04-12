@@ -299,34 +299,43 @@ static gboolean gst_bml_src_do_seek(GstBaseSrc * base, GstSegment * segment) {
   GstBML *bml=GST_BML(bml_src);
   GstClockTime time;
 
-  segment->time = segment->start;
   time = segment->last_stop;
+  bml->reverse = (segment->rate<0.0);
+  bml->running_time = time;
 
   /* now move to the time indicated */
   bml->n_samples = gst_util_uint64_scale_int(time, bml->samplerate, GST_SECOND);
-  bml->running_time = time;
 
-  g_assert (bml->running_time <= time);
-
-  if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
-    time = segment->stop;
-    bml->n_samples_stop = gst_util_uint64_scale_int(time, bml->samplerate,
-        GST_SECOND);
-    bml->check_seek_stop = TRUE;
-  } else {
-    bml->check_seek_stop = FALSE;
+  if (!bml->reverse) {
+    if (GST_CLOCK_TIME_IS_VALID (segment->start)) {
+      segment->time = segment->start;
+    }
+    if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
+      time = segment->stop;
+      bml->n_samples_stop = gst_util_uint64_scale_int(time, bml->samplerate,
+          GST_SECOND);
+      bml->check_eos = TRUE;
+    } else {
+      bml->check_eos = FALSE;
+    }
+  }
+  else {
+    if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
+      segment->time = segment->stop;
+    }
+    if (GST_CLOCK_TIME_IS_VALID (segment->start)) {
+      time = segment->start;
+      bml->n_samples_stop = gst_util_uint64_scale_int(time, bml->samplerate,
+          GST_SECOND);
+      bml->check_eos = TRUE;
+    } else {
+      bml->check_eos = FALSE;
+    }
   }
   bml->seek_flags = segment->flags;
   bml->eos_reached = FALSE;
-  bml->reverse = (segment->rate<0.0);
-  // should we swap here?
-  if (bml->reverse) {
-    gint64 t = bml->n_samples_stop;
-    bml->n_samples_stop = bml->n_samples;
-    bml->n_samples = t;
-  }
 
-  GST_WARNING("seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
+  GST_DEBUG_OBJECT(bml_src,"seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
     GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop),GST_TIME_ARGS(segment->last_stop),segment->rate);
 
   return TRUE;
@@ -347,7 +356,6 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   GstBML *bml=GST_BML(bml_src);
   GstBMLClass *bml_class=GST_BML_CLASS(klass);  
   GstBuffer *buf;
-  //GstClockTime next_time;
   GstClockTime next_running_time;
   gint64 n_samples;
   gdouble samples_done;
@@ -355,9 +363,10 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   gpointer bm=bml->bm;
   guint todo,seg_size,samples_per_buffer;
   gboolean has_data;
+  gboolean partial_buffer=FALSE;
 
   if (G_UNLIKELY(bml->eos_reached)) {
-    GST_DEBUG_OBJECT(bml_src,"  EOS reached");
+    GST_DEBUG_OBJECT(bml_src,"EOS reached");
     return GST_FLOW_UNEXPECTED;
   }
 
@@ -366,10 +375,17 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
 
   /* check for eos */
-  if (bml->check_seek_stop &&
-    (bml->n_samples_stop > bml->n_samples) &&
-    (bml->n_samples_stop < bml->n_samples + samples_per_buffer)
-  ) {
+  if (bml->check_eos) {
+    if (!bml->reverse) {
+      partial_buffer=((bml->n_samples_stop >= bml->n_samples) &&
+        (bml->n_samples_stop < bml->n_samples + samples_per_buffer));
+    } else {
+      partial_buffer=((bml->n_samples_stop < bml->n_samples) &&
+        (bml->n_samples_stop >= bml->n_samples - samples_per_buffer));
+    }
+  }
+  
+  if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
     samples_per_buffer = bml->n_samples_stop - bml->n_samples;
     n_samples = bml->n_samples_stop;
@@ -381,8 +397,6 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
     n_samples = bml->n_samples + (bml->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
   next_running_time = bml->running_time + (bml->reverse ? (-bml->ticktime) : bml->ticktime);
-
-  //next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
 
 #if 0
   /* allocate a new buffer suitable for this pad */
@@ -397,10 +411,17 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   buf=gst_buffer_new_and_alloc (samples_per_buffer * sizeof(BMLData));
 #endif
 
-  GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
-  GST_BUFFER_OFFSET(buf)=bml->n_samples;
-  GST_BUFFER_OFFSET_END(buf)=n_samples;
-  GST_BUFFER_DURATION(buf)=next_running_time - bml->running_time;
+  if (!bml->reverse) {
+    GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
+    GST_BUFFER_DURATION(buf)=next_running_time-bml->running_time;
+    GST_BUFFER_OFFSET(buf)=bml->n_samples;
+    GST_BUFFER_OFFSET_END(buf)=n_samples;
+  } else {
+    GST_BUFFER_TIMESTAMP(buf)=next_running_time;
+    GST_BUFFER_DURATION(buf)=bml->running_time-next_running_time;
+    GST_BUFFER_OFFSET(buf)=n_samples;
+    GST_BUFFER_OFFSET_END(buf)=bml->n_samples;
+  }
 
   /* @todo: split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
@@ -410,7 +431,6 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   bml(tick(bm));
 
   bml->running_time = next_running_time;
-  //bml->running_time = next_time;
   bml->n_samples = n_samples;
 
   GST_DEBUG_OBJECT(bml_src,"  calling work(%d)",samples_per_buffer);
@@ -445,7 +465,6 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   GstBML *bml=GST_BML(bml_src);
   GstBMLClass *bml_class=GST_BML_CLASS(klass);  
   GstBuffer *buf;
-  //GstClockTime next_time;
   GstClockTime next_running_time;
   gint64 n_samples;
   gdouble samples_done;
@@ -454,9 +473,10 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   gpointer bm=bml->bm;
   guint todo,seg_size,samples_per_buffer;
   gboolean has_data;
+  gboolean partial_buffer=FALSE;
 
   if (G_UNLIKELY(bml->eos_reached)) {
-    GST_DEBUG_OBJECT(bml_src,"  EOS reached");
+    GST_WARNING_OBJECT(bml_src,"EOS reached");
     return GST_FLOW_UNEXPECTED;
   }
 
@@ -465,21 +485,28 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
 
   /* check for eos */
-  if (bml->check_seek_stop &&
-    (bml->n_samples_stop > bml->n_samples) &&
-    (bml->n_samples_stop < bml->n_samples + samples_per_buffer)
-  ) {
+  if (bml->check_eos) {
+    if (!bml->reverse) {
+      partial_buffer=((bml->n_samples_stop >= bml->n_samples) &&
+        (bml->n_samples_stop < bml->n_samples + samples_per_buffer));
+    } else {
+      partial_buffer=((bml->n_samples_stop < bml->n_samples) &&
+        (bml->n_samples_stop >= bml->n_samples - samples_per_buffer));
+    }
+  }
+  
+  if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
     samples_per_buffer = bml->n_samples_stop - bml->n_samples;
     n_samples = bml->n_samples_stop;
-    bml->eos_reached = TRUE;
+    if (!(bml->seek_flags&GST_SEEK_FLAG_SEGMENT)) {
+      bml->eos_reached = TRUE;
+    }
   } else {
     /* calculate full buffer */
     n_samples = bml->n_samples + (bml->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
   next_running_time = bml->running_time + (bml->reverse ? (-bml->ticktime) : bml->ticktime);
-
-  //next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)bml->samplerate);
 
   /* allocate a new buffer suitable for this pad */
   if ((res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
@@ -490,10 +517,17 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
     return res;
   }
 
-  GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
-  GST_BUFFER_OFFSET(buf)=bml->n_samples;
-  GST_BUFFER_OFFSET_END(buf)=n_samples;
-  GST_BUFFER_DURATION(buf)=next_running_time - bml->running_time;
+  if (!bml->reverse) {
+    GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
+    GST_BUFFER_DURATION(buf)=next_running_time-bml->running_time;
+    GST_BUFFER_OFFSET(buf)=bml->n_samples;
+    GST_BUFFER_OFFSET_END(buf)=n_samples;
+  } else {
+    GST_BUFFER_TIMESTAMP(buf)=next_running_time;
+    GST_BUFFER_DURATION(buf)=bml->running_time-next_running_time;
+    GST_BUFFER_OFFSET(buf)=n_samples;
+    GST_BUFFER_OFFSET_END(buf)=bml->n_samples;
+  }
 
   /* @todo: split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
@@ -503,7 +537,6 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   bml(tick(bm));
 
   bml->running_time = next_running_time;
-  //bml->running_time = next_time;
   bml->n_samples = n_samples;
 
   GST_DEBUG_OBJECT(bml_src,"  calling work_m2s(%d)",samples_per_buffer);

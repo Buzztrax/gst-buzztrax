@@ -868,34 +868,42 @@ gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   GstSimSyn *src = GST_SIM_SYN (basesrc);
   GstClockTime time;
   
-  segment->time = segment->start;
   time = segment->last_stop;
+  src->reverse = (segment->rate<0.0);
+  src->running_time = time;
 
   /* now move to the time indicated */
   src->n_samples = gst_util_uint64_scale_int(time, src->samplerate, GST_SECOND);
-  src->running_time = time;
-
-  g_assert (src->running_time <= time);
-
-  if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
-    time = segment->stop;
-    src->n_samples_stop = gst_util_uint64_scale_int(time, src->samplerate,
-        GST_SECOND);
-    src->check_seek_stop = TRUE;
+  
+  if (!src->reverse) {
+    if (GST_CLOCK_TIME_IS_VALID (segment->start)) {
+      segment->time = segment->start;
+    }
+    if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
+      time = segment->stop;
+      src->n_samples_stop = gst_util_uint64_scale_int(time, src->samplerate,
+          GST_SECOND);
+      src->check_eos = TRUE;
+    } else {
+      src->check_eos = FALSE;
+    }
   } else {
-    src->check_seek_stop = FALSE;
+    if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
+      segment->time = segment->stop;
+    }
+    if (GST_CLOCK_TIME_IS_VALID (segment->start)) {
+      time = segment->start;
+      src->n_samples_stop = gst_util_uint64_scale_int(time, src->samplerate,
+          GST_SECOND);
+      src->check_eos = TRUE;
+    } else {
+      src->check_eos = FALSE;
+    }
   }
   src->seek_flags = segment->flags;
   src->eos_reached = FALSE;
-  src->reverse = (segment->rate<0.0);
-  // should we swap here?
-  if (src->reverse) {
-    gint64 t = src->n_samples_stop;
-    src->n_samples_stop = src->n_samples;
-    src->n_samples = t;
-  }
 
-  GST_WARNING("seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
+  GST_DEBUG_OBJECT(src,"seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
     GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop),GST_TIME_ARGS(segment->last_stop),segment->rate);
 
   return TRUE;
@@ -925,29 +933,42 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   GstSimSyn *src = GST_SIM_SYN (basesrc);
   GstFlowReturn res;
   GstBuffer *buf;
-  GstClockTime next_time, next_running_time;
+  GstClockTime next_running_time;
   gint64 n_samples;
   gdouble samples_done;
   guint samples_per_buffer;
+  gboolean partial_buffer=FALSE;
 
   if (G_UNLIKELY(src->eos_reached)) {
-    GST_DEBUG("  EOS reached");
+    GST_WARNING_OBJECT(src,"EOS reached");
     return GST_FLOW_UNEXPECTED;
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   samples_done = (gdouble)src->running_time*(gdouble)src->samplerate/(gdouble)GST_SECOND;
   samples_per_buffer=(guint)(src->samples_per_buffer+(samples_done-(gdouble)src->n_samples));
-
-  //GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf), length = %u",samples_per_buffer,src->samples_per_buffer,length);
+  
+  /*
+  GST_DEBUG_OBJECT(src,"samples_done=%lf, src->n_samples=%lf, samples_per_buffer=%u",
+    samples_done,(gdouble)src->n_samples,samples_per_buffer);
+  GST_DEBUG("  samplers-per-buffer = %7d (%8.3lf), length = %u",samples_per_buffer,src->samples_per_buffer,length);
+  */
 
   /* check for eos */
-  if (G_UNLIKELY(src->check_seek_stop &&
-    (src->n_samples_stop >= src->n_samples) &&
-    (src->n_samples_stop < src->n_samples + samples_per_buffer))
-  ) {
+  if (src->check_eos) {
+    if (!src->reverse) {
+      partial_buffer=((src->n_samples_stop >= src->n_samples) &&
+        (src->n_samples_stop < src->n_samples + samples_per_buffer));
+    } else {
+      partial_buffer=((src->n_samples_stop < src->n_samples) &&
+        (src->n_samples_stop >= src->n_samples - samples_per_buffer));
+    }
+  }
+  
+  if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
     src->generate_samples_per_buffer = (guint)(src->n_samples_stop - src->n_samples);
+    GST_INFO_OBJECT(src,"partial buffer: %u", src->generate_samples_per_buffer);
     if(!src->generate_samples_per_buffer) {
       src->eos_reached = TRUE;
       return GST_FLOW_UNEXPECTED;
@@ -963,8 +984,6 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   }
   next_running_time = src->running_time + (src->reverse ? (-src->ticktime) : src->ticktime);
 
-  next_time = gst_util_uint64_scale(n_samples,GST_SECOND,(guint64)src->samplerate);
-
   /* allocate a new buffer suitable for this pad */
   if ((res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
       src->generate_samples_per_buffer * sizeof (gint16),
@@ -974,19 +993,26 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     return res;
   }
 
-  GST_BUFFER_TIMESTAMP (buf) = src->running_time;
-  GST_BUFFER_OFFSET (buf) = src->n_samples;
-  GST_BUFFER_OFFSET_END (buf) = n_samples;
-  GST_BUFFER_DURATION (buf) = next_time - src->running_time;
+  if (!src->reverse) {
+    GST_BUFFER_TIMESTAMP (buf) = src->running_time;
+    GST_BUFFER_DURATION (buf) = next_running_time - src->running_time;
+    GST_BUFFER_OFFSET (buf) = src->n_samples;
+    GST_BUFFER_OFFSET_END (buf) = n_samples;
+  } else {
+    GST_BUFFER_TIMESTAMP (buf) = next_running_time;
+    GST_BUFFER_DURATION (buf) = src->running_time - next_running_time;
+    GST_BUFFER_OFFSET (buf) = n_samples;
+    GST_BUFFER_OFFSET_END (buf) = src->n_samples;
+  }
 
-  gst_object_sync_values (G_OBJECT (src), src->running_time);
+  gst_object_sync_values (G_OBJECT (src), GST_BUFFER_TIMESTAMP (buf));
 
   GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", d_samples %6u running_time %"GST_TIME_FORMAT", next_time %"GST_TIME_FORMAT", duration %"GST_TIME_FORMAT,
     src->n_samples,src->generate_samples_per_buffer,
-    GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
+    GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_running_time),
+    GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
 
   src->running_time = next_running_time;
-  //src->running_time = next_time;
   src->n_samples = n_samples;
 
   if ((src->freq != 0.0) && (src->volenv->value > 0.0001)) {
@@ -1154,7 +1180,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
       break;
 	// help iface
 	case PROP_DOCU_URI:
-	  g_value_set_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstSimSyn.html");
+	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstSimSyn.html");
 	  break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);

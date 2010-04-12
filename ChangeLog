@@ -1,5 +1,15 @@
 2010-04-12  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/gstbml.h:
+	* src/bml/gstbmlsrc.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Fix reverse playback.
+
+2010-04-12  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/audiodelay/audiodelay.c:
 	  Avoid a string copy.
 

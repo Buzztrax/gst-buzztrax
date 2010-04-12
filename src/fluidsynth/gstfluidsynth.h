@@ -92,10 +92,11 @@ struct _GstFluidsynth {
   GstClockTime running_time;            /* total running time */
   gint64 n_samples;                     /* total samples sent */
   gint64 n_samples_stop;
-  gboolean check_seek_stop;
+  gboolean check_eos;
   gboolean eos_reached;
   gint generate_samples_per_buffer;	/* generate a partial buffer */
   GstSeekFlags seek_flags;
+  gboolean reverse;                  /* play backwards */
 
   /* tempo handling */
   gulong beats_per_minute;
