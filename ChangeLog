@@ -1,3 +1,11 @@
+2010-04-12  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiodelay/audiodelay.c:
+	  Avoid a string copy.
+
+	* src/bml/common.c:
+	  Comment
+
 2010-04-04  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/audiodelay/audiodelay.c: (gst_audio_delay_base_init):

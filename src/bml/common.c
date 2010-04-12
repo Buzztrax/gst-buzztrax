@@ -773,6 +773,7 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
   if(has_data) {
     has_data=FALSE;
 
+    // see also http://www.musicdsp.org/archive.php?classid=5#191
     for(i=0;i<num_samples;i++) {
       if(G_LIKELY(isnormal(data[i]))) {
         has_data=TRUE;
