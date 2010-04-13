@@ -1,3 +1,14 @@
+2010-04-13  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbml.h:
+	* src/bml/gstbmlsrc.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Don't need the seekflags - baseclass has them. Also always do eos handling
+	  on last buffer.
+
 2010-04-12  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbml.h:

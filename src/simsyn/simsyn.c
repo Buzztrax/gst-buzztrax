@@ -900,7 +900,6 @@ gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
       src->check_eos = FALSE;
     }
   }
-  src->seek_flags = segment->flags;
   src->eos_reached = FALSE;
 
   GST_DEBUG_OBJECT(src,"seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
@@ -969,14 +968,13 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     /* calculate only partial buffer */
     src->generate_samples_per_buffer = (guint)(src->n_samples_stop - src->n_samples);
     GST_INFO_OBJECT(src,"partial buffer: %u", src->generate_samples_per_buffer);
-    if(!src->generate_samples_per_buffer) {
+    if(G_UNLIKELY(!src->generate_samples_per_buffer)) {
+      GST_WARNING_OBJECT(src,"0 samples left -> EOS reached");
       src->eos_reached = TRUE;
       return GST_FLOW_UNEXPECTED;
     }
     n_samples = src->n_samples_stop;
-    if (!(src->seek_flags&GST_SEEK_FLAG_SEGMENT)) {
-      src->eos_reached = TRUE;
-    }
+    src->eos_reached = TRUE;
   } else {
     /* calculate full buffer */
     src->generate_samples_per_buffer = samples_per_buffer;

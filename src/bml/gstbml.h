@@ -96,7 +96,6 @@ struct _GstBML {
   gint64 n_samples_stop;
   gboolean check_eos;
   gboolean eos_reached;
-  GstSeekFlags seek_flags;
   gboolean reverse;                  /* play backwards */
 };
 

@@ -95,7 +95,6 @@ struct _GstFluidsynth {
   gboolean check_eos;
   gboolean eos_reached;
   gint generate_samples_per_buffer;	/* generate a partial buffer */
-  GstSeekFlags seek_flags;
   gboolean reverse;                  /* play backwards */
 
   /* tempo handling */

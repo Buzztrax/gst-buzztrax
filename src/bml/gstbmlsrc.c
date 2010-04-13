@@ -332,7 +332,6 @@ static gboolean gst_bml_src_do_seek(GstBaseSrc * base, GstSegment * segment) {
       bml->check_eos = FALSE;
     }
   }
-  bml->seek_flags = segment->flags;
   bml->eos_reached = FALSE;
 
   GST_DEBUG_OBJECT(bml_src,"seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
@@ -388,10 +387,13 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
     samples_per_buffer = bml->n_samples_stop - bml->n_samples;
-    n_samples = bml->n_samples_stop;
-    if (!(bml->seek_flags&GST_SEEK_FLAG_SEGMENT)) {
+    if(G_UNLIKELY(!samples_per_buffer)) {
+      GST_WARNING_OBJECT(bml_src,"0 samples left -> EOS reached");
       bml->eos_reached = TRUE;
+      return GST_FLOW_UNEXPECTED;
     }
+    n_samples = bml->n_samples_stop;
+    bml->eos_reached = TRUE;
   } else {
     /* calculate full buffer */
     n_samples = bml->n_samples + (bml->reverse ? (-samples_per_buffer) : samples_per_buffer);
@@ -498,10 +500,13 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
     samples_per_buffer = bml->n_samples_stop - bml->n_samples;
-    n_samples = bml->n_samples_stop;
-    if (!(bml->seek_flags&GST_SEEK_FLAG_SEGMENT)) {
+    if(G_UNLIKELY(!samples_per_buffer)) {
+      GST_WARNING_OBJECT(bml_src,"0 samples left -> EOS reached");
       bml->eos_reached = TRUE;
+      return GST_FLOW_UNEXPECTED;
     }
+    n_samples = bml->n_samples_stop;
+    bml->eos_reached = TRUE;
   } else {
     /* calculate full buffer */
     n_samples = bml->n_samples + (bml->reverse ? (-samples_per_buffer) : samples_per_buffer);
