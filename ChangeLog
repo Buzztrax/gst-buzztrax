@@ -1,3 +1,10 @@
+2010-04-19  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Calculate correct buffer siyes when playing backwards.
+
 2010-04-16  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

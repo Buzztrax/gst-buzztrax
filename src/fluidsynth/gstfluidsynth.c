@@ -1116,7 +1116,11 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   samples_done = (gdouble)src->running_time*(gdouble)src->samplerate/(gdouble)GST_SECOND;
-  samples_per_buffer=(guint)(src->samples_per_buffer+(samples_done-(gdouble)src->n_samples));
+  if (!src->reverse) {
+    samples_per_buffer=(guint)(src->samples_per_buffer+(samples_done-(gdouble)src->n_samples));
+  } else {
+    samples_per_buffer=(guint)(src->samples_per_buffer+((gdouble)src->n_samples-samples_done));
+  }
 
   /*
   GST_DEBUG_OBJECT(src,"samples_done=%lf, src->n_samples=%lf, samples_per_buffer=%u",

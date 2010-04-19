@@ -370,8 +370,15 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  samples_done = (gdouble)bml->running_time*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
-  samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
+  samples_done=(gdouble)bml->running_time*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
+  if (!bml->reverse) {
+    samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
+  } else {
+    samples_per_buffer=(guint)(bml->samples_per_buffer+((gdouble)bml->n_samples-samples_done));
+  }
+  
+  //GST_LOG_OBJECT(bml_src,"time=%"GST_TIME_FORMAT", samples_done=%lf, %"G_GINT64_FORMAT" spb=%u",
+  //  GST_TIME_ARGS(bml->running_time),samples_done,bml->n_samples,samples_per_buffer);
 
   /* check for eos */
   if (bml->check_eos) {
@@ -483,8 +490,15 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   }
 
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
-  samples_done = (gdouble)bml->running_time*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
-  samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
+  samples_done=(gdouble)bml->running_time*(gdouble)bml->samplerate/(gdouble)GST_SECOND;
+  if (!bml->reverse) {
+    samples_per_buffer=(guint)(bml->samples_per_buffer+(samples_done-(gdouble)bml->n_samples));
+  } else {
+    samples_per_buffer=(guint)(bml->samples_per_buffer+((gdouble)bml->n_samples-samples_done));
+  }
+
+  //GST_LOG_OBJECT(bml_src,"time=%"GST_TIME_FORMAT", samples_done=%lf, %"G_GINT64_FORMAT" spb=%u",
+  //  GST_TIME_ARGS(bml->running_time),samples_done,bml->n_samples,samples_per_buffer);
 
   /* check for eos */
   if (bml->check_eos) {
