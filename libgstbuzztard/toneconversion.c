@@ -28,8 +28,9 @@
  */
 
 #include "toneconversion.h"
-#include "math.h"
-#include "string.h"
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
 //-- signal ids
 
