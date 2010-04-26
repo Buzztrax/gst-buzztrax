@@ -1,3 +1,9 @@
+2010-04-26  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Don't fail in plugin_init when having 0 elements. If we fail, the
+	  plugin scanner will blacklist us.
+
 2010-04-19  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlsrc.c:

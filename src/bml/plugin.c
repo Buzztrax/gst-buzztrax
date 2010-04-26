@@ -472,7 +472,12 @@ static gboolean plugin_init (GstPlugin * plugin) {
     }
   }
 
-  return(res);
+  if (!res) {
+    GST_WARNING ("no buzzmachine plugins found, check BML_PATH");
+  }
+  
+  /* we don't want to fail, even if there are no elements registered */
+  return TRUE;
 }
 
 GST_PLUGIN_DEFINE(
