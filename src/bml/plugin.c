@@ -296,7 +296,7 @@ static gboolean dir_scan(const gchar *dir_name) {
       /* test against blacklist */
       if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
         file_name=g_build_filename (dir_name, conv_entry_name?conv_entry_name:entry_name, NULL);
-        GST_WARNING("trying plugin '%s','%s'",entry_name,file_name);
+        GST_INFO("trying plugin '%s','%s'",entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
           if((bmh=bmlw_open(file_name))) {
@@ -422,7 +422,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
   gst_bml_property_meta_quark_type=g_quark_from_string("GstBMLPropertyMeta::type");
 
   GST_INFO("scan for plugins");
-#if GST_CHECK_VERSION(0,10,23) && (GST_VERSION_NANO == 1)
+#if GST_CHECK_VERSION(0,10,24)
   bml_meta_all=(GstStructure *)gst_plugin_get_cache_data(plugin);
   if(bml_meta_all) {
     n=gst_structure_n_fields(bml_meta_all);
@@ -435,7 +435,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
     if(res) {
       n=gst_structure_n_fields(bml_meta_all);
       GST_INFO("%d entries after scanning",n);
-#if GST_CHECK_VERSION(0,10,23) && (GST_VERSION_NANO == 1)
+#if GST_CHECK_VERSION(0,10,24)
       gst_plugin_set_cache_data(plugin,bml_meta_all);
 #endif
     }

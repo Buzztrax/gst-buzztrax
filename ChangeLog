@@ -1,5 +1,10 @@
 2010-04-27  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/plugin.c:
+	  Fix version check.
+
+2010-04-27  Stefan Kost  <ensonic@users.sf.net>
+
 	* libgstbuzztard/toneconversion.c:
 	  Fix include style and add missing include.
 
