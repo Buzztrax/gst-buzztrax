@@ -453,7 +453,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   has_data=FALSE;
   while (todo) {
     // 256 is MachineInterface.h::MAX_BUFFER_LENGTH
-    seg_size = (todo>256) ? 256 : todo; 
+    seg_size = (todo>256) ? 256 : todo;
     /* mode does not really matter for generators */
     has_data |= bml(work(bm,seg_data,(int)seg_size,2/*WM_WRITE*/));
     seg_data = &seg_data[seg_size];
@@ -569,7 +569,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   has_data=FALSE;
   while (todo) {
     // 256 is MachineInterface.h::MAX_BUFFER_LENGTH
-    seg_size = (todo>256) ? 256 : todo; 
+    seg_size = (todo>256) ? 256 : todo;
     /* mode does not really matter for generators, NULL for input should be fine */
     has_data |= bml(work_m2s(bm,NULL,seg_data,(int)seg_size,2/*WM_WRITE*/));
     seg_data = &seg_data[seg_size*2];
