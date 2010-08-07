@@ -724,9 +724,9 @@ gst_sim_syn_create_sine_table (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_lowpass (GstSimSyn * src, gint16 * samples)
 {
-  guint i;
+  guint i, ct = src->generate_samples_per_buffer;
 
-  for (i = 0; i < src->generate_samples_per_buffer; i++) {
+  for (i = 0; i < ct; i++) {
     src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
     src->flt_mid += (src->flt_high * src->cutoff);
     src->flt_low += (src->flt_mid * src->cutoff);
@@ -738,9 +738,9 @@ gst_sim_syn_filter_lowpass (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_hipass (GstSimSyn * src, gint16 * samples)
 {
-  guint i;
+  guint i, ct = src->generate_samples_per_buffer;
 
-  for (i = 0; i < src->generate_samples_per_buffer; i++) {
+  for (i = 0; i < ct; i++) {
     src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
     src->flt_mid += (src->flt_high * src->cutoff);
     src->flt_low += (src->flt_mid * src->cutoff);
@@ -752,9 +752,9 @@ gst_sim_syn_filter_hipass (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_bandpass (GstSimSyn * src, gint16 * samples)
 {
-  guint i;
+  guint i, ct = src->generate_samples_per_buffer;
 
-  for (i = 0; i < src->generate_samples_per_buffer; i++) {
+  for (i = 0; i < ct; i++) {
     src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
     src->flt_mid += (src->flt_high * src->cutoff);
     src->flt_low += (src->flt_mid * src->cutoff);
@@ -766,9 +766,9 @@ gst_sim_syn_filter_bandpass (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_bandstop (GstSimSyn * src, gint16 * samples)
 {
-  guint i;
+  guint i, ct = src->generate_samples_per_buffer;
 
-  for (i = 0; i < src->generate_samples_per_buffer; i++) {
+  for (i = 0; i < ct; i++) {
     src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
     src->flt_mid += (src->flt_high * src->cutoff);
     src->flt_low += (src->flt_mid * src->cutoff);

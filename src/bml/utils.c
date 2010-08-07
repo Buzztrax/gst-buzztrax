@@ -754,7 +754,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
       GST_DEBUG_OBJECT(bml->self,"passing callbacks to bml");
       bml(set_callbacks(bm,g_value_get_pointer(value)));
       handled=TRUE;
-      break;      
+      break;
     default:
       if(bml(gstbml_is_polyphonic(bm))) {
         if(prop_id==(props_skip+1)) {
