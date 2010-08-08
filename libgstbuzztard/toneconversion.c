@@ -168,7 +168,7 @@ static gdouble gstbt_tone_conversion_translate_cromatic(GstBtToneConversion *sel
   return(frequency);
 }
 
-static gstbt_tone_conversion_change_tuning(GstBtToneConversion *self) {
+static void gstbt_tone_conversion_change_tuning(GstBtToneConversion *self) {
   switch(self->tuning) {
     case GSTBT_TONE_CONVERSION_CROMATIC:
       self->translate=gstbt_tone_conversion_translate_cromatic;
