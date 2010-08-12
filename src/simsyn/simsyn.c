@@ -471,10 +471,11 @@ static void
 gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
-  gdouble step, amp, ampf;
+  gdouble step, amp, ampf, accumulator;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   ampf = src->volume * 32767.0;
+  accumulator = src->accumulator;
 
   while (i < ct) {
     /* the volume envelope */
@@ -482,24 +483,26 @@ gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
     amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
-      src->accumulator += step;
+      accumulator += step;
       /* @todo: move out of inner loop? */
-      if (G_UNLIKELY (src->accumulator >= M_PI_M2))
-        src->accumulator -= M_PI_M2;
+      if (G_UNLIKELY (accumulator >= M_PI_M2))
+        accumulator -= M_PI_M2;
 
-      samples[i] = (gint16) (sin (src->accumulator) * amp);
+      samples[i] = (gint16) (sin (accumulator) * amp);
     }
   }
+  src->accumulator = accumulator;
 }
 
 static void
 gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
-  gdouble step, amp, ampf;
+  gdouble step, amp, ampf, accumulator;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   ampf = src->volume * 32767.0;
+  accumulator = src->accumulator;
 
   while (i < ct) {
     /* the volume envelope */
@@ -507,23 +510,25 @@ gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
     amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
-      src->accumulator += step;
-      if (G_UNLIKELY (src->accumulator >= M_PI_M2))
-        src->accumulator -= M_PI_M2;
+      accumulator += step;
+      if (G_UNLIKELY (accumulator >= M_PI_M2))
+        accumulator -= M_PI_M2;
 
-      samples[i] = (gint16) ((src->accumulator < M_PI) ? amp : -amp);
+      samples[i] = (gint16) ((accumulator < M_PI) ? amp : -amp);
     }
   }
+  src->accumulator = accumulator;
 }
 
 static void
 gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
-  gdouble step, amp, ampf;
+  gdouble step, amp, ampf, accumulator;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   ampf = src->volume * 32767.0 / M_PI;
+  accumulator = src->accumulator;
 
   while (i < ct) {
     /* the volume envelope */
@@ -531,27 +536,29 @@ gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
     amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
-      src->accumulator += step;
-      if (G_UNLIKELY (src->accumulator >= M_PI_M2))
-        src->accumulator -= M_PI_M2;
+      accumulator += step;
+      if (G_UNLIKELY (accumulator >= M_PI_M2))
+        accumulator -= M_PI_M2;
 
-      if (src->accumulator < M_PI) {
-        samples[i] = (gint16) (src->accumulator * amp);
+      if (accumulator < M_PI) {
+        samples[i] = (gint16) (accumulator * amp);
       } else {
-        samples[i] = (gint16) ((M_PI_M2 - src->accumulator) * -amp);
+        samples[i] = (gint16) ((M_PI_M2 - accumulator) * -amp);
       }
     }
   }
+  src->accumulator = accumulator;
 }
 
 static void
 gst_sim_syn_create_triangle (GstSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
-  gdouble step, amp, ampf;
+  gdouble step, amp, ampf, accumulator;
 
   step = M_PI_M2 * src->freq / src->samplerate;
   ampf = src->volume * 32767.0 / M_PI;
+  accumulator = src->accumulator;
 
   while (i < ct) {
     /* the volume envelope */
@@ -559,19 +566,20 @@ gst_sim_syn_create_triangle (GstSimSyn * src, gint16 * samples)
     amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
-      src->accumulator += step;
-      if (G_UNLIKELY (src->accumulator >= M_PI_M2))
-        src->accumulator -= M_PI_M2;
+      accumulator += step;
+      if (G_UNLIKELY (accumulator >= M_PI_M2))
+        accumulator -= M_PI_M2;
 
-      if (src->accumulator < (M_PI * 0.5)) {
-        samples[i] = (gint16) (src->accumulator * amp);
-      } else if (src->accumulator < (M_PI * 1.5)) {
-        samples[i] = (gint16) ((src->accumulator - M_PI) * -amp);
+      if (accumulator < (M_PI * 0.5)) {
+        samples[i] = (gint16) (accumulator * amp);
+      } else if (accumulator < (M_PI * 1.5)) {
+        samples[i] = (gint16) ((accumulator - M_PI) * -amp);
       } else {
-        samples[i] = (gint16) ((M_PI_M2 - src->accumulator) * -amp);
+        samples[i] = (gint16) ((M_PI_M2 - accumulator) * -amp);
       }
     }
   }
+  src->accumulator = accumulator;
 }
 
 static void
@@ -607,8 +615,7 @@ gst_sim_syn_create_white_noise (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_init_pink_noise (GstSimSyn * src)
 {
-  gint i;
-  gint num_rows = 12;           /* arbitrary: 1 .. PINK_MAX_RANDOM_ROWS */
+  guint num_rows = 12;           /* arbitrary: 1 .. PINK_MAX_RANDOM_ROWS */
   glong pmax;
 
   src->pink.index = 0;
@@ -618,8 +625,7 @@ gst_sim_syn_init_pink_noise (GstSimSyn * src)
   pmax = (num_rows + 1) * (1 << (PINK_RANDOM_BITS - 1));
   src->pink.scalar = 1.0f / pmax;
   /* Initialize rows. */
-  for (i = 0; i < num_rows; i++)
-    src->pink.rows[i] = 0;
+  memset (src->pink.rows, 0, sizeof(src->pink.rows));
   src->pink.running_sum = 0;
 }
 
@@ -668,6 +674,7 @@ static void
 gst_sim_syn_create_pink_noise (GstSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
+  GstPinkNoise * pink = &src->pink;
   gdouble amp, ampf;
 
   ampf = src->volume * 32767.0;
@@ -678,9 +685,7 @@ gst_sim_syn_create_pink_noise (GstSimSyn * src, gint16 * samples)
     amp = src->volenv->value * ampf;
     src->note_count += INNER_LOOP;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
-      samples[i] =
-        (gint16) (gst_sim_syn_generate_pink_noise_value (&src->pink) *
-        amp);
+      samples[i] = (gint16) (gst_sim_syn_generate_pink_noise_value (pink) * amp);
     }
   }
 }
@@ -688,13 +693,14 @@ gst_sim_syn_create_pink_noise (GstSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_init_sine_table (GstSimSyn * src)
 {
-  gint i;
+  guint i;
   gdouble ang = 0.0;
-  gdouble step = M_PI_M2 / 1024.0;
+  gdouble step = M_PI_M2 / (gdouble)WAVE_TABLE_SIZE;
   gdouble amp = src->volume * 32767.0;
+  gint16 * __restrict__ wave_table = src->wave_table;
 
-  for (i = 0; i < 1024; i++) {
-    src->wave_table[i] = (gint16) (sin (ang) * amp);
+  for (i = 0; i <  WAVE_TABLE_SIZE; i++) {
+    wave_table[i] = (gint16) (sin (ang) * amp);
     ang += step;
   }
 }
@@ -702,21 +708,23 @@ gst_sim_syn_init_sine_table (GstSimSyn * src)
 static void
 gst_sim_syn_create_sine_table (GstSimSyn * src, gint16 * samples)
 {
-  guint i, ct=src->generate_samples_per_buffer;
-  gdouble step, scl;
+  guint i, ct = src->generate_samples_per_buffer;
+  gdouble step, scl, accumulator;
+  gint16 * __restrict__ wave_table = src->wave_table;
 
   step = M_PI_M2 * src->freq / src->samplerate;
-  scl = 1024.0 /  M_PI_M2;
+  scl = (gdouble)WAVE_TABLE_SIZE /  M_PI_M2;
+  accumulator = src->accumulator;
 
   for (i = 0; i < ct; i++) {
     /* @todo: add envelope */
-
-    src->accumulator += step;
-    if (G_UNLIKELY (src->accumulator >= M_PI_M2))
-      src->accumulator -= M_PI_M2;
-
-    samples[i] = src->wave_table[(gint) (src->accumulator * scl)];
+    accumulator += step;
+    samples[i] = wave_table[((guint) (accumulator * scl)) & (WAVE_TABLE_SIZE - 1)];
   }
+  while (G_UNLIKELY (accumulator >= M_PI_M2)) {
+    accumulator -= M_PI_M2;
+  }
+  src->accumulator = accumulator;
 }
 
 /* Filters */
@@ -725,56 +733,88 @@ static void
 gst_sim_syn_filter_lowpass (GstSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
+  gdouble flt_low = src->flt_low;
+  gdouble flt_mid = src->flt_mid;
+  gdouble flt_high = src->flt_high;
+  gdouble flt_res = src->flt_res;
+  gdouble cutoff = src->cutoff;
 
   for (i = 0; i < ct; i++) {
-    src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
-    src->flt_mid += (src->flt_high * src->cutoff);
-    src->flt_low += (src->flt_mid * src->cutoff);
+    flt_high = (gdouble)samples[i] - (flt_mid * flt_res) - flt_low;
+    flt_mid += (flt_high * cutoff);
+    flt_low += (flt_mid * cutoff);
 
-    samples[i]=(gint16)CLAMP((glong)src->flt_low,G_MININT16,G_MAXINT16);
+    samples[i] = (gint16)CLAMP((glong)flt_low, G_MININT16, G_MAXINT16);
   }
+  src->flt_low = flt_low;
+  src->flt_mid = flt_mid;
+  src->flt_high = flt_high;
 }
 
 static void
 gst_sim_syn_filter_hipass (GstSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
+  gdouble flt_low = src->flt_low;
+  gdouble flt_mid = src->flt_mid;
+  gdouble flt_high = src->flt_high;
+  gdouble flt_res = src->flt_res;
+  gdouble cutoff = src->cutoff;
 
   for (i = 0; i < ct; i++) {
-    src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
-    src->flt_mid += (src->flt_high * src->cutoff);
-    src->flt_low += (src->flt_mid * src->cutoff);
+    flt_high = (gdouble)samples[i] - (flt_mid * flt_res) - flt_low;
+    flt_mid += (flt_high * cutoff);
+    flt_low += (flt_mid * cutoff);
 
-    samples[i]=(gint16)CLAMP((glong)src->flt_high,G_MININT16,G_MAXINT16);
+    samples[i] = (gint16)CLAMP((glong)flt_high, G_MININT16, G_MAXINT16);
   }
+  src->flt_low = flt_low;
+  src->flt_mid = flt_mid;
+  src->flt_high = flt_high;
 }
 
 static void
 gst_sim_syn_filter_bandpass (GstSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
+  gdouble flt_low = src->flt_low;
+  gdouble flt_mid = src->flt_mid;
+  gdouble flt_high = src->flt_high;
+  gdouble flt_res = src->flt_res;
+  gdouble cutoff = src->cutoff;
 
   for (i = 0; i < ct; i++) {
-    src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
-    src->flt_mid += (src->flt_high * src->cutoff);
-    src->flt_low += (src->flt_mid * src->cutoff);
+    flt_high = (gdouble)samples[i] - (flt_mid * flt_res) - flt_low;
+    flt_mid += (flt_high * cutoff);
+    flt_low += (flt_mid * cutoff);
 
-    samples[i]=(gint16)CLAMP((glong)src->flt_mid,G_MININT16,G_MAXINT16);
+    samples[i]=(gint16)CLAMP((glong)flt_mid, G_MININT16, G_MAXINT16);
   }
+  src->flt_low = flt_low;
+  src->flt_mid = flt_mid;
+  src->flt_high = flt_high;
 }
 
 static void
 gst_sim_syn_filter_bandstop (GstSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
+  gdouble flt_low = src->flt_low;
+  gdouble flt_mid = src->flt_mid;
+  gdouble flt_high = src->flt_high;
+  gdouble flt_res = src->flt_res;
+  gdouble cutoff = src->cutoff;
 
   for (i = 0; i < ct; i++) {
-    src->flt_high = (gdouble)samples[i] - (src->flt_mid * src->flt_res) - src->flt_low;
-    src->flt_mid += (src->flt_high * src->cutoff);
-    src->flt_low += (src->flt_mid * src->cutoff);
+    flt_high = (gdouble)samples[i] - (flt_mid * flt_res) - flt_low;
+    flt_mid += (flt_high * cutoff);
+    flt_low += (flt_mid * cutoff);
 
-    samples[i]=(gint16)CLAMP((glong)(src->flt_low+src->flt_high),G_MININT16,G_MAXINT16);
+    samples[i]=(gint16)CLAMP((glong)(flt_low+flt_high), G_MININT16, G_MAXINT16);
   }
+  src->flt_low = flt_low;
+  src->flt_mid = flt_mid;
+  src->flt_high = flt_high;
 }
 
 /*

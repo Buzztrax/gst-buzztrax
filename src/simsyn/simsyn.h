@@ -93,6 +93,8 @@ typedef struct {
   gfloat     scalar;        /* Used to scale within range of -1.0 to +1.0 */
 } GstPinkNoise;
 
+#define WAVE_TABLE_SIZE 1024
+
 typedef struct _GstSimSyn GstSimSyn;
 typedef struct _GstSimSynClass GstSimSynClass;
 
@@ -144,7 +146,7 @@ struct _GstSimSyn {
   /* waveform specific context data */
   gdouble accumulator;			/* phase angle */
   GstPinkNoise pink;
-  gint16 wave_table[1024];
+  gint16 wave_table[ WAVE_TABLE_SIZE];
   
   /* filter specific data */
   gdouble flt_low, flt_mid, flt_high;

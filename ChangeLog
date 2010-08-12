@@ -1,3 +1,9 @@
+2010-08-12  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Performance improvemnts. Use a define for wavetable-size.
+
 2010-08-08  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/toneconversion.c:
