@@ -39,6 +39,12 @@
  */
 
 #include "tempo.h"
+#include "compat.h"
+
+//-- the iface
+
+G_DEFINE_INTERFACE (GstBtTempo, gstbt_tempo, 0);
+
 
 /**
  * gstbt_tempo_change_tempo:
@@ -58,53 +64,32 @@ gstbt_tempo_change_tempo (GstBtTempo *self, glong beats_per_minute, glong ticks_
 }
 
 static void
-gstbt_tempo_class_init(gpointer g_class)
+gstbt_tempo_default_init (GstBtTempoInterface *iface)
 {
   /* create interface signals and properties here. */
-  g_object_interface_install_property (g_class,
+  g_object_interface_install_property (iface,
     g_param_spec_ulong ("beats-per-minute",
     "beat-per-minute tempo property",
     "the number of beats per minute the top level pipeline uses",
     1,
     G_MAXULONG,
     120,
-    G_PARAM_READWRITE));
-  g_object_interface_install_property (g_class,
+    G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
+  g_object_interface_install_property (iface,
     g_param_spec_ulong ("ticks-per-beat",
     "ticks-per-beat tempo property",
     "the number of ticks (events) per beat the top level pipeline uses",
     1,
     G_MAXULONG,
     4,
-    G_PARAM_READWRITE));
-  g_object_interface_install_property (g_class,
+    G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
+  g_object_interface_install_property (iface,
     g_param_spec_ulong ("subticks-per-tick",
     "subticks-per-tick tempo property",
     "the number of subticks (for smoothing) per tick the top level pipeline uses",
     1,
     G_MAXULONG,
     1,
-    G_PARAM_READWRITE));
+    G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
 }
 
-GType
-gstbt_tempo_get_type (void)
-{
-  static GType type = 0;
-
-  if(G_UNLIKELY(!type)) {
-    const GTypeInfo info = {
-      sizeof (GstBtTempoInterface),
-      NULL,   /* base_init */
-      NULL,   /* base_finalize */
-      (GClassInitFunc)gstbt_tempo_class_init,   /* class_init */
-      NULL,   /* class_finalize */
-      NULL,   /* class_data */
-      0,
-      0,      /* n_preallocs */
-      NULL    /* instance_init */
-    };
-    type = g_type_register_static (G_TYPE_INTERFACE,"GstBtTempo",&info,0);
-  }
-  return type;
-}

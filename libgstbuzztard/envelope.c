@@ -45,7 +45,9 @@ enum {
   PROP_VALUE=1,
 };
 
-static GObjectClass *parent_class = NULL;
+//-- the class
+
+G_DEFINE_TYPE (GstBtEnvelope, gstbt_envelope, G_TYPE_OBJECT);
 
 //-- constructor methods
 
@@ -112,13 +114,11 @@ gstbt_envelope_dispose (GObject *object)
   if (env->dispose_has_run) return;
   env->dispose_has_run = TRUE;
   
-  if(G_OBJECT_CLASS(parent_class)->dispose) {
-    (G_OBJECT_CLASS(parent_class)->dispose)(object);
-  }
+  G_OBJECT_CLASS(gstbt_envelope_parent_class)->dispose(object);
 }
 
 static void
-gstbt_envelope_init (GstBtEnvelope * env, GstBtEnvelopeClass * g_class)
+gstbt_envelope_init (GstBtEnvelope * env)
 {
   env->value=0.0;
 }
@@ -126,13 +126,9 @@ gstbt_envelope_init (GstBtEnvelope * env, GstBtEnvelopeClass * g_class)
 static void
 gstbt_envelope_class_init (GstBtEnvelopeClass * klass)
 {
-  GObjectClass *gobject_class;
+  GObjectClass *gobject_class = (GObjectClass *) klass;
 
   GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "envelope", GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "parameter envelope");
-  
-  parent_class = (GObjectClass *) g_type_class_peek_parent (klass);
-
-  gobject_class = (GObjectClass *) klass;
 
   gobject_class->set_property = gstbt_envelope_set_property;
   gobject_class->get_property = gstbt_envelope_get_property;
@@ -143,27 +139,8 @@ gstbt_envelope_class_init (GstBtEnvelopeClass * klass)
   g_object_class_install_property(gobject_class, PROP_VALUE,
   	g_param_spec_double("value", "Value",
           "Current envelope value",
-          0.0, 1.0, 0.0, G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE));
+          0.0, 1.0, 0.0,
+          G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS|GST_PARAM_CONTROLLABLE));
 
 }
 
-GType gstbt_envelope_get_type (void)
-{
-  static GType type = 0;
-
-  if(G_UNLIKELY(!type)) {
-    const GTypeInfo element_type_info = {
-      sizeof (GstBtEnvelopeClass),
-      NULL,               /* base_init */
-      NULL,		  /* base_finalize */
-      (GClassInitFunc)gstbt_envelope_class_init,
-      NULL,		  /* class_finalize */
-      NULL,               /* class_data */
-      sizeof (GstBtEnvelope),
-      0,                  /* n_preallocs */
-      (GInstanceInitFunc) gstbt_envelope_init
-    };
-    type = g_type_register_static(G_TYPE_OBJECT, "GstBtEnvelope", &element_type_info, (GTypeFlags) 0);
-  }
-  return type;
-}

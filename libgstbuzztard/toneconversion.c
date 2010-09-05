@@ -40,7 +40,10 @@ enum {
   GSTBT_TONE_CONVERSION_TUNING=1
 };
 
-static GObjectClass *parent_class=NULL;
+//-- the class
+
+G_DEFINE_TYPE (GstBtToneConversion, gstbt_tone_conversion, G_TYPE_OBJECT);
+
 
 //-- enums
 
@@ -316,67 +319,35 @@ static void gstbt_tone_conversion_set_property(GObject      *object,
   }
 }
 
-static void gstbt_tone_conversion_dispose(GObject *object) {
+static void gstbt_tone_conversion_dispose(GObject *object)
+{
   GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
 
   if(self->dispose_has_run) return;
   self->dispose_has_run = TRUE;
 
-  if(G_OBJECT_CLASS(parent_class)->dispose) {
-    (G_OBJECT_CLASS(parent_class)->dispose)(object);
-  }
+  G_OBJECT_CLASS(gstbt_tone_conversion_parent_class)->dispose(object);
 }
 
-static void gstbt_tone_conversion_finalize(GObject *object) {
-  //GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
-
-  if(G_OBJECT_CLASS(parent_class)->finalize) {
-    (G_OBJECT_CLASS(parent_class)->finalize)(object);
-  }
+static void gstbt_tone_conversion_init(GstBtToneConversion *self)
+{
 }
 
-static void gstbt_tone_conversion_init(GTypeInstance *instance, gpointer g_class) {
-  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(instance);
-  self->dispose_has_run = FALSE;
-}
-
-static void gstbt_tone_conversion_class_init(GstBtToneConversionClass *klass) {
+static void gstbt_tone_conversion_class_init(GstBtToneConversionClass *klass)
+{
   GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
-
-  parent_class=g_type_class_peek_parent(klass);
 
   gobject_class->set_property = gstbt_tone_conversion_set_property;
   gobject_class->get_property = gstbt_tone_conversion_get_property;
   gobject_class->dispose      = gstbt_tone_conversion_dispose;
-  gobject_class->finalize     = gstbt_tone_conversion_finalize;
 
   g_object_class_install_property(gobject_class,GSTBT_TONE_CONVERSION_TUNING,
                                   g_param_spec_enum("tuning",
                                     "tuning prop",
                                     "selection frequency tuning table",
                                     GSTBT_TYPE_TONE_CONVERSION_TUNING,
-									GSTBT_TONE_CONVERSION_CROMATIC,
-                                    G_PARAM_READWRITE));
+                                    GSTBT_TONE_CONVERSION_CROMATIC,
+                                    G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
 
 }
 
-GType gstbt_tone_conversion_get_type(void) {
-  static GType type = 0;
-
-  if(G_UNLIKELY(!type)) {
-    const GTypeInfo info = {
-      sizeof(GstBtToneConversionClass),
-      NULL, // base_init
-      NULL, // base_finalize
-      (GClassInitFunc)gstbt_tone_conversion_class_init, // class_init
-      NULL, // class_finalize
-      NULL, // class_data
-      sizeof(GstBtToneConversion),
-      0,   // n_preallocs
-      (GInstanceInitFunc)gstbt_tone_conversion_init, // instance_init
-      NULL // value_table
-    };
-    type = g_type_register_static(G_TYPE_OBJECT,"GstBtToneConversion",&info,0);
-  }
-  return type;
-}

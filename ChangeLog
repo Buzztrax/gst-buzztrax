@@ -1,3 +1,19 @@
+2010-09-05  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/Makefile.am:
+	* libgstbuzztard/childbin.c:
+	* libgstbuzztard/compat.h:
+	* libgstbuzztard/envelope.c:
+	* libgstbuzztard/help.c:
+	* libgstbuzztard/preset.c:
+	* libgstbuzztard/propertymeta.c:
+	* libgstbuzztard/tempo.c:
+	* libgstbuzztard/toneconversion.c:
+	* libgstbuzztard/compat.h (svn:keywords, svn:eol-style):
+	* libgstbuzztard/compat.h (added):
+	  Use G_DEFINE_TYPE and co. Add compat header for the G_DEFINE_INTERACE
+	  macros. Clean up gobject usage.
+
 2010-08-12  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/simsyn/simsyn.c:

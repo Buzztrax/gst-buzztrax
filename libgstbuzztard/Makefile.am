@@ -6,6 +6,8 @@ PRESET_C =
 PRESET_H =
 endif
 
+noinst_HEADERS = compat.h
+
 lib_LTLIBRARIES = libgstbuzztard.la
 
 libgstbuzztard_la_SOURCES = \

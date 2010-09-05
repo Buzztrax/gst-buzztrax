@@ -58,6 +58,7 @@
 #endif
 
 #include "preset.h"
+#include "compat.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -80,6 +81,11 @@ static GQuark instance_list_quark = 0;
 
 /* max character per line */
 #define LINE_LEN 200
+
+//-- the iface
+
+G_DEFINE_INTERFACE (GstPreset, gst_preset, 0);
+
 
 static gboolean gst_preset_default_save_presets_file (GstPreset * self);
 
@@ -863,8 +869,11 @@ gst_preset_get_meta (GstPreset * self, const gchar * name, const gchar * tag,
 /* class internals */
 
 static void
-gst_preset_class_init (GstPresetInterface * iface)
+gst_preset_default_init (GstPresetInterface * iface)
 {
+  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "preset",
+      GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "preset interface");
+
   iface->get_preset_names = gst_preset_default_get_preset_names;
   iface->get_property_names = gst_preset_default_get_property_names;
 
@@ -875,66 +884,11 @@ gst_preset_class_init (GstPresetInterface * iface)
 
   iface->set_meta = gst_preset_default_set_meta;
   iface->get_meta = gst_preset_default_get_meta;
+
+  /* create quarks for use with g_type_{g,s}et_qdata() */
+  preset_quark = g_quark_from_static_string ("GstPreset::presets");
+  preset_user_path_quark = g_quark_from_static_string ("GstPreset::user_path");
+  preset_system_path_quark = g_quark_from_static_string ("GstPreset::system_path");
+  instance_list_quark = g_quark_from_static_string ("GstPreset::instances");
 }
 
-static void
-gst_preset_base_init (gpointer g_class)
-{
-  static gboolean initialized = FALSE;
-
-  if (!initialized) {
-    /* init default implementation */
-    GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "preset",
-        GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "preset interface");
-
-    /* create quarks for use with g_type_{g,s}et_qdata() */
-    preset_quark = g_quark_from_static_string ("GstPreset::presets");
-    preset_user_path_quark = g_quark_from_static_string ("GstPreset::user_path");
-    preset_system_path_quark = g_quark_from_static_string ("GstPreset::system_path");
-    instance_list_quark = g_quark_from_static_string ("GstPreset::instances");
-
-#if 0
-    property_list_quark = g_quark_from_static_string ("GstPreset::properties");
-
-    /* create interface properties, each element would need to override this
-     *   g_object_class_override_property(gobject_class, PROP_PRESET_NAME, "preset-name");
-     * and in _set_property() do
-     *   case PROP_PRESET_NAME: {
-     *     gchar *name = g_value_get_string (value);
-     *     if (name)
-     *       gst_preset_load_preset(self, name);
-     *   } break;
-     */
-    g_object_interface_install_property (g_class,
-      g_param_spec_string ("preset-name",
-      "preset-name property",
-      "load given preset",
-      NULL,
-      G_PARAM_WRITABLE));
-#endif
-
-    initialized = TRUE;
-  }
-}
-
-GType
-gst_preset_get_type (void)
-{
-  static GType type = 0;
-
-  if(G_UNLIKELY(!type)) {
-    const GTypeInfo info = {
-      sizeof (GstPresetInterface),
-      (GBaseInitFunc) gst_preset_base_init,     /* base_init */
-      NULL,                     /* base_finalize */
-      (GClassInitFunc) gst_preset_class_init,   /* class_init */
-      NULL,                     /* class_finalize */
-      NULL,                     /* class_data */
-      0,
-      0,                        /* n_preallocs */
-      NULL                      /* instance_init */
-    };
-    type = g_type_register_static (G_TYPE_INTERFACE, "GstPreset", &info, 0);
-  }
-  return type;
-}

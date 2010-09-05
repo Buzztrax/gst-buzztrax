@@ -26,37 +26,21 @@
  */
 
 #include "help.h"
+#include "compat.h"
+
+//-- the iface
+
+G_DEFINE_INTERFACE (GstBtHelp, gstbt_help, 0);
+
 
 static void
-gstbt_help_class_init(gpointer g_class)
+gstbt_help_default_init(GstBtHelpInterface *iface)
 {
-  /* create interface signals and properties here. */
-  g_object_interface_install_property (g_class,
+  g_object_interface_install_property (iface,
     g_param_spec_string ("documentation-uri",
-    "documentation uri help property",
-    "uri of the user documentation",
-    NULL,
-    G_PARAM_READABLE));
+      "documentation uri help property",
+      "uri of the user documentation",
+      NULL,
+      G_PARAM_READABLE|G_PARAM_STATIC_STRINGS));
 }
 
-GType
-gstbt_help_get_type (void)
-{
-  static GType type = 0;
-  
-  if(G_UNLIKELY(!type)) {
-    const GTypeInfo info = {
-      sizeof (GstBtHelpInterface),
-      NULL,   /* base_init */
-      NULL,   /* base_finalize */
-      (GClassInitFunc)gstbt_help_class_init,   /* class_init */
-      NULL,   /* class_finalize */
-      NULL,   /* class_data */
-      0,
-      0,      /* n_preallocs */
-      NULL    /* instance_init */
-    };
-    type = g_type_register_static (G_TYPE_INTERFACE,"GstBtHelp",&info,0);
-  }
-  return type;
-}
