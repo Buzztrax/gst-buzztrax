@@ -1239,8 +1239,7 @@ gst_fluidsynth_dispose (GObject *object)
 
   g_free(gstsynth->instrument_patch_path);
 
-  if (G_OBJECT_CLASS (parent_class)->dispose)
-    G_OBJECT_CLASS (parent_class)->dispose (object);
+  G_OBJECT_CLASS (parent_class)->dispose (object);
 }
 
 GType gst_fluidsynth_get_type (void)

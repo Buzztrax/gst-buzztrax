@@ -162,8 +162,6 @@ static gboolean gst_sim_syn_do_seek (GstBaseSrc * basesrc,
 static gboolean gst_sim_syn_query (GstBaseSrc * basesrc,
     GstQuery * query);
 
-static gboolean gst_sim_syn_send_event (GstElement *elem, GstEvent *event);
-
 static void gst_sim_syn_change_wave (GstSimSyn * src);
 static void gst_sim_syn_change_volume (GstSimSyn * src);
 static void gst_sim_syn_change_filter (GstSimSyn * src);
@@ -262,8 +260,6 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
   gobject_class->set_property = gst_sim_syn_set_property;
   gobject_class->get_property = gst_sim_syn_get_property;
   gobject_class->dispose      = gst_sim_syn_dispose;
-
-  gstelement_class->send_event = GST_DEBUG_FUNCPTR (gst_sim_syn_send_event);
 
   gstbasesrc_class->set_caps = GST_DEBUG_FUNCPTR (gst_sim_syn_setcaps);
   gstbasesrc_class->is_seekable =
@@ -454,27 +450,6 @@ error:
     GST_DEBUG_OBJECT (src, "query failed");
     return FALSE;
   }
-}
-
-static gboolean
-gst_sim_syn_send_event (GstElement *elem, GstEvent *event) {
-  //GST_INFO_OBJECT(elem,"reveived event: %s",GST_EVENT_TYPE_NAME(event));
-  switch (GST_EVENT_TYPE (event)) {
-    case GST_EVENT_TAG: {
-      GstTagList *list;
-      gchar *str;
-
-      gst_event_parse_tag (event, &list);
-      str=gst_structure_to_string (list);
-      GST_INFO ("got tags: %s",str);
-      g_free (str);
-      //gst_event_unref (event);
-      return gst_pad_push_event (GST_BASE_SRC_PAD(elem),event);
-    } break;
-    default:
-      break;
-  }
-  return GST_ELEMENT_CLASS (parent_class)->send_event (elem,event);
 }
 
 /* Wave generators */
@@ -1232,7 +1207,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
     case PROP_STPT:
       g_value_set_ulong(value, src->subticks_per_tick);
       break;
-#if GST_CHECK_VERSION(0,10,31)
+#if !GST_CHECK_VERSION(0,10,31)
 	// help iface
 	case PROP_DOCU_URI:
 	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstSimSyn.html");
@@ -1256,9 +1231,7 @@ gst_sim_syn_dispose (GObject *object)
   if (src->volenv_controller) g_object_unref (src->volenv_controller);
   if (src->volenv) g_object_unref (src->volenv);
 
-  if(G_OBJECT_CLASS(parent_class)->dispose) {
-    (G_OBJECT_CLASS(parent_class)->dispose)(object);
-  }
+  G_OBJECT_CLASS(parent_class)->dispose(object);
 }
 
 GType gst_sim_syn_get_type (void)

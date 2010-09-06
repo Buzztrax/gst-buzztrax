@@ -607,9 +607,7 @@ static void gst_bml_src_dispose(GObject *object) {
 
   gstbml_dispose(bml);
 
-  if(G_OBJECT_CLASS(parent_class)->dispose) {
-    (G_OBJECT_CLASS(parent_class)->dispose)(object);
-  }
+  G_OBJECT_CLASS(parent_class)->dispose(object);
 }
 
 static void gst_bml_src_finalize(GObject *object) {
@@ -618,9 +616,7 @@ static void gst_bml_src_finalize(GObject *object) {
 
   bml(gstbml_finalize(bml));
 
-  if(G_OBJECT_CLASS(parent_class)->finalize) {
-    (G_OBJECT_CLASS(parent_class)->finalize)(object);
-  }
+  G_OBJECT_CLASS(parent_class)->finalize(object);
 }
 
 static void gst_bml_src_base_finalize(GstBMLSrcClass *klass) {

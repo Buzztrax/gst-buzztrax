@@ -3,6 +3,16 @@
 	* src/audiodelay/audiodelay.c:
 	* src/bml/gstbmlsrc.c:
 	* src/bml/gstbmltransform.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Fix a few wrong checks in the gst-version check. Clean needless parent
+	  checks when chainign up.
+
+2010-09-06  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/audiodelay/audiodelay.c:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
 	* src/bml/plugin.h:
 	* src/bml/utils.c:
 	* src/fluidsynth/gstfluidsynth.c:
