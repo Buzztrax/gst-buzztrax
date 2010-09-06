@@ -1,5 +1,19 @@
 2010-09-06  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/common.c:
+	* src/bml/gstbmlorc-dist.c:
+	* src/bml/gstbmlorc-dist.h:
+	* src/bml/gstbmlorc.orc:
+	* src/bml/gstbmltransform.c:
+	* src/bml/gstbmlorc-dist.h (svn:keywords, svn:eol-style):
+	* src/bml/gstbmlorc-dist.c (svn:keywords, svn:eol-style):
+	* src/bml/gstbmlorc-dist.h (added):
+	* src/bml/gstbmlorc.orc (added):
+	* src/bml/gstbmlorc-dist.c (added):
+	  Add new files for orc and remove fallback (handled by orc).
+
+2010-09-06  Stefan Kost  <ensonic@users.sf.net>
+
 	* configure.ac:
 	* docs/reference/gst-buzztard.types.in:
 	* src/audiodelay/audiodelay.c:

@@ -812,12 +812,8 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
   else {
     // buzz generates relative loud output
     gfloat fc=1.0/32768.0;
-#if HAVE_ORC
     orc_scalarmultiply_f32_ns (data, data, fc, num_samples);
-#else
     //oil_scalarmultiply_f32_ns (data, data, &fc, num_samples);
-    for(i=0;i<num_samples;i++) datao[i]*=fc;
-#endif
     GST_BUFFER_FLAG_UNSET(buf,GST_BUFFER_FLAG_GAP);
   }
 }
