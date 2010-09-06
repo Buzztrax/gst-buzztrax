@@ -851,7 +851,7 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     case PROP_STPT:
       g_value_set_ulong(value, gstsynth->subticks_per_tick);
       break;
-#if GST_CHECK_VERSION(0,10,31)
+#if !GST_CHECK_VERSION(0,10,31)
 	// help iface
 	case PROP_DOCU_URI:
 	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstFluidSynth.html");
