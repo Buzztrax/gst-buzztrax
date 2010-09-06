@@ -232,10 +232,22 @@ fi
 AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET" = "0")
 AC_SUBST(PRESET_DOC_TYPES)
 
+AC_MSG_CHECKING([gstreamer version >= 0.10.31])
+if pkg-config --atleast-version=0.10.31 gstreamer-0.10; then
+  HAVE_GST_DOC_URI=1
+  HELP_DOC_TYPES="%"
+  AC_MSG_RESULT(yes)
+else
+  HAVE_GST_DOC_URI=0
+  HELP_DOC_TYPES=
+  AC_MSG_RESULT(no)
+fi
+AM_CONDITIONAL(BUILD_HELP_IFACE, test "$HAVE_GST_DOC_URI" = "0")
+AC_SUBST(HELP_DOC_TYPES)
+
 
 dnl - Check for buzzmachineloader (bml)
-PKG_CHECK_MODULES(BML, libbml >= 0.6.0 liboil-0.3 >= 0.3.8,
-    have_bml=yes, have_bml=no)
+PKG_CHECK_MODULES(BML, libbml >= 0.6.0, have_bml=yes, have_bml=no)
 AC_SUBST(BML_CFLAGS)
 AC_SUBST(BML_LIBS)
 AM_CONDITIONAL(BML_SUPPORT, test "x$have_bml" = "xyes")
@@ -246,6 +258,7 @@ else
   BML_DOC_TYPES="%"
 fi
 AC_SUBST(BML_DOC_TYPES)
+
 dnl check for bml variant (wrapped/native)
 ac_cflags_save="$CFLAGS"
 ac_ldflags_save="$LDFLAGS"
@@ -262,8 +275,10 @@ AM_CONDITIONAL(BUILD_BMLW, test "x$have_bmlw" = "xyes")
 CFLAGS="$ac_cflags_save"
 LDFLAGS="$ac_ldflags_save"
 
+dnl check for oil runtime compiler
+ORC_CHECK([0.4.6])
 
-dnl - Check for FluidSynth
+dnl check for FluidSynth
 PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
     have_fluidsynth=yes, have_fluidsynth=no)
 AC_SUBST(FLUIDSYNTH_CFLAGS)
@@ -368,4 +383,6 @@ export PKG_CONFIG_PATH="\$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"
 export GST_PLUGIN_PATH="\$GST_PLUGIN_PATH:$prefix/lib/gstreamer-0.10"
 "
 fi
+
+ORC_OUTPUT
 

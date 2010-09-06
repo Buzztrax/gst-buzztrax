@@ -1,3 +1,19 @@
+2010-09-06  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* docs/reference/gst-buzztard.types.in:
+	* src/audiodelay/audiodelay.c:
+	* src/bml/Makefile.am:
+	* src/bml/common.c:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/native/Makefile.am:
+	* src/bml/plugin.c:
+	* src/bml/plugin.h:
+	* src/bml/wrapped/Makefile.am:
+	  Switch from liboil to ORC. Add a fallback. Make Help iface
+	  conditional (need to switch more elements).
+
 2010-09-05  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/Makefile.am:

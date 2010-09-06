@@ -8,5 +8,6 @@ libgstbmln_la_SOURCES = ../gstbml.c ../gstbmlsrc.c ../gstbmltransform.c \
 libgstbmln_la_CFLAGS = -I$(srcdir) -DBML_NATIVE \
   $(GST_PLUGIN_CFLAGS) \
   $(BASE_DEPS_CFLAGS) \
+  $(ORC_CFLAGS) \
   $(BML_CFLAGS)
 

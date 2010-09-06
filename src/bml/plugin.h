@@ -50,8 +50,8 @@
 #endif
 #include <libgstbuzztard/propertymeta.h>
 #include <libgstbuzztard/tempo.h>
-//-- liboil
-#include <liboil/liboil.h>
+//-- orc
+#include "gstbmlorc.h"
 
 //-- libbml
 #include <libbml/bml.h>

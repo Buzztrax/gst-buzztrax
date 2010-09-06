@@ -8,17 +8,23 @@ SUBDIRS = native .
 BMLW_LA = 
 endif
 
+ORC_SOURCE=gstbmlorc
+include $(top_srcdir)/orc.mak
+
 plugin_LTLIBRARIES = libgstbml.la
 
 libgstbml_la_SOURCES = \
   plugin.c common.c
 
+nodist_libgstbml_la_SOURCES = $(ORC_NODIST_SOURCES)
+
 libgstbml_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) \
   -DLIBDIR=\"\${libdir}\" \
   $(GST_PLUGIN_CFLAGS) \
   $(BASE_DEPS_CFLAGS) \
+  $(ORC_CFLAGS) \
   $(BML_CFLAGS)
-libgstbml_la_LIBADD = $(GST_BASE_LIBS)  $(BML_LIBS) -lm \
+libgstbml_la_LIBADD = $(GST_BASE_LIBS) $(ORC_LIBS) $(BML_LIBS) -lm \
 	$(top_builddir)/libgstbuzztard/libgstbuzztard.la \
 	native/libgstbmln.la $(BMLW_LA)
 libgstbml_la_LDFLAGS =  $(GST_PLUGIN_LDFLAGS)

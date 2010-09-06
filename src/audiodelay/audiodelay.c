@@ -47,7 +47,9 @@
 #include <gst/controller/gstcontroller.h>
 #include <gst/audio/audio.h>
 
+#if !GST_CHECK_VERSION(0,10,31)
 #include <libgstbuzztard/help.h>
+#endif
 #include <libgstbuzztard/tempo.h>
 
 #include "audiodelay.h"
@@ -71,8 +73,10 @@ enum {
   PROP_BPM,
   PROP_TPB,
   PROP_STPT,
+#if !GST_CHECK_VERSION(0,10,31)
   // help iface
   PROP_DOCU_URI
+#endif
 };
 
 #define DELAYTIME_MAX 1000
@@ -115,7 +119,6 @@ static void gst_audio_delay_finalize (GObject * object);
 
 static gboolean gst_audio_delay_set_caps (GstBaseTransform * base,
     GstCaps * incaps, GstCaps * outcaps);
-static gboolean gst_audio_delay_send_event (GstElement *elem, GstEvent *event);
 
 static gboolean gst_audio_delay_start (GstBaseTransform * base);
 static GstFlowReturn gst_audio_delay_transform_ip (GstBaseTransform * base,
@@ -185,6 +188,10 @@ gst_audio_delay_base_init (gpointer klass)
     "Filter/Effect/Audio",
     "Add echos to audio streams",
     "Stefan Kost <ensonic@users.sf.net>");
+#if GST_CHECK_VERSION(0,10,31)
+   gst_element_calss_set_documentation_uri (element_class,
+       "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstAudioDelay.html");
+#endif
 }
 
 static void
@@ -202,14 +209,14 @@ gst_audio_delay_class_init (GstAudioDelayClass * klass)
   gobject_class->get_property = gst_audio_delay_get_property;
   gobject_class->finalize = gst_audio_delay_finalize;
 
-  gstelement_class->send_event = GST_DEBUG_FUNCPTR (gst_audio_delay_send_event);
-
   // override interface properties
   g_object_class_override_property(gobject_class, PROP_BPM, "beats-per-minute");
   g_object_class_override_property(gobject_class, PROP_TPB, "ticks-per-beat");
   g_object_class_override_property(gobject_class, PROP_STPT, "subticks-per-tick");
 
+#if !GST_CHECK_VERSION(0,10,31)
   g_object_class_override_property(gobject_class, PROP_DOCU_URI, "documentation-uri");
+#endif
 
   // register own properties
 
@@ -312,10 +319,12 @@ gst_audio_delay_get_property (GObject * object, guint prop_id,
     case PROP_STPT:
       g_value_set_ulong(value, filter->subticks_per_tick);
       break;
+#if GST_CHECK_VERSION(0,10,31)
     // help iface
     case PROP_DOCU_URI:
       g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstAudioDelay.html");
       break;
+#endif
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -336,27 +345,6 @@ gst_audio_delay_finalize (GObject * object)
 }
 
 /* GstElement vmethod implementations */
-
-static gboolean
-gst_audio_delay_send_event (GstElement *elem, GstEvent *event) {
-  //GST_INFO_OBJECT(elem,"reveived event: %s",GST_EVENT_TYPE_NAME(event));
-  switch (GST_EVENT_TYPE (event)) {
-    case GST_EVENT_TAG: {
-      GstTagList *list;
-      gchar *str;
-
-      gst_event_parse_tag (event, &list);
-      str=gst_structure_to_string (list);
-      GST_INFO ("got tags: %s",str);
-      g_free (str);
-      //gst_event_unref (event);
-      return gst_pad_push_event (GST_BASE_TRANSFORM_SRC_PAD(elem),event);
-    } break;
-    default:
-      break;
-  }
-  return GST_ELEMENT_CLASS (parent_class)->send_event (elem,event);
-}
 
 /* GstBaseTransform vmethod implementations */
 
@@ -502,14 +490,18 @@ GType gst_audio_delay_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
+#if !GST_CHECK_VERSION(0,10,31)
     const GInterfaceInfo help_interface_info = {
       NULL,               /* interface_init */
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
+#endif
     type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, "GstBtAudioDelay", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
-	g_type_add_interface_static(type, GSTBT_TYPE_HELP, &help_interface_info);
+#if !GST_CHECK_VERSION(0,10,31)
+    g_type_add_interface_static(type, GSTBT_TYPE_HELP, &help_interface_info);
+#endif
   }
   return type;
 }

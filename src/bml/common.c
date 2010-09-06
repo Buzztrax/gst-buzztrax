@@ -765,6 +765,10 @@ void gstbml_dispose(GstBML *bml) {
   }
 }
 
+/* fixes elements that output denormalized values (sets them to 0.0). also
+ * adjust gap-flags. unfortunately this is quite expensive, although extra gap
+ * flags help.
+ */
 void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
   BMLData *data=(BMLData *)GST_BUFFER_DATA(buf);
   guint num_samples=GST_BUFFER_SIZE(buf)/sizeof(BMLData);
@@ -775,6 +779,7 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
 
     // see also http://www.musicdsp.org/archive.php?classid=5#191
     for(i=0;i<num_samples;i++) {
+      /* is normal checks for != zero */
       if(G_LIKELY(isnormal(data[i]))) {
         has_data=TRUE;
         break;
@@ -807,8 +812,12 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
   else {
     // buzz generates relative loud output
     gfloat fc=1.0/32768.0;
-    oil_scalarmultiply_f32_ns (data, data, &fc, num_samples);
-    //for(i=0;i<num_samples;i++) datao[i]/=32768.0;
+#if HAVE_ORC
+    orc_scalarmultiply_f32_ns (data, data, fc, num_samples);
+#else
+    //oil_scalarmultiply_f32_ns (data, data, &fc, num_samples);
+    for(i=0;i<num_samples;i++) datao[i]*=fc;
+#endif
     GST_BUFFER_FLAG_UNSET(buf,GST_BUFFER_FLAG_GAP);
   }
 }

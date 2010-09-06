@@ -11,19 +11,18 @@ gst_sim_syn_get_type
 % stuff that we want for gstreamer
 
 #include <libgstbuzztard/childbin.h>
-#include <libgstbuzztard/help.h>
 #include <libgstbuzztard/propertymeta.h>
 #include <libgstbuzztard/tempo.h>
 
 gstbt_child_bin_get_type
-gstbt_help_get_type
 gstbt_property_meta_get_type
 gstbt_tempo_get_type
 
 % stuff that we have contributed to gstreamer
 
+@HELP_DOC_TYPES@#include <libgstbuzztard/help.h>
+@HELP_DOC_TYPES@gstbt_help_get_type
 @PRESET_DOC_TYPES@#include <libgstbuzztard/preset.h>
-
 @PRESET_DOC_TYPES@gst_preset_get_type
 
 % own stuff

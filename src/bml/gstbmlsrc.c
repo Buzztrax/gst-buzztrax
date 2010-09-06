@@ -646,7 +646,7 @@ static void gst_bml_src_init(GstBMLSrc *bml_src) {
 
   //bml(gstbml_pads(GST_ELEMENT(bml_src),bml,gst_bml_src_link));
   srcpad=GST_BASE_SRC_PAD(bml_src);
-  gst_pad_set_fixatecaps_function (srcpad, gst_bml_src_src_fixate);
+  gst_pad_set_fixatecaps_function(srcpad, gst_bml_src_src_fixate);
 
   GST_DEBUG("  done");
 }
