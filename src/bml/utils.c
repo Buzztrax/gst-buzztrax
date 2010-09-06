@@ -259,6 +259,9 @@ void bml(gstbml_base_finalize(GstBMLClass *klass)) {
  */
 void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bmh, const gchar *category)) {
   GstElementDetails details;
+#if GST_CHECK_VERSION(0,10,31)
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+#endif
   gchar *str;
   GType type=G_TYPE_FROM_CLASS(klass);
   const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
@@ -285,6 +288,11 @@ void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bmh, const gc
   g_free(details.description);
   g_free(details.author);
   g_free(details.klass);
+#if GST_CHECK_VERSION(0,10,31)
+  if(bml_class->help_uri) {
+    gst_element_class_set_documentation_uri (klass, bml_class->help_uri);
+  }
+#endif
   GST_DEBUG("  element_class details have been set");
 }
 
@@ -472,10 +480,12 @@ void bml(gstbml_class_prepare_properties(GObjectClass *klass, GstBMLClass *bml_c
     g_object_class_override_property(klass, prop_id, "children");
     prop_id++;
   }
+#if !GST_CHECK_VERSION(0,10,31)
   if(bml_class->help_uri) {
     g_object_class_override_property(klass, prop_id, "documentation-uri");
     prop_id++;
   }
+#endif
 
   // register attributes as gobject properties
   if(bml(get_machine_info(bmh,BM_PROP_NUM_ATTRIBUTES,(void *)&num))) {
@@ -885,6 +895,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
         }
         props_skip++;
       }
+#if !GST_CHECK_VERSION(0,10,31)
       if(bml_class->help_uri) {
         if(prop_id==(props_skip+1)) {
           g_value_set_string(value,bml_class->help_uri);
@@ -892,6 +903,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
         }
         props_skip++;
       }
+#endif
       break;
   }
   prop_id-=props_skip;

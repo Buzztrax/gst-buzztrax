@@ -79,9 +79,13 @@
 #include <gst/audio/audio.h>
 
 //#include <gst/childbin/childbin.h>
-#include "libgstbuzztard/help.h"
+#if !GST_CHECK_VERSION(0,10,31)
+#include <libgstbuzztard/help.h>
+#endif
 #include "libgstbuzztard/propertymeta.h"
+#ifndef HAVE_GST_GSTPRESET_H
 #include "libgstbuzztard/preset.h"
+#endif
 #include "libgstbuzztard/tempo.h"
 
 #include "gstfluidsynth.h"
@@ -100,6 +104,10 @@ enum {
   PROP_BPM,
   PROP_TPB,
   PROP_STPT,
+#if !GST_CHECK_VERSION(0,10,31)
+  // help iface
+  PROP_DOCU_URI,
+#endif
   // dynamic class properties
   PROP_NOTE,
   PROP_NOTE_LENGTH,
@@ -120,7 +128,7 @@ enum {
   PROP_CHORUS_LEVEL,
   PROP_CHORUS_FREQ,
   PROP_CHORUS_DEPTH,
-  PROP_CHORUS_WAVEFORM,
+  PROP_CHORUS_WAVEFORM
 };
 
 /* number to use for first dynamic (FluidSynth settings) property */
@@ -352,6 +360,10 @@ gst_fluidsynth_base_init (gpointer g_class)
       "Source/Audio",
       "FluidSynth wavetable synthesizer",
       "Josh Green <josh@users.sf.net>");
+#if GST_CHECK_VERSION(0,10,31)
+   gst_element_class_set_documentation_uri (element_class,
+       "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstFluidSynth.html");
+#endif
 }
 
 /* used for passing multiple values to FluidSynth foreach function */
@@ -405,6 +417,10 @@ gst_fluidsynth_class_init (GstFluidsynthClass * klass)
   g_object_class_override_property (gobject_class, PROP_BPM, "beats-per-minute");
   g_object_class_override_property (gobject_class, PROP_TPB, "ticks-per-beat");
   g_object_class_override_property (gobject_class, PROP_STPT, "subticks-per-tick");
+
+#if !GST_CHECK_VERSION(0,10,31)
+  g_object_class_override_property (gobject_class, PROP_DOCU_URI, "documentation-uri");
+#endif
 
   // register own properties
 
@@ -776,12 +792,12 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
       g_value_set_int (value, gstsynth->velocity);
       break;
     case PROP_PROGRAM:
-      g_value_set_int(value, gstsynth->program);
+      g_value_set_int (value, gstsynth->program);
       break;
     // not yet GST_PARAM_CONTROLLABLE
-  case PROP_INSTRUMENT_PATCH:
-    g_value_set_string(value, gstsynth->instrument_patch_path);
-    break;
+    case PROP_INSTRUMENT_PATCH:
+      g_value_set_string (value, gstsynth->instrument_patch_path);
+      break;
     case PROP_INTERP:
       g_value_set_enum (value, gstsynth->interp);
       break;
@@ -835,6 +851,12 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     case PROP_STPT:
       g_value_set_ulong(value, gstsynth->subticks_per_tick);
       break;
+#if GST_CHECK_VERSION(0,10,31)
+	// help iface
+	case PROP_DOCU_URI:
+	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstFluidSynth.html");
+	  break;
+#endif
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -1247,6 +1269,13 @@ GType gst_fluidsynth_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
+#if !GST_CHECK_VERSION(0,10,31)
+    const GInterfaceInfo help_interface_info = {
+      NULL,               /* interface_init */
+      NULL,               /* interface_finalize */
+      NULL                /* interface_data */
+    };
+#endif
     const GInterfaceInfo preset_interface_info = {
       NULL,               /* interface_init */
       NULL,               /* interface_finalize */
@@ -1256,6 +1285,9 @@ GType gst_fluidsynth_get_type (void)
     type = g_type_register_static(GST_TYPE_BASE_SRC, "GstBtFluidsynth", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
     g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
+#if !GST_CHECK_VERSION(0,10,31)
+    g_type_add_interface_static(type, GSTBT_TYPE_HELP, &help_interface_info);
+#endif
     g_type_add_interface_static(type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;

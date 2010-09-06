@@ -1,5 +1,16 @@
 2010-09-06  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/audiodelay/audiodelay.c:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/plugin.h:
+	* src/bml/utils.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Make Help iface conditional in other places too.
+
+2010-09-06  Stefan Kost  <ensonic@users.sf.net>
+
 	* m4/orc.m4:
 	* orc.mak:
 	* m4/orc.m4 (added):

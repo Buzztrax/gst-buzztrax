@@ -42,7 +42,9 @@
 #include <gst/audio/audio.h>
 //-- gstbuzztard
 #include <libgstbuzztard/childbin.h>
+#if !GST_CHECK_VERSION(0,10,31)
 #include <libgstbuzztard/help.h>
+#endif
 #include <libgstbuzztard/musicenums.h>
 #include <libgstbuzztard/toneconversion.h>
 #ifndef HAVE_GST_GSTPRESET_H
