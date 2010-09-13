@@ -391,8 +391,6 @@ static gboolean plugin_init (GstPlugin * plugin) {
 
   GST_INFO("lets go ===========================================================");
   
-  //oil_init ();
-  
 #if GST_CHECK_VERSION(0,10,22)
   gst_plugin_add_dependency_simple (plugin, 
     "BML_PATH",

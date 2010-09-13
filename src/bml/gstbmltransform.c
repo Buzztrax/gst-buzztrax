@@ -276,7 +276,6 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
     // buzz generates loud output
     gfloat fc=32768.0;
     orc_scalarmultiply_f32_ns (data, data, fc, samples_per_buffer);
-    //oil_scalarmultiply_f32_ns (data, data, &fc, samples_per_buffer);
   }
 
   GST_DEBUG_OBJECT(bml_transform,"  calling work(%d,%d)",samples_per_buffer,mode);
@@ -328,7 +327,6 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
   else {
     gfloat fc=32768.0;
     orc_scalarmultiply_f32_ns (data, data, fc, samples_per_buffer*2);
-    //oil_scalarmultiply_f32_ns (data, data, &fc, samples_per_buffer*2);
   }
 
   GST_DEBUG_OBJECT(bml_transform,"  calling work_m2s(%d,%d)",samples_per_buffer,mode);
@@ -395,7 +393,6 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   else {
     gfloat fc=32768.0;
     orc_scalarmultiply_f32_ns (datai, datai, fc, samples_per_buffer);
-    //oil_scalarmultiply_f32_ns (datai, datai, &fc, samples_per_buffer);
   }
 
   GST_DEBUG_OBJECT(bml_transform,"  calling work_m2s(%d,%d)",samples_per_buffer,mode);
