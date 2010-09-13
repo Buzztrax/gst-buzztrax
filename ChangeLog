@@ -1,3 +1,8 @@
+2010-09-13  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  Make gtk-doc also optional in vcs build.
+
 2010-09-07  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c:

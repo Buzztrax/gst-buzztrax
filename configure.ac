@@ -315,7 +315,9 @@ PKG_CHECK_MODULES(CHECK, check >= 0.9.2,
 )
 
 dnl Check for gtk-doc.
-GTK_DOC_CHECK([1.4])
+m4_ifdef([GTK_DOC_CHECK], [
+GTK_DOC_CHECK([1.10],[--flavour no-tmpl])
+])
 
 dnl Substitutes
 AC_SUBST(BASE_DEPS_LIBS)
