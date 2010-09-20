@@ -100,12 +100,14 @@ typedef struct _GstSimSynClass GstSimSynClass;
 
 /**
  * GstSimSyn:
+ * @parent: parent instance
  *
  * Class instance data.
  */
 struct _GstSimSyn {
   GstBaseSrc parent;
 
+  /* < private > */
   /* parameters */
   gdouble samples_per_buffer;
   GstSimSynWave wave;
@@ -116,7 +118,6 @@ struct _GstSimSyn {
   gdouble cutoff;
   gdouble resonance;
   
-  /* < private > */
   gboolean dispose_has_run;		/* validate if dispose has run */
 
   void (*process)(GstSimSyn*, gint16 *);

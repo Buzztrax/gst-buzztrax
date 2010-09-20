@@ -53,6 +53,7 @@ GstPinkNoise
 PINK_MAX_RANDOM_ROWS
 PINK_RANDOM_BITS
 PINK_RANDOM_SHIFT
+WAVE_TABLE_SIZE
 GST_SIM_SYN
 GST_IS_SIM_SYN
 GST_SIM_SYN_CLASS
@@ -62,6 +63,58 @@ GST_TYPE_SIM_SYN
 gst_sim_syn_get_type
 </SECTION>
 
+<SECTION>
+<FILE>gstbml</FILE>
+<TITLE>GstBML</TITLE>
+gstbml_calculate_buffer_frames
+gstbml_convert_names
+gstbml_dispose
+gstbml_fix_data
+gstbml_get_param
+gstbml_set_param
+gstbml_register_param
+<SUBSECTION Standard>
+bml
+BML
+BMLData
+BML_VERSION
+GstBML
+gst_bml_property_meta_quark_type
+<SUBSECTION Private>
+GST_BML
+GST_BMLV
+GST_BMLV_CLASS
+GST_BMLV_GET_CLASS
+GST_BML_CLASS
+GST_BML_SRC
+GST_BML_SRC_CLASS
+GST_BML_SRC_GET_CLASS
+GST_BML_TRANSFORM
+GST_BML_TRANSFORM_CLASS
+GST_BML_TRANSFORM_GET_CLASS
+GST_IS_BML_SRC
+GST_IS_BML_SRC_CLASS
+GST_IS_BML_TRANSFORM
+GST_IS_BML_TRANSFORM_CLASS
+GstBMLMachineTypes
+GstBMLParameterTypes
+GstBMLPropertyIDs
+GstBMLSrc
+GstBMLSrcClass
+GstBMLTransform
+GstBMLTransformClass
+GstBMLV
+GstBMLVClass
+gstbml_preset_delete_preset
+gstbml_preset_finalize
+gstbml_preset_get_meta
+gstbml_preset_get_preset_names
+gstbml_preset_load_preset
+gstbml_preset_rename_preset
+gstbml_preset_save_preset
+gstbml_preset_set_meta
+gstbml_register_param
+</SECTION>
 
 # stuff that we want for gstreamer
 
@@ -135,6 +188,7 @@ gstbt_property_meta_get_type
 <FILE>gstpreset</FILE>
 <TITLE>GstPreset</TITLE>
 gst_preset_get_preset_names
+gst_preset_get_property_names
 gst_preset_load_preset
 gst_preset_save_preset
 gst_preset_rename_preset
@@ -174,6 +228,9 @@ gstbt_envelope_get_type
 <FILE>gstbtmusicenums</FILE>
 <TITLE>GstBtMusicEnums</TITLE>
 GstBtTriggerSwitch
+<SUBSECTION Standard>
+GSTBT_TYPE_TRIGGER_SWITCH
+gstbt_trigger_switch_get_type
 </SECTION>
 
 <SECTION>
@@ -186,6 +243,8 @@ gstbt_tone_conversion_translate_from_string
 gstbt_tone_conversion_translate_from_number
 gstbt_tone_conversion_note_string_2_number
 gstbt_tone_conversion_note_number_2_string
+GSTBT_TONE_CONVERSION_NOTE_NO
+GSTBT_TONE_CONVERSION_NOTE_OFF
 <SUBSECTION Standard>
 GstBtToneConversionClass
 GSTBT_TONE_CONVERSION
@@ -199,3 +258,11 @@ gstbt_tone_conversion_get_type
 gstbt_tone_conversion_tuning_get_type
 </SECTION>
 
+<SECTION>
+<FILE>gstbuzztard</FILE>
+<TITLE>gst-buzztard</TITLE>
+<SUBSECTION Private>
+G_DEFINE_INTERFACE
+G_DEFINE_INTERFACE_WITH_CODE
+g_object_checked_unref
+</SECTION>

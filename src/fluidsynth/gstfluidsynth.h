@@ -46,12 +46,14 @@ typedef struct _GstFluidsynthClass GstFluidsynthClass;
 
 /**
  * GstFluidsynth:
+ * @parent: parent instance
  *
  * Class instance data.
  */
 struct _GstFluidsynth {
   GstBaseSrc parent;
 
+  /* < private > */
   /* parameters */
   gdouble samples_per_buffer;
   gchar *note;
@@ -60,7 +62,6 @@ struct _GstFluidsynth {
   glong cur_note_length,note_length;
   gint program;
 
-  /* < private > */
   gboolean dispose_has_run;		/* validate if dispose has run */
 
   fluid_synth_t *fluid;			/* the FluidSynth handle */

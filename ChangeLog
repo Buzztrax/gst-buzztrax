@@ -1,3 +1,19 @@
+2010-09-20  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/Makefile.am:
+	* docs/reference/gst-buzztard-docs.sgml:
+	* docs/reference/gst-buzztard-sections.txt:
+	* libgstbuzztard/compat.h:
+	* libgstbuzztard/envelope.h:
+	* libgstbuzztard/toneconversion.h:
+	* src/audiodelay/audiodelay.h:
+	* src/bml/common.c:
+	* src/bml/common.h:
+	* src/bml/gstbml.c:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/simsyn/simsyn.h:
+	  Cleanup the docs.
+
 2010-09-13  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:

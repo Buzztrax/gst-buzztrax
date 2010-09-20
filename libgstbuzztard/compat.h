@@ -18,6 +18,12 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+/**
+ * SECTION:gstbuzztard
+ * @short_description: internal module utilities
+ *
+ * Internal gst-buzztard module utilities.
+ */
 
 //-- glib compat & helper
 

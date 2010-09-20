@@ -39,17 +39,21 @@ typedef struct _GstAudioDelayClass GstAudioDelayClass;
 
 /**
  * GstAudioDelay:
+ * @parent: parent instance
  *
  * Class instance data.
  */
 struct _GstAudioDelay {
-  GstBaseTransform element;
+  GstBaseTransform parent;
 
+  /* < private > */
+
+  /* properties */
   guint drywet;
   guint delaytime;
   guint feedback;
   
-  /* < private > */
+  /* ringbuffer */
   gint samplerate;
   gint16 *ring_buffer;
   guint max_delaytime;

@@ -62,7 +62,10 @@ CFILE_GLOB=$(top_srcdir)/libgstbuzztard/*.c $(top_srcdir)/src/*/*.h
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=config.h $(BML_IGNORE_H) $(FLUIDSYNTH_IGNORE_H)
+IGNORE_HFILES=config.h \
+	m-gst-buzztard.h \
+	$(BML_IGNORE_H) gstbmlorc.h gstbmlorc-dist.h \
+	$(FLUIDSYNTH_IGNORE_H)
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png

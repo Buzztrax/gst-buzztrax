@@ -28,9 +28,19 @@
 
 G_BEGIN_DECLS
 
+/**
+ * GSTBT_TONE_CONVERSION_NOTE_NO:
+ *
+ * Value for no note.
+ */
 #define GSTBT_TONE_CONVERSION_NOTE_NO 0
 //#define GSTBT_TONE_CONVERSION_NOTE_MIN 1
 //#define GSTBT_TONE_CONVERSION_NOTE_MAX 1+(9*16)+11
+/**
+ * GSTBT_TONE_CONVERSION_NOTE_OFF:
+ *
+ * Value for note-off command.
+ */
 #define GSTBT_TONE_CONVERSION_NOTE_OFF 255
 
 #define GSTBT_TYPE_TONE_CONVERSION_TUNING     (gstbt_tone_conversion_tuning_get_type())

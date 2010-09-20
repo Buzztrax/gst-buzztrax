@@ -493,20 +493,26 @@ void gstbml_preset_finalize(GstBMLClass *klass) {
 
 //-- common class functions
 
-/*
+/**
  * gstbml_convert_names:
+ * @klass: the instance class
+ * @tmp_name: name to build @name and @nick from
+ * @tmp_desc: desc to build @desc from
+ * @name: target for name
+ * @nick: target for nick
+ * @desc: target for description 
  *
  * Convert charset encoding and make property-names unique.
  */
-void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc, gchar **_name, gchar **nick, gchar **desc) {
-  gchar *name,*ptr1,*ptr2;
+void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc, gchar **name, gchar **nick, gchar **desc) {
+  gchar *cname,*ptr1,*ptr2;
 
   GST_DEBUG("        tmp_name='%s'",tmp_name);
   // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE? 
-  name=g_convert(tmp_name,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
-  if(!name) {
+  cname=g_convert(tmp_name,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
+  if(!cname) {
     // weak fallback when conversion failed
-    name=g_strdup(tmp_name);    
+    cname=g_strdup(tmp_name);    
   }
   if(nick) {
     *nick=g_convert(tmp_name,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
@@ -514,10 +520,10 @@ void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc,
   if(desc && tmp_desc) {
     *desc=g_convert(tmp_desc,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   }
-  g_strcanon(name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-_", '-');
+  g_strcanon(cname, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-_", '-');
 
   // remove leading '-'
-  ptr1=ptr2=name;
+  ptr1=ptr2=cname;
   while(*ptr2=='-') ptr2++;
   // remove double '-'
   while(*ptr2) {
@@ -534,34 +540,48 @@ void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc,
   while(*ptr1=='-') *ptr1++='\0';
 
   // name must begin with a char
-  if(!g_ascii_isalpha(name[0])) {
-    gchar *old_name=name;
-    name=g_strconcat("Par_",old_name,NULL);
+  if(!g_ascii_isalpha(cname[0])) {
+    gchar *old_name=cname;
+    cname=g_strconcat("Par_",old_name,NULL);
     g_free(old_name);
   }
 
   // check for already existing property names
-  if(g_object_class_find_property(klass, name)) {
-    gchar *old_name=name;
+  if(g_object_class_find_property(klass, cname)) {
+    gchar *old_name=cname;
     gchar postfix[5];
     gint i=0;
 
     // make name uniqe
-    name=NULL;
+    cname=NULL;
     do {
-      if(name) g_free(name);
+      if(cname) g_free(cname);
       snprintf(postfix,5,"_%03d",i++);
-      name=g_strconcat(old_name,postfix,NULL);
-    } while(g_object_class_find_property(klass, name));
+      cname=g_strconcat(old_name,postfix,NULL);
+    } while(g_object_class_find_property(klass, cname));
      g_free(old_name);
   }
-  *_name=name;
+  *name=cname;
 }
 
-/*
+/**
  * gstbml_register_param:
+ * @klass: the instance class
+ * @prop_id: the property number
+ * @type: the parameter type
+ * @enum_type: the enum type (or 0)
+ * @name: the property name
+ * @nick: the property nick
+ * @desc: the property description
+ * @flags: extra property flags
+ * @min_val: minimum value
+ * @max_val: maximum value
+ * @no_val: unset value (neutral)
+ * @def_val: default value
  *
- * normalize data and register property
+ * Normalize data and create a paramspec.
+ *
+ * Returns: the param spec
  */
 GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val) {
   GParamSpec *paramspec = NULL;
@@ -683,6 +703,14 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, G
 
 //-- common element functions
 
+/**
+ * gstbml_set_param:
+ * @type: parameter type
+ * @addr: the address pointing to the value
+ * @value: the source
+ *
+ * Write a parameter according to @type to @addr from the @value.
+ */
 void gstbml_set_param(gint type,gpointer addr,const GValue *value) {
   switch(type) {
     case PT_NOTE: {
@@ -708,6 +736,14 @@ void gstbml_set_param(gint type,gpointer addr,const GValue *value) {
   }
 }
 
+/**
+ * gstbml_get_param:
+ * @type: parameter type
+ * @addr: the address pointing to the value
+ * @value: the target
+ *
+ * Read a parameter according to @type from @addr into the @value.
+ */
 void gstbml_get_param(gint type,gpointer addr,GValue *value) {
   switch(type) {
     case PT_NOTE:
@@ -731,8 +767,9 @@ void gstbml_get_param(gint type,gpointer addr,GValue *value) {
   }
 }
 
-/*
+/**
  * gstbml_calculate_buffer_frames:
+ * @bml: bml instance
  *
  * update the buffersize for calculation (in samples)
  * buffer_frames = samples_per_minute/ticks_per_minute
@@ -744,6 +781,12 @@ void gstbml_calculate_buffer_frames(GstBML *bml) {
   bml->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
 }
 
+/**
+ * gstbml_dispose:
+ * @bml: bml instance
+ *
+ * Dispose common buzzmachine data.
+ */
 void gstbml_dispose(GstBML *bml) {
   GList* node;
 
@@ -765,7 +808,13 @@ void gstbml_dispose(GstBML *bml) {
   }
 }
 
-/* fixes elements that output denormalized values (sets them to 0.0). also
+/**
+ * gstbml_fix_data:
+ * @elem: the element instance
+ * @buf: the data buffer
+ * @has_data: indication wheter the buffer has values != 0.0
+ *
+ * Fixes elements that output denormalized values (sets them to 0.0). Also
  * adjust gap-flags. unfortunately this is quite expensive, although extra gap
  * flags help.
  */

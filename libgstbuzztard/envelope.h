@@ -38,6 +38,8 @@ typedef struct _GstBtEnvelopeClass GstBtEnvelopeClass;
 
 /**
  * GstBtEnvelope:
+ * @parent: parent instance
+ * @value: current envelope value
  *
  * Class instance data.
  */

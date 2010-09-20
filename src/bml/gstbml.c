@@ -16,7 +16,13 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
+/**
+ * SECTION:gstbml
+ * @short_description: buzzmachine wrapper
+ *
+ * Wrapper for buzzmachine sound generators and effects.
+ */
+ 
 #include "plugin.h"
 
 #define GST_CAT_DEFAULT bml_debug

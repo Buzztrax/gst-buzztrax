@@ -40,7 +40,7 @@ extern void gstbml_preset_finalize(GstBMLClass *klass);
 
 //-- common class functions
 
-extern void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc, gchar **_name, gchar **nick, gchar **desc);
+extern void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc, gchar **name, gchar **nick, gchar **desc);
 extern GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val);
 
 //-- common element functions
