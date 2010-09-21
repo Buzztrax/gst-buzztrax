@@ -1,5 +1,11 @@
 2010-09-21  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/common.c:
+	* src/bml/common.h:
+	  Use the enum type instead of guint.
+
+2010-09-21  Stefan Kost  <ensonic@users.sf.net>
+
 	* docs/reference/Makefile.am:
 	  and use tabs...
 

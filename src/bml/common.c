@@ -583,7 +583,7 @@ void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc,
  *
  * Returns: the param spec
  */
-GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val) {
+GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParameterTypes type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val) {
   GParamSpec *paramspec = NULL;
   gint saved_min_val=min_val,saved_max_val=max_val,saved_def_val=def_val;
   GParamFlags pspec_flags=G_PARAM_WRITABLE|GST_PARAM_CONTROLLABLE;
@@ -711,7 +711,7 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, gint type, G
  *
  * Write a parameter according to @type to @addr from the @value.
  */
-void gstbml_set_param(gint type,gpointer addr,const GValue *value) {
+void gstbml_set_param(GstBMLParameterTypes type,gpointer addr,const GValue *value) {
   switch(type) {
     case PT_NOTE: {
       const gchar *str=g_value_get_string(value);
@@ -744,7 +744,7 @@ void gstbml_set_param(gint type,gpointer addr,const GValue *value) {
  *
  * Read a parameter according to @type from @addr into the @value.
  */
-void gstbml_get_param(gint type,gpointer addr,GValue *value) {
+void gstbml_get_param(GstBMLParameterTypes type,gpointer addr,GValue *value) {
   switch(type) {
     case PT_NOTE:
       g_value_set_string(value, gstbt_tone_conversion_note_number_2_string ((guint)(*(guint8 *)addr)));
