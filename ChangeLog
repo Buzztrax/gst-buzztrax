@@ -1,5 +1,13 @@
 2010-09-21  Stefan Kost  <ensonic@users.sf.net>
 
+	* docs/reference/Makefile.am:
+	  srcdir!=builddir update.
+
+	* docs/reference/gst-buzztard-sections.txt:
+	  Fix duplicate entry.
+
+2010-09-21  Stefan Kost  <ensonic@users.sf.net>
+
 	* Makefile.am:
 	  Remove some more shave leftovers.
 

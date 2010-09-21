@@ -113,7 +113,6 @@ gstbml_preset_load_preset
 gstbml_preset_rename_preset
 gstbml_preset_save_preset
 gstbml_preset_set_meta
-gstbml_register_param
 </SECTION>
 
 # stuff that we want for gstreamer
