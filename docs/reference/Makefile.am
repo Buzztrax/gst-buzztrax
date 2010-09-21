@@ -86,10 +86,10 @@ expand_content_files=
 # signals and properties.
 GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/src $(BASE_DEPS_CFLAGS)
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
-  $(top_builddir)/libgstbuzztard/libgstbuzztard.la \
-  $(top_builddir)/src/audiodelay/libgstaudiodelay.la \
-  $(FLUIDSYNTH_LA) \
-  $(top_builddir)/src/simsyn/libgstsimsyn.la
+	$(top_builddir)/libgstbuzztard/libgstbuzztard.la \
+	$(top_builddir)/src/audiodelay/libgstaudiodelay.la \
+	$(FLUIDSYNTH_LA) \
+	$(top_builddir)/src/simsyn/libgstsimsyn.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make
@@ -101,8 +101,8 @@ EXTRA_DIST += $(DOC_MODULE).types
 # Comment this out if you want your docs-status tested during 'make check'
 if ENABLE_GTK_DOC
 TESTS_ENVIRONMENT = cd $(srcdir) && \
-  DOC_MODULE=$(DOC_MODULE) DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE) \
-  SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir)
+	DOC_MODULE=$(DOC_MODULE) DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE) \
+	SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir)
 
 TESTS = $(GTKDOC_CHECK)
 endif

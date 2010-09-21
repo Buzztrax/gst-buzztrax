@@ -1,6 +1,11 @@
 2010-09-21  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
+	  and use tabs...
+
+2010-09-21  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/Makefile.am:
 	  srcdir!=builddir update.
 
 	* docs/reference/gst-buzztard-sections.txt:
