@@ -1,5 +1,13 @@
 2010-09-21  Stefan Kost  <ensonic@users.sf.net>
 
+	* Makefile.am:
+	  Remove some more shave leftovers.
+
+	* orc.mak:
+	  Cure make distcheck.
+
+2010-09-21  Stefan Kost  <ensonic@users.sf.net>
+
 	* docs/reference/Makefile.am:
 	* libgstbuzztard/toneconversion.c:
 	  Fix the tests.

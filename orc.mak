@@ -62,10 +62,12 @@ dist-hook: dist-hook-orc
 .PHONY: dist-hook-orc
 dist-hook-orc: tmp-orc.c $(ORC_SOURCE).h
 	rm -f tmp-orc.c~
-	cmp -s tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c || \
-	  cp tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c
-	cmp -s $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h || \
-	  cp $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h
+	if test $(abs_srcdir) == $(abs_builddir) ; then \
+	  cmp -s tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c || \
+	    cp tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c; \
+	  cmp -s $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h || \
+	    cp $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h; \
+	fi
 	cp -p $(srcdir)/$(ORC_SOURCE)-dist.c $(distdir)/
 	cp -p $(srcdir)/$(ORC_SOURCE)-dist.h $(distdir)/
 
