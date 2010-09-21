@@ -1,5 +1,11 @@
 2010-09-21  Stefan Kost  <ensonic@users.sf.net>
 
+	* docs/reference/Makefile.am:
+	* libgstbuzztard/toneconversion.c:
+	  Fix the tests.
+
+2010-09-21  Stefan Kost  <ensonic@users.sf.net>
+
 	* NEWS:
 	  Enable make-distcheck.
 

@@ -192,6 +192,8 @@ static void gstbt_tone_conversion_change_tuning(GstBtToneConversion *self) {
  */
 gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gchar *note) {
   guint tone, octave;
+  
+  g_return_val_if_fail(note,0.0);
 
   if(note[0]=='o' && note[1]=='f' && note[2]=='f') {
     return(-1.0);
@@ -213,7 +215,8 @@ gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gc
  * which is 1+(9*16)+11 (1 octave has 12 tones, 4 are left unused for easy
  * coding).
  *
- * Returns: the frequency of the note or 0.0 in case of an error
+ * Returns: the frequency of the note,or values <= 0.0 case of an error
+ * (-1.0 for note off).
  */
 gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,guint note) {
   guint tone, octave;
