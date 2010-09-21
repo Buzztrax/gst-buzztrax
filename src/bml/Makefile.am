@@ -18,7 +18,7 @@ libgstbml_la_SOURCES = \
 
 nodist_libgstbml_la_SOURCES = $(ORC_NODIST_SOURCES)
 
-libgstbml_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) \
+libgstbml_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) -I$(builddir) \
   -DLIBDIR=\"\${libdir}\" \
   $(GST_PLUGIN_CFLAGS) \
   $(BASE_DEPS_CFLAGS) \

@@ -1,3 +1,14 @@
+2010-09-21  Stefan Kost  <ensonic@users.sf.net>
+
+	* NEWS:
+	  Enable make-distcheck.
+
+	* orc.mak:
+	* src/bml/Makefile.am:
+	* src/bml/native/Makefile.am:
+	* src/bml/wrapped/Makefile.am:
+	  Make dist-cehck fixes.
+
 2010-09-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
