@@ -310,8 +310,13 @@ AC_SUBST(gst_prefix)
 dnl test for availability of check unittest package (with a relative new function)
 dnl @todo: if we configure without --enable-debug most tests wont work
 PKG_CHECK_MODULES(CHECK, check >= 0.9.2,
-  AM_CONDITIONAL(BUILD_CHECK_TESTS, true),
-  AM_CONDITIONAL(BUILD_CHECK_TESTS, false)
+  [
+    have_check=yes
+    AM_CONDITIONAL(BUILD_CHECK_TESTS, true)
+  ],[
+    have_check=no
+    AM_CONDITIONAL(BUILD_CHECK_TESTS, false)
+  ]
 )
 
 dnl Check for gtk-doc.
@@ -366,6 +371,7 @@ Configuration
 	Debug                      : ${enable_debug}
 	Coverage profiling         : ${enable_coverage}
 	Use of deprecated API      : ${enable_deprecated}
+	Check based unit tests     : ${have_check}
 "
 
 if test "x${have_bml}" = "xno" -o "x${have_fluidsynth}" = "xno" ; then
