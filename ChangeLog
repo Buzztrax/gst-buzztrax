@@ -1,3 +1,8 @@
+2010-12-10  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c:
+	  Improve docs and add comments.
+
 2010-11-25  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:

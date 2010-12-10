@@ -28,7 +28,9 @@
  * <refsect2>
  * <para>
  * FluidSynth is a SoundFont 2 capable wavetable synthesizer. Soundpatches are
- * available on <ulink url="http://sounds.resonance.org">sounds.resonance.org</ulink>
+ * available on <ulink url="http://sounds.resonance.org">sounds.resonance.org</ulink>.
+ * Distributions also have a few soundfonts packaged. The internet offers free
+ * pacthes for download.
  * </para>
  * <title>Example launch line</title>
  * <para>
@@ -56,9 +58,11 @@
  *   - where to get them from:
  *     - local files
  *       - ubuntu/suse use /usr/share/sounds/sf2
- *       - what about LIB_INSTPATCH_PATH to look for soundfonts
+ *       - what about LIB_INSTPATCH_PATH/SF2_PATH to look for soundfonts
  *       - http://help.lockergnome.com/linux/Bug-348290-asfxload-handle-soundfont-search-path--ftopict218300.html
  *         SFBANKDIR
+ *       - ask tracker or locate for installed *.sf2 files
+ *       - include a tiny beep.sf2 file with the plugin
  *     - internet
  *       - http://sounds.resonance.org/patches.py
  *   - preset iface?
