@@ -257,11 +257,8 @@ void bml(gstbml_base_finalize(GstBMLClass *klass)) {
  *
  * Get metadata from buzz-machine and set as element details
  */
-void bml(gstbml_class_set_details(GstElementClass *klass, gpointer bmh, const gchar *category)) {
+void bml(gstbml_class_set_details(GstElementClass *klass, GstBMLClass *bml_class, gpointer bmh, const gchar *category)) {
   GstElementDetails details;
-#if GST_CHECK_VERSION(0,10,31)
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-#endif
   gchar *str;
   GType type=G_TYPE_FROM_CLASS(klass);
   const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));

@@ -1,3 +1,11 @@
+2010-12-17  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	* src/bml/utils.c:
+	* src/bml/utils.h:
+	  Fix the build for using the new element factory metadata.
+
 2010-12-10  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c:

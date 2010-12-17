@@ -695,7 +695,7 @@ static void gst_bml_src_base_init(GstBMLSrcClass *klass) {
     GST_INFO("  added stereo src pad template");
   }
 
-  bml(gstbml_class_set_details(element_class,bmh,"Source/Audio/BML"));
+  bml(gstbml_class_set_details(element_class,bml_class,bmh,"Source/Audio/BML"));
 }
 
 

@@ -42,7 +42,7 @@ extern gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml
 
 extern gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcpads, gint numsinkpads));
 extern void bml(gstbml_base_finalize(GstBMLClass *klass));
-extern void bml(gstbml_class_set_details(GstElementClass *element_class, gpointer bmh, const gchar *category));
+extern void bml(gstbml_class_set_details(GstElementClass *element_class, GstBMLClass *bml_class, gpointer bmh, const gchar *category));
 extern void bml(gstbml_class_prepare_properties(GObjectClass *klass, GstBMLClass *bml_class));
 extern GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bm, gint i, gchar *name, gint min_val, gint max_val, gint no_val));
 

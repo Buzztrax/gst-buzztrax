@@ -652,7 +652,7 @@ static void gst_bml_transform_base_init(GstBMLTransformClass *klass) {
     GST_INFO("  added stereo sink pad template");
   }
 
-  bml(gstbml_class_set_details(element_class,bmh,"Filter/Effect/Audio/BML"));
+  bml(gstbml_class_set_details(element_class,bml_class,bmh,"Filter/Effect/Audio/BML"));
 }
 
 
