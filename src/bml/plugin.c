@@ -48,7 +48,7 @@ static gboolean read_index(const gchar *dir_name) {
   gchar *file_name;
   FILE *file;
   gboolean res=FALSE;
-  
+
   /* we want a GHashTable bml_category_by_machine_name
    * with the plugin-name (BM_PROP_SHORT_NAME) as a key
    * and the categories as values.
@@ -64,7 +64,7 @@ static gboolean read_index(const gchar *dir_name) {
      gchar line[500],*entry;
      gchar categories[1000]="";
      gint cat_pos=0,i,len;
-    
+
     /* the format
      * there are:
      *   comments?  : ","
@@ -75,7 +75,7 @@ static gboolean read_index(const gchar *dir_name) {
      *   machines   : "Arguelles Pro3"
      *   mach.+alias: "Argüelles Pro2, Arguelles Pro2"
      */
-     
+
     while(!feof(file)) {
       if(fgets(line,500,file)) {
         // strip leading and trailing spaces and convert
@@ -113,7 +113,7 @@ static gboolean read_index(const gchar *dir_name) {
             gchar **names=g_strsplit(entry,",",-1);
             gchar *cat=g_strdup(categories),*beg,*end;
             gint a;
-            
+
             // we need to filter 'Generators,Effects,Gear' from the categories
             if ((beg=strstr(cat,"/Generator"))) {
               end=&beg[strlen("/Generator")];
@@ -143,7 +143,7 @@ static gboolean read_index(const gchar *dir_name) {
         g_free(entry);
       }
     }
-    
+
     res=TRUE;
     fclose(file);
   }
@@ -172,13 +172,15 @@ static const gchar *get_bml_path(void) {
  */
 static gboolean dir_scan(const gchar *dir_name) {
   GDir *dir;
-  gchar *file_name,*ext,*conv_entry_name;
+  gchar *file_name,*ext,*conv_entry_name,*cur_entry_name;
   const gchar *entry_name;
   gpointer bmh;
   gboolean res=FALSE;
 
   const gchar *blacklist[] ={
+    "2NDPLOOPJUMPHACK.DLL",
     "2NDPROCESS NUMBIRD 1.4.DLL",
+    "7900S PEARL DRUM.DLL",
     "ANEURYSM DISTGARB.DLL",
     "ARGUELLES FX2.DLL",
     /*"ARGUELLES PRO3.DLL",
@@ -196,10 +198,12 @@ static gboolean dir_scan(const gchar *dir_name) {
     "BUZZINAMOVIE.DLL",
     /*"CHEAPO SPREAD.DLL",
       - hangs after GetInfo(), should be fixed after installing msvcr70.dll and
-        with new function implemented 
+        with new function implemented
       */
     "CHIMP REPLAY.DLL",
     "CYANPHASE AUXRETURN.DLL",
+    /* this is part of normal buzz installs these days, even its not a plugin */
+    "CYANPHASE BUZZ OVERLOADER.DLL",
     "CYANPHASE DMO EFFECT ADAPTER.DLL",
     "CYANPHASE SEA CUCUMBER.DLL",
     "CYANPHASE SONGINFO.DLL",
@@ -211,13 +215,18 @@ static gboolean dir_scan(const gchar *dir_name) {
     "DEX RINGMOD.DLL",
     "DT_BLOCKFX (STEREO).DLL",
     "DT_BLOCKFX.DLL",
+    "ELAK_DIST.DLL",
     "FIRESLEDGE ANTIOPE-1.DLL",
+    "FREQUENCY UNKNOWN FREQ IN.DLL",
     "FREQUENCY UNKNOWN FREQ OUT.DLL",
     "FUZZPILZ POTTWAL.DLL",
     "FUZZPILZ RO-BOT.DLL",
     "FUZZPILZ UNWIELDYDELAY3.DLL",
     "GAZBABY'S PROLOGIC ENCODER.DLL",
+    "GEONIK'S DX INPUT.DLL",
+    "GEONIK'S PRIMIFUN.DLL",
     "GEONIK'S VISUALIZATION.DLL",
+    "HD AUXREPEATER.DLL",
     "HD F-FLANGER.DLL",
     "HD MOD-X.DLL",
     "J.R. BP V1 FILTER.DLL",
@@ -227,11 +236,16 @@ static gboolean dir_scan(const gchar *dir_name) {
     "J.R. NOTCH FILTER.DLL",
     "JESKOLA AUXSEND.DLL",
     "JESKOLA EQ-3 XP.DLL",
+    "JESKOLA ES-9.DLL",
+    "JESKOLA FREEVERB.DLL",
     "JESKOLA MULTIPLIER.DLL",
+    "JESKOLA O1.DLL",
     /*"JESKOLA REVERB 2.DLL",*/
     /*"JESKOLA REVERB.DLL",*/
     /*"JESKOLA STEREO REVERB.DLL",*/
+    "JESKOLA TRACKER.DLL",
     "JESKOLA WAVE SHAPER.DLL",
+    "JESKOLA WAVEIN INTERFACE.DLL",
     "JOASMURF VUMETER.DLL",
     "JOYPLUG 1.DLL",
     "LD AUXSEND.DLL",
@@ -240,8 +254,12 @@ static gboolean dir_scan(const gchar *dir_name) {
     "LD MIXER.DLL",
     "LD VOCODER XP.DLL",
     "LD VOCODER.DLL",
+    "LIVE.DLL",
     "LOST_BIT IMOD.DLL",
     "LOST_BIT IPAN.DLL",
+    "M4WII.DLL",
+    "MARC MP3LOADER.DLL",
+    "MIMO'S MIDIGEN.DLL",
     "MIMO'S MIDIOUT.DLL",
     "MIMO'S MIXO.DLL",
     "NINEREEDS 2P FILTER.DLL",
@@ -249,20 +267,35 @@ static gboolean dir_scan(const gchar *dir_name) {
     "NINEREEDS DISCRITIZE.DLL",
     "NINEREEDS FADE.DLL",
     "NINEREEDS LFO FADE.DLL",
+    "NINEREEDS NRS04.DLL",
+    "NINEREEDS NRS05.DLL",
+    "P. DOOM'S HACK JUMP.DLL",
+    "P. DOOM'S HACK MSYNC.DLL",
     "PITCHWIZARD.DLL",
     "POLAC MIDI IN.DLL",
     "POLAC VST 1.1.DLL",
     "PSI KRAFT.DLL",
     "PSI KRAFT2.DLL",
+    "REBIRTH MIDI 2.DLL",
+    "REBIRTH MIDI.DLL",
     "REPEATER.DLL",
+    "RNZNANF VST INSTRUMENT ADAPTER.DLL",
+    "RNZNANFNCNR VST INSTRUMENT ADAPTER.DLL",
+    "RNZNANFNR VST INSTRUMENT ADAPTER.DLL",
     "ROUT EQ-10.DLL",
     "ROUT VST PLUGIN LOADER.DLL",
     "SHAMAN CHORUS.DLL",
     "STATIC DUAFILT II.DLL",
       // *** glibc detected *** /home/ensonic/projects/buzztard/bml/src/.libs/lt-bmltest_info: free(): invalid next size (normal): 0x0805cc18 ***
+    "SYNTHROM SINUS 2.DLL",
     "TRACK ORGANIZER.DLL",
     "VGRAPHITY.DLL",
+    "VMIDIOUT.DLL",
+    "WAVEEDIT.DLL",
     "WHITENOISE AUXRETURN.DLL",
+    "WHITENOISE'S DRUMMER 2.DLL",
+    /* BuzzMachineCallbacksPre12::GetWave (i=0) */
+    "WHITENOISE'S LOOPER 2.DLL",
     "XMIX.DLL",
     "YNZN'S AMPLITUDE MODULATOR.DLL",
     "YNZN'S CHIRPFILTER.DLL",
@@ -270,12 +303,23 @@ static gboolean dir_scan(const gchar *dir_name) {
     "YNZN'S REMOTE COMPRESSOR.DLL",
     "YNZN'S REMOTE GATE.DLL",
     "YNZN'S VOCODER.DLL",
+    /* Zephod machines seem to need some functions from oleauth.dll
+     * other die right after GetInfo() :/
+     */
     "ZEPHOD BLUE FILTER.DLL",
+    "ZEPHOD CSYNTH.DLL",
+    "ZEPHOD GOLDFISH.DLL",
     "ZEPHOD GREEN FILTER.DLL",
+    "ZEPHOD MIDITRACKER.DLL",
+    "ZEPHOD PLATINUMFISH.DLL",
     "ZEPHOD_RESAW.DLL",
-    "ZU PARAMETRIC EQ.DLL",
+    "ZNT WAVEEDIT.DLL",
     "ZU ?TAPS.DLL",
-    "ZU µTAPS.DLL"
+    "ZU MORPHIN FINAL DOSE.DLL",
+    "ZU PARAMETRIC EQ.DLL",
+    "ZU µTAPS.DLL",
+    "ZU �TAPS.DLL",
+    "Zu æTaps.dll"
   };
 
   GST_INFO("scanning directory \"%s\"",dir_name);
@@ -284,19 +328,21 @@ static gboolean dir_scan(const gchar *dir_name) {
   if (!dir) return(res);
 
   while((entry_name=g_dir_read_name(dir))) {
+    cur_entry_name=(gchar *)entry_name;
     if(!g_utf8_validate(entry_name,-1,NULL)) {
       GST_WARNING("file %s is not a valid file-name",entry_name);
-      conv_entry_name=g_filename_to_utf8(entry_name,-1,NULL,NULL,NULL);
+      if((conv_entry_name=g_convert(entry_name,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL))) {
+        cur_entry_name=conv_entry_name;
+      }
       //continue;
     }
-    conv_entry_name=NULL;
 
     ext=strrchr(entry_name,'.');
     if (ext && (!strcasecmp(ext,".dll") || !strcmp(ext,".so"))) {
       /* test against blacklist */
-      if(!bsearch(entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
-        file_name=g_build_filename (dir_name, conv_entry_name?conv_entry_name:entry_name, NULL);
-        GST_INFO("trying plugin '%s','%s'",entry_name,file_name);
+      if(!bsearch(cur_entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
+        file_name=g_build_filename (dir_name, cur_entry_name, NULL);
+        GST_INFO("trying plugin '%s','%s'",cur_entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
           if((bmh=bmlw_open(file_name))) {
@@ -333,7 +379,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     conv_entry_name=NULL;
   }
   g_dir_close (dir);
-  
+
   GST_INFO("after scanning dir \"%s\", res=%d",dir_name,res);
   return(res);
 }
@@ -359,13 +405,13 @@ static gboolean bml_scan(void) {
     bml_path = get_bml_path();
     GST_WARNING("You do not have a BML_PATH environment variable set, using default: '%s'", bml_path);
   }
-  
+
   paths=g_strsplit(bml_path,G_SEARCHPATH_SEPARATOR_S,0);
   path_entries=g_strv_length(paths);
   GST_INFO("%d dirs in search paths \"%s\"",path_entries,bml_path);
-  
+
   bml_category_by_machine_name=g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-  
+
   // check of index.txt in any of the paths
   for(i=0;i<path_entries;i++) {
     if(read_index(paths[i]))
@@ -376,7 +422,7 @@ static gboolean bml_scan(void) {
     res|=dir_scan(paths[i]);
   }
   g_strfreev(paths);
-  
+
   g_hash_table_destroy(bml_category_by_machine_name);
 
   GST_INFO("after scanning path \"%s\", res=%d",bml_path,res);
@@ -390,9 +436,9 @@ static gboolean plugin_init (GstPlugin * plugin) {
   GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "bml", GST_DEBUG_FG_GREEN | GST_DEBUG_BG_BLACK | GST_DEBUG_BOLD, "BML");
 
   GST_INFO("lets go ===========================================================");
-  
+
 #if GST_CHECK_VERSION(0,10,22)
-  gst_plugin_add_dependency_simple (plugin, 
+  gst_plugin_add_dependency_simple (plugin,
     "BML_PATH",
     get_bml_path(),
     "so,dll",
@@ -441,23 +487,23 @@ static gboolean plugin_init (GstPlugin * plugin) {
   else {
     res=TRUE;
   }
-    
+
   if(n) {
     gint i;
     const gchar *name;
     const GValue *value;
     GQuark bmln_type=g_quark_from_static_string("bmln");
-    
+
     GST_INFO("register types");
 
     for(i=0;i<n;i++) {
-      name=gst_structure_nth_field_name(bml_meta_all,i); 
+      name=gst_structure_nth_field_name(bml_meta_all,i);
       value=gst_structure_get_value(bml_meta_all,name);
       //printf("%3d: %20s\n",i,name);
       if(G_VALUE_TYPE(value)==GST_TYPE_STRUCTURE) {
         GstStructure *bml_meta=g_value_get_boxed(value);
         GQuark bml_type=gst_structure_get_name_id(bml_meta);
-        
+
         if(bml_type==bmln_type) {
           res&=bmln_gstbml_register_element(plugin,bml_meta);
         }
@@ -473,7 +519,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
   if (!res) {
     GST_WARNING ("no buzzmachine plugins found, check BML_PATH");
   }
-  
+
   /* we don't want to fail, even if there are no elements registered */
   return TRUE;
 }

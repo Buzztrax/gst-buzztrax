@@ -1,3 +1,9 @@
+2011-01-08  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Update plugin blacklist. Also improve matching with different
+	  charsets.
+
 2011-01-07  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlsrc.c:
