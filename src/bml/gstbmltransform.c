@@ -232,7 +232,7 @@ static gboolean gst_bml_transform_set_caps(GstBaseTransform * base, GstCaps * in
 
   GST_DEBUG("set_caps: in %"GST_PTR_FORMAT"  out %"GST_PTR_FORMAT, incaps, outcaps);
   structure=gst_caps_get_structure(incaps,0);
-  
+
   if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate)) && (samplerate!=bml->samplerate)) {
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
     // @todo: irks, this resets all parameter to their default
@@ -284,7 +284,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
   has_data=FALSE;
   while (todo) {
     // 256 is MachineInterface.h::MAX_BUFFER_LENGTH
-    seg_size = (todo>256) ? 256 : todo; 
+    seg_size = (todo>256) ? 256 : todo;
     has_data |= bml(work(bm,seg_data,(int)seg_size,mode));
     seg_data = &seg_data[seg_size];
     todo -= seg_size;
@@ -361,11 +361,11 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   datai=(BMLData *)GST_BUFFER_DATA (inbuf);
   datao=(BMLData *)GST_BUFFER_DATA (outbuf);
   samples_per_buffer=GST_BUFFER_SIZE(inbuf)/sizeof(BMLData);
-  
+
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer*2;i++) datao[i]=0.0f;
   memset(datao,0,samples_per_buffer*2*sizeof(BMLData));
-  
+
   GST_DEBUG_OBJECT(bml_transform,"input : %p,%d  output: %p,%d",
     datai,GST_BUFFER_SIZE(inbuf),
     datao,GST_BUFFER_SIZE(outbuf));
@@ -402,7 +402,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   has_data = FALSE;
   while (todo) {
     // 256 is MachineInterface.h::MAX_BUFFER_LENGTH
-    seg_size = (todo>256) ? 256 : todo; 
+    seg_size = (todo>256) ? 256 : todo;
     has_data |= bml(work_m2s(bm,seg_datai,seg_datao,(int)seg_size,mode));
     seg_datai = &seg_datai[seg_size];
     seg_datao = &seg_datao[seg_size*2];
@@ -444,12 +444,12 @@ static GstCaps *gst_bml_transform_transform_caps(GstBaseTransform * base, GstPad
   /* if we should produce this output, what can we accept */
   if (direction == GST_PAD_SRC) {
     GST_INFO_OBJECT (base, "allow %d input channel", bml_class->input_channels);
-    gst_structure_set (structure, 
+    gst_structure_set (structure,
       "channels", G_TYPE_INT, bml_class->input_channels,
       NULL);
   } else {
     GST_INFO_OBJECT (base, "allow %d output channels", bml_class->output_channels);
-    gst_structure_set (structure, 
+    gst_structure_set (structure,
       "channels", G_TYPE_INT, bml_class->output_channels,
       NULL);
   }
@@ -500,7 +500,7 @@ static gboolean gst_bml_transform_start(GstBaseTransform * base) {
         GST_WARNING("unhandled type : %d",type);
     }
   }
-  
+
   return TRUE;
 }
 #endif
@@ -509,7 +509,7 @@ static gboolean gst_bml_transform_stop(GstBaseTransform * base) {
   GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
   GstBML *bml=GST_BML(bml_transform);
   gpointer bm=bml->bm;
-  
+
   bml(stop(bm));
   return TRUE;
 }
@@ -630,25 +630,37 @@ static void gst_bml_transform_base_init(GstBMLTransformClass *klass) {
   GstElementClass *element_class=GST_ELEMENT_CLASS(klass);
   //GstPadTemplate *templ;
   gpointer bmh;
+  static GstPadTemplate *mono_src_pad_template=NULL;
+  static GstPadTemplate *stereo_src_pad_template=NULL;
+  static GstPadTemplate *mono_sink_pad_template=NULL;
+  static GstPadTemplate *stereo_sink_pad_template=NULL;
 
   GST_INFO("initializing base");
 
   bmh=bml(gstbml_class_base_init(bml_class,G_TYPE_FROM_CLASS(klass),1,1));
 
   if(bml_class->output_channels==1) {
-    gst_element_class_add_pad_template(element_class,gst_static_pad_template_get(&bml_pad_caps_mono_src_template));
+    if(G_UNLIKELY(!mono_src_pad_template))
+      mono_src_pad_template=gst_static_pad_template_get(&bml_pad_caps_mono_src_template);
+    gst_element_class_add_pad_template(element_class,mono_src_pad_template);
     GST_INFO("  added mono src pad template");
   }
   else {
-    gst_element_class_add_pad_template(element_class,gst_static_pad_template_get(&bml_pad_caps_stereo_src_template));
+    if(G_UNLIKELY(!stereo_src_pad_template))
+      stereo_src_pad_template=gst_static_pad_template_get(&bml_pad_caps_stereo_src_template);
+    gst_element_class_add_pad_template(element_class,stereo_src_pad_template);
     GST_INFO("  added stereo src pad template");
   }
   if(bml_class->input_channels==1) {
-    gst_element_class_add_pad_template(element_class,gst_static_pad_template_get(&bml_pad_caps_mono_sink_template));
+    if(G_UNLIKELY(!mono_sink_pad_template))
+      mono_sink_pad_template=gst_static_pad_template_get(&bml_pad_caps_mono_sink_template);
+    gst_element_class_add_pad_template(element_class,mono_sink_pad_template);
     GST_INFO("  added mono sink pad template");
   }
   else {
-    gst_element_class_add_pad_template(element_class,gst_static_pad_template_get(&bml_pad_caps_stereo_sink_template));
+    if(G_UNLIKELY(!stereo_sink_pad_template))
+      stereo_sink_pad_template=gst_static_pad_template_get(&bml_pad_caps_stereo_sink_template);
+    gst_element_class_add_pad_template(element_class,stereo_sink_pad_template);
     GST_INFO("  added stereo sink pad template");
   }
 

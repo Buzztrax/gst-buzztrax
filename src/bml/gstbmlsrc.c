@@ -219,7 +219,7 @@ static gboolean gst_bml_src_set_caps(GstBaseSrc *base, GstCaps *caps) {
     // @todo: irks, this resets all parameter to their default
     //bml(init(bml->bm,0,NULL));
   }
-  
+
   return ret;
 }
 
@@ -289,7 +289,7 @@ static gboolean gst_bml_src_stop(GstBaseSrc * base) {
   GstBMLSrc *bml_src=GST_BML_SRC(base);
   GstBML *bml=GST_BML(bml_src);
   gpointer bm=bml->bm;
-  
+
   bml(stop(bm));
   return TRUE;
 }
@@ -353,7 +353,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   GstBMLSrc *bml_src=GST_BML_SRC(base);
   GstBMLSrcClass *klass=GST_BML_SRC_GET_CLASS(bml_src);
   GstBML *bml=GST_BML(bml_src);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);  
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
   GstBuffer *buf;
   GstClockTime next_running_time;
   gint64 n_samples;
@@ -376,7 +376,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   } else {
     samples_per_buffer=(guint)(bml->samples_per_buffer+((gdouble)bml->n_samples-samples_done));
   }
-  
+
   //GST_LOG_OBJECT(bml_src,"time=%"GST_TIME_FORMAT", samples_done=%lf, %"G_GINT64_FORMAT" spb=%u",
   //  GST_TIME_ARGS(bml->running_time),samples_done,bml->n_samples,samples_per_buffer);
 
@@ -390,7 +390,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
         (bml->n_samples_stop >= bml->n_samples - samples_per_buffer));
     }
   }
-  
+
   if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
     samples_per_buffer = bml->n_samples_stop - bml->n_samples;
@@ -472,7 +472,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   GstBMLSrc *bml_src=GST_BML_SRC(base);
   GstBMLSrcClass *klass=GST_BML_SRC_GET_CLASS(bml_src);
   GstBML *bml=GST_BML(bml_src);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);  
+  GstBMLClass *bml_class=GST_BML_CLASS(klass);
   GstBuffer *buf;
   GstClockTime next_running_time;
   gint64 n_samples;
@@ -510,7 +510,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
         (bml->n_samples_stop >= bml->n_samples - samples_per_buffer));
     }
   }
-  
+
   if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
     samples_per_buffer = bml->n_samples_stop - bml->n_samples;
@@ -681,17 +681,23 @@ static void gst_bml_src_base_init(GstBMLSrcClass *klass) {
   GstElementClass *element_class=GST_ELEMENT_CLASS(klass);
   //GstPadTemplate *templ;
   gpointer bmh;
+  static GstPadTemplate *mono_src_pad_template=NULL;
+  static GstPadTemplate *stereo_src_pad_template=NULL;
 
   GST_INFO("initializing base");
 
   bmh=bml(gstbml_class_base_init(bml_class,G_TYPE_FROM_CLASS(klass),1,0));
 
   if(bml_class->output_channels==1) {
-    gst_element_class_add_pad_template(element_class, gst_static_pad_template_get (&bml_pad_caps_mono_src_template));
+    if(G_UNLIKELY(!mono_src_pad_template))
+      mono_src_pad_template=gst_static_pad_template_get(&bml_pad_caps_mono_src_template);
+    gst_element_class_add_pad_template(element_class,mono_src_pad_template);
     GST_INFO("  added mono src pad template");
   }
   else {
-    gst_element_class_add_pad_template(element_class, gst_static_pad_template_get (&bml_pad_caps_stereo_src_template));
+    if(G_UNLIKELY(!stereo_src_pad_template))
+      stereo_src_pad_template=gst_static_pad_template_get(&bml_pad_caps_stereo_src_template);
+    gst_element_class_add_pad_template(element_class,stereo_src_pad_template);
     GST_INFO("  added stereo src pad template");
   }
 

@@ -1,3 +1,9 @@
+2011-01-07  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmltransform.c:
+	  Reuse pad-templates. Saves memory and startup time.
+
 2010-12-17  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlsrc.c:
