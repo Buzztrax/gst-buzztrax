@@ -294,8 +294,6 @@ static gboolean dir_scan(const gchar *dir_name) {
     "WAVEEDIT.DLL",
     "WHITENOISE AUXRETURN.DLL",
     "WHITENOISE'S DRUMMER 2.DLL",
-    /* BuzzMachineCallbacksPre12::GetWave (i=0) */
-    "WHITENOISE'S LOOPER 2.DLL",
     "XMIX.DLL",
     "YNZN'S AMPLITUDE MODULATOR.DLL",
     "YNZN'S CHIRPFILTER.DLL",
