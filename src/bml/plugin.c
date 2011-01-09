@@ -177,6 +177,9 @@ static gboolean dir_scan(const gchar *dir_name) {
   gpointer bmh;
   gboolean res=FALSE;
 
+  /* @TODO: find a way to sync this with bml's testmachine report
+   * also turning this into an include would ease, e.g. sorting it
+   */
   const gchar *blacklist[] ={
     "2NDPLOOPJUMPHACK.DLL",
     "2NDPROCESS NUMBIRD 1.4.DLL",
@@ -194,12 +197,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     /*"AUTOMATON PARAMETRIC EQ.DLL",
       - crashes on CMachineInterface::SetNumTracks(1)
       */
-    "AUTOMATON VCF.DLL",
     "BUZZINAMOVIE.DLL",
-    /*"CHEAPO SPREAD.DLL",
-      - hangs after GetInfo(), should be fixed after installing msvcr70.dll and
-        with new function implemented
-      */
     "CHIMP REPLAY.DLL",
     "CYANPHASE AUXRETURN.DLL",
     /* this is part of normal buzz installs these days, even its not a plugin */
@@ -215,7 +213,6 @@ static gboolean dir_scan(const gchar *dir_name) {
     "DEX RINGMOD.DLL",
     "DT_BLOCKFX (STEREO).DLL",
     "DT_BLOCKFX.DLL",
-    "ELAK_DIST.DLL",
     "FIRESLEDGE ANTIOPE-1.DLL",
     "FREQUENCY UNKNOWN FREQ IN.DLL",
     "FREQUENCY UNKNOWN FREQ OUT.DLL",

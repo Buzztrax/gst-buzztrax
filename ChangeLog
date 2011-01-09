@@ -1,3 +1,8 @@
+2011-01-10  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Update blacklist after recent bml improvements.
+
 2011-01-09  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:
