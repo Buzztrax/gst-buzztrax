@@ -1,6 +1,11 @@
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/gstbufferpool.c:
+	  gst_buffer_pool_acquire_buffer() can be called with params=NULL.
+
+2011-01-26  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/gstbufferpool.c:
 	  Check for the proper return value.
 
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
