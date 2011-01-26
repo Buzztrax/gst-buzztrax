@@ -197,25 +197,18 @@ GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|
 AC_SUBST(GST_PLUGIN_LDFLAGS)
 
 
-#dnl - Check for modules already commited upstream
-#ac_cflags_save="$CFLAGS"
-#ac_cppflags_save="$CPPFLAGS"
-#ac_ldflags_save="$LDFLAGS"
-#CFLAGS="$CFLAGS $BASE_DEPS_CFLAGS"
-#CPPFLAGS="$CPPFLAGS $BASE_DEPS_CFLAGS"
-#LDFLAGS="$LDFLAGS $BASE_DEPS_LIBS"
-#AC_CHECK_HEADERS(gst/gstpreset.h,[HAVE_GST_GSTPRESET_H="1"],[HAVE_GST_GSTPRESET_H="0"])
-#AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET_H" = "0")
-#if test "x$HAVE_GST_GSTPRESET_H" = "x1"
-#then
-#  PRESET_DOC_TYPES=
-#else
-#  PRESET_DOC_TYPES="%"
-#fi
-#AC_SUBST(PRESET_DOC_TYPES)
-#CFLAGS="$ac_cflags_save"
-#CPPFLAGS="$ac_cppflags_save"
-#LDFLAGS="$ac_ldflags_save"
+#dnl - Check for parts not yet in upstream
+ac_cflags_save="$CFLAGS"
+ac_cppflags_save="$CPPFLAGS"
+ac_ldflags_save="$LDFLAGS"
+CFLAGS="$CFLAGS $BASE_DEPS_CFLAGS"
+CPPFLAGS="$CPPFLAGS $BASE_DEPS_CFLAGS"
+LDFLAGS="$LDFLAGS $BASE_DEPS_LIBS"
+AC_CHECK_HEADERS(gst/gstbufferpool.h,[HAVE_GST_BUFFERPOOL_H="1"],[HAVE_GST_BUFFERPOOL_H="0"])
+AM_CONDITIONAL(BUILD_BUFFERPOOL, test "$HAVE_GST_BUFFERPOOL_H" = "0")
+CFLAGS="$ac_cflags_save"
+CPPFLAGS="$ac_cppflags_save"
+LDFLAGS="$ac_ldflags_save"
 
 
 AC_MSG_CHECKING([gstreamer version >= 0.10.20])

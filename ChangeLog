@@ -1,3 +1,17 @@
+2011-01-26  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* libgstbuzztard/Makefile.am:
+	* libgstbuzztard/gstbufferpool.c:
+	* libgstbuzztard/gstbufferpool.h:
+	* libgstbuzztard/gstlfqueue.c:
+	* libgstbuzztard/gstlfqueue.h:
+	* libgstbuzztard/gstbufferpool.c (added):
+	* libgstbuzztard/gstlfqueue.c (added):
+	* libgstbuzztard/gstbufferpool.h (added):
+	* libgstbuzztard/gstlfqueue.h (added):
+	  Add a copy of http://cgit.freedesktop.org/~wtay/gstreamer/?h=bufferpool.
+
 2011-01-10  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:
