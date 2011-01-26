@@ -29,8 +29,10 @@
 #include <libgstbuzztard/toneconversion.h>
 #include <libgstbuzztard/envelope.h>
 
-G_BEGIN_DECLS
+//#define TEST_BUFFERPOOL
+#include <libgstbuzztard/gstbufferpool.h>
 
+G_BEGIN_DECLS
 
 #define GST_TYPE_SIM_SYN            (gst_sim_syn_get_type())
 #define GST_SIM_SYN(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_SIM_SYN,GstSimSyn))
@@ -152,6 +154,10 @@ struct _GstSimSyn {
   /* filter specific data */
   gdouble flt_low, flt_mid, flt_high;
   gdouble flt_res;
+  
+#ifdef TEST_BUFFERPOOL
+  GstBufferPool *buffer_pool;
+#endif
 };
 
 struct _GstSimSynClass {

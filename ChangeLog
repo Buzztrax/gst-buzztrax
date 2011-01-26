@@ -1,5 +1,11 @@
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Conditionally attempt to use a bufferpool. Disabled yet.
+
+2011-01-26  Stefan Kost  <ensonic@users.sf.net>
+
 	* configure.ac:
 	* libgstbuzztard/Makefile.am:
 	* libgstbuzztard/gstbufferpool.c:

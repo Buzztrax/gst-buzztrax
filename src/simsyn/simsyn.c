@@ -24,6 +24,13 @@
  *
  * Simple monophonic audio synthesizer with a decay envelope and a
  * state-variable filter.
+ *
+ * <refsect2>
+ * <title>Example launch line</title>
+ * |[
+ * gst-launch simsyn num-buffers=1000 note="c-4" ! autoaudiosink
+ * ]| Render a sine wave tone.
+ * </refsect2>
  */
 /* @todo:
  * - implement property-meta iface (see gstbml)
@@ -330,14 +337,13 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
 
   gst_pad_set_fixatecaps_function (pad, gst_sim_syn_src_fixate);
 
-  src->samples_per_buffer = 1024.0;
-  src->generate_samples_per_buffer = (guint)src->samples_per_buffer;
-
   src->samplerate = GST_AUDIO_DEF_RATE;
   src->beats_per_minute=120;
   src->ticks_per_beat=4;
   src->subticks_per_tick=1;
   gst_sim_syn_calculate_buffer_frames (src);
+  src->generate_samples_per_buffer = (guint)(0.5+src->samples_per_buffer);
+
   /* we operate in time */
   gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
   gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
@@ -364,6 +370,17 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->resonance = 0.8;
   src->flt_res=1.0/src->resonance;
   gst_sim_syn_change_filter (src);
+
+#ifdef TEST_BUFFERPOOL
+  {
+    GstBufferPoolConfig pool_config = { 10, 10,
+      src->generate_samples_per_buffer * sizeof (gint16) * 2,
+      0, 0, 4
+    };
+    src->buffer_pool=gst_buffer_pool_new();
+    gst_buffer_pool_set_config(src->buffer_pool,&pool_config);
+  }
+#endif
 }
 
 static void
@@ -949,6 +966,10 @@ gst_sim_syn_start (GstBaseSrc *basesrc)
 
   src->n_samples=G_GINT64_CONSTANT(0);
   src->running_time=G_GUINT64_CONSTANT(0);
+  
+#ifdef TEST_BUFFERPOOL
+  gst_buffer_pool_set_flushing (src->buffer_pool, FALSE);
+#endif
   return(TRUE);
 }
 
@@ -1013,12 +1034,16 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   }
   next_running_time = src->running_time + (src->reverse ? (-src->ticktime) : src->ticktime);
 
+#ifdef TEST_BUFFERPOOL
+  res = gst_buffer_pool_acquire_buffer(src->buffer_pool,&buf,NULL);
+#else
   /* allocate a new buffer suitable for this pad */
-  if ((res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
+  res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
       src->generate_samples_per_buffer * sizeof (gint16),
       GST_PAD_CAPS (basesrc->srcpad),
-      &buf)) != GST_FLOW_OK
-  ) {
+      &buf);
+#endif
+  if (res != GST_FLOW_OK) {
     return res;
   }
 
@@ -1230,6 +1255,11 @@ gst_sim_syn_dispose (GObject *object)
   if (src->n2f) g_object_unref (src->n2f);
   if (src->volenv_controller) g_object_unref (src->volenv_controller);
   if (src->volenv) g_object_unref (src->volenv);
+  
+#ifdef TEST_BUFFERPOOL
+  if (src->buffer_pool) g_object_unref (src->buffer_pool);
+#endif
+
 
   G_OBJECT_CLASS(parent_class)->dispose(object);
 }
