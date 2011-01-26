@@ -173,7 +173,7 @@ default_set_config (GstBufferPool * pool, GstBufferPoolConfig * config)
     GstBuffer *buffer;
 
     if (G_LIKELY (pclass->alloc_buffer)) {
-      if (!pclass->alloc_buffer (pool, &buffer, config, NULL))
+      if (pclass->alloc_buffer (pool, &buffer, config, NULL) != GST_FLOW_OK)
         return FALSE;
     } else
       return FALSE;

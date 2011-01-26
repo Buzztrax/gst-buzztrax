@@ -1,5 +1,10 @@
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
 
+	* libgstbuzztard/gstbufferpool.c:
+	  Check for the proper return value.
+
+2011-01-26  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/simsyn/simsyn.c:
 	* src/simsyn/simsyn.h:
 	  Conditionally attempt to use a bufferpool. Disabled yet.
