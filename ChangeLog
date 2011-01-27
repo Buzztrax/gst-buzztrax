@@ -1,5 +1,11 @@
 2011-01-27  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Whitespace fixes and logging.
+
+2011-01-27  Stefan Kost  <ensonic@users.sf.net>
+
 	* libgstbuzztard/Makefile.am:
 	* libgstbuzztard/gstbufferpool.c:
 	* libgstbuzztard/gstlfqueue.c:

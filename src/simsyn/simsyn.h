@@ -70,7 +70,7 @@ typedef enum {
  * @GST_SIM_SYN_FILTER_NONE: no filtering
  * @GST_SIM_SYN_FILTER_LOWPASS: low pass
  * @GST_SIM_SYN_FILTER_HIPASS: high pass
- * @GST_SIM_SYN_FILTER_BANDPASS: band pass 
+ * @GST_SIM_SYN_FILTER_BANDPASS: band pass
  * @GST_SIM_SYN_FILTER_BANDSTOP: band stop (notch)
  *
  * Filter types.
@@ -119,7 +119,7 @@ struct _GstSimSyn {
   GstSimSynFilter filter;
   gdouble cutoff;
   gdouble resonance;
-  
+
   gboolean dispose_has_run;		/* validate if dispose has run */
 
   void (*process)(GstSimSyn*, gint16 *);
@@ -150,11 +150,11 @@ struct _GstSimSyn {
   gdouble accumulator;			/* phase angle */
   GstPinkNoise pink;
   gint16 wave_table[ WAVE_TABLE_SIZE];
-  
+
   /* filter specific data */
   gdouble flt_low, flt_mid, flt_high;
   gdouble flt_res;
-  
+
 #ifdef TEST_BUFFERPOOL
   GstBufferPool *buffer_pool;
 #endif
