@@ -2,6 +2,12 @@
 
 	* src/simsyn/simsyn.c:
 	* src/simsyn/simsyn.h:
+	  Use an env-var (GST_USE_BUFFERPOOL) for before-after-meassuremnets.
+
+2011-01-27  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
 	  Whitespace fixes and logging.
 
 2011-01-27  Stefan Kost  <ensonic@users.sf.net>

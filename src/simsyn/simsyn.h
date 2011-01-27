@@ -29,7 +29,6 @@
 #include <libgstbuzztard/toneconversion.h>
 #include <libgstbuzztard/envelope.h>
 
-//#define TEST_BUFFERPOOL
 #include <libgstbuzztard/gstbufferpool.h>
 
 G_BEGIN_DECLS
@@ -155,9 +154,7 @@ struct _GstSimSyn {
   gdouble flt_low, flt_mid, flt_high;
   gdouble flt_res;
 
-#ifdef TEST_BUFFERPOOL
   GstBufferPool *buffer_pool;
-#endif
 };
 
 struct _GstSimSynClass {

@@ -69,6 +69,8 @@
 #define GST_CAT_DEFAULT sim_syn_debug
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
+static gboolean _use_buffer_pool = FALSE;
+
 
 enum {
   // static class properties
@@ -372,8 +374,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->flt_res=1.0/src->resonance;
   gst_sim_syn_change_filter (src);
 
-#ifdef TEST_BUFFERPOOL
-  {
+  if(_use_buffer_pool) {
     GstBufferPoolConfig pool_config = { 10, 10,
       src->generate_samples_per_buffer * sizeof (gint16) * 2,
       0, 0, 4
@@ -383,7 +384,6 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
       GST_WARNING_OBJECT(src,"setting up the buffer pool failed");
     }
   }
-#endif
 }
 
 static void
@@ -970,9 +970,9 @@ gst_sim_syn_start (GstBaseSrc *basesrc)
   src->n_samples=G_GINT64_CONSTANT(0);
   src->running_time=G_GUINT64_CONSTANT(0);
 
-#ifdef TEST_BUFFERPOOL
-  gst_buffer_pool_set_flushing (src->buffer_pool, FALSE);
-#endif
+  if (_use_buffer_pool)
+    gst_buffer_pool_set_flushing (src->buffer_pool, FALSE);
+
   return(TRUE);
 }
 
@@ -1037,21 +1037,17 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   }
   next_running_time = src->running_time + (src->reverse ? (-src->ticktime) : src->ticktime);
 
-#ifdef TEST_BUFFERPOOL
-  res = gst_buffer_pool_acquire_buffer(src->buffer_pool,&buf,NULL);
-#else
-  /* allocate a new buffer suitable for this pad */
-  res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
-      src->generate_samples_per_buffer * sizeof (gint16),
-      GST_PAD_CAPS (basesrc->srcpad),
-      &buf);
-#endif
+  if (_use_buffer_pool)
+    res = gst_buffer_pool_acquire_buffer(src->buffer_pool,&buf,NULL);
+  else
+    /* allocate a new buffer suitable for this pad */
+    res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
+        src->generate_samples_per_buffer * sizeof (gint16),
+        GST_PAD_CAPS (basesrc->srcpad),
+        &buf);
   if (res != GST_FLOW_OK) {
     return res;
   }
-#ifdef TEST_BUFFERPOOL
-  GST_INFO_OBJECT(src,"got pool buffer %p: size %d, data %p/%p",buf,GST_BUFFER_SIZE(buf),GST_BUFFER_DATA(buf),GST_BUFFER_MALLOCDATA(buf));
-#endif
 
   if (!src->reverse) {
     GST_BUFFER_TIMESTAMP (buf) = src->running_time;
@@ -1262,10 +1258,7 @@ gst_sim_syn_dispose (GObject *object)
   if (src->volenv_controller) g_object_unref (src->volenv_controller);
   if (src->volenv) g_object_unref (src->volenv);
 
-#ifdef TEST_BUFFERPOOL
   if (src->buffer_pool) g_object_unref (src->buffer_pool);
-#endif
-
 
   G_OBJECT_CLASS(parent_class)->dispose(object);
 }
@@ -1324,6 +1317,8 @@ GType gst_sim_syn_get_type (void)
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
+  _use_buffer_pool = (g_getenv("GST_USE_BUFFERPOOL") != NULL);
+
   GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "simsyn", GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
 
   /* initialize gst controller library */
