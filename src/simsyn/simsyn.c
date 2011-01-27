@@ -176,6 +176,7 @@ static void gst_sim_syn_change_volume (GstSimSyn * src);
 static void gst_sim_syn_change_filter (GstSimSyn * src);
 
 static gboolean gst_sim_syn_start (GstBaseSrc *basesrc);
+static gboolean gst_sim_syn_stop (GstBaseSrc *basesrc);
 static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
@@ -190,6 +191,16 @@ static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
   self->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
   GST_INFO("samples_per_buffer=%lf",self->samples_per_buffer);
+
+  if(_use_buffer_pool) {
+    GstBufferPoolConfig pool_config = { 10, 10,
+      (gint)(0.5 + self->samples_per_buffer) * sizeof (gint16),
+      0, 0, 4
+    };
+    if(!gst_buffer_pool_set_config(self->buffer_pool,&pool_config)) {
+      GST_WARNING_OBJECT(self,"setting up the buffer pool failed");
+    }
+  }
 }
 
 static void gst_sim_syn_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
@@ -277,6 +288,7 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_sim_syn_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_sim_syn_query);
   gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gst_sim_syn_start);
+  gstbasesrc_class->stop = GST_DEBUG_FUNCPTR (gst_sim_syn_stop);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_sim_syn_create);
 
   // override interface properties
@@ -339,6 +351,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   GstPad *pad = GST_BASE_SRC_PAD (src);
 
   gst_pad_set_fixatecaps_function (pad, gst_sim_syn_src_fixate);
+  src->buffer_pool=gst_buffer_pool_new();
 
   src->samplerate = GST_AUDIO_DEF_RATE;
   src->beats_per_minute=120;
@@ -374,16 +387,6 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->flt_res=1.0/src->resonance;
   gst_sim_syn_change_filter (src);
 
-  if(_use_buffer_pool) {
-    GstBufferPoolConfig pool_config = { 10, 10,
-      src->generate_samples_per_buffer * sizeof (gint16) * 2,
-      0, 0, 4
-    };
-    src->buffer_pool=gst_buffer_pool_new();
-    if(!gst_buffer_pool_set_config(src->buffer_pool,&pool_config)) {
-      GST_WARNING_OBJECT(src,"setting up the buffer pool failed");
-    }
-  }
 }
 
 static void
@@ -970,10 +973,18 @@ gst_sim_syn_start (GstBaseSrc *basesrc)
   src->n_samples=G_GINT64_CONSTANT(0);
   src->running_time=G_GUINT64_CONSTANT(0);
 
-  if (_use_buffer_pool)
-    gst_buffer_pool_set_flushing (src->buffer_pool, FALSE);
+  gst_buffer_pool_set_flushing (src->buffer_pool, FALSE);
 
   return(TRUE);
+}
+
+static gboolean
+gst_sim_syn_stop (GstBaseSrc * basesrc)
+{
+  GstSimSyn *src = GST_SIM_SYN (basesrc);
+
+  gst_buffer_pool_set_flushing (src->buffer_pool, TRUE);
+  return TRUE;
 }
 
 static GstFlowReturn
@@ -1043,8 +1054,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     /* allocate a new buffer suitable for this pad */
     res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
         src->generate_samples_per_buffer * sizeof (gint16),
-        GST_PAD_CAPS (basesrc->srcpad),
-        &buf);
+        GST_PAD_CAPS (basesrc->srcpad), &buf);
   if (res != GST_FLOW_OK) {
     return res;
   }

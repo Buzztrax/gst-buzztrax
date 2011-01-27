@@ -1,5 +1,14 @@
 2011-01-27  Stefan Kost  <ensonic@users.sf.net>
 
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmlsrc.h:
+	* src/bml/utils.c:
+	* src/simsyn/simsyn.c:
+	  Clean up pool handling and implement for bmlsrc. Would need
+	  prepare_buffer in bmltransform for m2s case.
+
+2011-01-27  Stefan Kost  <ensonic@users.sf.net>
+
 	* src/simsyn/simsyn.c:
 	* src/simsyn/simsyn.h:
 	  Use an env-var (GST_USE_BUFFERPOOL) for before-after-meassuremnets.
