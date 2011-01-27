@@ -1,3 +1,17 @@
+2011-01-27  Stefan Kost  <ensonic@users.sf.net>
+
+	* libgstbuzztard/Makefile.am:
+	* libgstbuzztard/gstbufferpool.c:
+	* libgstbuzztard/gstlfqueue.c:
+	* libgstbuzztard/gstpooledbuffer.c:
+	* libgstbuzztard/gstpooledbuffer.h:
+	* libgstbuzztard/gstpooledbuffer.h (svn:keywords, svn:eol-style):
+	* libgstbuzztard/gstpooledbuffer.c (svn:keywords, svn:eol-style):
+	* libgstbuzztard/gstpooledbuffer.h (added):
+	* libgstbuzztard/gstpooledbuffer.c (added):
+	  Add a pooled buffer subclass to implement resurrection of buffers into
+	  the pool.
+
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* libgstbuzztard/gstbufferpool.c:

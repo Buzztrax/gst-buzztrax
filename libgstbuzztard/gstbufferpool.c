@@ -37,6 +37,7 @@
 #include <gst/gstinfo.h>
 
 #include "gstbufferpool.h"
+#include "gstpooledbuffer.h"
 
 enum
 {
@@ -241,7 +242,7 @@ default_alloc_buffer (GstBufferPool * pool, GstBuffer ** buffer,
 {
   guint size, align;
 
-  *buffer = gst_buffer_new ();
+  *buffer = (GstBuffer *) gst_pooled_buffer_new (pool);
 
   align = config->align - 1;
   size = config->prefix + config->postfix + config->size + align;

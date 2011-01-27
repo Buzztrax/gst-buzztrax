@@ -240,12 +240,13 @@ gst_lf_queue_push (GstLFQueue * queue, gpointer data)
       GstLFQueueMem *mem;
 
       tail_mem = g_atomic_pointer_get (&queue->tail_mem);
+
       head = g_atomic_int_get (&tail_mem->head);
       tail = g_atomic_int_get (&tail_mem->tail);
       size = tail_mem->size;
 
       /* we're not full, continue */
-      if (tail - head < size)
+      if (G_LIKELY (tail - head < size))
         break;
 
       /* else we need to grow the array */

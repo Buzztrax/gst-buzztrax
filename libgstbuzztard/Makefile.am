@@ -7,8 +7,8 @@ PRESET_H =
 endif
 
 if BUILD_BUFFERPOOL
-BUFFERPOOL_C = gstbufferpool.c gstlfqueue.c
-BUFFERPOOL_H = gstbufferpool.h gstlfqueue.h
+BUFFERPOOL_C = gstbufferpool.c gstpooledbuffer.c gstlfqueue.c
+BUFFERPOOL_H = gstbufferpool.h gstpooledbuffer.h gstlfqueue.h
 else
 BUFFERPOOL_C =
 BUFFERPOOL_H =
