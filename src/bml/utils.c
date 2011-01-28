@@ -739,6 +739,7 @@ void bml(gstbml_finalize(GstBML *bml)) {
   g_free(bml->triggers_changed);
 
   bml(free(bml->bm));
+  bml->bm=NULL;
 }
 
 void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id, const GValue *value, GParamSpec * pspec)) {

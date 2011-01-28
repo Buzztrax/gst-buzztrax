@@ -1,3 +1,8 @@
+2011-01-29  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/utils.c:
+	  Set ptr to NULL to avoid double free.
+
 2011-01-27  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlsrc.c:
