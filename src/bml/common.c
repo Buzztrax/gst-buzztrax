@@ -832,8 +832,11 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
         has_data=TRUE;
         break;
       }
+/* FIXME: we not configure the FPU to DAZ|FZ in libbuzztard-core
+ * this would not apply to other clients
+ */
 #if 0
-      /* is normal checks for != zero */
+      /* isnormal checks for != zero */
       if(G_LIKELY(isnormal(data[i]))) {
         has_data=TRUE;
         break;

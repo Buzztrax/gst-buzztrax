@@ -1,6 +1,11 @@
 2011-02-22  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:
+	  Add some more comments.
+
+2011-02-22  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
 	  Make bml_fix_data() lighter, as we now configure the FPU to DAZ|FZ
 	  mode. Maybe need to make that conditional ...
 
