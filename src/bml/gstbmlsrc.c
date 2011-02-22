@@ -300,7 +300,9 @@ error:
 static gboolean gst_bml_src_start(GstBaseSrc * base) {
   GstBMLSrc *bml_src=GST_BML_SRC(base);
 
-  gst_buffer_pool_set_flushing (bml_src->buffer_pool, FALSE);
+  if(_use_buffer_pool) {
+    gst_buffer_pool_set_flushing (bml_src->buffer_pool, FALSE);
+  }
   return TRUE;
 }
 
@@ -310,7 +312,9 @@ static gboolean gst_bml_src_stop(GstBaseSrc * base) {
   gpointer bm=bml->bm;
 
   bml(stop(bm));
-  gst_buffer_pool_set_flushing (bml_src->buffer_pool, TRUE);
+  if(_use_buffer_pool) {
+    gst_buffer_pool_set_flushing (bml_src->buffer_pool, TRUE);
+  }
   return TRUE;
 }
 
