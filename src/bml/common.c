@@ -112,7 +112,7 @@ eof_error:
     gchar **preset_names = g_new (gchar*, g_list_length (klass->presets) + 1);
     GList *node;
     guint i=0;
-    
+
     for (node = klass->presets; node; node = g_list_next (node)) {
       preset_names[i++] = g_strdup(node->data);
     }
@@ -145,7 +145,7 @@ gboolean gstbml_preset_load_preset(GstObject *self, GstBML *bml, GstBMLClass *kl
 
       tracks=*data++;
       params=*data++;
-      
+
       if(klass->voice_type) {
         voice_class=G_OBJECT_CLASS(g_type_class_ref(klass->voice_type));
       }
@@ -500,7 +500,7 @@ void gstbml_preset_finalize(GstBMLClass *klass) {
  * @tmp_desc: desc to build @desc from
  * @name: target for name
  * @nick: target for nick
- * @desc: target for description 
+ * @desc: target for description
  *
  * Convert charset encoding and make property-names unique.
  */
@@ -508,11 +508,11 @@ void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc,
   gchar *cname,*ptr1,*ptr2;
 
   GST_DEBUG("        tmp_name='%s'",tmp_name);
-  // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE? 
+  // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE?
   cname=g_convert(tmp_name,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
   if(!cname) {
     // weak fallback when conversion failed
-    cname=g_strdup(tmp_name);    
+    cname=g_strdup(tmp_name);
   }
   if(nick) {
     *nick=g_convert(tmp_name,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
@@ -828,13 +828,17 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
 
     // see also http://www.musicdsp.org/archive.php?classid=5#191
     for(i=0;i<num_samples;i++) {
+      if(data[i]!=0.0) {
+        has_data=TRUE;
+        break;
+      }
+#if 0
       /* is normal checks for != zero */
       if(G_LIKELY(isnormal(data[i]))) {
         has_data=TRUE;
         break;
       }
       else {
-#if 0
         if(isnan(data[i])) {
           GST_WARNING_OBJECT(elem,"data contains NaN");
         }
@@ -844,18 +848,20 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
         else if(data[i]!=0.0) { //fpclassify(data[i])==FP_SUBNORMAL
           GST_WARNING_OBJECT(bml_transform,"data contains Denormal");
         }
-#endif
         data[i]=0.0;
       }
+#endif
     }
+#if 0
     for(;i<num_samples;i++) {
       if(G_UNLIKELY(!isnormal(data[i]))) {
         data[i]=0.0;
       }
     }
+#endif
   }
   if(!has_data) {
-    GST_INFO_OBJECT(elem,"silent buffer");
+    GST_LOG_OBJECT(elem,"silent buffer");
     GST_BUFFER_FLAG_SET(buf,GST_BUFFER_FLAG_GAP);
   }
   else {
