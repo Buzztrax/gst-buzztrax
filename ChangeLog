@@ -1,3 +1,9 @@
+2011-03-01  Stefan Kost  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* libgstbuzztard/Makefile.am:
+	  Use linker  regexp for the library too and fix the one for the plugins.
+
 2011-02-22  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/common.c:

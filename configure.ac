@@ -188,12 +188,15 @@ PKG_CHECK_MODULES(BASE_DEPS, \
   gstreamer-plugins-base-0.10 >= 0.10.10 \
 )
 
+GST_LIB_LDFLAGS="-export-symbols-regex \^[_]*\(gstbt_\|GstBt\|GSTBT_\|gst_\|Gst\|GST_\).*"
+AC_SUBST(GST_LIB_LDFLAGS)
+
 dnl GStreamer plugin build
 plugindir="\$(libdir)/gstreamer-$GST_MAJORMINOR"
 AC_SUBST(plugindir)
 GST_PLUGIN_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS"
 AC_SUBST(GST_PLUGIN_CFLAGS)
-GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|Gst|GST_).*' $COVERAGE_LIBS"
+GST_PLUGIN_LDFLAGS="-module·-avoid-version·-export-symbols-regex·'^[_]*gst_plugin_desc.*'·$COVERAGE_LIBS" 
 AC_SUBST(GST_PLUGIN_LDFLAGS)
 
 

@@ -46,5 +46,6 @@ libgstbuzztardinclude_HEADERS = \
 	$(BUFFERPOOL_H)
 
 libgstbuzztard_la_LIBADD = $(BASE_DEPS_LIBS)
-libgstbuzztard_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@
+libgstbuzztard_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@ \
+    $(GST_LIB_LDFLAGS)
 
