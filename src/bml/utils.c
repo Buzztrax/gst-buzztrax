@@ -790,6 +790,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
         }
         props_skip++;
       }
+#if !GST_CHECK_VERSION(0,10,31)
       if(bml_class->help_uri) {
         if(prop_id==(props_skip+1)) {
           GST_WARNING_OBJECT(bml->self,"documentation-uri property is read only");
@@ -797,6 +798,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
         }
         props_skip++;
       }
+#endif
       break;
   }
   prop_id-=props_skip;
