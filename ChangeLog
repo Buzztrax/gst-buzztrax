@@ -1,3 +1,8 @@
+2011-03-20  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Remove Rout EQ 10 rom blacklist.
+
 2011-03-18  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/utils.c:
