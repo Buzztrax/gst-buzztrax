@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstbtmusicenums
+ * @title: GstBtMusicEnums
  * @short_description: various enum types
  *
  * Music/Audio related enumerations.

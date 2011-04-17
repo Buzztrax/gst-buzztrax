@@ -38,7 +38,6 @@ typedef struct _GstBtEnvelopeClass GstBtEnvelopeClass;
 
 /**
  * GstBtEnvelope:
- * @parent: parent instance
  * @value: current envelope value
  *
  * Class instance data.
@@ -46,6 +45,7 @@ typedef struct _GstBtEnvelopeClass GstBtEnvelopeClass;
 struct _GstBtEnvelope {
   GObject parent;
 
+  /* < public > */
   /* parameters */
   gdouble value;
 

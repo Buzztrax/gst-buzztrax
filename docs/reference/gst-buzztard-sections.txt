@@ -4,7 +4,6 @@
 # please add section in the alpahbetical order using the following template
 # <SECTION>
 # <FILE>gstxxx</FILE>
-# <TITLE>GstXxx</TITLE>
 # <SUBSECTION Standard>
 # <SUBSECTION Private>
 # </SECTION>
@@ -13,7 +12,6 @@
 
 <SECTION>
 <FILE>gstaudiodelay</FILE>
-<TITLE>GstAudioDelay</TITLE>
 GstAudioDelay
 <SUBSECTION Standard>
 GstAudioDelayClass
@@ -28,7 +26,6 @@ gst_audio_delay_get_type
 
 <SECTION>
 <FILE>gstfluidsynth</FILE>
-<TITLE>GstFluidsynth</TITLE>
 GstFluidsynth
 <SUBSECTION Standard>
 GstFluidsynthClass
@@ -43,7 +40,6 @@ gst_fluidsynth_get_type
 
 <SECTION>
 <FILE>gstsimsyn</FILE>
-<TITLE>GstSimSyn</TITLE>
 GstSimSyn
 GstSimSynFilter
 GstSimSynWave
@@ -65,7 +61,6 @@ gst_sim_syn_get_type
 
 <SECTION>
 <FILE>gstbml</FILE>
-<TITLE>GstBML</TITLE>
 gstbml_calculate_buffer_frames
 gstbml_convert_names
 gstbml_dispose
@@ -119,11 +114,10 @@ gstbml_preset_set_meta
 
 <SECTION>
 <FILE>gstbtchildbin</FILE>
-<TITLE>GstBtChildBin</TITLE>
+GstBtChildBin
 gstbt_child_bin_add_child
 gstbt_child_bin_remove_child
 <SUBSECTION Standard>
-GstBtChildBin
 GstBtChildBinInterface
 GSTBT_CHILD_BIN
 GSTBT_IS_CHILD_BIN
@@ -134,9 +128,8 @@ gstbt_child_bin_get_type
 
 <SECTION>
 <FILE>gstbthelp</FILE>
-<TITLE>GstBtHelp</TITLE>
-<SUBSECTION Standard>
 GstBtHelp
+<SUBSECTION Standard>
 GstBtHelpInterface
 GSTBT_HELP
 GSTBT_IS_HELP
@@ -147,10 +140,9 @@ gstbt_help_get_type
 
 <SECTION>
 <FILE>gstbttempo</FILE>
-<TITLE>GstBtTempo</TITLE>
+GstBtTempo
 gstbt_tempo_change_tempo
 <SUBSECTION Standard>
-GstBtTempo
 GstBtTempoInterface
 GSTBT_TEMPO
 GSTBT_IS_TEMPO
@@ -161,7 +153,7 @@ gstbt_tempo_get_type
 
 <SECTION>
 <FILE>gstbtpropertymeta</FILE>
-<TITLE>GstBtPropertyMeta</TITLE>
+GstBtPropertyMeta
 GstBtPropertyMetaFlags
 gstbt_property_meta_describe_property
 gstbt_property_meta_quark
@@ -171,7 +163,6 @@ gstbt_property_meta_quark_def_val
 gstbt_property_meta_quark_no_val
 gstbt_property_meta_quark_flags
 <SUBSECTION Standard>
-GstBtPropertyMeta
 GstBtPropertyMetaInterface
 GSTBT_PROPERTY_META
 GSTBT_IS_PROPERTY_META
@@ -185,7 +176,7 @@ gstbt_property_meta_get_type
 
 <SECTION>
 <FILE>gstpreset</FILE>
-<TITLE>GstPreset</TITLE>
+GstPreset
 gst_preset_get_preset_names
 gst_preset_get_property_names
 gst_preset_load_preset
@@ -195,7 +186,6 @@ gst_preset_delete_preset
 gst_preset_set_meta
 gst_preset_get_meta
 <SUBSECTION Standard>
-GstPreset
 GstPresetInterface
 GST_PRESET
 GST_IS_PRESET
@@ -209,7 +199,6 @@ gst_preset_get_type
 
 <SECTION>
 <FILE>gstbtenvelope</FILE>
-<TITLE>GstBtEnvelope</TITLE>
 GstBtEnvelope
 gstbt_envelope_new
 <SUBSECTION Standard>
@@ -225,7 +214,6 @@ gstbt_envelope_get_type
 
 <SECTION>
 <FILE>gstbtmusicenums</FILE>
-<TITLE>GstBtMusicEnums</TITLE>
 GstBtTriggerSwitch
 <SUBSECTION Standard>
 GSTBT_TYPE_TRIGGER_SWITCH
@@ -234,7 +222,6 @@ gstbt_trigger_switch_get_type
 
 <SECTION>
 <FILE>gstbttoneconversion</FILE>
-<TITLE>GstBtToneConversion</TITLE>
 GstBtToneConversion
 GstBtToneConversionTuning
 gstbt_tone_conversion_new
@@ -259,7 +246,6 @@ gstbt_tone_conversion_tuning_get_type
 
 <SECTION>
 <FILE>gstbuzztard</FILE>
-<TITLE>gst-buzztard</TITLE>
 <SUBSECTION Private>
 G_DEFINE_INTERFACE
 G_DEFINE_INTERFACE_WITH_CODE

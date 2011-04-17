@@ -27,7 +27,9 @@ gstbt_tempo_get_type
 
 % own stuff
 
+#include <libgstbuzztard/envelope.h>
 #include <libgstbuzztard/toneconversion.h>
 
+gstbt_envelope_get_type
 gstbt_tone_conversion_get_type
 

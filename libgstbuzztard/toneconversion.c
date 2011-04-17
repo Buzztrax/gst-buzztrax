@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstbttoneconversion
+ * @title: GstBtToneConversion
  * @short_description: helper class for tone unit conversion
  *
  * An instance of this class can translate a musical note to a frequency, while
@@ -113,7 +114,7 @@ static gboolean note_number_to_values (guint note, guint *tone, guint *octave) {
   g_return_val_if_fail(note<((16*9)+12),0);
   g_assert(tone);
   g_assert(octave);
-  
+
   if(note==0) return(FALSE);
 
   note-=1;
@@ -192,7 +193,7 @@ static void gstbt_tone_conversion_change_tuning(GstBtToneConversion *self) {
  */
 gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gchar *note) {
   guint tone, octave;
-  
+
   g_return_val_if_fail(note,0.0);
 
   if(note[0]=='o' && note[1]=='f' && note[2]=='f') {
@@ -220,7 +221,7 @@ gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gc
  */
 gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,guint note) {
   guint tone, octave;
-  
+
   if(note==GSTBT_TONE_CONVERSION_NOTE_OFF) return (-1.0);
 
   if(note_number_to_values(note,&tone,&octave))
@@ -232,7 +233,7 @@ gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,gu
 /**
  * gstbt_tone_conversion_note_string_2_number:
  * @note: a musical note in string representation
- * 
+ *
  * Converts the string representation of a musical note such as 'C-3' or 'd#4'
  * to a note number.
  *
@@ -244,7 +245,7 @@ guint gstbt_tone_conversion_note_string_2_number(const gchar *note) {
   if(note[0]=='o' && note[1]=='f' && note[2]=='f') {
     return(GSTBT_TONE_CONVERSION_NOTE_OFF);
   }
-  
+
   if(note_string_to_values(note,&tone,&octave))
     return (1+(octave<<4)+tone);
   else
@@ -266,15 +267,15 @@ const gchar *gstbt_tone_conversion_note_number_2_string(guint note) {
   static gchar str[4];
   static const gchar key[12][3]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
   guint tone, octave;
-  
+
   if(note==GSTBT_TONE_CONVERSION_NOTE_OFF) return ("off");
-  
+
   if(note_number_to_values(note,&tone,&octave)) {
     sprintf(str,"%2s%1d",key[tone],octave);
     return(str);
   }
   else
-    return("");  
+    return("");
 }
 
 //-- wrapper

@@ -18,11 +18,12 @@
  */
 /**
  * SECTION:gstbml
+ * @title: GstBml
  * @short_description: buzzmachine wrapper
  *
  * Wrapper for buzzmachine sound generators and effects.
  */
- 
+
 #include "plugin.h"
 
 #define GST_CAT_DEFAULT bml_debug
@@ -45,7 +46,7 @@ static void remove_double_def_chars(gchar *name) {
     ptr1++;
     ptr2++;
   }
-  if(ptr1!=ptr2) *ptr1='\0'; 
+  if(ptr1!=ptr2) *ptr1='\0';
   // remove trailing '-'
   ptr1--;
   while(*ptr1=='-') *ptr1++='\0';
@@ -57,7 +58,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bmh)) {
   gboolean res=FALSE;
 
   GST_INFO("describing %p : %s",bmh, pathname);
-  
+
   // use dllname to register
   // 'M3.dll' and 'M3 Pro.dll' both use the name M3 :(
   // BM_PROP_DLL_NAME instead of BM_PROP_SHORT_NAME
@@ -124,7 +125,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bmh)) {
       g_free(voice_type_name);
       return(TRUE);
     }
-    
+
     // create the metadata store
 #ifdef BML_WRAPPED
     bml_meta=gst_structure_empty_new("bmlw");

@@ -27,13 +27,13 @@ else
 BML_CF =
 BML_LA =
 BML_IGNORE_H = common.h gstbml.h gstbmlsrc.h gstbmltransform.h gstbmlv.h \
-	plugin.h utils.h  
+	plugin.h utils.h
 endif
 
 # The directory containing the source code. Relative to $(srcdir).
 # gtk-doc will search all .c & .h files beneath here for inline comments
 # documenting the functions and macros.
-DOC_SOURCE_DIR=$(top_srcdir)/
+DOC_SOURCE_DIR=$(top_srcdir)
 
 # Extra options to pass to gtkdoc-scangobj. Not normally needed.
 SCANGOBJ_OPTIONS=--type-init-func="g_type_init();gst_init(&argc,&argv)"

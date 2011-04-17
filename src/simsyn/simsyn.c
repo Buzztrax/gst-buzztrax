@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstsimsyn
+ * @title: GstSimSyn
  * @short_description: simple monophonic audio synthesizer
  *
  * Simple monophonic audio synthesizer with a decay envelope and a

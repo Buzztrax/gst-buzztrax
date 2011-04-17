@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstbtenvelope
+ * @title: GstBtEnvelope
  * @short_description: envelope helper object
  *
  * Object with one controllable public gdouble variable /property
@@ -113,7 +114,7 @@ gstbt_envelope_dispose (GObject *object)
 
   if (env->dispose_has_run) return;
   env->dispose_has_run = TRUE;
-  
+
   G_OBJECT_CLASS(gstbt_envelope_parent_class)->dispose(object);
 }
 
@@ -133,7 +134,7 @@ gstbt_envelope_class_init (GstBtEnvelopeClass * klass)
   gobject_class->set_property = gstbt_envelope_set_property;
   gobject_class->get_property = gstbt_envelope_get_property;
   gobject_class->dispose      = gstbt_envelope_dispose;
-  
+
   // register own properties
 
   g_object_class_install_property(gobject_class, PROP_VALUE,

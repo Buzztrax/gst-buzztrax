@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstpreset
+ * @title: GstPreset
  * @short_description: helper interface for element presets
  *
  * This interface offers methods to query and manipulate parameter preset sets.
@@ -211,11 +212,11 @@ preset_open_and_parse_header(GstPreset * self, const gchar *preset_path, gchar *
 {
   GKeyFile *in = g_key_file_new();
   GError *error = NULL;
-  
+
   if (g_key_file_load_from_file (in, preset_path, G_KEY_FILE_KEEP_COMMENTS|G_KEY_FILE_KEEP_TRANSLATIONS, &error)) {
     const gchar *element_name = G_OBJECT_TYPE_NAME (self);
     gchar *name = g_key_file_get_value (in, PRESET_HEADER, "element", NULL);
-    
+
     if (!name || strcmp (name, element_name)) {
       GST_WARNING ("Wrong element name in preset file %s", preset_path);
       goto Error;
@@ -260,7 +261,7 @@ preset_merge (GKeyFile *system, GKeyFile *user) {
   gchar *str;
   gchar **groups, **keys;
   gsize i, j, num_groups, num_keys;
-  
+
   /* copy file comment if there is any */
   if ((str = g_key_file_get_comment (user, NULL, NULL, NULL))) {
     g_key_file_set_comment (system, NULL, NULL, str, NULL);
@@ -282,7 +283,7 @@ preset_merge (GKeyFile *system, GKeyFile *user) {
     if (g_key_file_has_group (system, groups[i])) {
       g_key_file_remove_group (system, groups[i], NULL);
     }
-    
+
     keys = g_key_file_get_keys (user, groups[i], &num_keys, NULL);
     for (j = 0; j < num_keys; j++) {
       /* copy key comment if there is any */
@@ -320,7 +321,7 @@ gst_preset_default_get_preset_names (GstPreset * self)
     in_system = preset_open_and_parse_header (self, preset_system_path, &str_version_system);
     /* compare version to check for merge */
     if (in_system) {
-      if (!in_user || (in_user && (preset_parse_version (str_version_system) > 
+      if (!in_user || (in_user && (preset_parse_version (str_version_system) >
           preset_parse_version (str_version_user)))) {
         /* keep system presets */
         presets = in_system;
@@ -349,7 +350,7 @@ gst_preset_default_get_preset_names (GstPreset * self)
       gst_preset_default_save_presets_file (self);
     }
   }
-  
+
   if (presets) {
     GList *instances;
     gboolean found = FALSE;
@@ -357,7 +358,7 @@ gst_preset_default_get_preset_names (GstPreset * self)
     gchar **groups = g_key_file_get_groups (presets, &num_groups);
     gchar **preset_names = g_new (gchar*, num_groups);
     GSList *list=NULL,*node;
-    
+
     /* insert instance in instance list (if not yet there) */
     instances = (GList *) g_type_get_qdata (type, instance_list_quark);
     if (instances != NULL) {
@@ -451,7 +452,7 @@ gst_preset_default_load_preset (GstPreset * self, const gchar * name)
           if ((str = g_key_file_get_value (presets, name, property->name, NULL))) {
             GST_DEBUG ("setting value '%s' for property '%s'", str,
                 property->name);
-            
+
             g_value_init(&gvalue, property->value_type);
             if (gst_value_deserialize (&gvalue, str)) {
               g_object_set_property (G_OBJECT (self), property->name, &gvalue);
@@ -611,7 +612,7 @@ gst_preset_default_rename_preset (GstPreset * self, const gchar * old_name,
         g_key_file_set_comment (presets, new_name, NULL, str, NULL);
         g_free(str);
       }
-  
+
       keys = g_key_file_get_keys (presets, old_name, &num_keys, NULL);
       for (j = 0; j < num_keys; j++) {
         /* copy key comment if there is any */
@@ -624,9 +625,9 @@ gst_preset_default_rename_preset (GstPreset * self, const gchar * old_name,
         g_free(str);
       }
       g_strfreev(keys);
-  
+
       g_key_file_remove_group (presets, old_name, NULL);
-  
+
       return gst_preset_default_save_presets_file (self);
     } else {
       GST_WARNING ("no preset named %s", old_name);
@@ -687,13 +688,13 @@ gst_preset_default_get_meta (GstPreset * self, const gchar * name,
     const gchar * tag, gchar ** value)
 {
   GKeyFile *presets;
-  
+
   g_assert (value);
 
   /* get the presets from the type */
   if ((presets = preset_get_storage (self))) {
     gchar *key = g_strdup_printf ("_meta/%s",tag);
-    
+
     *value = g_key_file_get_value(presets, name, key, NULL);
     g_free (key);
     return TRUE;

@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstbtchildbin
+ * @title: GstBtChildBin
  * @short_description: helper interface for multi child gstreamer elements
  *
  * This interface provides an extension to the #GstChildProxy interface, which

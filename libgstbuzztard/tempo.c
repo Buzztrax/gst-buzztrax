@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstbttempo
+ * @title: GstBtTempo
  * @short_description: helper interface for tempo synced gstreamer elements
  *
  * This interface offers three #GObject properties to specify a rythmic tempo of

@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstbthelp
+ * @title: GstBtHelp
  * @short_description: helper interface for element user docs
  *
  * This interface offers a method to query the URL of the user documentation.

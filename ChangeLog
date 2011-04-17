@@ -1,3 +1,24 @@
+2011-04-17  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/Makefile.am:
+	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztard.types.in:
+	* libgstbuzztard/childbin.c:
+	* libgstbuzztard/compat.h:
+	* libgstbuzztard/envelope.c:
+	* libgstbuzztard/envelope.h:
+	* libgstbuzztard/help.c:
+	* libgstbuzztard/musicenums.c:
+	* libgstbuzztard/preset.c:
+	* libgstbuzztard/propertymeta.c:
+	* libgstbuzztard/tempo.c:
+	* libgstbuzztard/toneconversion.c:
+	* src/audiodelay/audiodelay.c:
+	* src/bml/gstbml.c:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Add titles to the section docs and other doc cleanups.
+
 2011-03-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:

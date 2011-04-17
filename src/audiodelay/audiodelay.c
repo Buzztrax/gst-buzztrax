@@ -20,6 +20,7 @@
 
 /**
  * SECTION:gstaudiodelay
+ * @title: GstAudioDelay
  * @short_description: audio echo effect
  *
  * <refsect2>
@@ -259,7 +260,7 @@ gst_audio_delay_init (GstAudioDelay *filter, GstAudioDelayClass * klass)
   gst_audio_delay_calculate_tick_time (filter);
 
   filter->ring_buffer = NULL;
-  
+
 #if GST_CHECK_VERSION(0,10,17)
   gst_base_transform_set_gap_aware (GST_BASE_TRANSFORM (filter), TRUE);
 #endif
@@ -395,7 +396,7 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
   guint i, num_samples = GST_BUFFER_SIZE (outbuf) / sizeof (gint16);
   guint rb_in, rb_out;
   gint32 sum_fx=0;
-  
+
   /* flush ring_buffer on DISCONT */
   if (GST_BUFFER_FLAG_IS_SET (outbuf,GST_BUFFER_FLAG_DISCONT)) {
     memset (filter->ring_buffer, 0, sizeof (gint16) * filter->max_delaytime);
@@ -419,7 +420,7 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
   if (G_UNLIKELY(GST_BUFFER_FLAG_IS_SET (outbuf,GST_BUFFER_FLAG_GAP) ||
     gst_base_transform_is_passthrough (base))) {
     /* input is silence */
-  
+
     for (i = 0; i < num_samples; i++) {
       val_fx = (gdouble)filter->ring_buffer[rb_out];
       sum_fx += abs (filter->ring_buffer[rb_out]);
@@ -445,7 +446,7 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
     }
   }
   filter->rb_ptr=rb_in;
-  
+
   if (GST_BUFFER_FLAG_IS_SET (outbuf,GST_BUFFER_FLAG_GAP) && sum_fx) {
     GST_BUFFER_FLAG_UNSET (outbuf,GST_BUFFER_FLAG_GAP);
   }

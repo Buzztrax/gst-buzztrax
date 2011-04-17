@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Library General Public License for more details.
- *
+ *g_object_checked_unref
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
@@ -20,6 +20,7 @@
  */
 /**
  * SECTION:gstbuzztard
+ * @title: gst-buzztard
  * @short_description: internal module utilities
  *
  * Internal gst-buzztard module utilities.

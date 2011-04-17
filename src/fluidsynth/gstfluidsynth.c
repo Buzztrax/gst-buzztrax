@@ -23,6 +23,7 @@
  */
 /**
  * SECTION:gstfluidsynth
+ * @title: GstFluidSynth
  * @short_description: FluidSynth GStreamer wrapper
  *
  * <refsect2>
@@ -71,7 +72,7 @@
  *       - rename would store it localy as new name
  *       - saving is sort of fake still as one can't change the content of the
  *         patch anyway
- * 
+ *
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -238,7 +239,7 @@ chorus_waveform_get_type (void)
 static void gst_fluidsynth_calculate_buffer_frames(GstFluidsynth *self)
 {
   const gdouble ticks_per_minute=(gdouble)(self->beats_per_minute*self->ticks_per_beat);
-  
+
   self->samples_per_buffer=((self->samplerate*60.0)/ticks_per_minute);
   self->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
@@ -291,7 +292,7 @@ static guint gst_fluidsynth_note_string_2_value (const gchar *note) {
 
   g_return_val_if_fail(note,0);
   g_return_val_if_fail((strlen(note)==3),0);
-  
+
   g_return_val_if_fail((note[1]=='-' || note[1]=='#'),0);
 
   // parse note
@@ -359,7 +360,7 @@ gst_fluidsynth_base_init (gpointer g_class)
 
   gst_element_class_add_pad_template (element_class,
       gst_static_pad_template_get (&gst_fluidsynth_src_template));
-  gst_element_class_set_details_simple (element_class, 
+  gst_element_class_set_details_simple (element_class,
       "FluidSynth",
       "Source/Audio",
       "FluidSynth wavetable synthesizer",
@@ -1081,7 +1082,7 @@ gst_fluidsynth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
 
   /* now move to the time indicated */
   src->n_samples = gst_util_uint64_scale_int(time, src->samplerate, GST_SECOND);
-  
+
   if (!src->reverse) {
     if (GST_CLOCK_TIME_IS_VALID (segment->start)) {
       segment->time = segment->start;
@@ -1164,7 +1165,7 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
         (src->n_samples_stop >= src->n_samples - samples_per_buffer));
     }
   }
-  
+
   if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
     src->generate_samples_per_buffer = src->n_samples_stop - src->n_samples;
