@@ -25,8 +25,6 @@
 
 #include "plugin.h"
 
-#include <libgstbuzztard/gstbufferpool.h>
-
 G_BEGIN_DECLS
 
 // that can not work here, as we register a dozen types at once
@@ -45,8 +43,6 @@ typedef struct _GstBMLSrcClass GstBMLSrcClass;
 struct _GstBMLSrc {
   GstBaseSrc parent;
   GstBML bml;
-
-  GstBufferPool *buffer_pool;
 };
 
 struct _GstBMLSrcClass {

@@ -70,9 +70,6 @@
 #define GST_CAT_DEFAULT sim_syn_debug
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
-static gboolean _use_buffer_pool = FALSE;
-
-
 enum {
   // static class properties
   PROP_SAMPLES_PER_BUFFER=1,
@@ -177,7 +174,7 @@ static void gst_sim_syn_change_volume (GstSimSyn * src);
 static void gst_sim_syn_change_filter (GstSimSyn * src);
 
 static gboolean gst_sim_syn_start (GstBaseSrc *basesrc);
-static gboolean gst_sim_syn_stop (GstBaseSrc *basesrc);
+//static gboolean gst_sim_syn_stop (GstBaseSrc *basesrc);
 static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
@@ -192,16 +189,6 @@ static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
   self->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
   GST_INFO("samples_per_buffer=%lf",self->samples_per_buffer);
-
-  if(_use_buffer_pool) {
-    GstBufferPoolConfig pool_config = { 10, 10,
-      (gint)(0.5 + self->samples_per_buffer) * sizeof (gint16),
-      0, 0, 4
-    };
-    if(!gst_buffer_pool_set_config(self->buffer_pool,&pool_config)) {
-      GST_WARNING_OBJECT(self,"setting up the buffer pool failed");
-    }
-  }
 }
 
 static void gst_sim_syn_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
@@ -289,7 +276,7 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_sim_syn_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_sim_syn_query);
   gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gst_sim_syn_start);
-  gstbasesrc_class->stop = GST_DEBUG_FUNCPTR (gst_sim_syn_stop);
+  //gstbasesrc_class->stop = GST_DEBUG_FUNCPTR (gst_sim_syn_stop);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_sim_syn_create);
 
   // override interface properties
@@ -352,7 +339,6 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   GstPad *pad = GST_BASE_SRC_PAD (src);
 
   gst_pad_set_fixatecaps_function (pad, gst_sim_syn_src_fixate);
-  src->buffer_pool=gst_buffer_pool_new();
 
   src->samplerate = GST_AUDIO_DEF_RATE;
   src->beats_per_minute=120;
@@ -974,19 +960,18 @@ gst_sim_syn_start (GstBaseSrc *basesrc)
   src->n_samples=G_GINT64_CONSTANT(0);
   src->running_time=G_GUINT64_CONSTANT(0);
 
-  gst_buffer_pool_set_flushing (src->buffer_pool, FALSE);
-
   return(TRUE);
 }
 
+/*
 static gboolean
 gst_sim_syn_stop (GstBaseSrc * basesrc)
 {
   GstSimSyn *src = GST_SIM_SYN (basesrc);
 
-  gst_buffer_pool_set_flushing (src->buffer_pool, TRUE);
   return TRUE;
 }
+*/
 
 static GstFlowReturn
 gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
@@ -1049,13 +1034,10 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
   }
   next_running_time = src->running_time + (src->reverse ? (-src->ticktime) : src->ticktime);
 
-  if (_use_buffer_pool)
-    res = gst_buffer_pool_acquire_buffer(src->buffer_pool,&buf,NULL);
-  else
-    /* allocate a new buffer suitable for this pad */
-    res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
-        src->generate_samples_per_buffer * sizeof (gint16),
-        GST_PAD_CAPS (basesrc->srcpad), &buf);
+  /* allocate a new buffer suitable for this pad */
+  res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
+      src->generate_samples_per_buffer * sizeof (gint16),
+      GST_PAD_CAPS (basesrc->srcpad), &buf);
   if (res != GST_FLOW_OK) {
     return res;
   }
@@ -1269,8 +1251,6 @@ gst_sim_syn_dispose (GObject *object)
   if (src->volenv_controller) g_object_unref (src->volenv_controller);
   if (src->volenv) g_object_unref (src->volenv);
 
-  if (src->buffer_pool) g_object_unref (src->buffer_pool);
-
   G_OBJECT_CLASS(parent_class)->dispose(object);
 }
 
@@ -1328,8 +1308,6 @@ GType gst_sim_syn_get_type (void)
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
-  _use_buffer_pool = (g_getenv("GST_USE_BUFFERPOOL") != NULL);
-
   GST_DEBUG_CATEGORY_INIT(GST_CAT_DEFAULT, "simsyn", GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
 
   /* initialize gst controller library */

@@ -1,5 +1,21 @@
 2011-04-17  Stefan Kost  <ensonic@users.sf.net>
 
+	* configure.ac:
+	* libgstbuzztard/Makefile.am:
+	* src/bml/gstbmlsrc.c:
+	* src/bml/gstbmlsrc.h:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	* libgstbuzztard/gstpooledbuffer.h (deleted):
+	* libgstbuzztard/gstbufferpool.c (deleted):
+	* libgstbuzztard/gstlfqueue.c (deleted):
+	* libgstbuzztard/gstbufferpool.h (deleted):
+	* libgstbuzztard/gstlfqueue.h (deleted):
+	* libgstbuzztard/gstpooledbuffer.c (deleted):
+	  Remove bufferpool again. We're going to have it in gst-0.11.
+
+2011-04-17  Stefan Kost  <ensonic@users.sf.net>
+
 	* docs/reference/Makefile.am:
 	* docs/reference/gst-buzztard-sections.txt:
 	* docs/reference/gst-buzztard.types.in:

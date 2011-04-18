@@ -29,8 +29,6 @@
 #include <libgstbuzztard/toneconversion.h>
 #include <libgstbuzztard/envelope.h>
 
-#include <libgstbuzztard/gstbufferpool.h>
-
 G_BEGIN_DECLS
 
 #define GST_TYPE_SIM_SYN            (gst_sim_syn_get_type())
@@ -153,8 +151,6 @@ struct _GstSimSyn {
   /* filter specific data */
   gdouble flt_low, flt_mid, flt_high;
   gdouble flt_res;
-
-  GstBufferPool *buffer_pool;
 };
 
 struct _GstSimSynClass {

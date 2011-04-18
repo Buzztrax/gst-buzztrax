@@ -24,8 +24,6 @@
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
 
-static gboolean _use_buffer_pool = FALSE;
-
 static GstStaticPadTemplate bml_pad_caps_mono_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
   GST_PAD_SRC,
@@ -110,16 +108,6 @@ static void gst_bml_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute
   GstBML *bml=GST_BML(bml_src);
 
   bml(gstbml_tempo_change_tempo(G_OBJECT(bml_src),bml,beats_per_minute,ticks_per_beat,subticks_per_tick));
-
-  if(_use_buffer_pool) {
-    GstBufferPoolConfig pool_config = { 10, 10,
-      (gint)(0.5 + bml->samples_per_buffer) * 2 * sizeof (BMLData),
-      0, 0, 4
-    };
-    if(!gst_buffer_pool_set_config(bml_src->buffer_pool,&pool_config)) {
-      GST_WARNING_OBJECT(bml_src,"setting up the buffer pool failed");
-    }
-  }
 }
 
 static void gst_bml_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
@@ -297,14 +285,13 @@ error:
   }
 }
 
+/*
 static gboolean gst_bml_src_start(GstBaseSrc * base) {
   GstBMLSrc *bml_src=GST_BML_SRC(base);
 
-  if(_use_buffer_pool) {
-    gst_buffer_pool_set_flushing (bml_src->buffer_pool, FALSE);
-  }
   return TRUE;
 }
+*/
 
 static gboolean gst_bml_src_stop(GstBaseSrc * base) {
   GstBMLSrc *bml_src=GST_BML_SRC(base);
@@ -312,9 +299,6 @@ static gboolean gst_bml_src_stop(GstBaseSrc * base) {
   gpointer bm=bml->bm;
 
   bml(stop(bm));
-  if(_use_buffer_pool) {
-    gst_buffer_pool_set_flushing (bml_src->buffer_pool, TRUE);
-  }
   return TRUE;
 }
 
@@ -429,13 +413,10 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   }
   next_running_time = bml->running_time + (bml->reverse ? (-bml->ticktime) : bml->ticktime);
 
-  if (_use_buffer_pool)
-    res = gst_buffer_pool_acquire_buffer(bml_src->buffer_pool,&buf,NULL);
-  else
-    /* allocate a new buffer suitable for this pad */
-    res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
-      samples_per_buffer * sizeof(BMLData),
-      GST_PAD_CAPS (srcpad), &buf);
+  /* allocate a new buffer suitable for this pad */
+  res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
+    samples_per_buffer * sizeof(BMLData),
+    GST_PAD_CAPS (srcpad), &buf);
   if (res != GST_FLOW_OK) {
     return res;
   }
@@ -547,13 +528,10 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   }
   next_running_time = bml->running_time + (bml->reverse ? (-bml->ticktime) : bml->ticktime);
 
-  if (_use_buffer_pool)
-    res = gst_buffer_pool_acquire_buffer(bml_src->buffer_pool,&buf,NULL);
-  else
-    /* allocate a new buffer suitable for this pad */
-    res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
-        samples_per_buffer * 2 * sizeof(BMLData),
-        GST_PAD_CAPS (srcpad), &buf);
+  /* allocate a new buffer suitable for this pad */
+  res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
+      samples_per_buffer * 2 * sizeof(BMLData),
+      GST_PAD_CAPS (srcpad), &buf);
   if (res != GST_FLOW_OK) {
     return res;
   }
@@ -629,8 +607,6 @@ static void gst_bml_src_dispose(GObject *object) {
 
   gstbml_dispose(bml);
 
-  if (bml_src->buffer_pool) g_object_unref (bml_src->buffer_pool);
-
   G_OBJECT_CLASS(parent_class)->dispose(object);
 }
 
@@ -668,17 +644,6 @@ static void gst_bml_src_init(GstBMLSrc *bml_src) {
   srcpad=GST_BASE_SRC_PAD(bml_src);
   gst_pad_set_fixatecaps_function(srcpad, gst_bml_src_src_fixate);
 
-  if(_use_buffer_pool) {
-    GstBufferPoolConfig pool_config = { 10, 10,
-      (gint)(0.5 + bml->samples_per_buffer) * 2 * sizeof (BMLData),
-      0, 0, 4
-    };
-    bml_src->buffer_pool=gst_buffer_pool_new();
-    if(!gst_buffer_pool_set_config(bml_src->buffer_pool,&pool_config)) {
-      GST_WARNING_OBJECT(bml_src,"setting up the buffer pool failed");
-    }
-  }
-
   GST_DEBUG("  done");
 }
 
@@ -699,7 +664,7 @@ static void gst_bml_src_class_init(GstBMLSrcClass * klass) {
   gstbasesrc_class->is_seekable = GST_DEBUG_FUNCPTR(gst_bml_src_is_seekable);
   gstbasesrc_class->do_seek     = GST_DEBUG_FUNCPTR(gst_bml_src_do_seek);
   gstbasesrc_class->query       = GST_DEBUG_FUNCPTR(gst_bml_src_query);
-  gstbasesrc_class->start       = GST_DEBUG_FUNCPTR(gst_bml_src_start);
+  //gstbasesrc_class->start       = GST_DEBUG_FUNCPTR(gst_bml_src_start);
   gstbasesrc_class->stop        = GST_DEBUG_FUNCPTR(gst_bml_src_stop);
   if(bml_class->output_channels==1) {
     gstbasesrc_class->create    = GST_DEBUG_FUNCPTR(gst_bml_src_create_mono);
@@ -788,8 +753,6 @@ GType bml(src_get_type(const char *element_type_name, gboolean is_polyphonic, gb
   GType element_type;
 
   GST_INFO("registering source-plugin: \"%s\"",element_type_name);
-
-  _use_buffer_pool = (g_getenv("GST_USE_BUFFERPOOL") != NULL);
 
   // create the element type now
   element_type = g_type_register_static(GST_TYPE_BASE_SRC, element_type_name, &element_type_info, 0);
