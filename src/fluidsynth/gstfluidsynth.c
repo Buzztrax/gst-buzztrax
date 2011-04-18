@@ -159,13 +159,13 @@ static GType interp_mode_get_type (void);
 static GType chorus_waveform_get_type (void);
 
 static void gst_fluidsynth_base_init (gpointer klass);
-static void gst_fluidsynth_class_init (GstFluidsynthClass *klass);
+static void gst_fluidsynth_class_init (GstBtFluidsynthClass *klass);
 static void settings_foreach_count (void *data, char *name, int type);
 static void settings_foreach_func (void *data, char *name, int type);
-static void gst_fluidsynth_init (GstFluidsynth *object, GstFluidsynthClass *klass);
+static void gst_fluidsynth_init (GstBtFluidsynth *object, GstBtFluidsynthClass *klass);
 
-static void gst_fluidsynth_update_reverb (GstFluidsynth *gstsynth);
-static void gst_fluidsynth_update_chorus (GstFluidsynth *gstsynth);
+static void gst_fluidsynth_update_reverb (GstBtFluidsynth *gstsynth);
+static void gst_fluidsynth_update_chorus (GstBtFluidsynth *gstsynth);
 
 static void gst_fluidsynth_set_property (GObject * object,
     guint prop_id, const GValue * value, GParamSpec * pspec);
@@ -200,18 +200,18 @@ interp_mode_get_type (void)
   static const GEnumValue values[] =
   {
     { FLUID_INTERP_NONE,
-      "GST_FLUIDSYNTH_INTERP_NONE", "None" },
+      "GSTBT_FLUIDSYNTH_INTERP_NONE", "None" },
     { FLUID_INTERP_LINEAR,
-      "GST_FLUIDSYNTH_INTERP_LINEAR", "Linear" },
+      "GSTBT_FLUIDSYNTH_INTERP_LINEAR", "Linear" },
     { FLUID_INTERP_4THORDER,
-      "GST_FLUIDSYNTH_INTERP_4THORDER", "4th Order" },
+      "GSTBT_FLUIDSYNTH_INTERP_4THORDER", "4th Order" },
     { FLUID_INTERP_7THORDER,
-      "GST_FLUIDSYNTH_INTERP_7THORDER", "7th Order" },
+      "GSTBT_FLUIDSYNTH_INTERP_7THORDER", "7th Order" },
     { 0, NULL, NULL }
   };
 
   if (!G_UNLIKELY (type))
-    type = g_enum_register_static ("GstFluidsynthInterp", values);
+    type = g_enum_register_static ("GstBtFluidsynthInterp", values);
 
   return (type);
 }
@@ -223,20 +223,20 @@ chorus_waveform_get_type (void)
   static const GEnumValue values[] =
   {
     { FLUID_CHORUS_MOD_SINE,
-      "GST_FLUIDSYNTH_CHORUS_MOD_SINE", "Sine" },
+      "GSTBT_FLUIDSYNTH_CHORUS_MOD_SINE", "Sine" },
     { FLUID_CHORUS_MOD_TRIANGLE,
-      "GST_FLUIDSYNTH_CHORUS_MOD_TRIANGLE", "Triangle" },
+      "GSTBT_FLUIDSYNTH_CHORUS_MOD_TRIANGLE", "Triangle" },
     { 0, NULL, NULL }
   };
 
   /* initialize the type info structure for the enum type */
   if (!G_UNLIKELY (type))
-    type = g_enum_register_static ("GstFluidsynthChorusWaveform", values);
+    type = g_enum_register_static ("GstBtFluidsynthChorusWaveform", values);
 
   return (type);
 }
 
-static void gst_fluidsynth_calculate_buffer_frames(GstFluidsynth *self)
+static void gst_fluidsynth_calculate_buffer_frames(GstBtFluidsynth *self)
 {
   const gdouble ticks_per_minute=(gdouble)(self->beats_per_minute*self->ticks_per_beat);
 
@@ -247,7 +247,7 @@ static void gst_fluidsynth_calculate_buffer_frames(GstFluidsynth *self)
 }
 
 static void gst_fluidsynth_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
-  GstFluidsynth *self=GST_FLUIDSYNTH(tempo);
+  GstBtFluidsynth *self=GSTBT_FLUIDSYNTH(tempo);
   gboolean changed=FALSE;
 
   if(beats_per_minute>=0) {
@@ -379,7 +379,7 @@ typedef struct
 } ForeachBag;
 
 static void
-gst_fluidsynth_class_init (GstFluidsynthClass * klass)
+gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
 {
   GObjectClass *gobject_class;
   GstBaseSrcClass *gstbasesrc_class;
@@ -578,7 +578,7 @@ static void
 gst_fluidsynth_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstFluidsynth *gstsynth = GST_FLUIDSYNTH (object);
+  GstBtFluidsynth *gstsynth = GSTBT_FLUIDSYNTH (object);
   char *name;
   int retval;
 
@@ -729,11 +729,11 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       gst_base_src_set_live (GST_BASE_SRC (gstsynth),
       g_value_get_boolean (value));
       break;
-	// tempo iface
+    // tempo iface
     case PROP_BPM:
     case PROP_TPB:
     case PROP_STPT:
-	  GST_WARNING("use gstbt_tempo_change_tempo()");
+      GST_WARNING("use gstbt_tempo_change_tempo()");
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -745,7 +745,7 @@ static void
 gst_fluidsynth_get_property (GObject * object, guint prop_id,
                              GValue * value, GParamSpec * pspec)
 {
-  GstFluidsynth *gstsynth = GST_FLUIDSYNTH (object);
+  GstBtFluidsynth *gstsynth = GSTBT_FLUIDSYNTH (object);
   char *s;
   char *name;
   double d;
@@ -846,7 +846,7 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     case PROP_IS_LIVE:
       g_value_set_boolean (value, gst_base_src_is_live (GST_BASE_SRC (gstsynth)));
       break;
-	// tempo iface
+    // tempo iface
     case PROP_BPM:
       g_value_set_ulong(value, gstsynth->beats_per_minute);
       break;
@@ -857,10 +857,10 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
       g_value_set_ulong(value, gstsynth->subticks_per_tick);
       break;
 #if !GST_CHECK_VERSION(0,10,31)
-	// help iface
-	case PROP_DOCU_URI:
-	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstFluidSynth.html");
-	  break;
+    // help iface
+    case PROP_DOCU_URI:
+      g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstFluidSynth.html");
+      break;
 #endif
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -869,7 +869,7 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
+gst_fluidsynth_init (GstBtFluidsynth *gstsynth, GstBtFluidsynthClass * g_class)
 {
   GstPad *pad = GST_BASE_SRC_PAD (gstsynth);
 
@@ -955,7 +955,7 @@ gst_fluidsynth_init (GstFluidsynth *gstsynth, GstFluidsynthClass * g_class)
 }
 
 static void
-gst_fluidsynth_update_reverb (GstFluidsynth *gstsynth)
+gst_fluidsynth_update_reverb (GstBtFluidsynth *gstsynth)
 {
   if (!gstsynth->reverb_update) return;
 
@@ -969,7 +969,7 @@ gst_fluidsynth_update_reverb (GstFluidsynth *gstsynth)
 }
 
 static void
-gst_fluidsynth_update_chorus (GstFluidsynth *gstsynth)
+gst_fluidsynth_update_chorus (GstBtFluidsynth *gstsynth)
 {
   if (!gstsynth->chorus_update) return;
 
@@ -985,7 +985,7 @@ gst_fluidsynth_update_chorus (GstFluidsynth *gstsynth)
 static void
 gst_fluidsynth_src_fixate (GstPad * pad, GstCaps * caps)
 {
-  GstFluidsynth *src = GST_FLUIDSYNTH (GST_PAD_PARENT (pad));
+  GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (GST_PAD_PARENT (pad));
   GstStructure *structure;
 
   structure = gst_caps_get_structure (caps, 0);
@@ -996,7 +996,7 @@ gst_fluidsynth_src_fixate (GstPad * pad, GstCaps * caps)
 static gboolean
 gst_fluidsynth_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
 {
-  GstFluidsynth *src = GST_FLUIDSYNTH (basesrc);
+  GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (basesrc);
   const GstStructure *structure;
   gboolean ret;
 
@@ -1013,7 +1013,7 @@ gst_fluidsynth_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
 static gboolean
 gst_fluidsynth_query (GstBaseSrc * basesrc, GstQuery * query)
 {
-  GstFluidsynth *src = GST_FLUIDSYNTH (basesrc);
+  GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (basesrc);
   gboolean res = FALSE;
 
   switch (GST_QUERY_TYPE (query)) {
@@ -1073,7 +1073,7 @@ error:
 static gboolean
 gst_fluidsynth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
 {
-  GstFluidsynth *src = GST_FLUIDSYNTH (basesrc);
+  GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (basesrc);
   GstClockTime time;
 
   time = segment->last_stop;
@@ -1127,7 +1127,7 @@ static GstFlowReturn
 gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
 		       GstBuffer ** buffer)
 {
-  GstFluidsynth *src = GST_FLUIDSYNTH (basesrc);
+  GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (basesrc);
   GstFlowReturn res;
   GstBuffer *buf;
   GstClockTime next_running_time;
@@ -1229,7 +1229,7 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
 static void
 gst_fluidsynth_dispose (GObject *object)
 {
-  GstFluidsynth *gstsynth = GST_FLUIDSYNTH (object);
+  GstBtFluidsynth *gstsynth = GSTBT_FLUIDSYNTH (object);
 
   if (gstsynth->dispose_has_run) return;
   gstsynth->dispose_has_run = TRUE;
@@ -1247,19 +1247,19 @@ gst_fluidsynth_dispose (GObject *object)
   G_OBJECT_CLASS (parent_class)->dispose (object);
 }
 
-GType gst_fluidsynth_get_type (void)
+GType gstbt_fluidsynth_get_type (void)
 {
   static GType type = 0;
 
   if (G_UNLIKELY(!type)) {
     const GTypeInfo element_type_info = {
-      sizeof (GstFluidsynthClass),
+      sizeof (GstBtFluidsynthClass),
       (GBaseInitFunc)gst_fluidsynth_base_init,
       NULL,                       /* base_finalize */
       (GClassInitFunc)gst_fluidsynth_class_init,
       NULL,                       /* class_finalize */
       NULL,               /* class_data */
-      sizeof (GstFluidsynth),
+      sizeof (GstBtFluidsynth),
       0,                  /* n_preallocs */
       (GInstanceInitFunc) gst_fluidsynth_init
     };
@@ -1307,7 +1307,7 @@ plugin_init (GstPlugin * plugin)
   gst_controller_init(NULL,NULL);
 
   return gst_element_register (plugin, "fluidsynth",
-                               GST_RANK_NONE, GST_TYPE_FLUIDSYNTH);
+                               GST_RANK_NONE, GSTBT_TYPE_FLUIDSYNTH);
 }
 
 GST_PLUGIN_DEFINE (

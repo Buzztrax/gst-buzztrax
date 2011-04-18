@@ -1,4 +1,4 @@
-/* 
+/*
  * GStreamer
  * Copyright (C) 2006 Stefan Kost <ensonic@users.sf.net>
  *
@@ -17,9 +17,9 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
- 
-#ifndef __GST_AUDIO_DELAY_H__
-#define __GST_AUDIO_DELAY_H__
+
+#ifndef __GSTBT_AUDIO_DELAY_H__
+#define __GSTBT_AUDIO_DELAY_H__
 
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
@@ -27,23 +27,23 @@
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_AUDIO_DELAY            (gst_audio_delay_get_type())
-#define GST_AUDIO_DELAY(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_AUDIO_DELAY,GstAudioDelay))
-#define GST_IS_AUDIO_DELAY(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_AUDIO_DELAY))
-#define GST_AUDIO_DELAY_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GST_TYPE_AUDIO_DELAY,GstAudioDelayClass))
-#define GST_IS_AUDIO_DELAY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GST_TYPE_AUDIO_DELAY))
-#define GST_AUDIO_DELAY_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GST_TYPE_AUDIO_DELAY,GstAudioDelayClass))
+#define GSTBT_TYPE_AUDIO_DELAY            (gstbt_audio_delay_get_type())
+#define GSTBT_AUDIO_DELAY(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_AUDIO_DELAY,GstBtAudioDelay))
+#define GSTBT_IS_AUDIO_DELAY(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_AUDIO_DELAY))
+#define GSTBT_AUDIO_DELAY_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_AUDIO_DELAY,GstBtAudioDelayClass))
+#define GSTBT_IS_AUDIO_DELAY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_AUDIO_DELAY))
+#define GSTBT_AUDIO_DELAY_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_AUDIO_DELAY,GstBtAudioDelayClass))
 
-typedef struct _GstAudioDelay      GstAudioDelay;
-typedef struct _GstAudioDelayClass GstAudioDelayClass;
+typedef struct _GstBtAudioDelay      GstBtAudioDelay;
+typedef struct _GstBtAudioDelayClass GstBtAudioDelayClass;
 
 /**
- * GstAudioDelay:
+ * GstBtAudioDelay:
  * @parent: parent instance
  *
  * Class instance data.
  */
-struct _GstAudioDelay {
+struct _GstBtAudioDelay {
   GstBaseTransform parent;
 
   /* < private > */
@@ -52,13 +52,13 @@ struct _GstAudioDelay {
   guint drywet;
   guint delaytime;
   guint feedback;
-  
+
   /* ringbuffer */
   gint samplerate;
   gint16 *ring_buffer;
   guint max_delaytime;
   guint rb_ptr;
-  
+
   /* tempo handling */
   gulong beats_per_minute;
   gulong ticks_per_beat;
@@ -66,12 +66,12 @@ struct _GstAudioDelay {
   GstClockTime ticktime;
 };
 
-struct _GstAudioDelayClass {
+struct _GstBtAudioDelayClass {
   GstBaseTransformClass parent_class;
 };
 
-GType gst_audio_delay_get_type (void);
+GType gstbt_audio_delay_get_type (void);
 
 G_END_DECLS
 
-#endif /* __GST_AUDIO_DELAY_H__ */
+#endif /* __GSTBT_AUDIO_DELAY_H__ */

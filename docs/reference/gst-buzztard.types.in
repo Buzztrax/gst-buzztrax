@@ -4,9 +4,9 @@
 @FLUIDSYNTH_DOC_TYPES@#include <fluidsynth/gstfluidsynth.h>
 #include <simsyn/simsyn.h>
 
-gst_audio_delay_get_type
-@FLUIDSYNTH_DOC_TYPES@gst_fluidsynth_get_type
-gst_sim_syn_get_type
+gstbt_audio_delay_get_type
+@FLUIDSYNTH_DOC_TYPES@gstbt_fluidsynth_get_type
+gstbt_sim_syn_get_type
 
 % stuff that we want for gstreamer
 

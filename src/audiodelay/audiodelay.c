@@ -20,7 +20,7 @@
 
 /**
  * SECTION:gstaudiodelay
- * @title: GstAudioDelay
+ * @title: GstBtAudioDelay
  * @short_description: audio echo effect
  *
  * <refsect2>
@@ -128,12 +128,12 @@ static gboolean gst_audio_delay_stop (GstBaseTransform * base);
 
 /* tempo interface implementations */
 
-static void gst_audio_delay_calculate_tick_time(GstAudioDelay *self) {
+static void gst_audio_delay_calculate_tick_time(GstBtAudioDelay *self) {
   self->ticktime=((GST_SECOND*60)/(GstClockTime)(self->beats_per_minute*self->ticks_per_beat));
 }
 
 static void gst_audio_delay_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
-  GstAudioDelay *self=GST_AUDIO_DELAY(tempo);
+  GstBtAudioDelay *self=GSTBT_AUDIO_DELAY(tempo);
   gboolean changed=FALSE;
 
   if(beats_per_minute>=0) {
@@ -191,12 +191,12 @@ gst_audio_delay_base_init (gpointer klass)
     "Stefan Kost <ensonic@users.sf.net>");
 #if GST_CHECK_VERSION(0,10,31)
    gst_element_class_set_documentation_uri (element_class,
-       "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstAudioDelay.html");
+       "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstBtAudioDelay.html");
 #endif
 }
 
 static void
-gst_audio_delay_class_init (GstAudioDelayClass * klass)
+gst_audio_delay_class_init (GstBtAudioDelayClass * klass)
 {
   GObjectClass *gobject_class;
   GstElementClass *gstelement_class;
@@ -247,7 +247,7 @@ gst_audio_delay_class_init (GstAudioDelayClass * klass)
 }
 
 static void
-gst_audio_delay_init (GstAudioDelay *filter, GstAudioDelayClass * klass)
+gst_audio_delay_init (GstBtAudioDelay *filter, GstBtAudioDelayClass * klass)
 {
   filter->drywet = 50;
   filter->delaytime = 100;
@@ -270,7 +270,7 @@ static void
 gst_audio_delay_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstAudioDelay *filter = GST_AUDIO_DELAY (object);
+  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (object);
 
   switch (prop_id) {
     case PROP_DRYWET:
@@ -298,7 +298,7 @@ static void
 gst_audio_delay_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
-  GstAudioDelay *filter = GST_AUDIO_DELAY (object);
+  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (object);
 
   switch (prop_id) {
     case PROP_DRYWET:
@@ -323,7 +323,7 @@ gst_audio_delay_get_property (GObject * object, guint prop_id,
 #if !GST_CHECK_VERSION(0,10,31)
     // help iface
     case PROP_DOCU_URI:
-      g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstAudioDelay.html");
+      g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstBtAudioDelay.html");
       break;
 #endif
     default:
@@ -335,7 +335,7 @@ gst_audio_delay_get_property (GObject * object, guint prop_id,
 static void
 gst_audio_delay_finalize (GObject * object)
 {
-  GstAudioDelay *filter = GST_AUDIO_DELAY (object);
+  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (object);
 
   if (filter->ring_buffer) {
     g_free (filter->ring_buffer);
@@ -352,7 +352,7 @@ gst_audio_delay_finalize (GObject * object)
 static gboolean
 gst_audio_delay_set_caps (GstBaseTransform * base, GstCaps * incaps, GstCaps * outcaps)
 {
-  GstAudioDelay *filter = GST_AUDIO_DELAY (base);
+  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (base);
   const GstStructure *structure;
   gboolean ret;
 
@@ -367,7 +367,7 @@ gst_audio_delay_set_caps (GstBaseTransform * base, GstCaps * incaps, GstCaps * o
 static gboolean
 gst_audio_delay_start (GstBaseTransform *base)
 {
-  GstAudioDelay *filter = GST_AUDIO_DELAY (base);
+  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (base);
 
   filter->max_delaytime=(2 + (DELAYTIME_MAX * filter->samplerate) / 100);
   filter->ring_buffer = (gint16 *) g_new0 (gint16, filter->max_delaytime);
@@ -386,7 +386,7 @@ gst_audio_delay_start (GstBaseTransform *base)
 static GstFlowReturn
 gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 {
-  GstAudioDelay *filter = GST_AUDIO_DELAY (base);
+  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (base);
   GstClockTime timestamp;
   guint delaytime;
   gdouble feedback, dry, wet;
@@ -459,7 +459,7 @@ gst_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 static gboolean
 gst_audio_delay_stop (GstBaseTransform *base)
 {
-  GstAudioDelay *filter = GST_AUDIO_DELAY (base);
+  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (base);
 
   if (filter->ring_buffer) {
     g_free (filter->ring_buffer);
@@ -470,19 +470,19 @@ gst_audio_delay_stop (GstBaseTransform *base)
 }
 
 
-GType gst_audio_delay_get_type (void)
+GType gstbt_audio_delay_get_type (void)
 {
   static GType type = 0;
 
   if (G_UNLIKELY(!type)) {
     const GTypeInfo element_type_info = {
-      sizeof (GstAudioDelayClass),
+      sizeof (GstBtAudioDelayClass),
       (GBaseInitFunc)gst_audio_delay_base_init,
       NULL,		          /* base_finalize */
       (GClassInitFunc)gst_audio_delay_class_init,
       NULL,		          /* class_finalize */
       NULL,               /* class_data */
-      sizeof (GstAudioDelay),
+      sizeof (GstBtAudioDelay),
       0,                  /* n_preallocs */
       (GInstanceInitFunc) gst_audio_delay_init
     };
@@ -517,7 +517,7 @@ plugin_init (GstPlugin * plugin)
   gst_controller_init(NULL, NULL);
 
   return gst_element_register (plugin, "audiodelay", GST_RANK_NONE,
-      GST_TYPE_AUDIO_DELAY);
+      GSTBT_TYPE_AUDIO_DELAY);
 }
 
 GST_PLUGIN_DEFINE (

@@ -1,6 +1,19 @@
 2011-04-17  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztard.types.in:
+	* src/audiodelay/audiodelay.c:
+	* src/audiodelay/audiodelay.h:
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Fully move to GstBt namespace. Makes the docs recognise the gobjects
+	  again too.
+
+2011-04-17  Stefan Kost  <ensonic@users.sf.net>
+
+	* docs/reference/gst-buzztard-sections.txt:
 	* libgstbuzztard/childbin.h:
 	* libgstbuzztard/help.h:
 	* libgstbuzztard/propertymeta.h:

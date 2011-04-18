@@ -19,8 +19,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_SIM_SYN_H__
-#define __GST_SIM_SYN_H__
+#ifndef __GSTBT_SIM_SYN_H__
+#define __GSTBT_SIM_SYN_H__
 
 
 #include <gst/gst.h>
@@ -31,54 +31,54 @@
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_SIM_SYN            (gst_sim_syn_get_type())
-#define GST_SIM_SYN(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_SIM_SYN,GstSimSyn))
-#define GST_IS_SIM_SYN(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_SIM_SYN))
-#define GST_SIM_SYN_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GST_TYPE_SIM_SYN,GstSimSynClass))
-#define GST_IS_SIM_SYN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GST_TYPE_SIM_SYN))
-#define GST_SIM_SYN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GST_TYPE_SIM_SYN,GstSimSynClass))
+#define GSTBT_TYPE_SIM_SYN            (gstbt_sim_syn_get_type())
+#define GSTBT_SIM_SYN(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_SIM_SYN,GstBtSimSyn))
+#define GSTBT_IS_SIM_SYN(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_SIM_SYN))
+#define GSTBT_SIM_SYN_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_SIM_SYN,GstBtSimSynClass))
+#define GSTBT_IS_SIM_SYN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_SIM_SYN))
+#define GSTBT_SIM_SYN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_SIM_SYN,GstBtSimSynClass))
 
 /**
- * GstSimSynWave:
- * @GST_SIM_SYN_WAVE_SINE: sine wave
- * @GST_SIM_SYN_WAVE_SQUARE: square wave
- * @GST_SIM_SYN_WAVE_SAW: saw wave
- * @GST_SIM_SYN_WAVE_TRIANGLE: triangle wave
- * @GST_SIM_SYN_WAVE_SILENCE: silence
- * @GST_SIM_SYN_WAVE_WHITE_NOISE: white noise
- * @GST_SIM_SYN_WAVE_PINK_NOISE: pink noise
- * @GST_SIM_SYN_WAVE_SINE_TAB: sine wave (precalculated)
+ * GstBtSimSynWave:
+ * @GSTBT_SIM_SYN_WAVE_SINE: sine wave
+ * @GSTBT_SIM_SYN_WAVE_SQUARE: square wave
+ * @GSTBT_SIM_SYN_WAVE_SAW: saw wave
+ * @GSTBT_SIM_SYN_WAVE_TRIANGLE: triangle wave
+ * @GSTBT_SIM_SYN_WAVE_SILENCE: silence
+ * @GSTBT_SIM_SYN_WAVE_WHITE_NOISE: white noise
+ * @GSTBT_SIM_SYN_WAVE_PINK_NOISE: pink noise
+ * @GSTBT_SIM_SYN_WAVE_SINE_TAB: sine wave (precalculated)
  *
  * Oscillator wave forms.
  */
 typedef enum {
-  GST_SIM_SYN_WAVE_SINE,
-  GST_SIM_SYN_WAVE_SQUARE,
-  GST_SIM_SYN_WAVE_SAW,
-  GST_SIM_SYN_WAVE_TRIANGLE,
-  GST_SIM_SYN_WAVE_SILENCE,
-  GST_SIM_SYN_WAVE_WHITE_NOISE,
-  GST_SIM_SYN_WAVE_PINK_NOISE,
-  GST_SIM_SYN_WAVE_SINE_TAB
-} GstSimSynWave;
+  GSTBT_SIM_SYN_WAVE_SINE,
+  GSTBT_SIM_SYN_WAVE_SQUARE,
+  GSTBT_SIM_SYN_WAVE_SAW,
+  GSTBT_SIM_SYN_WAVE_TRIANGLE,
+  GSTBT_SIM_SYN_WAVE_SILENCE,
+  GSTBT_SIM_SYN_WAVE_WHITE_NOISE,
+  GSTBT_SIM_SYN_WAVE_PINK_NOISE,
+  GSTBT_SIM_SYN_WAVE_SINE_TAB
+} GstBtSimSynWave;
 
 /**
- * GstSimSynFilter:
- * @GST_SIM_SYN_FILTER_NONE: no filtering
- * @GST_SIM_SYN_FILTER_LOWPASS: low pass
- * @GST_SIM_SYN_FILTER_HIPASS: high pass
- * @GST_SIM_SYN_FILTER_BANDPASS: band pass
- * @GST_SIM_SYN_FILTER_BANDSTOP: band stop (notch)
+ * GstBtSimSynFilter:
+ * @GSTBT_SIM_SYN_FILTER_NONE: no filtering
+ * @GSTBT_SIM_SYN_FILTER_LOWPASS: low pass
+ * @GSTBT_SIM_SYN_FILTER_HIPASS: high pass
+ * @GSTBT_SIM_SYN_FILTER_BANDPASS: band pass
+ * @GSTBT_SIM_SYN_FILTER_BANDSTOP: band stop (notch)
  *
  * Filter types.
  */
 typedef enum {
-  GST_SIM_SYN_FILTER_NONE,
-  GST_SIM_SYN_FILTER_LOWPASS,
-  GST_SIM_SYN_FILTER_HIPASS,
-  GST_SIM_SYN_FILTER_BANDPASS,
-  GST_SIM_SYN_FILTER_BANDSTOP
-} GstSimSynFilter;
+  GSTBT_SIM_SYN_FILTER_NONE,
+  GSTBT_SIM_SYN_FILTER_LOWPASS,
+  GSTBT_SIM_SYN_FILTER_HIPASS,
+  GSTBT_SIM_SYN_FILTER_BANDPASS,
+  GSTBT_SIM_SYN_FILTER_BANDSTOP
+} GstBtSimSynFilter;
 
 #define PINK_MAX_RANDOM_ROWS   (30)
 #define PINK_RANDOM_BITS       (16)
@@ -94,33 +94,33 @@ typedef struct {
 
 #define WAVE_TABLE_SIZE 1024
 
-typedef struct _GstSimSyn GstSimSyn;
-typedef struct _GstSimSynClass GstSimSynClass;
+typedef struct _GstBtSimSyn GstBtSimSyn;
+typedef struct _GstBtSimSynClass GstBtSimSynClass;
 
 /**
- * GstSimSyn:
+ * GstBtSimSyn:
  * @parent: parent instance
  *
  * Class instance data.
  */
-struct _GstSimSyn {
+struct _GstBtSimSyn {
   GstBaseSrc parent;
 
   /* < private > */
   /* parameters */
   gdouble samples_per_buffer;
-  GstSimSynWave wave;
+  GstBtSimSynWave wave;
   gchar *note;
   gdouble volume;
   gdouble decay;
-  GstSimSynFilter filter;
+  GstBtSimSynFilter filter;
   gdouble cutoff;
   gdouble resonance;
 
   gboolean dispose_has_run;		/* validate if dispose has run */
 
-  void (*process)(GstSimSyn*, gint16 *);
-  void (*apply_filter)(GstSimSyn*, gint16 *);
+  void (*process)(GstBtSimSyn*, gint16 *);
+  void (*apply_filter)(GstBtSimSyn*, gint16 *);
 
   gint samplerate;
   GstClockTime running_time;            /* total running time */
@@ -153,12 +153,12 @@ struct _GstSimSyn {
   gdouble flt_res;
 };
 
-struct _GstSimSynClass {
+struct _GstBtSimSynClass {
   GstBaseSrcClass parent_class;
 };
 
-GType gst_sim_syn_get_type(void);
+GType gstbt_sim_syn_get_type(void);
 
 G_END_DECLS
 
-#endif /* __GST_SIM_SYN_H__ */
+#endif /* __GSTBT_SIM_SYN_H__ */

@@ -20,7 +20,7 @@
  */
 /**
  * SECTION:gstsimsyn
- * @title: GstSimSyn
+ * @title: GstBtSimSyn
  * @short_description: simple monophonic audio synthesizer
  *
  * Simple monophonic audio synthesizer with a decay envelope and a
@@ -103,45 +103,45 @@ GST_STATIC_PAD_TEMPLATE ("src",
         "depth = (int) 16, " "rate = (int) [ 1, MAX ], " "channels = (int) 1")
     );
 
-#define GST_TYPE_SIM_SYN_WAVE (gst_sim_syn_wave_get_type())
+#define GSTBT_TYPE_SIM_SYN_WAVE (gst_sim_syn_wave_get_type())
 static GType
 gst_sim_syn_wave_get_type (void)
 {
   static GType type = 0;
   static const GEnumValue enums[] = {
-    {GST_SIM_SYN_WAVE_SINE, "Sine", "sine"},
-    {GST_SIM_SYN_WAVE_SQUARE, "Square", "square"},
-    {GST_SIM_SYN_WAVE_SAW, "Saw", "saw"},
-    {GST_SIM_SYN_WAVE_TRIANGLE, "Triangle", "triangle"},
-    {GST_SIM_SYN_WAVE_SILENCE, "Silence", "silence"},
-    {GST_SIM_SYN_WAVE_WHITE_NOISE, "White noise", "white-noise"},
-    {GST_SIM_SYN_WAVE_PINK_NOISE, "Pink noise", "pink-noise"},
-    {GST_SIM_SYN_WAVE_SINE_TAB, "Sine table", "sine table"},
+    {GSTBT_SIM_SYN_WAVE_SINE, "Sine", "sine"},
+    {GSTBT_SIM_SYN_WAVE_SQUARE, "Square", "square"},
+    {GSTBT_SIM_SYN_WAVE_SAW, "Saw", "saw"},
+    {GSTBT_SIM_SYN_WAVE_TRIANGLE, "Triangle", "triangle"},
+    {GSTBT_SIM_SYN_WAVE_SILENCE, "Silence", "silence"},
+    {GSTBT_SIM_SYN_WAVE_WHITE_NOISE, "White noise", "white-noise"},
+    {GSTBT_SIM_SYN_WAVE_PINK_NOISE, "Pink noise", "pink-noise"},
+    {GSTBT_SIM_SYN_WAVE_SINE_TAB, "Sine table", "sine table"},
     {0, NULL, NULL},
   };
 
   if (G_UNLIKELY (!type)) {
-    type = g_enum_register_static ("GstSimSynWave", enums);
+    type = g_enum_register_static ("GstBtSimSynWave", enums);
   }
   return type;
 }
 
-#define GST_TYPE_SIM_SYN_FILTER (gst_sim_syn_filter_get_type())
+#define GSTBT_TYPE_SIM_SYN_FILTER (gst_sim_syn_filter_get_type())
 static GType
 gst_sim_syn_filter_get_type (void)
 {
   static GType type = 0;
   static const GEnumValue enums[] = {
-    {GST_SIM_SYN_FILTER_NONE, "None", "none"},
-    {GST_SIM_SYN_FILTER_LOWPASS, "LowPass", "lowpass"},
-    {GST_SIM_SYN_FILTER_HIPASS, "HiPass", "hipass"},
-    {GST_SIM_SYN_FILTER_BANDPASS, "BandPass", "bandpass"},
-    {GST_SIM_SYN_FILTER_BANDSTOP, "BandStop", "bandstop"},
+    {GSTBT_SIM_SYN_FILTER_NONE, "None", "none"},
+    {GSTBT_SIM_SYN_FILTER_LOWPASS, "LowPass", "lowpass"},
+    {GSTBT_SIM_SYN_FILTER_HIPASS, "HiPass", "hipass"},
+    {GSTBT_SIM_SYN_FILTER_BANDPASS, "BandPass", "bandpass"},
+    {GSTBT_SIM_SYN_FILTER_BANDSTOP, "BandStop", "bandstop"},
     {0, NULL, NULL},
   };
 
   if (G_UNLIKELY (!type)) {
-    type = g_enum_register_static ("GstSimSynFilter",
+    type = g_enum_register_static ("GstBtSimSynFilter",
         enums);
   }
   return type;
@@ -150,8 +150,8 @@ gst_sim_syn_filter_get_type (void)
 static GstBaseSrcClass *parent_class = NULL;
 
 static void gst_sim_syn_base_init (gpointer klass);
-static void gst_sim_syn_class_init (GstSimSynClass *klass);
-static void gst_sim_syn_init (GstSimSyn *object, GstSimSynClass *klass);
+static void gst_sim_syn_class_init (GstBtSimSynClass *klass);
+static void gst_sim_syn_init (GstBtSimSyn *object, GstBtSimSynClass *klass);
 
 static void gst_sim_syn_set_property (GObject * object,
     guint prop_id, const GValue * value, GParamSpec * pspec);
@@ -169,9 +169,9 @@ static gboolean gst_sim_syn_do_seek (GstBaseSrc * basesrc,
 static gboolean gst_sim_syn_query (GstBaseSrc * basesrc,
     GstQuery * query);
 
-static void gst_sim_syn_change_wave (GstSimSyn * src);
-static void gst_sim_syn_change_volume (GstSimSyn * src);
-static void gst_sim_syn_change_filter (GstSimSyn * src);
+static void gst_sim_syn_change_wave (GstBtSimSyn * src);
+static void gst_sim_syn_change_volume (GstBtSimSyn * src);
+static void gst_sim_syn_change_filter (GstBtSimSyn * src);
 
 static gboolean gst_sim_syn_start (GstBaseSrc *basesrc);
 //static gboolean gst_sim_syn_stop (GstBaseSrc *basesrc);
@@ -182,7 +182,7 @@ static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
 
 //-- tempo interface implementations
 
-static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
+static void gst_sim_syn_calculate_buffer_frames(GstBtSimSyn *self) {
   const gdouble ticks_per_minute=(gdouble)(self->beats_per_minute*self->ticks_per_beat);
 
   self->samples_per_buffer=((self->samplerate*60.0)/ticks_per_minute);
@@ -192,7 +192,7 @@ static void gst_sim_syn_calculate_buffer_frames(GstSimSyn *self) {
 }
 
 static void gst_sim_syn_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
-  GstSimSyn *self=GST_SIM_SYN(tempo);
+  GstBtSimSyn *self=GSTBT_SIM_SYN(tempo);
   gboolean changed=FALSE;
 
   if(beats_per_minute>=0) {
@@ -249,12 +249,12 @@ gst_sim_syn_base_init (gpointer g_class)
       "Stefan Kost <ensonic@users.sf.net>");
 #if GST_CHECK_VERSION(0,10,31)
    gst_element_class_set_documentation_uri (element_class,
-       "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstSimSyn.html");
+       "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstBtSimSyn.html");
 #endif
 }
 
 static void
-gst_sim_syn_class_init (GstSimSynClass * klass)
+gst_sim_syn_class_init (GstBtSimSynClass * klass)
 {
   GObjectClass *gobject_class;
   GstElementClass *gstelement_class;
@@ -305,8 +305,8 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
 
   g_object_class_install_property(gobject_class,PROP_WAVE,
     g_param_spec_enum("wave", "Waveform", "Oscillator waveform",
-          GST_TYPE_SIM_SYN_WAVE, /* enum type */
-          GST_SIM_SYN_WAVE_SINE, /* default value */
+          GSTBT_TYPE_SIM_SYN_WAVE, /* enum type */
+          GSTBT_SIM_SYN_WAVE_SINE, /* default value */
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   g_object_class_install_property(gobject_class,PROP_VOLUME,
@@ -320,8 +320,8 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
 
   g_object_class_install_property(gobject_class,PROP_FILTER,
     g_param_spec_enum("filter", "Filtertype", "Type of audio filter",
-          GST_TYPE_SIM_SYN_FILTER,    /* enum type */
-          GST_SIM_SYN_FILTER_LOWPASS, /* default value */
+          GSTBT_TYPE_SIM_SYN_FILTER,    /* enum type */
+          GSTBT_SIM_SYN_FILTER_LOWPASS, /* default value */
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   g_object_class_install_property(gobject_class,PROP_CUTOFF,
@@ -334,7 +334,7 @@ gst_sim_syn_class_init (GstSimSynClass * klass)
 }
 
 static void
-gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
+gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
 {
   GstPad *pad = GST_BASE_SRC_PAD (src);
 
@@ -359,7 +359,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_CROMATIC);
 
   /* set the waveform */
-  src->wave = GST_SIM_SYN_WAVE_SINE;
+  src->wave = GSTBT_SIM_SYN_WAVE_SINE;
   gst_sim_syn_change_wave (src);
 
   /* add a volume envelope generator */
@@ -368,7 +368,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
   gst_controller_set_interpolation_mode (src->volenv_controller, "value", GST_INTERPOLATE_LINEAR);
 
   /* set filter */
-  src->filter = GST_SIM_SYN_FILTER_LOWPASS;
+  src->filter = GSTBT_SIM_SYN_FILTER_LOWPASS;
   src->cutoff = 0.8;
   src->resonance = 0.8;
   src->flt_res=1.0/src->resonance;
@@ -379,7 +379,7 @@ gst_sim_syn_init (GstSimSyn * src, GstSimSynClass * g_class)
 static void
 gst_sim_syn_src_fixate (GstPad * pad, GstCaps * caps)
 {
-  GstSimSyn *src = GST_SIM_SYN (GST_PAD_PARENT (pad));
+  GstBtSimSyn *src = GSTBT_SIM_SYN (GST_PAD_PARENT (pad));
   GstStructure *structure;
 
   structure = gst_caps_get_structure (caps, 0);
@@ -390,7 +390,7 @@ gst_sim_syn_src_fixate (GstPad * pad, GstCaps * caps)
 static gboolean
 gst_sim_syn_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
 {
-  GstSimSyn *src = GST_SIM_SYN (basesrc);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (basesrc);
   const GstStructure *structure;
   gboolean ret;
 
@@ -403,7 +403,7 @@ gst_sim_syn_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
 static gboolean
 gst_sim_syn_query (GstBaseSrc * basesrc, GstQuery * query)
 {
-  GstSimSyn *src = GST_SIM_SYN (basesrc);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (basesrc);
   gboolean res = FALSE;
 
   switch (GST_QUERY_TYPE (query)) {
@@ -465,7 +465,7 @@ error:
 /* Wave generators */
 
 static void
-gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_create_sine (GstBtSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble step, amp, ampf, accumulator;
@@ -492,7 +492,7 @@ gst_sim_syn_create_sine (GstSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_create_square (GstBtSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble step, amp, ampf, accumulator;
@@ -518,7 +518,7 @@ gst_sim_syn_create_square (GstSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_create_saw (GstBtSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble step, amp, ampf, accumulator;
@@ -548,7 +548,7 @@ gst_sim_syn_create_saw (GstSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_create_triangle (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_create_triangle (GstBtSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble step, amp, ampf, accumulator;
@@ -580,13 +580,13 @@ gst_sim_syn_create_triangle (GstSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_create_silence (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_create_silence (GstBtSimSyn * src, gint16 * samples)
 {
   memset (samples, 0, src->generate_samples_per_buffer * sizeof (gint16));
 }
 
 static void
-gst_sim_syn_create_white_noise (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_create_white_noise (GstBtSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
   gdouble amp, ampf;
@@ -610,7 +610,7 @@ gst_sim_syn_create_white_noise (GstSimSyn * src, gint16 * samples)
  * Many thanks Phil!
  */
 static void
-gst_sim_syn_init_pink_noise (GstSimSyn * src)
+gst_sim_syn_init_pink_noise (GstBtSimSyn * src)
 {
   guint num_rows = 12;           /* arbitrary: 1 .. PINK_MAX_RANDOM_ROWS */
   glong pmax;
@@ -668,7 +668,7 @@ gst_sim_syn_generate_pink_noise_value (GstPinkNoise * pink)
 }
 
 static void
-gst_sim_syn_create_pink_noise (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_create_pink_noise (GstBtSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
   GstPinkNoise * pink = &src->pink;
@@ -688,7 +688,7 @@ gst_sim_syn_create_pink_noise (GstSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_init_sine_table (GstSimSyn * src)
+gst_sim_syn_init_sine_table (GstBtSimSyn * src)
 {
   guint i;
   gdouble ang = 0.0;
@@ -703,7 +703,7 @@ gst_sim_syn_init_sine_table (GstSimSyn * src)
 }
 
 static void
-gst_sim_syn_create_sine_table (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_create_sine_table (GstBtSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
   gdouble step, scl, accumulator;
@@ -727,7 +727,7 @@ gst_sim_syn_create_sine_table (GstSimSyn * src, gint16 * samples)
 /* Filters */
 
 static void
-gst_sim_syn_filter_lowpass (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_filter_lowpass (GstBtSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
   gdouble flt_low = src->flt_low;
@@ -749,7 +749,7 @@ gst_sim_syn_filter_lowpass (GstSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_filter_hipass (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_filter_hipass (GstBtSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
   gdouble flt_low = src->flt_low;
@@ -771,7 +771,7 @@ gst_sim_syn_filter_hipass (GstSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_filter_bandpass (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_filter_bandpass (GstBtSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
   gdouble flt_low = src->flt_low;
@@ -793,7 +793,7 @@ gst_sim_syn_filter_bandpass (GstSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_filter_bandstop (GstSimSyn * src, gint16 * samples)
+gst_sim_syn_filter_bandstop (GstBtSimSyn * src, gint16 * samples)
 {
   guint i, ct = src->generate_samples_per_buffer;
   gdouble flt_low = src->flt_low;
@@ -819,32 +819,32 @@ gst_sim_syn_filter_bandstop (GstSimSyn * src, gint16 * samples)
  * Assign function pointer of wave genrator.
  */
 static void
-gst_sim_syn_change_wave (GstSimSyn * src)
+gst_sim_syn_change_wave (GstBtSimSyn * src)
 {
   switch (src->wave) {
-    case GST_SIM_SYN_WAVE_SINE:
+    case GSTBT_SIM_SYN_WAVE_SINE:
       src->process = gst_sim_syn_create_sine;
       break;
-    case GST_SIM_SYN_WAVE_SQUARE:
+    case GSTBT_SIM_SYN_WAVE_SQUARE:
       src->process = gst_sim_syn_create_square;
       break;
-    case GST_SIM_SYN_WAVE_SAW:
+    case GSTBT_SIM_SYN_WAVE_SAW:
       src->process = gst_sim_syn_create_saw;
       break;
-    case GST_SIM_SYN_WAVE_TRIANGLE:
+    case GSTBT_SIM_SYN_WAVE_TRIANGLE:
       src->process = gst_sim_syn_create_triangle;
       break;
-    case GST_SIM_SYN_WAVE_SILENCE:
+    case GSTBT_SIM_SYN_WAVE_SILENCE:
       src->process = gst_sim_syn_create_silence;
       break;
-    case GST_SIM_SYN_WAVE_WHITE_NOISE:
+    case GSTBT_SIM_SYN_WAVE_WHITE_NOISE:
       src->process = gst_sim_syn_create_white_noise;
       break;
-    case GST_SIM_SYN_WAVE_PINK_NOISE:
+    case GSTBT_SIM_SYN_WAVE_PINK_NOISE:
       gst_sim_syn_init_pink_noise (src);
       src->process = gst_sim_syn_create_pink_noise;
       break;
-    case GST_SIM_SYN_WAVE_SINE_TAB:
+    case GSTBT_SIM_SYN_WAVE_SINE_TAB:
       gst_sim_syn_init_sine_table (src);
       src->process = gst_sim_syn_create_sine_table;
       break;
@@ -859,10 +859,10 @@ gst_sim_syn_change_wave (GstSimSyn * src)
  * Recalc wave tables for precalculated waves.
  */
 static void
-gst_sim_syn_change_volume (GstSimSyn * src)
+gst_sim_syn_change_volume (GstBtSimSyn * src)
 {
   switch (src->wave) {
-    case GST_SIM_SYN_WAVE_SINE_TAB:
+    case GSTBT_SIM_SYN_WAVE_SINE_TAB:
       gst_sim_syn_init_sine_table (src);
       break;
     default:
@@ -875,22 +875,22 @@ gst_sim_syn_change_volume (GstSimSyn * src)
  * Assign filter type function
  */
 static void
-gst_sim_syn_change_filter (GstSimSyn * src)
+gst_sim_syn_change_filter (GstBtSimSyn * src)
 {
   switch (src->filter) {
-    case GST_SIM_SYN_FILTER_NONE:
+    case GSTBT_SIM_SYN_FILTER_NONE:
       src->apply_filter = NULL;
       break;
-    case GST_SIM_SYN_FILTER_LOWPASS:
+    case GSTBT_SIM_SYN_FILTER_LOWPASS:
       src->apply_filter = gst_sim_syn_filter_lowpass;
       break;
-    case GST_SIM_SYN_FILTER_HIPASS:
+    case GSTBT_SIM_SYN_FILTER_HIPASS:
       src->apply_filter = gst_sim_syn_filter_hipass;
       break;
-    case GST_SIM_SYN_FILTER_BANDPASS:
+    case GSTBT_SIM_SYN_FILTER_BANDPASS:
       src->apply_filter = gst_sim_syn_filter_bandpass;
       break;
-    case GST_SIM_SYN_FILTER_BANDSTOP:
+    case GSTBT_SIM_SYN_FILTER_BANDSTOP:
       src->apply_filter = gst_sim_syn_filter_bandstop;
       break;
     default:
@@ -902,7 +902,7 @@ gst_sim_syn_change_filter (GstSimSyn * src)
 static gboolean
 gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
 {
-  GstSimSyn *src = GST_SIM_SYN (basesrc);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (basesrc);
   GstClockTime time;
 
   time = segment->last_stop;
@@ -955,7 +955,7 @@ gst_sim_syn_is_seekable (GstBaseSrc * basesrc)
 static gboolean
 gst_sim_syn_start (GstBaseSrc *basesrc)
 {
-  GstSimSyn *src = GST_SIM_SYN (basesrc);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (basesrc);
 
   src->n_samples=G_GINT64_CONSTANT(0);
   src->running_time=G_GUINT64_CONSTANT(0);
@@ -967,7 +967,7 @@ gst_sim_syn_start (GstBaseSrc *basesrc)
 static gboolean
 gst_sim_syn_stop (GstBaseSrc * basesrc)
 {
-  GstSimSyn *src = GST_SIM_SYN (basesrc);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (basesrc);
 
   return TRUE;
 }
@@ -977,7 +977,7 @@ static GstFlowReturn
 gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
     guint length, GstBuffer ** buffer)
 {
-  GstSimSyn *src = GST_SIM_SYN (basesrc);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (basesrc);
   GstFlowReturn res;
   GstBuffer *buf;
   GstClockTime next_running_time;
@@ -1084,7 +1084,7 @@ static void
 gst_sim_syn_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstSimSyn *src = GST_SIM_SYN (object);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (object);
 
   if (src->dispose_has_run) return;
 
@@ -1185,7 +1185,7 @@ static void
 gst_sim_syn_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
-  GstSimSyn *src = GST_SIM_SYN (object);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (object);
 
   if (src->dispose_has_run) return;
 
@@ -1230,7 +1230,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
 #if !GST_CHECK_VERSION(0,10,31)
 	// help iface
 	case PROP_DOCU_URI:
-	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstSimSyn.html");
+	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstBtSimSyn.html");
 	  break;
 #endif
     default:
@@ -1242,7 +1242,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
 static void
 gst_sim_syn_dispose (GObject *object)
 {
-  GstSimSyn *src = GST_SIM_SYN (object);
+  GstBtSimSyn *src = GSTBT_SIM_SYN (object);
 
   if (src->dispose_has_run) return;
   src->dispose_has_run = TRUE;
@@ -1254,19 +1254,19 @@ gst_sim_syn_dispose (GObject *object)
   G_OBJECT_CLASS(parent_class)->dispose(object);
 }
 
-GType gst_sim_syn_get_type (void)
+GType gstbt_sim_syn_get_type (void)
 {
   static GType type = 0;
 
   if (G_UNLIKELY(!type)) {
     const GTypeInfo element_type_info = {
-      sizeof (GstSimSynClass),
+      sizeof (GstBtSimSynClass),
       (GBaseInitFunc)gst_sim_syn_base_init,
       NULL,		          /* base_finalize */
       (GClassInitFunc)gst_sim_syn_class_init,
       NULL,		          /* class_finalize */
       NULL,               /* class_data */
-      sizeof (GstSimSyn),
+      sizeof (GstBtSimSyn),
       0,                  /* n_preallocs */
       (GInstanceInitFunc) gst_sim_syn_init
     };
@@ -1314,7 +1314,7 @@ plugin_init (GstPlugin * plugin)
   gst_controller_init(NULL,NULL);
 
   return gst_element_register (plugin, "simsyn",
-      GST_RANK_NONE, GST_TYPE_SIM_SYN);
+      GST_RANK_NONE, GSTBT_TYPE_SIM_SYN);
 }
 
 GST_PLUGIN_DEFINE (

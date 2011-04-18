@@ -22,8 +22,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_FLUIDSYNTH_H__
-#define __GST_FLUIDSYNTH_H__
+#ifndef __GSTBT_FLUIDSYNTH_H__
+#define __GSTBT_FLUIDSYNTH_H__
 
 #include <gst/gst.h>
 #include <gst/base/gstbasesrc.h>
@@ -34,23 +34,23 @@
 
 G_BEGIN_DECLS
 
-#define GST_TYPE_FLUIDSYNTH            (gst_fluidsynth_get_type())
-#define GST_FLUIDSYNTH(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_FLUIDSYNTH,GstFluidsynth))
-#define GST_IS_FLUIDSYNTH(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_FLUIDSYNTH))
-#define GST_FLUIDSYNTH_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GST_TYPE_FLUIDSYNTH,GstFluidsynthClass))
-#define GST_IS_FLUIDSYNTH_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GST_TYPE_FLUIDSYNTH))
-#define GST_FLUIDSYNTH_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GST_TYPE_FLUIDSYNTH,GstFluidsynthClass))
+#define GSTBT_TYPE_FLUIDSYNTH            (gstbt_fluidsynth_get_type())
+#define GSTBT_FLUIDSYNTH(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynth))
+#define GSTBT_IS_FLUIDSYNTH(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_FLUIDSYNTH))
+#define GSTBT_FLUIDSYNTH_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynthClass))
+#define GSTBT_IS_FLUIDSYNTH_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_FLUIDSYNTH))
+#define GSTBT_FLUIDSYNTH_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynthClass))
 
-typedef struct _GstFluidsynth GstFluidsynth;
-typedef struct _GstFluidsynthClass GstFluidsynthClass;
+typedef struct _GstBtFluidsynth GstBtFluidsynth;
+typedef struct _GstBtFluidsynthClass GstBtFluidsynthClass;
 
 /**
- * GstFluidsynth:
+ * GstBtFluidsynth:
  * @parent: parent instance
  *
  * Class instance data.
  */
-struct _GstFluidsynth {
+struct _GstBtFluidsynth {
   GstBaseSrc parent;
 
   /* < private > */
@@ -106,12 +106,12 @@ struct _GstFluidsynth {
 
 };
 
-struct _GstFluidsynthClass {
+struct _GstBtFluidsynthClass {
   GstBaseSrcClass parent_class;
 };
 
-GType gst_fluidsynth_get_type(void);
+GType gstbt_fluidsynth_get_type(void);
 
 G_END_DECLS
 
-#endif /* __GST_FLUIDSYNTH_H__ */
+#endif /* __GSTBT_FLUIDSYNTH_H__ */
