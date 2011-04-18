@@ -1,5 +1,14 @@
 2011-04-17  Stefan Kost  <ensonic@users.sf.net>
 
+	* docs/reference/gst-buzztard-sections.txt:
+	* libgstbuzztard/childbin.h:
+	* libgstbuzztard/help.h:
+	* libgstbuzztard/propertymeta.h:
+	* libgstbuzztard/tempo.h:
+	  Add dummy docs for opaque interface structs.
+
+2011-04-17  Stefan Kost  <ensonic@users.sf.net>
+
 	* configure.ac:
 	* libgstbuzztard/Makefile.am:
 	* src/bml/gstbmlsrc.c:

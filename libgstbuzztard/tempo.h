@@ -36,6 +36,11 @@ G_BEGIN_DECLS
 typedef struct _GstBtTempo GstBtTempo; /* dummy object */
 typedef struct _GstBtTempoInterface GstBtTempoInterface;
 
+/**
+ * GstBtTempo:
+ *
+ * Opaque interface structure.
+ */
 struct _GstBtTempoInterface
 {
   GTypeInterface parent;

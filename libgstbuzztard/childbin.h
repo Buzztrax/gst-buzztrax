@@ -37,6 +37,11 @@ G_BEGIN_DECLS
 typedef struct _GstBtChildBin GstBtChildBin; /* dummy object */
 typedef struct _GstBtChildBinInterface GstBtChildBinInterface;
 
+/**
+ * GstBtChildBin:
+ *
+ * Opaque interface structure.
+ */
 struct _GstBtChildBinInterface
 {
   GTypeInterface parent;

@@ -35,6 +35,11 @@ G_BEGIN_DECLS
 typedef struct _GstBtPropertyMeta GstBtPropertyMeta; /* dummy object */
 typedef struct _GstBtPropertyMetaInterface GstBtPropertyMetaInterface;
 
+/**
+ * GstBtPropertyMeta:
+ *
+ * Opaque interface structure.
+ */
 struct _GstBtPropertyMetaInterface
 {
   GTypeInterface parent;

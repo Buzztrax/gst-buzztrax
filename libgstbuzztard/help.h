@@ -35,6 +35,11 @@ G_BEGIN_DECLS
 typedef struct _GstBtHelp GstBtHelp; /* dummy object */
 typedef struct _GstBtHelpInterface GstBtHelpInterface;
 
+/**
+ * GstBtHelp:
+ *
+ * Opaque interface structure.
+ */
 struct _GstBtHelpInterface
 {
   GTypeInterface parent;
