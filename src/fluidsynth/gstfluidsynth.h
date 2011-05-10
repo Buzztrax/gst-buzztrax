@@ -46,7 +46,6 @@ typedef struct _GstBtFluidsynthClass GstBtFluidsynthClass;
 
 /**
  * GstBtFluidsynth:
- * @parent: parent instance
  *
  * Class instance data.
  */

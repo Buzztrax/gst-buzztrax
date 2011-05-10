@@ -628,7 +628,7 @@ gst_sim_syn_init_pink_noise (GstBtSimSyn * src)
 
 /* Generate Pink noise values between -1.0 and +1.0 */
 static gfloat
-gst_sim_syn_generate_pink_noise_value (GstPinkNoise * pink)
+gst_sim_syn_generate_pink_noise_value (GstBtPinkNoise * pink)
 {
   glong new_random;
   glong sum;
@@ -671,7 +671,7 @@ static void
 gst_sim_syn_create_pink_noise (GstBtSimSyn * src, gint16 * samples)
 {
   guint i=0, j, ct=src->generate_samples_per_buffer;
-  GstPinkNoise * pink = &src->pink;
+  GstBtPinkNoise * pink = &src->pink;
   gdouble amp, ampf;
 
   ampf = src->volume * 32767.0;

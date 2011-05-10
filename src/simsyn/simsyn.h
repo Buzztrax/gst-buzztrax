@@ -90,7 +90,7 @@ typedef struct {
   gint       index;         /* Incremented each sample. */
   gint       index_mask;    /* Index wrapped by ANDing with this mask. */
   gfloat     scalar;        /* Used to scale within range of -1.0 to +1.0 */
-} GstPinkNoise;
+} GstBtPinkNoise;
 
 #define WAVE_TABLE_SIZE 1024
 
@@ -99,7 +99,6 @@ typedef struct _GstBtSimSynClass GstBtSimSynClass;
 
 /**
  * GstBtSimSyn:
- * @parent: parent instance
  *
  * Class instance data.
  */
@@ -145,7 +144,7 @@ struct _GstBtSimSyn {
 
   /* waveform specific context data */
   gdouble accumulator;			/* phase angle */
-  GstPinkNoise pink;
+  GstBtPinkNoise pink;
   gint16 wave_table[ WAVE_TABLE_SIZE];
 
   /* filter specific data */

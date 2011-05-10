@@ -39,7 +39,6 @@ typedef struct _GstBtAudioDelayClass GstBtAudioDelayClass;
 
 /**
  * GstBtAudioDelay:
- * @parent: parent instance
  *
  * Class instance data.
  */
