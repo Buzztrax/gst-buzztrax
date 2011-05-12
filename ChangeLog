@@ -1,3 +1,11 @@
+2011-05-12  Stefan Kost  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Look again at the vagrind complaints. Pass uniform types to bsearch to
+	  not rely on argument order in the compare function. Also drop a
+	  nonsense check (cat won't be NULL, its malloced).
+	  
+
 2011-05-10  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:

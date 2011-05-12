@@ -44,6 +44,8 @@ extern gboolean bmln_gstbml_register_element(GstPlugin *plugin, GstStructure *bm
 typedef int (*bsearchcomparefunc)(const void *,const void *);
 
 
+#define LINE_LEN 500
+#define CAT_LEN 1000
 static gboolean read_index(const gchar *dir_name) {
   gchar *file_name;
   FILE *file;
@@ -61,8 +63,8 @@ static gboolean read_index(const gchar *dir_name) {
   file_name=g_build_filename(dir_name,"index.txt",NULL);
   if((file=fopen(file_name,"rt"))) {
     GST_INFO("found buzz machine index at \"%s\"",file_name);
-     gchar line[500],*entry;
-     gchar categories[1000]="";
+     gchar line[LINE_LEN+1],*entry;
+     gchar categories[CAT_LEN+1]="";
      gint cat_pos=0,i,len;
 
     /* the format
@@ -77,7 +79,7 @@ static gboolean read_index(const gchar *dir_name) {
      */
 
     while(!feof(file)) {
-      if(fgets(line,500,file)) {
+      if(fgets(line,LINE_LEN,file)) {
         // strip leading and trailing spaces and convert
         entry=g_convert(g_strstrip(line),-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
         if(entry[0]=='/') {
@@ -93,7 +95,7 @@ static gboolean read_index(const gchar *dir_name) {
           else {
             // push stack
             len=strlen(entry);
-            if((cat_pos+len)<1000) {
+            if((cat_pos+len)<CAT_LEN) {
               categories[cat_pos++]='/';
               for(i=1;i<len;i++) {
                 categories[cat_pos++]=(entry[i]!='/')?entry[i]:'+';
@@ -128,7 +130,7 @@ static gboolean read_index(const gchar *dir_name) {
               memmove(beg,end,strlen(end)+1);
             }
 
-            if(cat && *cat) {
+            if(*cat) {
               for(a=0;a<g_strv_length(names);a++) {
                 if(names[a] && *names[a]) {
                   GST_DEBUG("  %s -> %s",names[a],categories);
@@ -152,8 +154,8 @@ static gboolean read_index(const gchar *dir_name) {
 }
 
 static int blacklist_compare(const void *node1, const void *node2) {
-  //GST_DEBUG("comparing '%s' '%s'",node1,*(gchar**)node2);
-  return (strcasecmp((gchar *)node1,*(gchar**)node2));
+  //GST_DEBUG("comparing '%s' '%s'",*(gchar**)node1,*(gchar**)node2);
+  return (strcasecmp(*(gchar **)node1,*(gchar**)node2));
 }
 
 static const gchar *get_bml_path(void) {
@@ -334,7 +336,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     ext=strrchr(entry_name,'.');
     if (ext && (!strcasecmp(ext,".dll") || !strcmp(ext,".so"))) {
       /* test against blacklist */
-      if(!bsearch(cur_entry_name, blacklist, G_N_ELEMENTS(blacklist),sizeof(gchar *), blacklist_compare)) {
+      if(!bsearch(&cur_entry_name, blacklist, G_N_ELEMENTS(blacklist), sizeof(gchar *), blacklist_compare)) {
         file_name=g_build_filename (dir_name, cur_entry_name, NULL);
         GST_INFO("trying plugin '%s','%s'",cur_entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
