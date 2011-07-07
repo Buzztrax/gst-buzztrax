@@ -650,7 +650,7 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParame
         */
         type=PT_ENUM;
         paramspec=g_param_spec_enum(name, nick, desc,
-          GSTBT_TYPE_TRIGGER_SWITCH, GSTGSTBT_TRIGGER_SWITCH_EMPTY,
+          GSTBT_TYPE_TRIGGER_SWITCH, GSTBT_TRIGGER_SWITCH_EMPTY,
           pspec_flags);
       /*}
       else {

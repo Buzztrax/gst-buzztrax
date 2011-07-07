@@ -34,9 +34,9 @@
 
 /**
  * GstBtTriggerSwitch:
- * @GSTGSTBT_TRIGGER_SWITCH_OFF: turn switch off
- * @GSTGSTBT_TRIGGER_SWITCH_ON: turn switch on
- * @GSTGSTBT_TRIGGER_SWITCH_EMPTY: do not change switch
+ * @GSTBT_TRIGGER_SWITCH_OFF: turn switch off
+ * @GSTBT_TRIGGER_SWITCH_ON: turn switch on
+ * @GSTBT_TRIGGER_SWITCH_EMPTY: do not change switch
  *
  * Switch event commands.
  */
@@ -45,9 +45,9 @@ GType gstbt_trigger_switch_get_type(void) {
 
   if(G_UNLIKELY(!type)) {
     static const GEnumValue values[] = {
-      { GSTGSTBT_TRIGGER_SWITCH_OFF,  "OFF","0" },
-      { GSTGSTBT_TRIGGER_SWITCH_ON,   "ON","1" },
-      { GSTGSTBT_TRIGGER_SWITCH_EMPTY,"EMPTY","" },
+      { GSTBT_TRIGGER_SWITCH_OFF,  "OFF","0" },
+      { GSTBT_TRIGGER_SWITCH_ON,   "ON","1" },
+      { GSTBT_TRIGGER_SWITCH_EMPTY,"EMPTY","" },
       { 0, NULL, NULL},
     };
     type = g_enum_register_static("GstBtTriggerSwitch", values);

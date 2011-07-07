@@ -1,3 +1,11 @@
+2011-07-06  Stefan Sauer  <ensonic@users.sf.net>
+
+	* libgstbuzztard/musicenums.c:
+	* libgstbuzztard/musicenums.h:
+	* libgstbuzztard/toneconversion.h:
+	* src/bml/common.c:
+	  Rename some obviously misnamed enums.
+
 2011-05-12  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:
