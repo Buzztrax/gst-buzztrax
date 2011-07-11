@@ -199,12 +199,10 @@ static void
 gst_audio_delay_class_init (GstBtAudioDelayClass * klass)
 {
   GObjectClass *gobject_class;
-  GstElementClass *gstelement_class;
 
   parent_class = g_type_class_peek_parent (klass);
 
   gobject_class = (GObjectClass *) klass;
-  gstelement_class = (GstElementClass *) klass;
 
   gobject_class->set_property = gst_audio_delay_set_property;
   gobject_class->get_property = gst_audio_delay_get_property;

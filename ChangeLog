@@ -1,3 +1,8 @@
+2011-07-11  Stefan Sauer  <ensonic@users.sf.net>
+
+	* src/audiodelay/audiodelay.c:
+	  Remove unused variable.
+
 2011-07-06  Stefan Sauer  <ensonic@users.sf.net>
 
 	* libgstbuzztard/musicenums.c:
