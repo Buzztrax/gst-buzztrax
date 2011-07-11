@@ -257,13 +257,11 @@ static void
 gst_sim_syn_class_init (GstBtSimSynClass * klass)
 {
   GObjectClass *gobject_class;
-  GstElementClass *gstelement_class;
   GstBaseSrcClass *gstbasesrc_class;
 
   parent_class = (GstBaseSrcClass *) g_type_class_peek_parent (klass);
 
   gobject_class = (GObjectClass *) klass;
-  gstelement_class = (GstElementClass *) klass;
   gstbasesrc_class = (GstBaseSrcClass *) klass;
 
   gobject_class->set_property = gst_sim_syn_set_property;

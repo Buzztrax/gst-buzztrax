@@ -1,5 +1,10 @@
 2011-07-11  Stefan Sauer  <ensonic@users.sf.net>
 
+	* src/simsyn/simsyn.c:
+	  Remove unused variable.
+
+2011-07-11  Stefan Sauer  <ensonic@users.sf.net>
+
 	* src/audiodelay/audiodelay.c:
 	  Remove unused variable.
 
