@@ -1,3 +1,8 @@
+2011-08-02  Stefan Sauer  <ensonic@users.sf.net>
+
+	* docs/reference/tmpl/_dummy.sgml (deleted):
+	  Remove files we don't need.
+
 2011-07-11  Stefan Sauer  <ensonic@users.sf.net>
 
 	* src/simsyn/simsyn.c:
