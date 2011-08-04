@@ -1,3 +1,8 @@
+2011-08-04  Stefan Sauer  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  Fix weird chars in GST_PLGIN_LDFLAGS.
+
 2011-08-02  Stefan Sauer  <ensonic@users.sf.net>
 
 	* docs/reference/tmpl/_dummy.sgml (deleted):
