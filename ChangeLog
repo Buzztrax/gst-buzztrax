@@ -1,3 +1,11 @@
+2011-08-11  Stefan Sauer  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/fluidsynth/gstfluidsynth.h:
+	 Add planning comments for handling sf2 files. Mark paramspecs with
+	 static_string flag. Add a log handers to get fluidsynth messages into
+	 the gstreamer log and not on the users terminal.
+
 2011-08-04  Stefan Sauer  <ensonic@users.sf.net>
 
 	* configure.ac:

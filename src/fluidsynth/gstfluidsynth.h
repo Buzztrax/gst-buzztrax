@@ -102,7 +102,6 @@ struct _GstBtFluidsynth {
   gulong ticks_per_beat;
   gulong subticks_per_tick;
   GstClockTime ticktime;
-
 };
 
 struct _GstBtFluidsynthClass {
