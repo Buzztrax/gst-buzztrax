@@ -73,7 +73,6 @@ GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 enum {
   // static class properties
   PROP_SAMPLES_PER_BUFFER=1,
-  PROP_IS_LIVE,
   // dynamic class properties
   PROP_NOTE,
   PROP_WAVE,
@@ -292,10 +291,6 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
   	g_param_spec_int("samplesperbuffer", "Samples per buffer",
           "Number of samples in each outgoing buffer",
           1, G_MAXINT, 1024, G_PARAM_READWRITE));
-
-  g_object_class_install_property(gobject_class, PROP_IS_LIVE,
-    g_param_spec_boolean("is-live", "Is Live",
-          "Whether to act as a live source", FALSE, G_PARAM_READWRITE));
 
   g_object_class_install_property(gobject_class,PROP_NOTE,
     g_param_spec_string("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
@@ -1090,9 +1085,6 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
     case PROP_SAMPLES_PER_BUFFER:
       src->samples_per_buffer = (gdouble)g_value_get_int (value);
       break;
-    case PROP_IS_LIVE:
-      gst_base_src_set_live (GST_BASE_SRC (src), g_value_get_boolean (value));
-      break;
     case PROP_NOTE:
       g_free (src->note);
       src->note = g_value_dup_string (value);
@@ -1190,9 +1182,6 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
   switch (prop_id) {
     case PROP_SAMPLES_PER_BUFFER:
       g_value_set_int (value, (gint)src->samples_per_buffer);
-      break;
-    case PROP_IS_LIVE:
-      g_value_set_boolean (value, gst_base_src_is_live (GST_BASE_SRC (src)));
       break;
     /*case PROP_NOTE:
       g_value_set_string (value, src->note);

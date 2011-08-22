@@ -1,3 +1,10 @@
+2011-08-22  Stefan Sauer  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Remove is-live properties. Those are not useful for synthesizers, as
+	  they would break the controller.
+
 2011-08-11  Stefan Sauer  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c:

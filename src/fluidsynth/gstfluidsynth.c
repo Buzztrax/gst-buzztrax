@@ -109,7 +109,6 @@ GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 enum {
   // static class properties
   PROP_SAMPLES_PER_BUFFER=1,
-  PROP_IS_LIVE,
   // tempo iface
   PROP_BPM,
   PROP_TPB,
@@ -478,10 +477,6 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
           _("Number of samples in each outgoing buffer"),
           1, G_MAXINT, 1024, G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_IS_LIVE,
-      g_param_spec_boolean ("is-live", _("Is Live"),
-          _("Whether to act as a live source"), FALSE, G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
-
   g_object_class_install_property (gobject_class, PROP_NOTE,
       g_param_spec_string ("note", _("Musical note"),
           _("Musical note (e.g. 'c-3', 'd#4')"),
@@ -768,10 +763,6 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
     case PROP_SAMPLES_PER_BUFFER:
       gstsynth->samples_per_buffer = (gdouble)g_value_get_int (value);
       break;
-    case PROP_IS_LIVE:
-      gst_base_src_set_live (GST_BASE_SRC (gstsynth),
-      g_value_get_boolean (value));
-      break;
     // tempo iface
     case PROP_BPM:
     case PROP_TPB:
@@ -885,9 +876,6 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     // static class properties
     case PROP_SAMPLES_PER_BUFFER:
       g_value_set_int (value, (gint)gstsynth->samples_per_buffer);
-      break;
-    case PROP_IS_LIVE:
-      g_value_set_boolean (value, gst_base_src_is_live (GST_BASE_SRC (gstsynth)));
       break;
     // tempo iface
     case PROP_BPM:
