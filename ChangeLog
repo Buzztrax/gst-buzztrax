@@ -1,5 +1,10 @@
 2011-08-23  Stefan Sauer  <ensonic@users.sf.net>
 
+	* TODO:
+	  Translate some german comments and add more planning details.
+
+2011-08-23  Stefan Sauer  <ensonic@users.sf.net>
+
 	* src/fluidsynth/gstfluidsynth.c:
 	* src/simsyn/simsyn.c:
 	  Remove samplesperbuffer property, we use the tempo iface for it.
