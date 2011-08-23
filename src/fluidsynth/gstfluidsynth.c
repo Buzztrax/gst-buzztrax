@@ -607,11 +607,11 @@ static void
 gst_fluidsynth_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstBtFluidsynth *gstsynth = GSTBT_FLUIDSYNTH (object);
+  GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (object);
   char *name;
   int retval;
 
-  if (gstsynth->dispose_has_run) return;
+  if (src->dispose_has_run) return;
 
   /* is it one of the dynamically installed properties? */
   if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id)
@@ -621,15 +621,15 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
     switch (G_PARAM_SPEC_VALUE_TYPE (pspec))
       {
         case G_TYPE_INT:
-          retval = fluid_settings_setint (gstsynth->settings, name,
+          retval = fluid_settings_setint (src->settings, name,
                                           g_value_get_int (value));
           break;
         case G_TYPE_DOUBLE:
-          retval = fluid_settings_setnum (gstsynth->settings, name,
+          retval = fluid_settings_setnum (src->settings, name,
                                           g_value_get_double (value));
           break;
         case G_TYPE_STRING:
-          retval = fluid_settings_setstr (gstsynth->settings, name,
+          retval = fluid_settings_setstr (src->settings, name,
                                           (char *)g_value_get_string (value));
           break;
         default:
@@ -647,112 +647,112 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
   {
     // dynamic class properties
     case PROP_NOTE:
-      g_free (gstsynth->note);
-      gstsynth->note = g_value_dup_string (value);
-      if (gstsynth->note) {
-        if(gstsynth->note[0]=='o' && gstsynth->note[1]=='f' && gstsynth->note[2]=='f') {
-          fluid_synth_noteoff (gstsynth->fluid, /*chan*/ 0,  gstsynth->key);
-          gstsynth->cur_note_length = 0;
+      g_free (src->note);
+      src->note = g_value_dup_string (value);
+      if (src->note) {
+        if(src->note[0]=='o' && src->note[1]=='f' && src->note[2]=='f') {
+          fluid_synth_noteoff (src->fluid, /*chan*/ 0,  src->key);
+          src->cur_note_length = 0;
         }
         else {
           // start note-off counter
-          gstsynth->cur_note_length = gstsynth->note_length;
-          gstsynth->key = gst_fluidsynth_note_string_2_value(gstsynth->note);
-          GST_INFO("new note: '%s' = %d",gstsynth->note,gstsynth->key);
-          fluid_synth_noteon (gstsynth->fluid, /*chan*/ 0,  gstsynth->key, gstsynth->velocity);
+          src->cur_note_length = src->note_length;
+          src->key = gst_fluidsynth_note_string_2_value(src->note);
+          GST_INFO("new note: '%s' = %d",src->note,src->key);
+          fluid_synth_noteon (src->fluid, /*chan*/ 0,  src->key, src->velocity);
         }
       }
       break;
     case PROP_NOTE_LENGTH:
-      gstsynth->note_length = g_value_get_int (value);
+      src->note_length = g_value_get_int (value);
       break;
     case PROP_NOTE_VELOCITY:
-      gstsynth->velocity = g_value_get_int (value);
+      src->velocity = g_value_get_int (value);
       break;
     case PROP_PROGRAM:
-      gstsynth->program = g_value_get_int (value);
-      GST_INFO("Switch to program: %d, %d",gstsynth->program>>7, gstsynth->program&0x7F);
-      fluid_synth_program_select(gstsynth->fluid, /*chan*/ 0, gstsynth->instrument_patch,
-                              gstsynth->program>>7, gstsynth->program&0x7F);
+      src->program = g_value_get_int (value);
+      GST_INFO("Switch to program: %d, %d",src->program>>7, src->program&0x7F);
+      fluid_synth_program_select(src->fluid, /*chan*/ 0, src->instrument_patch,
+                              src->program>>7, src->program&0x7F);
       break;
     // not yet GST_PARAM_CONTROLLABLE
     case PROP_INSTRUMENT_PATCH:
       // unload old patch
-      g_free(gstsynth->instrument_patch_path);
-      fluid_synth_sfunload(gstsynth->fluid, gstsynth->instrument_patch, TRUE);
+      g_free(src->instrument_patch_path);
+      fluid_synth_sfunload(src->fluid, src->instrument_patch, TRUE);
       // load new patch
-      gstsynth->instrument_patch_path = g_value_dup_string(value);
-      GST_INFO("Trying to load load soundfont: '%s'",gstsynth->instrument_patch_path);
-      if((gstsynth->instrument_patch=fluid_synth_sfload (gstsynth->fluid, gstsynth->instrument_patch_path, TRUE))==-1) {
-        GST_WARNING("Couldn't load soundfont: '%s'",gstsynth->instrument_patch_path);
+      src->instrument_patch_path = g_value_dup_string(value);
+      GST_INFO("Trying to load load soundfont: '%s'",src->instrument_patch_path);
+      if((src->instrument_patch=fluid_synth_sfload (src->fluid, src->instrument_patch_path, TRUE))==-1) {
+        GST_WARNING("Couldn't load soundfont: '%s'",src->instrument_patch_path);
       }
       else {
-        GST_INFO("soundfont loaded as %d",gstsynth->instrument_patch);
-        //fluid_synth_program_reset(gstsynth->fluid);
-        fluid_synth_program_select(gstsynth->fluid, /*chan*/ 0, gstsynth->instrument_patch,
-                              gstsynth->program>>7, gstsynth->program&0x7F);
+        GST_INFO("soundfont loaded as %d",src->instrument_patch);
+        //fluid_synth_program_reset(src->fluid);
+        fluid_synth_program_select(src->fluid, /*chan*/ 0, src->instrument_patch,
+                              src->program>>7, src->program&0x7F);
       }
       break;
     case PROP_INTERP:
-      gstsynth->interp = g_value_get_enum (value);
-      fluid_synth_set_interp_method (gstsynth->fluid, -1, gstsynth->interp);
+      src->interp = g_value_get_enum (value);
+      fluid_synth_set_interp_method (src->fluid, -1, src->interp);
       break;
     case PROP_REVERB_ENABLE:
-      gstsynth->reverb_enable = g_value_get_boolean (value);
-      fluid_synth_set_reverb_on (gstsynth->fluid, gstsynth->reverb_enable);
+      src->reverb_enable = g_value_get_boolean (value);
+      fluid_synth_set_reverb_on (src->fluid, src->reverb_enable);
       break;
     case PROP_REVERB_ROOM_SIZE:
-      gstsynth->reverb_room_size = g_value_get_double (value);
-      gstsynth->reverb_update = TRUE;
-      gst_fluidsynth_update_reverb (gstsynth);
+      src->reverb_room_size = g_value_get_double (value);
+      src->reverb_update = TRUE;
+      gst_fluidsynth_update_reverb (src);
       break;
     case PROP_REVERB_DAMP:
-      gstsynth->reverb_damp = g_value_get_double (value);
-      gstsynth->reverb_update = TRUE;
-      gst_fluidsynth_update_reverb (gstsynth);
+      src->reverb_damp = g_value_get_double (value);
+      src->reverb_update = TRUE;
+      gst_fluidsynth_update_reverb (src);
       break;
     case PROP_REVERB_WIDTH:
-      gstsynth->reverb_width = g_value_get_double (value);
-      gstsynth->reverb_update = TRUE;
-      gst_fluidsynth_update_reverb (gstsynth);
+      src->reverb_width = g_value_get_double (value);
+      src->reverb_update = TRUE;
+      gst_fluidsynth_update_reverb (src);
       break;
     case PROP_REVERB_LEVEL:
-      gstsynth->reverb_level = g_value_get_double (value);
-      gstsynth->reverb_update = TRUE;
-      gst_fluidsynth_update_reverb (gstsynth);
+      src->reverb_level = g_value_get_double (value);
+      src->reverb_update = TRUE;
+      gst_fluidsynth_update_reverb (src);
       break;
     case PROP_CHORUS_ENABLE:
-      gstsynth->chorus_enable = g_value_get_boolean (value);
-      fluid_synth_set_chorus_on (gstsynth->fluid, gstsynth->chorus_enable);
+      src->chorus_enable = g_value_get_boolean (value);
+      fluid_synth_set_chorus_on (src->fluid, src->chorus_enable);
       break;
     case PROP_CHORUS_COUNT:
-      gstsynth->chorus_count = g_value_get_int (value);
-      gstsynth->chorus_update = TRUE;
-      gst_fluidsynth_update_chorus (gstsynth);
+      src->chorus_count = g_value_get_int (value);
+      src->chorus_update = TRUE;
+      gst_fluidsynth_update_chorus (src);
       break;
     case PROP_CHORUS_LEVEL:
-      gstsynth->chorus_level = g_value_get_double (value);
-      gstsynth->chorus_update = TRUE;
-      gst_fluidsynth_update_chorus (gstsynth);
+      src->chorus_level = g_value_get_double (value);
+      src->chorus_update = TRUE;
+      gst_fluidsynth_update_chorus (src);
       break;
     case PROP_CHORUS_FREQ:
-      gstsynth->chorus_freq = g_value_get_double (value);
-      gstsynth->chorus_update = TRUE;
-      gst_fluidsynth_update_chorus (gstsynth);
+      src->chorus_freq = g_value_get_double (value);
+      src->chorus_update = TRUE;
+      gst_fluidsynth_update_chorus (src);
       break;
     case PROP_CHORUS_DEPTH:
-      gstsynth->chorus_depth = g_value_get_double (value);
-      gstsynth->chorus_update = TRUE;
-      gst_fluidsynth_update_chorus (gstsynth);
+      src->chorus_depth = g_value_get_double (value);
+      src->chorus_update = TRUE;
+      gst_fluidsynth_update_chorus (src);
       break;
     case PROP_CHORUS_WAVEFORM:
-      gstsynth->chorus_waveform = g_value_get_enum (value);
-      gstsynth->chorus_update = TRUE;
-      gst_fluidsynth_update_chorus (gstsynth);
+      src->chorus_waveform = g_value_get_enum (value);
+      src->chorus_update = TRUE;
+      gst_fluidsynth_update_chorus (src);
       break;
     // static class properties
     case PROP_SAMPLES_PER_BUFFER:
-      gstsynth->samples_per_buffer = (gdouble)g_value_get_int (value);
+      src->samples_per_buffer = (gdouble)g_value_get_int (value);
       break;
     // tempo iface
     case PROP_BPM:
@@ -770,14 +770,14 @@ static void
 gst_fluidsynth_get_property (GObject * object, guint prop_id,
                              GValue * value, GParamSpec * pspec)
 {
-  GstBtFluidsynth *gstsynth = GSTBT_FLUIDSYNTH (object);
+  GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (object);
   char *s;
   char *name;
   double d;
   int retval;
   int i;
 
-  if (gstsynth->dispose_has_run) return;
+  if (src->dispose_has_run) return;
 
   /* is it one of the dynamically installed properties? */
   if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id)
@@ -787,15 +787,15 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     switch (G_PARAM_SPEC_VALUE_TYPE (pspec))
     {
       case G_TYPE_INT:
-        retval = fluid_settings_getint (gstsynth->settings, name, &i);
+        retval = fluid_settings_getint (src->settings, name, &i);
         if (retval) g_value_set_int (value, i);
         break;
       case G_TYPE_DOUBLE:
-        retval = fluid_settings_getnum (gstsynth->settings, name, &d);
+        retval = fluid_settings_getnum (src->settings, name, &d);
         if (retval) g_value_set_double (value, d);
         break;
       case G_TYPE_STRING:
-        retval = fluid_settings_getstr (gstsynth->settings, name, &s);
+        retval = fluid_settings_getstr (src->settings, name, &s);
         if (retval) g_value_set_string (value, s);
         break;
       default:
@@ -813,70 +813,70 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
   {
     // static class properties
     case PROP_NOTE:
-      g_value_set_string (value, gstsynth->note);
+      g_value_set_string (value, src->note);
       break;
     case PROP_NOTE_LENGTH:
-      g_value_set_int (value, gstsynth->note_length);
+      g_value_set_int (value, src->note_length);
       break;
     case PROP_NOTE_VELOCITY:
-      g_value_set_int (value, gstsynth->velocity);
+      g_value_set_int (value, src->velocity);
       break;
     case PROP_PROGRAM:
-      g_value_set_int (value, gstsynth->program);
+      g_value_set_int (value, src->program);
       break;
     // not yet GST_PARAM_CONTROLLABLE
     case PROP_INSTRUMENT_PATCH:
-      g_value_set_string (value, gstsynth->instrument_patch_path);
+      g_value_set_string (value, src->instrument_patch_path);
       break;
     case PROP_INTERP:
-      g_value_set_enum (value, gstsynth->interp);
+      g_value_set_enum (value, src->interp);
       break;
     case PROP_REVERB_ENABLE:
-      g_value_set_boolean (value, gstsynth->reverb_enable);
+      g_value_set_boolean (value, src->reverb_enable);
       break;
     case PROP_REVERB_ROOM_SIZE:
-      g_value_set_double (value, gstsynth->reverb_room_size);
+      g_value_set_double (value, src->reverb_room_size);
       break;
     case PROP_REVERB_DAMP:
-      g_value_set_double (value, gstsynth->reverb_damp);
+      g_value_set_double (value, src->reverb_damp);
       break;
     case PROP_REVERB_WIDTH:
-      g_value_set_double (value, gstsynth->reverb_width);
+      g_value_set_double (value, src->reverb_width);
       break;
     case PROP_REVERB_LEVEL:
-      g_value_set_double (value, gstsynth->reverb_level);
+      g_value_set_double (value, src->reverb_level);
       break;
     case PROP_CHORUS_ENABLE:
-      g_value_set_boolean (value, gstsynth->chorus_enable);
+      g_value_set_boolean (value, src->chorus_enable);
       break;
     case PROP_CHORUS_COUNT:
-      g_value_set_int (value, gstsynth->chorus_count);
+      g_value_set_int (value, src->chorus_count);
       break;
     case PROP_CHORUS_LEVEL:
-      g_value_set_double (value, gstsynth->chorus_level);
+      g_value_set_double (value, src->chorus_level);
       break;
     case PROP_CHORUS_FREQ:
-      g_value_set_double (value, gstsynth->chorus_freq);
+      g_value_set_double (value, src->chorus_freq);
       break;
     case PROP_CHORUS_DEPTH:
-      g_value_set_double (value, gstsynth->chorus_depth);
+      g_value_set_double (value, src->chorus_depth);
       break;
     case PROP_CHORUS_WAVEFORM:
-      g_value_set_enum (value, gstsynth->chorus_waveform);
+      g_value_set_enum (value, src->chorus_waveform);
       break;
     // static class properties
     case PROP_SAMPLES_PER_BUFFER:
-      g_value_set_int (value, (gint)gstsynth->samples_per_buffer);
+      g_value_set_int (value, (gint)src->samples_per_buffer);
       break;
     // tempo iface
     case PROP_BPM:
-      g_value_set_ulong(value, gstsynth->beats_per_minute);
+      g_value_set_ulong(value, src->beats_per_minute);
       break;
     case PROP_TPB:
-      g_value_set_ulong(value, gstsynth->ticks_per_beat);
+      g_value_set_ulong(value, src->ticks_per_beat);
       break;
     case PROP_STPT:
-      g_value_set_ulong(value, gstsynth->subticks_per_tick);
+      g_value_set_ulong(value, src->subticks_per_tick);
       break;
 #if !GST_CHECK_VERSION(0,10,31)
     // help iface
@@ -897,14 +897,12 @@ gst_fluidsynth_init (GstBtFluidsynth *src, GstBtFluidsynthClass * g_class)
 
   gst_pad_set_fixatecaps_function (pad, gst_fluidsynth_src_fixate);
 
-  src->samples_per_buffer = 1024.0;
-  src->generate_samples_per_buffer = (gint)src->samples_per_buffer;
-
   src->samplerate = GST_AUDIO_DEF_RATE;
   src->beats_per_minute=120;
   src->ticks_per_beat=4;
   src->subticks_per_tick=1;
   gst_fluidsynth_calculate_buffer_frames (src);
+  src->generate_samples_per_buffer = (guint)(0.5+src->samples_per_buffer);
 
   /* we operate in time */
   gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
