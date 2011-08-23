@@ -71,10 +71,8 @@
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
 enum {
-  // static class properties
-  PROP_SAMPLES_PER_BUFFER=1,
   // tempo iface
-  PROP_BPM,
+  PROP_BPM = 1,
   PROP_TPB,
   PROP_STPT,
 #if !GST_CHECK_VERSION(0,10,31)
@@ -184,7 +182,6 @@ static void gst_sim_syn_calculate_buffer_frames(GstBtSimSyn *self) {
 
   self->samples_per_buffer=((self->samplerate*60.0)/ticks_per_minute);
   self->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
-  g_object_notify(G_OBJECT(self),"samplesperbuffer");
   GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
 }
 
@@ -280,11 +277,6 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
 
   // register own properties
 
-  g_object_class_install_property(gobject_class, PROP_SAMPLES_PER_BUFFER,
-  	g_param_spec_int("samplesperbuffer", "Samples per buffer",
-          "Number of samples in each outgoing buffer",
-          1, G_MAXINT, 1024, G_PARAM_READWRITE));
-
   g_object_class_install_property(gobject_class,PROP_NOTE,
     g_param_spec_string("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
           NULL, G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE));
@@ -329,9 +321,6 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
   if (src->dispose_has_run) return;
 
   switch (prop_id) {
-    case PROP_SAMPLES_PER_BUFFER:
-      src->samples_per_buffer = (gdouble)g_value_get_int (value);
-      break;
     case PROP_NOTE:
       g_free (src->note);
       src->note = g_value_dup_string (value);
@@ -427,9 +416,6 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
   if (src->dispose_has_run) return;
 
   switch (prop_id) {
-    case PROP_SAMPLES_PER_BUFFER:
-      g_value_set_int (value, (gint)src->samples_per_buffer);
-      break;
     /*case PROP_NOTE:
       g_value_set_string (value, src->note);
       break;*/

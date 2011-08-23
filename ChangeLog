@@ -1,6 +1,12 @@
 2011-08-23  Stefan Sauer  <ensonic@users.sf.net>
 
 	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
+	  Remove samplesperbuffer property, we use the tempo iface for it.
+
+2011-08-23  Stefan Sauer  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c:
 	  More reordering an syncing.
 
 2011-08-23  Stefan Sauer  <ensonic@users.sf.net>

@@ -97,10 +97,8 @@
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
 enum {
-  // static class properties
-  PROP_SAMPLES_PER_BUFFER=1,
   // tempo iface
-  PROP_BPM,
+  PROP_BPM = 1,
   PROP_TPB,
   PROP_STPT,
 #if !GST_CHECK_VERSION(0,10,31)
@@ -259,7 +257,6 @@ static void gst_fluidsynth_calculate_buffer_frames(GstBtFluidsynth *self)
 
   self->samples_per_buffer=((self->samplerate*60.0)/ticks_per_minute);
   self->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
-  g_object_notify(G_OBJECT(self),"samplesperbuffer");
   GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
 }
 
@@ -515,11 +512,6 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
 
   // register own properties
 
-  g_object_class_install_property (gobject_class, PROP_SAMPLES_PER_BUFFER,
-      g_param_spec_int ("samplesperbuffer", _("Samples per buffer"),
-          _("Number of samples in each outgoing buffer"),
-          1, G_MAXINT, 1024, G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
-
   g_object_class_install_property (gobject_class, PROP_NOTE,
       g_param_spec_string ("note", _("Musical note"),
           _("Musical note (e.g. 'c-3', 'd#4')"),
@@ -608,34 +600,31 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
   GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (object);
-  char *name;
-  int retval;
 
   if (src->dispose_has_run) return;
 
   /* is it one of the dynamically installed properties? */
-  if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id)
-  {
-    name = dynamic_prop_names[prop_id - FIRST_DYNAMIC_PROP];
+  if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id) {
+    gint retval;
+    gchar *name = dynamic_prop_names[prop_id - FIRST_DYNAMIC_PROP];
 
-    switch (G_PARAM_SPEC_VALUE_TYPE (pspec))
-      {
-        case G_TYPE_INT:
-          retval = fluid_settings_setint (src->settings, name,
-                                          g_value_get_int (value));
-          break;
-        case G_TYPE_DOUBLE:
-          retval = fluid_settings_setnum (src->settings, name,
-                                          g_value_get_double (value));
-          break;
-        case G_TYPE_STRING:
-          retval = fluid_settings_setstr (src->settings, name,
-                                          (char *)g_value_get_string (value));
-          break;
-        default:
-          g_critical ("Unexpected FluidSynth dynamic property type");
-          return;
-      }
+    switch (G_PARAM_SPEC_VALUE_TYPE (pspec)) {
+      case G_TYPE_INT:
+        retval = fluid_settings_setint (src->settings, name,
+                                        g_value_get_int (value));
+        break;
+      case G_TYPE_DOUBLE:
+        retval = fluid_settings_setnum (src->settings, name,
+                                        g_value_get_double (value));
+        break;
+      case G_TYPE_STRING:
+        retval = fluid_settings_setstr (src->settings, name,
+                                        (char *)g_value_get_string (value));
+        break;
+      default:
+        g_critical ("Unexpected FluidSynth dynamic property type");
+        return;
+    }
 
     if (!retval)
       g_critical ("FluidSynth failure while setting FluidSynth property '%s'", name);
@@ -643,9 +632,7 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
     return;
   }
 
-  switch (prop_id)
-  {
-    // dynamic class properties
+  switch (prop_id) {
     case PROP_NOTE:
       g_free (src->note);
       src->note = g_value_dup_string (value);
@@ -750,10 +737,6 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       src->chorus_update = TRUE;
       gst_fluidsynth_update_chorus (src);
       break;
-    // static class properties
-    case PROP_SAMPLES_PER_BUFFER:
-      src->samples_per_buffer = (gdouble)g_value_get_int (value);
-      break;
     // tempo iface
     case PROP_BPM:
     case PROP_TPB:
@@ -771,21 +754,18 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
                              GValue * value, GParamSpec * pspec)
 {
   GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (object);
-  char *s;
-  char *name;
-  double d;
-  int retval;
-  int i;
 
   if (src->dispose_has_run) return;
 
   /* is it one of the dynamically installed properties? */
-  if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id)
-  {
-    name = dynamic_prop_names[prop_id - FIRST_DYNAMIC_PROP];
+  if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id) {
+    gchar *s;
+    gdouble d;
+    gint i;
+    gint retval;
+    gchar *name = dynamic_prop_names[prop_id - FIRST_DYNAMIC_PROP];
 
-    switch (G_PARAM_SPEC_VALUE_TYPE (pspec))
-    {
+    switch (G_PARAM_SPEC_VALUE_TYPE (pspec)) {
       case G_TYPE_INT:
         retval = fluid_settings_getint (src->settings, name, &i);
         if (retval) g_value_set_int (value, i);
@@ -809,12 +789,10 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     return;
   }
 
-  switch (prop_id)
-  {
-    // static class properties
-    case PROP_NOTE:
+  switch (prop_id) {
+    /*case PROP_NOTE:
       g_value_set_string (value, src->note);
-      break;
+      break;*/
     case PROP_NOTE_LENGTH:
       g_value_set_int (value, src->note_length);
       break;
@@ -863,10 +841,6 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
       break;
     case PROP_CHORUS_WAVEFORM:
       g_value_set_enum (value, src->chorus_waveform);
-      break;
-    // static class properties
-    case PROP_SAMPLES_PER_BUFFER:
-      g_value_set_int (value, (gint)src->samples_per_buffer);
       break;
     // tempo iface
     case PROP_BPM:
