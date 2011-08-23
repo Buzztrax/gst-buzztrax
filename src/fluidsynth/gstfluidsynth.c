@@ -1,7 +1,7 @@
 /* GStreamer
  * Copyright (C) 2007 Josh Green <josh@users.sf.net>
  *
- * Adapted from symsyn synthesizer plugin in gst-buzztard source.
+ * Adapted from simsyn synthesizer plugin in gst-buzztard source.
  * Copyright (C) 2005 Stefan Kost <ensonic@users.sf.net>
  *
  * gstfluidsynth.c: GStreamer wrapper for FluidSynth
@@ -26,30 +26,19 @@
  * @title: GstFluidSynth
  * @short_description: FluidSynth GStreamer wrapper
  *
- * <refsect2>
- * <para>
  * FluidSynth is a SoundFont 2 capable wavetable synthesizer. Soundpatches are
  * available on <ulink url="http://sounds.resonance.org">sounds.resonance.org</ulink>.
  * Distributions also have a few soundfonts packaged. The internet offers free
  * pacthes for download.
- * </para>
+ *
+ * <refsect2>
  * <title>Example launch line</title>
- * <para>
- * <programlisting>
+ * |[
  * gst-launch fluidsynth num-buffers=100 note="c-3" ! alsasink
- * </programlisting>
- * </para>
- * <para>
- * Plays one c-3 tone using the first instrument.
- * </para>
- * <para>
- * <programlisting>
+ * ]| Plays one c-3 tone using the first instrument.
+ * |[
  * gst-launch fluidsynth num-buffers=20 instrument-patch="/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2" program=2 note="c-3" ! alsasink
- * </programlisting>
- * </para>
- * <para>
- * Load a specific patch and plays one c-3 tone using the second program.
- * </para>
+ * ]| Load a specific patch and plays one c-3 tone using the second program.
  * </refsect2>
  */
 /*
@@ -79,6 +68,7 @@
  * - we would need a way to store the sf2 files with the song
  *
  */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -428,7 +418,7 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_fluidsynth_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_fluidsynth_query);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_fluidsynth_create);
-  
+
   /* set a log handler */
 #ifndef GST_DISABLE_GST_DEBUG
   fluid_set_log_function (FLUID_PANIC, gst_fluidsynth_error_log_function, NULL);
@@ -1080,7 +1070,8 @@ gst_fluidsynth_query (GstBaseSrc * basesrc, GstQuery * query)
           switch (dest_fmt) {
             case GST_FORMAT_TIME:
               /* samples to time */
-              dest_val = src_val / src->samplerate;
+              dest_val = gst_util_uint64_scale_int (src_val, GST_SECOND,
+                src->samplerate);
               break;
             default:
               goto error;
@@ -1090,7 +1081,8 @@ gst_fluidsynth_query (GstBaseSrc * basesrc, GstQuery * query)
           switch (dest_fmt) {
             case GST_FORMAT_DEFAULT:
               /* time to samples */
-              dest_val = src_val * src->samplerate;
+              dest_val = gst_util_uint64_scale_int (src_val, src->samplerate,
+                GST_SECOND);
               break;
             default:
               goto error;
@@ -1215,7 +1207,7 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
 
   if (G_UNLIKELY(partial_buffer)) {
     /* calculate only partial buffer */
-    src->generate_samples_per_buffer = src->n_samples_stop - src->n_samples;
+    src->generate_samples_per_buffer = (guint)(src->n_samples_stop - src->n_samples);
     GST_INFO_OBJECT(src,"partial buffer: %u", src->generate_samples_per_buffer);
     if(G_UNLIKELY(!src->generate_samples_per_buffer)) {
       GST_WARNING_OBJECT(src,"0 samples left -> EOS reached");
@@ -1227,16 +1219,17 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   } else {
     /* calculate full buffer */
     src->generate_samples_per_buffer = samples_per_buffer;
-    n_samples = src->n_samples + samples_per_buffer;
+    n_samples = src->n_samples + (src->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
   next_running_time = src->running_time + (src->reverse ? (-src->ticktime) : src->ticktime);
 
   /* allocate a new buffer suitable for this pad */
-  if ((res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
-      src->generate_samples_per_buffer * sizeof (gint16) * 2,
-      GST_PAD_CAPS (basesrc->srcpad),
-      &buf)) != GST_FLOW_OK)
+  res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
+      src->generate_samples_per_buffer * sizeof (gint16),
+      GST_PAD_CAPS (basesrc->srcpad), &buf);
+  if (res != GST_FLOW_OK) {
     return res;
+  }
 
   if (!src->reverse) {
     GST_BUFFER_TIMESTAMP (buf) = src->running_time;
@@ -1252,8 +1245,10 @@ gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
 
   gst_object_sync_values (G_OBJECT (src), GST_BUFFER_TIMESTAMP (buf));
 
-  GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", running_time %"GST_TIME_FORMAT", next_time %"GST_TIME_FORMAT", duration %"GST_TIME_FORMAT,
-    src->n_samples,GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_running_time),GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
+  GST_DEBUG("n_samples %12"G_GUINT64_FORMAT", d_samples %6u running_time %"GST_TIME_FORMAT", next_time %"GST_TIME_FORMAT", duration %"GST_TIME_FORMAT,
+    src->n_samples,src->generate_samples_per_buffer,
+    GST_TIME_ARGS(src->running_time),GST_TIME_ARGS(next_running_time),
+    GST_TIME_ARGS(GST_BUFFER_DURATION (buf)));
 
   src->running_time = next_running_time;
   src->n_samples = n_samples;
@@ -1353,8 +1348,7 @@ plugin_init (GstPlugin * plugin)
   /* initialize gst controller library */
   gst_controller_init(NULL,NULL);
 
-  return gst_element_register (plugin, "fluidsynth",
-                               GST_RANK_NONE, GSTBT_TYPE_FLUIDSYNTH);
+  return gst_element_register (plugin, "fluidsynth", GST_RANK_NONE, GSTBT_TYPE_FLUIDSYNTH);
 }
 
 GST_PLUGIN_DEFINE (

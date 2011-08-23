@@ -36,7 +36,7 @@
 /* @todo:
  * - implement property-meta iface (see gstbml)
  * - cut-off is now relative to samplerate, needs change
- * - get rid of samples-per-buffer, is-live properties
+ * - get rid of samples-per-buffer
  *
  * - add polyphonic element
  *   - simsyn-mono, simsyn-poly
@@ -73,6 +73,14 @@ GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 enum {
   // static class properties
   PROP_SAMPLES_PER_BUFFER=1,
+  // tempo iface
+  PROP_BPM,
+  PROP_TPB,
+  PROP_STPT,
+#if !GST_CHECK_VERSION(0,10,31)
+  // help iface
+  PROP_DOCU_URI,
+#endif
   // dynamic class properties
   PROP_NOTE,
   PROP_WAVE,
@@ -80,15 +88,7 @@ enum {
   PROP_DECAY,
   PROP_FILTER,
   PROP_CUTOFF,
-  PROP_RESONANCE,
-  // tempo iface
-  PROP_BPM,
-  PROP_TPB,
-  PROP_STPT,
-#if !GST_CHECK_VERSION(0,10,31)
-  // help iface
-  PROP_DOCU_URI
-#endif
+  PROP_RESONANCE
 };
 
 static GstStaticPadTemplate gst_sim_syn_src_template =
@@ -187,7 +187,7 @@ static void gst_sim_syn_calculate_buffer_frames(GstBtSimSyn *self) {
   self->samples_per_buffer=((self->samplerate*60.0)/ticks_per_minute);
   self->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
   g_object_notify(G_OBJECT(self),"samplesperbuffer");
-  GST_INFO("samples_per_buffer=%lf",self->samples_per_buffer);
+  GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
 }
 
 static void gst_sim_syn_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
@@ -216,7 +216,7 @@ static void gst_sim_syn_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_mi
     }
   }
   if(changed) {
-    GST_DEBUG("changing tempo to %ld BPM  %ld TPB  %ld STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
+    GST_DEBUG("changing tempo to %lu BPM  %lu TPB  %lu STPT",self->beats_per_minute,self->ticks_per_beat,self->subticks_per_tick);
     gst_sim_syn_calculate_buffer_frames(self);
   }
 }
@@ -228,9 +228,6 @@ static void gst_sim_syn_tempo_interface_init(gpointer g_iface, gpointer iface_da
 
   iface->change_tempo = gst_sim_syn_tempo_change_tempo;
 }
-
-//-- preset interface implementations
-
 
 //-- simsyn implementation
 
@@ -268,8 +265,7 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
   gobject_class->dispose      = gst_sim_syn_dispose;
 
   gstbasesrc_class->set_caps = GST_DEBUG_FUNCPTR (gst_sim_syn_setcaps);
-  gstbasesrc_class->is_seekable =
-      GST_DEBUG_FUNCPTR (gst_sim_syn_is_seekable);
+  gstbasesrc_class->is_seekable = GST_DEBUG_FUNCPTR (gst_sim_syn_is_seekable);
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_sim_syn_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_sim_syn_query);
   gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gst_sim_syn_start);
@@ -1300,8 +1296,7 @@ plugin_init (GstPlugin * plugin)
   /* initialize gst controller library */
   gst_controller_init(NULL,NULL);
 
-  return gst_element_register (plugin, "simsyn",
-      GST_RANK_NONE, GSTBT_TYPE_SIM_SYN);
+  return gst_element_register (plugin, "simsyn", GST_RANK_NONE, GSTBT_TYPE_SIM_SYN);
 }
 
 GST_PLUGIN_DEFINE (
