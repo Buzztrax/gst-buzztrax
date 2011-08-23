@@ -165,15 +165,13 @@ static void gst_sim_syn_src_fixate (GstPad * pad, GstCaps * caps);
 static gboolean gst_sim_syn_is_seekable (GstBaseSrc * basesrc);
 static gboolean gst_sim_syn_do_seek (GstBaseSrc * basesrc,
     GstSegment * segment);
-static gboolean gst_sim_syn_query (GstBaseSrc * basesrc,
-    GstQuery * query);
+static gboolean gst_sim_syn_query (GstBaseSrc * basesrc, GstQuery * query);
 
 static void gst_sim_syn_change_wave (GstBtSimSyn * src);
 static void gst_sim_syn_change_volume (GstBtSimSyn * src);
 static void gst_sim_syn_change_filter (GstBtSimSyn * src);
 
 static gboolean gst_sim_syn_start (GstBaseSrc *basesrc);
-//static gboolean gst_sim_syn_stop (GstBaseSrc *basesrc);
 static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
@@ -269,7 +267,6 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_sim_syn_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_sim_syn_query);
   gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gst_sim_syn_start);
-  //gstbasesrc_class->stop = GST_DEBUG_FUNCPTR (gst_sim_syn_stop);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_sim_syn_create);
 
   // override interface properties
@@ -320,6 +317,160 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
   g_object_class_install_property(gobject_class,PROP_RESONANCE,
     g_param_spec_double("resonance", "Resonance", "Audio filter resonance",
           0.7, 25.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+}
+
+
+static void
+gst_sim_syn_set_property (GObject * object, guint prop_id,
+    const GValue * value, GParamSpec * pspec)
+{
+  GstBtSimSyn *src = GSTBT_SIM_SYN (object);
+
+  if (src->dispose_has_run) return;
+
+  switch (prop_id) {
+    case PROP_SAMPLES_PER_BUFFER:
+      src->samples_per_buffer = (gdouble)g_value_get_int (value);
+      break;
+    case PROP_NOTE:
+      g_free (src->note);
+      src->note = g_value_dup_string (value);
+      if(src->note) {
+        gdouble freq;
+
+        GST_DEBUG("new note -> '%s'",src->note);
+        freq = gstbt_tone_conversion_translate_from_string (src->n2f, src->note);
+        if(freq>=0.0) {
+          guint64 attack,decay;
+          GValue val = { 0, };
+
+          src->freq=freq;
+          /* trigger volume 'envelope' */
+          src->volenv->value=0.001;
+          src->note_count=0L;
+          src->flt_low=src->flt_mid=src->flt_high=0.0;
+          /* src->samplerate will be one second */
+          attack=src->samplerate/1000;
+          decay=src->samplerate*src->decay;
+          if(attack>decay) attack=decay-10;
+          g_value_init (&val, G_TYPE_DOUBLE);
+          gst_controller_unset_all(src->volenv_controller,"value");
+          g_value_set_double(&val,0.001); // why is this not 0.0?
+          gst_controller_set(src->volenv_controller,"value",G_GUINT64_CONSTANT(0),&val);
+          g_value_set_double(&val,1.0);
+          gst_controller_set(src->volenv_controller,"value",attack,&val);
+          g_value_set_double(&val,0.0);
+          gst_controller_set(src->volenv_controller,"value",decay,&val);
+
+          /* @todo: more advanced envelope
+          if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
+          gst_controller_set(src->volenv_controller,"value",0,0.0);
+          gst_controller_set(src->volenv_controller,"value",attack_time,1.0);
+          gst_controller_set(src->volenv_controller,"value",attack_time+decay_time,sustain_level);
+          gst_controller_set(src->volenv_controller,"value",note_time,sustain_level);
+          gst_controller_set(src->volenv_controller,"value",note_time+release_time,0.0);
+          */
+        }
+        else {
+          src->freq=0.0;
+          /* stop volume 'envelope' */
+          src->volenv->value=0.0;
+        }
+      }
+      break;
+    case PROP_WAVE:
+      //GST_INFO("change wave %d -> %d",g_value_get_enum (value),src->wave);
+      src->wave = g_value_get_enum (value);
+      gst_sim_syn_change_wave (src);
+      break;
+    case PROP_VOLUME:
+      //GST_INFO("change volume %lf -> %lf",g_value_get_double (value),src->volume);
+      src->volume = g_value_get_double (value);
+      gst_sim_syn_change_volume (src);
+      break;
+    case PROP_DECAY:
+      //GST_INFO("change decay %lf -> %lf",g_value_get_double (value),src->decay);
+      src->decay = g_value_get_double (value);
+      break;
+    case PROP_FILTER:
+      //GST_INFO("change filter %d -> %d",g_value_get_enum (value),src->filter);
+      src->filter = g_value_get_enum (value);
+      gst_sim_syn_change_filter (src);
+      break;
+    case PROP_CUTOFF:
+      //GST_INFO("change cutoff %lf -> %lf",g_value_get_double (value),src->cutoff);
+      src->cutoff = g_value_get_double (value);
+      break;
+    case PROP_RESONANCE:
+      //GST_INFO("change resonance %lf -> %lf",g_value_get_double (value),src->resonance);
+      src->resonance = g_value_get_double (value);
+      src->flt_res=1.0/src->resonance;
+      break;
+	// tempo iface
+    case PROP_BPM:
+    case PROP_TPB:
+    case PROP_STPT:
+	  GST_WARNING("use gstbt_tempo_change_tempo()");
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+gst_sim_syn_get_property (GObject * object, guint prop_id,
+    GValue * value, GParamSpec * pspec)
+{
+  GstBtSimSyn *src = GSTBT_SIM_SYN (object);
+
+  if (src->dispose_has_run) return;
+
+  switch (prop_id) {
+    case PROP_SAMPLES_PER_BUFFER:
+      g_value_set_int (value, (gint)src->samples_per_buffer);
+      break;
+    /*case PROP_NOTE:
+      g_value_set_string (value, src->note);
+      break;*/
+    case PROP_WAVE:
+      g_value_set_enum (value, src->wave);
+      break;
+    case PROP_VOLUME:
+      g_value_set_double (value, src->volume);
+      break;
+    case PROP_DECAY:
+      g_value_set_double (value, src->decay);
+      break;
+    case PROP_FILTER:
+      g_value_set_enum (value, src->filter);
+      break;
+    case PROP_CUTOFF:
+      g_value_set_double (value, src->cutoff);
+      break;
+    case PROP_RESONANCE:
+      g_value_set_double (value, src->resonance);
+      break;
+	// tempo iface
+    case PROP_BPM:
+      g_value_set_ulong(value, src->beats_per_minute);
+      break;
+    case PROP_TPB:
+      g_value_set_ulong(value, src->ticks_per_beat);
+      break;
+    case PROP_STPT:
+      g_value_set_ulong(value, src->subticks_per_tick);
+      break;
+#if !GST_CHECK_VERSION(0,10,31)
+	// help iface
+	case PROP_DOCU_URI:
+	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstBtSimSyn.html");
+	  break;
+#endif
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
 }
 
 static void
@@ -952,19 +1103,9 @@ gst_sim_syn_start (GstBaseSrc *basesrc)
   return(TRUE);
 }
 
-/*
-static gboolean
-gst_sim_syn_stop (GstBaseSrc * basesrc)
-{
-  GstBtSimSyn *src = GSTBT_SIM_SYN (basesrc);
-
-  return TRUE;
-}
-*/
-
 static GstFlowReturn
-gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
-    guint length, GstBuffer ** buffer)
+gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset, guint length,
+    GstBuffer ** buffer)
 {
   GstBtSimSyn *src = GSTBT_SIM_SYN (basesrc);
   GstFlowReturn res;
@@ -1070,159 +1211,6 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset,
 }
 
 static void
-gst_sim_syn_set_property (GObject * object, guint prop_id,
-    const GValue * value, GParamSpec * pspec)
-{
-  GstBtSimSyn *src = GSTBT_SIM_SYN (object);
-
-  if (src->dispose_has_run) return;
-
-  switch (prop_id) {
-    case PROP_SAMPLES_PER_BUFFER:
-      src->samples_per_buffer = (gdouble)g_value_get_int (value);
-      break;
-    case PROP_NOTE:
-      g_free (src->note);
-      src->note = g_value_dup_string (value);
-      if(src->note) {
-        gdouble freq;
-
-        GST_DEBUG("new note -> '%s'",src->note);
-        freq = gstbt_tone_conversion_translate_from_string (src->n2f, src->note);
-        if(freq>=0.0) {
-          guint64 attack,decay;
-          GValue val = { 0, };
-
-          src->freq=freq;
-          /* trigger volume 'envelope' */
-          src->volenv->value=0.001;
-          src->note_count=0L;
-          src->flt_low=src->flt_mid=src->flt_high=0.0;
-          /* src->samplerate will be one second */
-          attack=src->samplerate/1000;
-          decay=src->samplerate*src->decay;
-          if(attack>decay) attack=decay-10;
-          g_value_init (&val, G_TYPE_DOUBLE);
-          gst_controller_unset_all(src->volenv_controller,"value");
-          g_value_set_double(&val,0.001); // why is this not 0.0?
-          gst_controller_set(src->volenv_controller,"value",G_GUINT64_CONSTANT(0),&val);
-          g_value_set_double(&val,1.0);
-          gst_controller_set(src->volenv_controller,"value",attack,&val);
-          g_value_set_double(&val,0.0);
-          gst_controller_set(src->volenv_controller,"value",decay,&val);
-
-          /* @todo: more advanced envelope
-          if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
-          gst_controller_set(src->volenv_controller,"value",0,0.0);
-          gst_controller_set(src->volenv_controller,"value",attack_time,1.0);
-          gst_controller_set(src->volenv_controller,"value",attack_time+decay_time,sustain_level);
-          gst_controller_set(src->volenv_controller,"value",note_time,sustain_level);
-          gst_controller_set(src->volenv_controller,"value",note_time+release_time,0.0);
-          */
-        }
-        else {
-          src->freq=0.0;
-          /* stop volume 'envelope' */
-          src->volenv->value=0.0;
-        }
-      }
-      break;
-    case PROP_WAVE:
-      //GST_INFO("change wave %d -> %d",g_value_get_enum (value),src->wave);
-      src->wave = g_value_get_enum (value);
-      gst_sim_syn_change_wave (src);
-      break;
-    case PROP_VOLUME:
-      //GST_INFO("change volume %lf -> %lf",g_value_get_double (value),src->volume);
-      src->volume = g_value_get_double (value);
-      gst_sim_syn_change_volume (src);
-      break;
-    case PROP_DECAY:
-      //GST_INFO("change decay %lf -> %lf",g_value_get_double (value),src->decay);
-      src->decay = g_value_get_double (value);
-      break;
-    case PROP_FILTER:
-      //GST_INFO("change filter %d -> %d",g_value_get_enum (value),src->filter);
-      src->filter = g_value_get_enum (value);
-      gst_sim_syn_change_filter (src);
-      break;
-    case PROP_CUTOFF:
-      //GST_INFO("change cutoff %lf -> %lf",g_value_get_double (value),src->cutoff);
-      src->cutoff = g_value_get_double (value);
-      break;
-    case PROP_RESONANCE:
-      //GST_INFO("change resonance %lf -> %lf",g_value_get_double (value),src->resonance);
-      src->resonance = g_value_get_double (value);
-      src->flt_res=1.0/src->resonance;
-      break;
-	// tempo iface
-    case PROP_BPM:
-    case PROP_TPB:
-    case PROP_STPT:
-	  GST_WARNING("use gstbt_tempo_change_tempo()");
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-}
-
-static void
-gst_sim_syn_get_property (GObject * object, guint prop_id,
-    GValue * value, GParamSpec * pspec)
-{
-  GstBtSimSyn *src = GSTBT_SIM_SYN (object);
-
-  if (src->dispose_has_run) return;
-
-  switch (prop_id) {
-    case PROP_SAMPLES_PER_BUFFER:
-      g_value_set_int (value, (gint)src->samples_per_buffer);
-      break;
-    /*case PROP_NOTE:
-      g_value_set_string (value, src->note);
-      break;*/
-    case PROP_WAVE:
-      g_value_set_enum (value, src->wave);
-      break;
-    case PROP_VOLUME:
-      g_value_set_double (value, src->volume);
-      break;
-    case PROP_DECAY:
-      g_value_set_double (value, src->decay);
-      break;
-    case PROP_FILTER:
-      g_value_set_enum (value, src->filter);
-      break;
-    case PROP_CUTOFF:
-      g_value_set_double (value, src->cutoff);
-      break;
-    case PROP_RESONANCE:
-      g_value_set_double (value, src->resonance);
-      break;
-	// tempo iface
-    case PROP_BPM:
-      g_value_set_ulong(value, src->beats_per_minute);
-      break;
-    case PROP_TPB:
-      g_value_set_ulong(value, src->ticks_per_beat);
-      break;
-    case PROP_STPT:
-      g_value_set_ulong(value, src->subticks_per_tick);
-      break;
-#if !GST_CHECK_VERSION(0,10,31)
-	// help iface
-	case PROP_DOCU_URI:
-	  g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstBtSimSyn.html");
-	  break;
-#endif
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-}
-
-static void
 gst_sim_syn_dispose (GObject *object)
 {
   GstBtSimSyn *src = GSTBT_SIM_SYN (object);
@@ -1286,7 +1274,6 @@ GType gstbt_sim_syn_get_type (void)
   }
   return type;
 }
-
 
 static gboolean
 plugin_init (GstPlugin * plugin)

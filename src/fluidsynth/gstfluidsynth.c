@@ -154,12 +154,7 @@ static GType chorus_waveform_get_type (void);
 
 static void gst_fluidsynth_base_init (gpointer klass);
 static void gst_fluidsynth_class_init (GstBtFluidsynthClass *klass);
-static void settings_foreach_count (void *data, char *name, int type);
-static void settings_foreach_func (void *data, char *name, int type);
 static void gst_fluidsynth_init (GstBtFluidsynth *object, GstBtFluidsynthClass *klass);
-
-static void gst_fluidsynth_update_reverb (GstBtFluidsynth *gstsynth);
-static void gst_fluidsynth_update_chorus (GstBtFluidsynth *gstsynth);
 
 static void gst_fluidsynth_set_property (GObject * object,
     guint prop_id, const GValue * value, GParamSpec * pspec);
@@ -172,9 +167,13 @@ static void gst_fluidsynth_src_fixate (GstPad * pad, GstCaps * caps);
 
 static gboolean gst_fluidsynth_is_seekable (GstBaseSrc * basesrc);
 static gboolean gst_fluidsynth_do_seek (GstBaseSrc * basesrc,
-                                        GstSegment * segment);
+    GstSegment * segment);
 static gboolean gst_fluidsynth_query (GstBaseSrc * basesrc, GstQuery * query);
 
+static void gst_fluidsynth_update_reverb (GstBtFluidsynth *gstsynth);
+static void gst_fluidsynth_update_chorus (GstBtFluidsynth *gstsynth);
+
+static gboolean gst_fluidsynth_start (GstBaseSrc *basesrc);
 static GstFlowReturn gst_fluidsynth_create (GstBaseSrc * basesrc,
     guint64 offset, guint length, GstBuffer ** buffer);
 
@@ -396,6 +395,59 @@ typedef struct
   GObjectClass *klass;
 } ForeachBag;
 
+
+/* for counting the number of FluidSynth settings properties */
+static void
+settings_foreach_count (void *data, char *name, int type)
+{
+  int *count = (int *)data;
+  *count = *count + 1;
+}
+
+/* add each FluidSynth setting as a GObject property */
+static void
+settings_foreach_func (void *data, char *name, int type)
+{
+  ForeachBag *bag = (ForeachBag *)data;
+  GParamSpec *spec;
+  double dmin, dmax, ddef;
+  int imin, imax, idef;
+  char *defstr;
+
+  switch (type)
+  {
+  case FLUID_NUM_TYPE:
+    fluid_settings_getnum_range (bag->settings, name, &dmin, &dmax);
+    ddef = fluid_settings_getnum_default (bag->settings, name);
+    spec = g_param_spec_double (name, name, name, dmin, dmax, ddef,
+                                G_PARAM_READWRITE);
+    break;
+  case FLUID_INT_TYPE:
+    fluid_settings_getint_range (bag->settings, name, &imin, &imax);
+    idef = fluid_settings_getint_default (bag->settings, name);
+    spec = g_param_spec_int (name, name, name, imin, imax, idef,
+                             G_PARAM_READWRITE);
+    break;
+  case FLUID_STR_TYPE:
+    defstr = fluid_settings_getstr_default (bag->settings, name);
+    spec = g_param_spec_string (name, name, name, defstr, G_PARAM_READWRITE);
+    break;
+  case FLUID_SET_TYPE:
+    g_warning ("Enum not handled for property '%s'", name);
+    return;
+  default:
+    return;
+  }
+
+  /* install the property */
+  g_object_class_install_property (bag->klass, last_property_id, spec);
+
+  /* store the name to the property name array */
+  dynamic_prop_names[last_property_id - FIRST_DYNAMIC_PROP] = g_strdup (name);
+
+  last_property_id++;   /* advance the last dynamic property ID */
+}
+
 static void
 gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
 {
@@ -417,6 +469,7 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
   gstbasesrc_class->is_seekable = GST_DEBUG_FUNCPTR (gst_fluidsynth_is_seekable);
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_fluidsynth_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_fluidsynth_query);
+  gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gst_fluidsynth_start);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gst_fluidsynth_create);
 
   /* set a log handler */
@@ -548,58 +601,6 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
           CHORUS_WAVEFORM_TYPE,
           FLUID_CHORUS_MOD_SINE,
           G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
-}
-
-/* for counting the number of FluidSynth settings properties */
-static void
-settings_foreach_count (void *data, char *name, int type)
-{
-  int *count = (int *)data;
-  *count = *count + 1;
-}
-
-/* add each FluidSynth setting as a GObject property */
-static void
-settings_foreach_func (void *data, char *name, int type)
-{
-  ForeachBag *bag = (ForeachBag *)data;
-  GParamSpec *spec;
-  double dmin, dmax, ddef;
-  int imin, imax, idef;
-  char *defstr;
-
-  switch (type)
-  {
-  case FLUID_NUM_TYPE:
-    fluid_settings_getnum_range (bag->settings, name, &dmin, &dmax);
-    ddef = fluid_settings_getnum_default (bag->settings, name);
-    spec = g_param_spec_double (name, name, name, dmin, dmax, ddef,
-                                G_PARAM_READWRITE);
-    break;
-  case FLUID_INT_TYPE:
-    fluid_settings_getint_range (bag->settings, name, &imin, &imax);
-    idef = fluid_settings_getint_default (bag->settings, name);
-    spec = g_param_spec_int (name, name, name, imin, imax, idef,
-                             G_PARAM_READWRITE);
-    break;
-  case FLUID_STR_TYPE:
-    defstr = fluid_settings_getstr_default (bag->settings, name);
-    spec = g_param_spec_string (name, name, name, defstr, G_PARAM_READWRITE);
-    break;
-  case FLUID_SET_TYPE:
-    g_warning ("Enum not handled for property '%s'", name);
-    return;
-  default:
-    return;
-  }
-
-  /* install the property */
-  g_object_class_install_property (bag->klass, last_property_id, spec);
-
-  /* store the name to the property name array */
-  dynamic_prop_names[last_property_id - FIRST_DYNAMIC_PROP] = g_strdup (name);
-
-  last_property_id++;   /* advance the last dynamic property ID */
 }
 
 static void
@@ -890,39 +891,39 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_fluidsynth_init (GstBtFluidsynth *gstsynth, GstBtFluidsynthClass * g_class)
+gst_fluidsynth_init (GstBtFluidsynth *src, GstBtFluidsynthClass * g_class)
 {
-  GstPad *pad = GST_BASE_SRC_PAD (gstsynth);
+  GstPad *pad = GST_BASE_SRC_PAD (src);
 
   gst_pad_set_fixatecaps_function (pad, gst_fluidsynth_src_fixate);
 
-  gstsynth->samples_per_buffer = 1024.0;
-  gstsynth->generate_samples_per_buffer = (gint)gstsynth->samples_per_buffer;
+  src->samples_per_buffer = 1024.0;
+  src->generate_samples_per_buffer = (gint)src->samples_per_buffer;
 
-  gstsynth->samplerate = GST_AUDIO_DEF_RATE;
-  gstsynth->beats_per_minute=120;
-  gstsynth->ticks_per_beat=4;
-  gstsynth->subticks_per_tick=1;
-  gst_fluidsynth_calculate_buffer_frames (gstsynth);
+  src->samplerate = GST_AUDIO_DEF_RATE;
+  src->beats_per_minute=120;
+  src->ticks_per_beat=4;
+  src->subticks_per_tick=1;
+  gst_fluidsynth_calculate_buffer_frames (src);
 
   /* we operate in time */
-  gst_base_src_set_format (GST_BASE_SRC (gstsynth), GST_FORMAT_TIME);
-  gst_base_src_set_live (GST_BASE_SRC (gstsynth), FALSE);
+  gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
+  gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
 
   /* set base parameters */
-  gstsynth->note = NULL;
-  gstsynth->note_length = 4;
-  gstsynth->velocity = 100;
+  src->note = NULL;
+  src->note_length = 4;
+  src->velocity = 100;
 
-  gstsynth->settings = new_fluid_settings ();
-  //fluid_settings_setstr(gstsynth->settings, "audio.driver", "alsa");
-  if(!(fluid_settings_setnum(gstsynth->settings, "synth.sample-rate", gstsynth->samplerate))) {
-    GST_WARNING("Can't set samplerate : %d", gstsynth->samplerate);
+  src->settings = new_fluid_settings ();
+  //fluid_settings_setstr(src->settings, "audio.driver", "alsa");
+  if(!(fluid_settings_setnum(src->settings, "synth.sample-rate", src->samplerate))) {
+    GST_WARNING("Can't set samplerate : %d", src->samplerate);
   }
 
   /* create new FluidSynth */
-  gstsynth->fluid = new_fluid_synth (gstsynth->settings);
-  if (!gstsynth->fluid)
+  src->fluid = new_fluid_synth (src->settings);
+  if (!src->fluid)
   {     /* FIXME - Element will likely crash if used after new_fluid_synth fails */
     g_critical ("Failed to create FluidSynth context");
     return;
@@ -938,24 +939,24 @@ gst_fluidsynth_init (GstBtFluidsynth *gstsynth, GstBtFluidsynthClass * g_class)
 #endif
 
   /* create MIDI router to send MIDI to FluidSynth */
-  gstsynth->midi_router =
-    new_fluid_midi_router (gstsynth->settings,
+  src->midi_router =
+    new_fluid_midi_router (src->settings,
                            fluid_synth_handle_midi_event,
-                           (void *)gstsynth);
-  if (gstsynth->midi_router)
+                           (void *)src);
+  if (src->midi_router)
     {
-      fluid_synth_set_midi_router (gstsynth->fluid, gstsynth->midi_router);
-      gstsynth->midi =
-        new_fluid_midi_driver (gstsynth->settings,
+      fluid_synth_set_midi_router (src->fluid, src->midi_router);
+      src->midi =
+        new_fluid_midi_driver (src->settings,
                                fluid_midi_router_handle_midi_event,
-                               (void *)(gstsynth->midi_router));
-      if (!gstsynth->midi)
+                               (void *)(src->midi_router));
+      if (!src->midi)
         g_warning ("Failed to create FluidSynth MIDI input driver");
     }
   else g_warning ("Failed to create MIDI input router");
 
-  gst_fluidsynth_update_reverb (gstsynth);      /* update reverb settings */
-  gst_fluidsynth_update_chorus (gstsynth);      /* update chorus settings */
+  gst_fluidsynth_update_reverb (src);      /* update reverb settings */
+  gst_fluidsynth_update_chorus (src);      /* update chorus settings */
 
   /* FIXME: temporary for testing, see comment at the top */
   {
@@ -967,27 +968,27 @@ gst_fluidsynth_init (GstBtFluidsynth *gstsynth, GstBtFluidsynthClass * g_class)
       NULL
     };
     sf2=sf2s;
-    gstsynth->instrument_patch=-1;
-    while((gstsynth->instrument_patch==-1) && *sf2) {
+    src->instrument_patch=-1;
+    while((src->instrument_patch==-1) && *sf2) {
       GST_INFO("trying '%s'",*sf2);
       if(g_file_test(*sf2, G_FILE_TEST_IS_REGULAR)) {
-        gstsynth->instrument_patch=fluid_synth_sfload (gstsynth->fluid, *sf2, TRUE);
+        src->instrument_patch=fluid_synth_sfload (src->fluid, *sf2, TRUE);
       }
       sf2++;
     }
   }
 #if 0
-  if(gstsynth->instrument_patch==-1) {
+  if(src->instrument_patch==-1) {
     gchar *path=g_strdup_printf("%s/sbks/synth/FlangerSaw.SF2",g_get_home_dir());
-    gstsynth->instrument_patch=fluid_synth_sfload (gstsynth->fluid, path, TRUE);
+    src->instrument_patch=fluid_synth_sfload (src->fluid, path, TRUE);
     g_free(path);
   }
 #endif
-  if(gstsynth->instrument_patch==-1) {
+  if(src->instrument_patch==-1) {
     GST_WARNING("Couldn't load any soundfont");
   }
   else {
-    GST_INFO("soundfont loaded as %d",gstsynth->instrument_patch);
+    GST_INFO("soundfont loaded as %d",src->instrument_patch);
   }
 }
 
@@ -1162,9 +1163,20 @@ gst_fluidsynth_is_seekable (GstBaseSrc * basesrc)
   return TRUE;
 }
 
+static gboolean
+gst_fluidsynth_start (GstBaseSrc *basesrc)
+{
+  GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (basesrc);
+
+  src->n_samples=G_GINT64_CONSTANT(0);
+  src->running_time=G_GUINT64_CONSTANT(0);
+
+  return(TRUE);
+}
+
 static GstFlowReturn
 gst_fluidsynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
-		       GstBuffer ** buffer)
+    GstBuffer ** buffer)
 {
   GstBtFluidsynth *src = GSTBT_FLUIDSYNTH (basesrc);
   GstFlowReturn res;

@@ -2,6 +2,12 @@
 
 	* src/fluidsynth/gstfluidsynth.c:
 	* src/simsyn/simsyn.c:
+	  More reordering an syncing.
+
+2011-08-23  Stefan Sauer  <ensonic@users.sf.net>
+
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/simsyn/simsyn.c:
 	  Sync both implementations a bit more.
 
 2011-08-22  Stefan Sauer  <ensonic@users.sf.net>
