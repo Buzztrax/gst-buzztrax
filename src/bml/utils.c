@@ -248,6 +248,7 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
 }
 
 void bml(gstbml_base_finalize(GstBMLClass *klass)) {
+  GST_INFO("!!!! klass=%p",klass);
   bml(close(klass->bmh));
   g_free(klass->dll_name);
 }

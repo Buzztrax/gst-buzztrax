@@ -1,5 +1,10 @@
 2011-10-04  Stefan Sauer  <ensonic@users.sf.net>
 
+	* src/bml/utils.c:
+	  More logging.
+
+2011-10-04  Stefan Sauer  <ensonic@users.sf.net>
+
 	* src/simsyn/simsyn.c:
 	* src/simsyn/simsyn.h:
 	  Add more noise types.
