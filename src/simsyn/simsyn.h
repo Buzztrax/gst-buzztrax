@@ -48,6 +48,10 @@ G_BEGIN_DECLS
  * @GSTBT_SIM_SYN_WAVE_WHITE_NOISE: white noise
  * @GSTBT_SIM_SYN_WAVE_PINK_NOISE: pink noise
  * @GSTBT_SIM_SYN_WAVE_SINE_TAB: sine wave (precalculated)
+ * @GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE: white (zero mean) Gaussian noise;  volume sets the standard deviation of the noise in units of the range of values of the sample type, e.g. volume=0.1 produces noise with a standard deviation of 0.1*32767=3277 with 16-bit integer samples, or 0.1*1.0=0.1 with floating-point samples.
+ * @GSTBT_SIM_SYN_WAVE_RED_NOISE: red (brownian) noise
+ * @GSTBT_SIM_SYN_WAVE_BLUE_NOISE: spectraly inverted pink noise
+ * @GSTBT_SIM_SYN_WAVE_VIOLET_NOISE: spectraly inverted red (brownian) noise
  *
  * Oscillator wave forms.
  */
@@ -59,7 +63,11 @@ typedef enum {
   GSTBT_SIM_SYN_WAVE_SILENCE,
   GSTBT_SIM_SYN_WAVE_WHITE_NOISE,
   GSTBT_SIM_SYN_WAVE_PINK_NOISE,
-  GSTBT_SIM_SYN_WAVE_SINE_TAB
+  GSTBT_SIM_SYN_WAVE_SINE_TAB,
+  GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE,
+  GSTBT_SIM_SYN_WAVE_RED_NOISE,
+  GSTBT_SIM_SYN_WAVE_BLUE_NOISE,
+  GSTBT_SIM_SYN_WAVE_VIOLET_NOISE
 } GstBtSimSynWave;
 
 /**
@@ -91,6 +99,11 @@ typedef struct {
   gint       index_mask;    /* Index wrapped by ANDing with this mask. */
   gfloat     scalar;        /* Used to scale within range of -1.0 to +1.0 */
 } GstBtPinkNoise;
+
+typedef struct {
+  gdouble    state;         /* noise state */
+} GstBtRedNoise;
+
 
 #define WAVE_TABLE_SIZE 1024
 
@@ -145,6 +158,7 @@ struct _GstBtSimSyn {
   /* waveform specific context data */
   gdouble accumulator;			/* phase angle */
   GstBtPinkNoise pink;
+  GstBtRedNoise red;
   gint16 wave_table[ WAVE_TABLE_SIZE];
 
   /* filter specific data */

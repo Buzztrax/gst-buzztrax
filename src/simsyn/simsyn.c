@@ -36,10 +36,11 @@
 /* @todo:
  * - implement property-meta iface (see gstbml)
  * - cut-off is now relative to samplerate, needs change
- * - get rid of samples-per-buffer
  *
- * - add polyphonic element
- *   - simsyn-mono, simsyn-poly
+ * - add a more advanced element (polysyn)
+ *   - polyphonic
+ *   - multiple oscillators per voice with detune
+ *   - real envelopes per osczillator
  */
 
 #ifdef HAVE_CONFIG_H
@@ -114,6 +115,10 @@ gst_sim_syn_wave_get_type (void)
     {GSTBT_SIM_SYN_WAVE_WHITE_NOISE, "White noise", "white-noise"},
     {GSTBT_SIM_SYN_WAVE_PINK_NOISE, "Pink noise", "pink-noise"},
     {GSTBT_SIM_SYN_WAVE_SINE_TAB, "Sine table", "sine table"},
+    {GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE, "White Gaussian noise", "gaussian-noise"},
+    {GSTBT_SIM_SYN_WAVE_RED_NOISE, "Red (brownian) noise", "red-noise"},
+    {GSTBT_SIM_SYN_WAVE_BLUE_NOISE, "Blue noise", "blue-noise"},
+    {GSTBT_SIM_SYN_WAVE_VIOLET_NOISE, "Violet noise", "violet-noise"},
     {0, NULL, NULL},
   };
 
@@ -850,6 +855,89 @@ gst_sim_syn_create_sine_table (GstBtSimSyn * src, gint16 * samples)
   src->accumulator = accumulator;
 }
 
+/* Gaussian white noise using Box-Muller algorithm.  unit variance
+ * normally-distributed random numbers are generated in pairs as the real
+ * and imaginary parts of a compex random variable with
+ * uniformly-distributed argument and \chi^{2}-distributed modulus.
+ */
+static void
+gst_sim_syn_create_gaussian_white_noise (GstBtSimSyn * src, gint16 * samples)
+{
+  gint i=0, j, ct=src->generate_samples_per_buffer;
+  gdouble amp, ampf;
+  
+  ampf = src->volume * 32767.0;
+
+  while (i < ct) {
+    /* the volume envelope */
+    gst_controller_sync_values (src->volenv_controller, src->note_count);
+    amp = src->volenv->value * ampf;
+    src->note_count += INNER_LOOP;
+    for (j = 0; ((j < INNER_LOOP) && (i < ct)); j+=2) {
+      gdouble mag = sqrt (-2 * log (1.0 - rand () / (RAND_MAX + 1.0)));
+      gdouble phs = M_PI_M2 * rand () / (RAND_MAX + 1.0);
+  
+      samples[i++] = (gint16) (amp * mag * cos (phs));
+      if(i<ct)
+        samples[i++] = (gint16) (amp * mag * sin (phs));
+    }
+  }
+}
+
+static void
+gst_sim_syn_create_red_noise (GstBtSimSyn * src, gint16 * samples)
+{
+  gint i=0, j, ct=src->generate_samples_per_buffer;
+  gdouble amp, ampf;
+  gdouble state = src->red.state;
+  
+  ampf = src->volume * 32767.0;
+
+  while (i < ct) {
+    /* the volume envelope */
+    gst_controller_sync_values (src->volenv_controller, src->note_count);
+    amp = src->volenv->value * ampf;
+    src->note_count += INNER_LOOP;
+    for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
+      while (TRUE) {
+        gdouble r = 1.0 - (2.0 * rand () / (RAND_MAX + 1.0));
+        state += r;
+        if (state<-8.0f || state>8.0f) state -= r;
+        else break;
+      }
+      samples[i] = (gint16) (amp * state * 0.0625f); /* /16.0 */
+    }
+  }
+  src->red.state = state;
+}
+
+static void
+gst_sim_syn_create_blue_noise (GstBtSimSyn * src, gint16 * samples)
+{
+  gint i, ct=src->generate_samples_per_buffer;
+  static gdouble flip=1.0;
+
+  gst_sim_syn_create_pink_noise (src, samples);
+  for (i = 0; i < ct; i++) {
+    samples[i] *= flip;
+    flip *= -1.0;
+  }
+}
+
+static void
+gst_sim_syn_create_violet_noise (GstBtSimSyn * src, gint16 * samples)
+{
+  gint i, ct=src->generate_samples_per_buffer;
+  static gdouble flip=1.0;
+
+  gst_sim_syn_create_red_noise (src, samples);
+  for (i = 0; i < ct; i++) {
+    samples[i] *= flip;
+    flip *= -1.0;
+  }
+}
+
+
 /* Filters */
 
 static void
@@ -973,6 +1061,21 @@ gst_sim_syn_change_wave (GstBtSimSyn * src)
     case GSTBT_SIM_SYN_WAVE_SINE_TAB:
       gst_sim_syn_init_sine_table (src);
       src->process = gst_sim_syn_create_sine_table;
+      break;
+    case GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE:
+      src->process = gst_sim_syn_create_gaussian_white_noise;
+      break;
+    case GSTBT_SIM_SYN_WAVE_RED_NOISE:
+      src->red.state = 0.0;
+      src->process = gst_sim_syn_create_red_noise;
+      break;
+    case GSTBT_SIM_SYN_WAVE_BLUE_NOISE:
+      gst_sim_syn_init_pink_noise (src);
+      src->process = gst_sim_syn_create_blue_noise;
+      break;
+    case GSTBT_SIM_SYN_WAVE_VIOLET_NOISE:
+      src->red.state = 0.0;
+      src->process = gst_sim_syn_create_violet_noise;
       break;
     default:
       GST_ERROR ("invalid wave-form: %d",src->wave);
