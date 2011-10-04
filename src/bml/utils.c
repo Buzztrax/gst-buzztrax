@@ -247,6 +247,9 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   return(bmh);
 }
 
+/* it see that this is never called :/
+ * due to that we 'leak' one instance of every buzzmachine we loaded
+ */
 void bml(gstbml_base_finalize(GstBMLClass *klass)) {
   GST_INFO("!!!! klass=%p",klass);
   bml(close(klass->bmh));

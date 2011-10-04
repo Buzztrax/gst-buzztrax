@@ -1,6 +1,12 @@
 2011-10-04  Stefan Sauer  <ensonic@users.sf.net>
 
 	* src/bml/utils.c:
+	  Add a comment explaining why we leak one instance for every buzz
+	  machine type being used.
+
+2011-10-04  Stefan Sauer  <ensonic@users.sf.net>
+
+	* src/bml/utils.c:
 	  More logging.
 
 2011-10-04  Stefan Sauer  <ensonic@users.sf.net>
