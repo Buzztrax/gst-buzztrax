@@ -36,6 +36,11 @@
 /* @todo:
  * - implement property-meta iface (see gstbml)
  * - cut-off is now relative to samplerate, needs change
+ * - we should do a linear fade down in the last inner_loop block as a anticlick
+ *   if(note_count+INNER_LOOP>=note_length) {
+ *     ac_f=1.0;
+ *     ac_s=1.0/INNER_LOOP;
+ *   }
  *
  * - add a more advanced element (polysyn)
  *   - polyphonic
@@ -347,6 +352,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
           attack=src->samplerate/1000;
           decay=src->samplerate*src->decay;
           if(attack>decay) attack=decay-10;
+          src->note_length=decay;
           g_value_init (&val, G_TYPE_DOUBLE);
           gst_controller_unset_all(src->volenv_controller,"value");
           g_value_set_double(&val,0.001); // why is this not 0.0?

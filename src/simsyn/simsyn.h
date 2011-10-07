@@ -145,7 +145,7 @@ struct _GstBtSimSyn {
 
   GstBtToneConversion *n2f;
   gdouble freq;
-  guint64 note_count;
+  guint64 note_count, note_length;
   GstBtEnvelope *volenv;                  /* volume-envelope */
   GstController *volenv_controller;     /* volume-envelope controller */
 
