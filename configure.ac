@@ -102,7 +102,7 @@ AC_ARG_ENABLE([deprecated],
 	AS_HELP_STRING([--disable-deprecated],[disable deprecated glib/gtk+/gst/etc. features]),
 	,
 	[
-		if test -f $srcdir/autogen.sh; then
+		if test -f $ac_top_srcdir/autogen.sh; then
 			is_cvs_version=true
 			enable_deprecated=no
 		else

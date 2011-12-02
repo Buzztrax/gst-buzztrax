@@ -1,3 +1,8 @@
+2011-12-03  Stefan Sauer  <ensonic@users.sf.net>
+
+	* configure.ac:
+	  Fix deprecation flags.
+
 2011-12-02  Stefan Sauer  <ensonic@users.sf.net>
 
 	* src/bml/gstbmlorc-dist.c:
@@ -200,7 +205,7 @@
 2011-03-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* src/bml/plugin.c:
-	  Remove Rout EQ 10 rom blacklist.
+	  Remove Rout EQ 10 from blacklist.
 
 2011-03-18  Stefan Kost  <ensonic@users.sf.net>
 
