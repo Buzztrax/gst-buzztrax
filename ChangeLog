@@ -1,5 +1,11 @@
 2011-12-02  Stefan Sauer  <ensonic@users.sf.net>
 
+	* src/bml/gstbmlorc-dist.c:
+	* src/bml/gstbmlorc-dist.h:
+	  Update generated files.
+
+2011-12-02  Stefan Sauer  <ensonic@users.sf.net>
+
 	* docs/reference/gst-buzztard-sections.txt:
 	  Make dist check fixes.
 

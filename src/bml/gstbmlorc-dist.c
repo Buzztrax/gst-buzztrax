@@ -4,9 +4,6 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#ifndef DISABLE_ORC
-#include <orc/orc.h>
-#endif
 #include <glib.h>
 
 #ifndef _ORC_INTEGER_TYPEDEFS_
@@ -21,6 +18,7 @@ typedef uint8_t orc_uint8;
 typedef uint16_t orc_uint16;
 typedef uint32_t orc_uint32;
 typedef uint64_t orc_uint64;
+#define ORC_UINT64_C(x) UINT64_C(x)
 #elif defined(_MSC_VER)
 typedef signed __int8 orc_int8;
 typedef signed __int16 orc_int16;
@@ -30,6 +28,8 @@ typedef unsigned __int8 orc_uint8;
 typedef unsigned __int16 orc_uint16;
 typedef unsigned __int32 orc_uint32;
 typedef unsigned __int64 orc_uint64;
+#define ORC_UINT64_C(x) (x##Ui64)
+#define inline __inline
 #else
 #include <limits.h>
 typedef signed char orc_int8;
@@ -41,16 +41,31 @@ typedef unsigned int orc_uint32;
 #if INT_MAX == LONG_MAX
 typedef long long orc_int64;
 typedef unsigned long long orc_uint64;
+#define ORC_UINT64_C(x) (x##ULL)
 #else
 typedef long orc_int64;
 typedef unsigned long orc_uint64;
+#define ORC_UINT64_C(x) (x##UL)
 #endif
 #endif
-typedef union { orc_int32 i; float f; } orc_union32;
-typedef union { orc_int64 i; double f; } orc_union64;
+typedef union { orc_int16 i; orc_int8 x2[2]; } orc_union16;
+typedef union { orc_int32 i; float f; orc_int16 x2[2]; orc_int8 x4[4]; } orc_union32;
+typedef union { orc_int64 i; double f; orc_int32 x2[2]; float x2f[2]; orc_int16 x4[4]; } orc_union64;
+#endif
+#ifndef ORC_RESTRICT
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define ORC_RESTRICT restrict
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#define ORC_RESTRICT __restrict__
+#else
+#define ORC_RESTRICT
+#endif
 #endif
 
-void orc_scalarmultiply_f32_ns (float * d1, const float * s1, float p1, int n);
+#ifndef DISABLE_ORC
+#include <orc/orc.h>
+#endif
+void orc_scalarmultiply_f32_ns (float * ORC_RESTRICT d1, const float * ORC_RESTRICT s1, float p1, int n);
 
 
 /* begin Orc C target preamble */
@@ -78,7 +93,21 @@ void orc_scalarmultiply_f32_ns (float * d1, const float * s1, float p1, int n);
 #define ORC_CLAMP_UL(x) ORC_CLAMP(x,ORC_UL_MIN,ORC_UL_MAX)
 #define ORC_SWAP_W(x) ((((x)&0xff)<<8) | (((x)&0xff00)>>8))
 #define ORC_SWAP_L(x) ((((x)&0xff)<<24) | (((x)&0xff00)<<8) | (((x)&0xff0000)>>8) | (((x)&0xff000000)>>24))
+#define ORC_SWAP_Q(x) ((((x)&ORC_UINT64_C(0xff))<<56) | (((x)&ORC_UINT64_C(0xff00))<<40) | (((x)&ORC_UINT64_C(0xff0000))<<24) | (((x)&ORC_UINT64_C(0xff000000))<<8) | (((x)&ORC_UINT64_C(0xff00000000))>>8) | (((x)&ORC_UINT64_C(0xff0000000000))>>24) | (((x)&ORC_UINT64_C(0xff000000000000))>>40) | (((x)&ORC_UINT64_C(0xff00000000000000))>>56))
 #define ORC_PTR_OFFSET(ptr,offset) ((void *)(((unsigned char *)(ptr)) + (offset)))
+#define ORC_DENORMAL(x) ((x) & ((((x)&0x7f800000) == 0) ? 0xff800000 : 0xffffffff))
+#define ORC_ISNAN(x) ((((x)&0x7f800000) == 0x7f800000) && (((x)&0x007fffff) != 0))
+#define ORC_DENORMAL_DOUBLE(x) ((x) & ((((x)&ORC_UINT64_C(0x7ff0000000000000)) == 0) ? ORC_UINT64_C(0xfff0000000000000) : ORC_UINT64_C(0xffffffffffffffff)))
+#define ORC_ISNAN_DOUBLE(x) ((((x)&ORC_UINT64_C(0x7ff0000000000000)) == ORC_UINT64_C(0x7ff0000000000000)) && (((x)&ORC_UINT64_C(0x000fffffffffffff)) != 0))
+#ifndef ORC_RESTRICT
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define ORC_RESTRICT restrict
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#define ORC_RESTRICT __restrict__
+#else
+#define ORC_RESTRICT
+#endif
+#endif
 /* end Orc C target preamble */
 
 
@@ -86,56 +115,78 @@ void orc_scalarmultiply_f32_ns (float * d1, const float * s1, float p1, int n);
 /* orc_scalarmultiply_f32_ns */
 #ifdef DISABLE_ORC
 void
-orc_scalarmultiply_f32_ns (float * d1, const float * s1, float p1, int n){
+orc_scalarmultiply_f32_ns (float * ORC_RESTRICT d1, const float * ORC_RESTRICT s1, float p1, int n){
   int i;
-  orc_union32 var0;
-  orc_union32 * ptr0;
-  orc_union32 var4;
-  const orc_union32 * ptr4;
-  const float var24 = p1;
+  orc_union32 * ORC_RESTRICT ptr0;
+  const orc_union32 * ORC_RESTRICT ptr4;
+  orc_union32 var32;
+  orc_union32 var33;
+  orc_union32 var34;
 
   ptr0 = (orc_union32 *)d1;
   ptr4 = (orc_union32 *)s1;
 
+    /* 1: loadpl */
+    var33.f = p1;
+
   for (i = 0; i < n; i++) {
-    var4 = *ptr4;
-    ptr4++;
-    /* 0: mulf */
-    var0.f = var4.f * var24;
-    *ptr0 = var0;
-    ptr0++;
+    /* 0: loadl */
+    var32 = ptr4[i];
+    /* 2: mulf */
+    {
+       orc_union32 _src1;
+       orc_union32 _src2;
+       orc_union32 _dest1;
+       _src1.i = ORC_DENORMAL(var32.i);
+       _src2.i = ORC_DENORMAL(var33.i);
+       _dest1.f = _src1.f * _src2.f;
+       var34.i = ORC_DENORMAL(_dest1.i);
+    }
+    /* 3: storel */
+    ptr0[i] = var34;
   }
 
 }
 
 #else
 static void
-_backup_orc_scalarmultiply_f32_ns (OrcExecutor *ex)
+_backup_orc_scalarmultiply_f32_ns (OrcExecutor * ex)
 {
   int i;
   int n = ex->n;
-  orc_union32 var0;
-  orc_union32 * ptr0;
-  orc_union32 var4;
-  const orc_union32 * ptr4;
-  const float var24 = ((orc_union32 *)(ex->params+24))->f;
+  orc_union32 * ORC_RESTRICT ptr0;
+  const orc_union32 * ORC_RESTRICT ptr4;
+  orc_union32 var32;
+  orc_union32 var33;
+  orc_union32 var34;
 
   ptr0 = (orc_union32 *)ex->arrays[0];
   ptr4 = (orc_union32 *)ex->arrays[4];
 
+    /* 1: loadpl */
+    var33.i = ex->params[24];
+
   for (i = 0; i < n; i++) {
-    var4 = *ptr4;
-    ptr4++;
-    /* 0: mulf */
-    var0.f = var4.f * var24;
-    *ptr0 = var0;
-    ptr0++;
+    /* 0: loadl */
+    var32 = ptr4[i];
+    /* 2: mulf */
+    {
+       orc_union32 _src1;
+       orc_union32 _src2;
+       orc_union32 _dest1;
+       _src1.i = ORC_DENORMAL(var32.i);
+       _src2.i = ORC_DENORMAL(var33.i);
+       _dest1.f = _src1.f * _src2.f;
+       var34.i = ORC_DENORMAL(_dest1.i);
+    }
+    /* 3: storel */
+    ptr0[i] = var34;
   }
 
 }
 
 void
-orc_scalarmultiply_f32_ns (float * d1, const float * s1, float p1, int n)
+orc_scalarmultiply_f32_ns (float * ORC_RESTRICT d1, const float * ORC_RESTRICT s1, float p1, int n)
 {
   OrcExecutor _ex, *ex = &_ex;
   static int p_inited = 0;
@@ -145,7 +196,6 @@ orc_scalarmultiply_f32_ns (float * d1, const float * s1, float p1, int n)
   if (!p_inited) {
     orc_once_mutex_lock ();
     if (!p_inited) {
-      OrcCompileResult result;
 
       p = orc_program_new ();
       orc_program_set_name (p, "orc_scalarmultiply_f32_ns");
@@ -156,7 +206,7 @@ orc_scalarmultiply_f32_ns (float * d1, const float * s1, float p1, int n)
 
       orc_program_append (p, "mulf", ORC_VAR_D1, ORC_VAR_S1, ORC_VAR_P1);
 
-      result = orc_program_compile (p);
+      orc_program_compile (p);
     }
     p_inited = TRUE;
     orc_once_mutex_unlock ();
@@ -176,4 +226,5 @@ orc_scalarmultiply_f32_ns (float * d1, const float * s1, float p1, int n)
   func (ex);
 }
 #endif
+
 
