@@ -45,6 +45,7 @@ GstBtSimSynFilter
 GstBtSimSynWave
 <SUBSECTION Standard>
 GstBtSimSynClass
+GstBtRedNoise
 GstBtPinkNoise
 PINK_MAX_RANDOM_ROWS
 PINK_RANDOM_BITS

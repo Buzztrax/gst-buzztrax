@@ -1,5 +1,10 @@
 2011-12-02  Stefan Sauer  <ensonic@users.sf.net>
 
+	* docs/reference/gst-buzztard-sections.txt:
+	  Make dist check fixes.
+
+2011-12-02  Stefan Sauer  <ensonic@users.sf.net>
+
 	* NEWS:
 	  Release prep.
 
