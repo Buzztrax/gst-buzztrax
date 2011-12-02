@@ -442,7 +442,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
 #endif
 
   // init bml library
-  if(!bml_setup(0)) {
+  if(!bml_setup()) {
     GST_WARNING("failed to init bml library");
     return(FALSE);
   }

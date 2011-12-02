@@ -1,3 +1,8 @@
+2011-12-02  Stefan Sauer  <ensonic@users.sf.net>
+
+	* src/bml/plugin.c:
+	  Removed unused parameter.
+
 2011-10-07  Stefan Sauer  <ensonic@users.sf.net>
 
 	* AUTHORS:
