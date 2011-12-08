@@ -55,7 +55,7 @@ struct _GstBtFluidsynth {
   /* < private > */
   /* parameters */
   gdouble samples_per_buffer;
-  gchar *note;
+  GstBtNote note;
   gint key;
   gint velocity;
   glong cur_note_length,note_length;

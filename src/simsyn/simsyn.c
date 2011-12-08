@@ -288,37 +288,42 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
   // register own properties
 
   g_object_class_install_property(gobject_class,PROP_NOTE,
-    g_param_spec_string("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
-          NULL, G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE));
+    g_param_spec_enum("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
+          GSTBT_TYPE_NOTE,
+          GSTBT_NOTE_NONE,
+          G_PARAM_WRITABLE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class,PROP_WAVE,
     g_param_spec_enum("wave", "Waveform", "Oscillator waveform",
           GSTBT_TYPE_SIM_SYN_WAVE, /* enum type */
           GSTBT_SIM_SYN_WAVE_SINE, /* default value */
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class,PROP_VOLUME,
     g_param_spec_double("volume", "Volume", "Volume of tone",
-          0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+          0.0, 1.0, 0.8,
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class,PROP_DECAY,
     g_param_spec_double("decay", "Decay", "Volume decay of the tone in seconds",
           0.001, 4.0, 0.5,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class,PROP_FILTER,
     g_param_spec_enum("filter", "Filtertype", "Type of audio filter",
           GSTBT_TYPE_SIM_SYN_FILTER,    /* enum type */
           GSTBT_SIM_SYN_FILTER_LOWPASS, /* default value */
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class,PROP_CUTOFF,
     g_param_spec_double("cut-off", "Cut-Off", "Audio filter cut-off frequency",
-          0.0, 1.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+          0.0, 1.0, 0.8,
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property(gobject_class,PROP_RESONANCE,
     g_param_spec_double("resonance", "Resonance", "Audio filter resonance",
-          0.7, 25.0, 0.8, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+          0.7, 25.0, 0.8,
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 }
 
 
@@ -332,13 +337,12 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_NOTE:
-      g_free (src->note);
-      src->note = g_value_dup_string (value);
+      src->note = g_value_get_enum (value);
       if(src->note) {
         gdouble freq;
 
         GST_DEBUG("new note -> '%s'",src->note);
-        freq = gstbt_tone_conversion_translate_from_string (src->n2f, src->note);
+        freq = gstbt_tone_conversion_translate_from_enum (src->n2f, src->note);
         if(freq>=0.0) {
           guint64 attack,decay;
           GValue val = { 0, };
@@ -488,7 +492,6 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
   /* set base parameters */
   src->volume = 0.8;
   src->freq = 0.0;
-  src->note = NULL;
   src->decay = 0.5;
   src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_CROMATIC);
 

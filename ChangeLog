@@ -1,5 +1,18 @@
 2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
 
+	* libgstbuzztard/musicenums.h:
+	  Use a count of 16 per octave to be able to reuse code that deals with
+	  buzz notes.
+
+	* src/fluidsynth/gstfluidsynth.c:
+	* src/fluidsynth/gstfluidsynth.h:
+	* src/simsyn/simsyn.c:
+	* src/simsyn/simsyn.h:
+	  Use the enums instead of strings to play notes. This also fixed
+	  leaking the string for the last note.
+
+2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
+
 	* docs/reference/gst-buzztard-sections.txt:
 	* libgstbuzztard/musicenums.c:
 	* libgstbuzztard/musicenums.h:

@@ -299,72 +299,6 @@ static void gst_fluidsynth_tempo_interface_init(gpointer g_iface, gpointer iface
   iface->change_tempo = gst_fluidsynth_tempo_change_tempo;
 }
 
-//-- helper
-
-static guint gst_fluidsynth_note_string_2_value (const gchar *note) {
-  guint tone, octave;
-
-  g_return_val_if_fail(note,0);
-  g_return_val_if_fail((strlen(note)==3),0);
-
-  g_return_val_if_fail((note[1]=='-' || note[1]=='#'),0);
-
-  // parse note
-  switch(note[0]) {
-    case 'c':
-    case 'C':
-      tone=(note[1]=='-')?0:1;
-      break;
-    case 'd':
-    case 'D':
-      tone=(note[1]=='-')?2:3;
-      break;
-    case 'e':
-    case 'E':
-      tone=4;
-      break;
-    case 'f':
-    case 'F':
-      tone=(note[1]=='-')?5:6;
-      break;
-    case 'g':
-    case 'G':
-      tone=(note[1]=='-')?7:8;
-      break;
-    case 'a':
-    case 'A':
-      tone=(note[1]=='-')?9:10;
-      break;
-    case 'b':
-    case 'B':
-    case 'h':
-    case 'H':
-      tone=11;
-      break;
-    default:
-      g_return_val_if_reached(0.0);
-  }
-  octave=atoi(&note[2]);
-  return ((octave*12)+tone);
-}
-
-#if 0
-static const gchar *gst_fluidsynth_note_value_2_string (guint note) {
-  guint tone, octave;
-  static gchar str[4];
-  static gchar *key[12]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
-
-  //g_return_val_if_fail(note<((12*9)+12),0);
-
-  note-=1;
-  octave=note/12;
-  tone=note-(octave*12);
-
-  sprintf(str,"%2s%1d",key[tone],octave);
-  return(str);
-}
-#endif
-
 //-- fluidsynth implementation
 
 static void
@@ -513,26 +447,26 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
   // register own properties
 
   g_object_class_install_property (gobject_class, PROP_NOTE,
-      g_param_spec_string ("note", _("Musical note"),
-          _("Musical note (e.g. 'c-3', 'd#4')"),
-          NULL,
-          G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
+    g_param_spec_enum("note", "Musical note", "Musical note (e.g. 'c-3', 'd#4')",
+          GSTBT_TYPE_NOTE,
+          GSTBT_NOTE_NONE,
+          G_PARAM_WRITABLE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_NOTE_LENGTH,
       g_param_spec_int ("note-length", _("Note length"),
           _("Length of a note in ticks (buffers)"),
           1, 100, 4,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
   g_object_class_install_property (gobject_class, PROP_NOTE_VELOCITY,
       g_param_spec_int ("note-velocity", _("Note velocity"),
           _("Velocity of a note"),
           0, 127, 100,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
   g_object_class_install_property (gobject_class, PROP_PROGRAM,
       g_param_spec_int ("program", _("Sound program"),
           _("Sound program number"),
           0, (0x7F<<7|0x7F), 0,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
+          G_PARAM_READWRITE|GST_PARAM_CONTROLLABLE|G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_INSTRUMENT_PATCH,
       g_param_spec_string ("instrument-patch", _("Instrument patch file"),
@@ -634,18 +568,16 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_NOTE:
-      g_free (src->note);
-      src->note = g_value_dup_string (value);
+      src->note = g_value_get_enum (value);
       if (src->note) {
-        if(src->note[0]=='o' && src->note[1]=='f' && src->note[2]=='f') {
+        if(src->note==GSTBT_NOTE_OFF) {
           fluid_synth_noteoff (src->fluid, /*chan*/ 0,  src->key);
           src->cur_note_length = 0;
         }
         else {
           // start note-off counter
           src->cur_note_length = src->note_length;
-          src->key = gst_fluidsynth_note_string_2_value(src->note);
-          GST_INFO("new note: '%s' = %d",src->note,src->key);
+          src->key = src->note - GSTBT_NOTE_C_0;
           fluid_synth_noteon (src->fluid, /*chan*/ 0,  src->key, src->velocity);
         }
       }
@@ -790,9 +722,6 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
   }
 
   switch (prop_id) {
-    /*case PROP_NOTE:
-      g_value_set_string (value, src->note);
-      break;*/
     case PROP_NOTE_LENGTH:
       g_value_set_int (value, src->note_length);
       break;
@@ -883,7 +812,6 @@ gst_fluidsynth_init (GstBtFluidsynth *src, GstBtFluidsynthClass * g_class)
   gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
 
   /* set base parameters */
-  src->note = NULL;
   src->note_length = 4;
   src->velocity = 100;
 

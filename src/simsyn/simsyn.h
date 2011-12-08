@@ -122,7 +122,7 @@ struct _GstBtSimSyn {
   /* parameters */
   gdouble samples_per_buffer;
   GstBtSimSynWave wave;
-  gchar *note;
+  GstBtNote note;
   gdouble volume;
   gdouble decay;
   GstBtSimSynFilter filter;
