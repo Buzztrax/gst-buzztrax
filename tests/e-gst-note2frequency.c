@@ -75,6 +75,45 @@ START_TEST(test_translate_str_series) {
 }
 END_TEST
 
+START_TEST(test_translate_enum_base) {
+  GstBtToneConversion *n2f;
+  gdouble frq;
+  
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  fail_unless(n2f != NULL, NULL);
+
+  frq=gstbt_tone_conversion_translate_from_enum(n2f,GSTBT_NOTE_A_3);
+  //g_print("frq=%lf\n",frq);
+  fail_unless(frq==440.0, NULL);
+  
+  // free object
+  g_object_checked_unref(n2f);
+}
+END_TEST
+
+START_TEST(test_translate_enum_series) {
+  GstBtToneConversion *n2f;
+  gdouble frq,frq_prev=0.0;
+  guint i,j;
+  
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  fail_unless(n2f != NULL, NULL);
+  
+  for(i=0;i<9;i++) {
+    for(j=0;j<12;j++) {
+      frq=gstbt_tone_conversion_translate_from_enum(n2f,1+(i*12+j));
+      //g_print("%3u -> frq=%lf\n",i,frq);
+      fail_unless(frq!=0.0, NULL);
+      fail_unless(frq>frq_prev, NULL);
+      frq_prev=frq;
+    }
+  }
+  
+  // free object
+  g_object_checked_unref(n2f);
+}
+END_TEST
+
 START_TEST(test_translate_num_base) {
   GstBtToneConversion *n2f;
   gdouble frq;
@@ -121,6 +160,8 @@ TCase *gst_buzztard_note2frequency_example_case(void) {
   tcase_add_test(tc,test_create_obj);
   tcase_add_test(tc,test_translate_str_base);
   tcase_add_test(tc,test_translate_str_series);
+  tcase_add_test(tc,test_translate_enum_base);
+  tcase_add_test(tc,test_translate_enum_series);
   tcase_add_test(tc,test_translate_num_base);
   tcase_add_test(tc,test_translate_num_series);
   tcase_add_unchecked_fixture(tc, test_setup, test_teardown);

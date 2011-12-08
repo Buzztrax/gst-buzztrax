@@ -110,6 +110,18 @@ static gboolean note_string_to_values (const gchar *note, guint *tone, guint *oc
   return(TRUE);
 }
 
+static gboolean note_enum_to_values (guint note, guint *tone, guint *octave) {
+  g_assert(tone);
+  g_assert(octave);
+
+  if(note==0) return(FALSE);
+
+  note-=1;
+  *octave=note/12;
+  *tone=note-(*octave*12);
+  return(TRUE);
+}
+
 static gboolean note_number_to_values (guint note, guint *tone, guint *octave) {
   g_return_val_if_fail(note<((16*9)+12),0);
   g_assert(tone);
@@ -122,7 +134,6 @@ static gboolean note_number_to_values (guint note, guint *tone, guint *octave) {
   *tone=note-(*octave*16);
   return(TRUE);
 }
-
 
 //-- constructor methods
 
@@ -207,6 +218,26 @@ gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gc
 }
 
 /**
+ * gstbt_tone_conversion_translate_from_enum:
+ * @self: a #GstBtToneConversion
+ * @note: a musical note
+ *
+ * Converts the musical note number to a frequency in Hz.
+ *
+ * Returns: the frequency of the note or 0.0 in case of an error
+ */
+gdouble gstbt_tone_conversion_translate_from_enum(GstBtToneConversion *self,GstBtNote note) {
+  guint tone, octave;
+
+  if(note==GSTBT_NOTE_OFF) return (-1.0);
+  
+  if(note_enum_to_values(note,&tone,&octave))
+    return(self->translate(self,octave,tone));
+  else
+    return(0.0);  
+}
+
+/**
  * gstbt_tone_conversion_translate_from_number:
  * @self: a #GstBtToneConversion
  * @note: a musical note as number
@@ -222,7 +253,7 @@ gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gc
 gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,guint note) {
   guint tone, octave;
 
-  if(note==GSTBT_TONE_CONVERSION_NOTE_OFF) return (-1.0);
+  if(note==GSTBT_NOTE_OFF) return (-1.0);
 
   if(note_number_to_values(note,&tone,&octave))
     return(self->translate(self,octave,tone));
@@ -243,7 +274,7 @@ guint gstbt_tone_conversion_note_string_2_number(const gchar *note) {
   guint tone, octave;
 
   if(note[0]=='o' && note[1]=='f' && note[2]=='f') {
-    return(GSTBT_TONE_CONVERSION_NOTE_OFF);
+    return(GSTBT_NOTE_OFF);
   }
 
   if(note_string_to_values(note,&tone,&octave))
@@ -268,7 +299,7 @@ const gchar *gstbt_tone_conversion_note_number_2_string(guint note) {
   static const gchar key[12][3]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
   guint tone, octave;
 
-  if(note==GSTBT_TONE_CONVERSION_NOTE_OFF) return ("off");
+  if(note==GSTBT_NOTE_OFF) return ("off");
 
   if(note_number_to_values(note,&tone,&octave)) {
     sprintf(str,"%2s%1d",key[tone],octave);

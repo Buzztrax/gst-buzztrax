@@ -217,9 +217,12 @@ gstbt_envelope_get_type
 <SECTION>
 <FILE>gstbtmusicenums</FILE>
 GstBtTriggerSwitch
+GstBtNote
 <SUBSECTION Standard>
 GSTBT_TYPE_TRIGGER_SWITCH
 gstbt_trigger_switch_get_type
+GSTBT_TYPE_NOTE
+gstbt_note_get_type
 </SECTION>
 
 <SECTION>
@@ -228,11 +231,10 @@ GstBtToneConversion
 GstBtToneConversionTuning
 gstbt_tone_conversion_new
 gstbt_tone_conversion_translate_from_string
+gstbt_tone_conversion_translate_from_enum
 gstbt_tone_conversion_translate_from_number
 gstbt_tone_conversion_note_string_2_number
 gstbt_tone_conversion_note_number_2_string
-GSTBT_TONE_CONVERSION_NOTE_NO
-GSTBT_TONE_CONVERSION_NOTE_OFF
 <SUBSECTION Standard>
 GstBtToneConversionClass
 GSTBT_TONE_CONVERSION

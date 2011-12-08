@@ -427,9 +427,6 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
   if (src->dispose_has_run) return;
 
   switch (prop_id) {
-    /*case PROP_NOTE:
-      g_value_set_string (value, src->note);
-      break;*/
     case PROP_WAVE:
       g_value_set_enum (value, src->wave);
       break;

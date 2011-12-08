@@ -1,3 +1,16 @@
+2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
+
+	* docs/reference/gst-buzztard-sections.txt:
+	* libgstbuzztard/musicenums.c:
+	* libgstbuzztard/musicenums.h:
+	* libgstbuzztard/toneconversion.c:
+	* libgstbuzztard/toneconversion.h:
+	* src/bml/gstbmlorc-dist.c:
+	* src/simsyn/simsyn.c:
+	* tests/e-gst-note2frequency.c:
+	  Add a Note enum type. Extend the tone conversion to handle it and
+	  replace some previous defines with enum values.
+
 2011-12-03  Stefan Sauer  <ensonic@users.sf.net>
 
 	* configure.ac:

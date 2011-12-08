@@ -26,22 +26,9 @@
 #include <glib-object.h>
 #include <gst/gst.h>
 
-G_BEGIN_DECLS
+#include "musicenums.h"
 
-/**
- * GSTBT_TONE_CONVERSION_NOTE_NO:
- *
- * Value for no note.
- */
-#define GSTBT_TONE_CONVERSION_NOTE_NO 0
-//#define GSTBT_TONE_CONVERSION_NOTE_MIN 1
-//#define GSTBT_TONE_CONVERSION_NOTE_MAX 1+(16*9)+12
-/**
- * GSTBT_TONE_CONVERSION_NOTE_OFF:
- *
- * Value for note-off command.
- */
-#define GSTBT_TONE_CONVERSION_NOTE_OFF 255
+G_BEGIN_DECLS
 
 #define GSTBT_TYPE_TONE_CONVERSION_TUNING     (gstbt_tone_conversion_tuning_get_type())
 
@@ -94,6 +81,7 @@ GType gstbt_tone_conversion_tuning_get_type(void) G_GNUC_CONST;
 
 GstBtToneConversion *gstbt_tone_conversion_new(GstBtToneConversionTuning tuning);
 gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gchar *note);
+gdouble gstbt_tone_conversion_translate_from_enum(GstBtToneConversion *self,GstBtNote note);
 gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,guint note);
 
 guint gstbt_tone_conversion_note_string_2_number(const gchar *note);

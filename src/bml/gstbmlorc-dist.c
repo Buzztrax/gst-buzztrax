@@ -189,7 +189,7 @@ void
 orc_scalarmultiply_f32_ns (float * ORC_RESTRICT d1, const float * ORC_RESTRICT s1, float p1, int n)
 {
   OrcExecutor _ex, *ex = &_ex;
-  static int p_inited = 0;
+  static volatile int p_inited = 0;
   static OrcProgram *p = 0;
   void (*func) (OrcExecutor *);
 
