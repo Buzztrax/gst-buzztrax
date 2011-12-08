@@ -1,5 +1,10 @@
 2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
 
+	* src/fluidsynth/gstfluidsynth.c:
+	  Fix buffer sizes, fluidsynth produces stereo.
+
+2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
+
 	* libgstbuzztard/musicenums.h:
 	  Use a count of 16 per octave to be able to reuse code that deals with
 	  buzz notes.
