@@ -1,5 +1,10 @@
 2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
 
+	* libgstbuzztard/toneconversion.c:
+	  Fix value mapping. We switched to buzz values.
+
+2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
+
 	* src/fluidsynth/gstfluidsynth.c:
 	  Fix buffer sizes, fluidsynth produces stereo.
 

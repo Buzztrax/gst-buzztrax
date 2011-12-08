@@ -106,19 +106,7 @@ static gboolean note_string_to_values (const gchar *note, guint *tone, guint *oc
     default:
       g_return_val_if_reached(FALSE);
   }
-  *octave=atoi(&note[2]);
-  return(TRUE);
-}
-
-static gboolean note_enum_to_values (guint note, guint *tone, guint *octave) {
-  g_assert(tone);
-  g_assert(octave);
-
-  if(note==0) return(FALSE);
-
-  note-=1;
-  *octave=note/12;
-  *tone=note-(*octave*12);
+  *octave=note[2]-'0';
   return(TRUE);
 }
 
@@ -231,12 +219,13 @@ gdouble gstbt_tone_conversion_translate_from_enum(GstBtToneConversion *self,GstB
 
   if(note==GSTBT_NOTE_OFF) return (-1.0);
   
-  if(note_enum_to_values(note,&tone,&octave))
+  if(note_number_to_values(note,&tone,&octave))
     return(self->translate(self,octave,tone));
   else
     return(0.0);  
 }
 
+// FIXME: make bml using GstBtNote and remove the function below
 /**
  * gstbt_tone_conversion_translate_from_number:
  * @self: a #GstBtToneConversion
