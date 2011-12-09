@@ -342,7 +342,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
         gdouble freq;
 
         GST_DEBUG("new note -> '%s'",src->note);
-        freq = gstbt_tone_conversion_translate_from_enum (src->n2f, src->note);
+        freq = gstbt_tone_conversion_translate_from_number(src->n2f, src->note);
         if(freq>=0.0) {
           guint64 attack,decay;
           GValue val = { 0, };

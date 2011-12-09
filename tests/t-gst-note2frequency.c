@@ -74,7 +74,7 @@ START_TEST(test_translate_str_delim) {
 }
 END_TEST
 
-START_TEST(test_translate_num_range) {
+START_TEST(test_translate_enum_range) {
   GstBtToneConversion *n2f;
   gdouble frq;
   
@@ -98,7 +98,7 @@ TCase *gst_buzztard_note2frequency_test_case(void) {
   tcase_add_test(tc,test_translate_str_null);
   tcase_add_test(tc,test_translate_str_length);
   tcase_add_test(tc,test_translate_str_delim);
-  tcase_add_test(tc,test_translate_num_range);
+  tcase_add_test(tc,test_translate_enum_range);
   tcase_add_unchecked_fixture(tc, test_setup, test_teardown);
   return(tc);
 }

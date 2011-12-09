@@ -111,7 +111,7 @@ static gboolean note_string_to_values (const gchar *note, guint *tone, guint *oc
 }
 
 static gboolean note_number_to_values (guint note, guint *tone, guint *octave) {
-  g_return_val_if_fail(note<((16*9)+12),0);
+  g_return_val_if_fail(note<GSTBT_NOTE_LAST,0);
   g_assert(tone);
   g_assert(octave);
 
@@ -206,15 +206,15 @@ gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gc
 }
 
 /**
- * gstbt_tone_conversion_translate_from_enum:
+ * gstbt_tone_conversion_translate_from_number:
  * @self: a #GstBtToneConversion
- * @note: a musical note
+ * @note: a musical note (#GstBtNote)
  *
  * Converts the musical note number to a frequency in Hz.
  *
  * Returns: the frequency of the note or 0.0 in case of an error
  */
-gdouble gstbt_tone_conversion_translate_from_enum(GstBtToneConversion *self,GstBtNote note) {
+gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self, guint note) {
   guint tone, octave;
 
   if(note==GSTBT_NOTE_OFF) return (-1.0);
@@ -223,31 +223,6 @@ gdouble gstbt_tone_conversion_translate_from_enum(GstBtToneConversion *self,GstB
     return(self->translate(self,octave,tone));
   else
     return(0.0);  
-}
-
-// FIXME: make bml using GstBtNote and remove the function below
-/**
- * gstbt_tone_conversion_translate_from_number:
- * @self: a #GstBtToneConversion
- * @note: a musical note as number
- *
- * Converts the numerical number of a note to a frequency in Hz. A value of 1
- * for @note represents 'c-0'. The highest supported value is 'b-9' (or 'h-9')
- * which is 1+(9*16)+11 (1 octave has 12 tones, 4 are left unused for easy
- * coding).
- *
- * Returns: the frequency of the note,or values <= 0.0 case of an error
- * (-1.0 for note off).
- */
-gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,guint note) {
-  guint tone, octave;
-
-  if(note==GSTBT_NOTE_OFF) return (-1.0);
-
-  if(note_number_to_values(note,&tone,&octave))
-    return(self->translate(self,octave,tone));
-  else
-    return(0.0);
 }
 
 /**
