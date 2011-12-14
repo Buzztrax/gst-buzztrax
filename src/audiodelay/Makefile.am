@@ -9,8 +9,9 @@ libgstaudiodelay_la_SOURCES = audiodelay.c
 libgstaudiodelay_la_CFLAGS =  -I$(srcdir) -I$(top_srcdir) \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
-libgstaudiodelay_la_LIBADD = $(GST_BASE_LIBS) \
-	$(top_builddir)/libgstbuzztard/libgstbuzztard.la
+libgstaudiodelay_la_LIBADD = \
+	$(top_builddir)/libgstbuzztard/libgstbuzztard.la \
+	$(GST_BASE_LIBS) $(GST_PLUGIN_LIBS)
 libgstaudiodelay_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstaudiodelay_la_LIBTOOLFLAGS = --tag=disable-static
 

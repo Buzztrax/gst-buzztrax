@@ -1,3 +1,12 @@
+2011-12-14  Stefan Sauer  <ensonic@users.sf.net>
+
+	* configure.ac:
+	* src/audiodelay/Makefile.am:
+	* src/bml/Makefile.am:
+	* src/fluidsynth/Makefile.am:
+	* src/simsyn/Makefile.am:
+	  Split BT_LIBS into BT_LDFLAGS and BT_LIBS. Sanitize link order.
+
 2011-12-09  Stefan Sauer  <ensonic@users.sf.net>
 
 	* docs/reference/gst-buzztard-sections.txt:

@@ -9,8 +9,9 @@ libgstsimsyn_la_SOURCES = simsyn.c
 libgstsimsyn_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
-libgstsimsyn_la_LIBADD = $(BASE_DEPS_LIBS) \
-	$(top_builddir)/libgstbuzztard/libgstbuzztard.la
+libgstsimsyn_la_LIBADD = \
+	$(top_builddir)/libgstbuzztard/libgstbuzztard.la \
+	$(GST_BASE_LIBS) $(GST_PLUGIN_LIBS)
 libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
 
