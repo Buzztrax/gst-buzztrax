@@ -620,11 +620,8 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParame
 
   switch(type) {
     case PT_NOTE:
-      paramspec=g_param_spec_string(name, nick, desc,
-          NULL, pspec_flags);
-      /* @todo: what about using an enum type (define in gst-buzztard) here to
-       * be able to detect this type in UIs
-       */
+      paramspec=g_param_spec_enum(name, nick, desc,
+          GSTBT_TYPE_NOTE, GSTBT_NOTE_NONE, pspec_flags);
       break;
     case PT_SWITCH:
       //if(!(flags&GSTBT_PROPERTY_META_STATE)) {
@@ -713,11 +710,9 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParame
  */
 void gstbml_set_param(GstBMLParameterTypes type,gpointer addr,const GValue *value) {
   switch(type) {
-    case PT_NOTE: {
-      const gchar *str=g_value_get_string(value);
-      *(guint8 *)addr=(str && *str) ? gstbt_tone_conversion_note_string_2_number (str) : 0;
+    case PT_NOTE:
+      *(guint8 *)addr=(guint8)g_value_get_enum(value);
       break;
-    }
     case PT_SWITCH:
       *(guint8 *)addr=(guint8)g_value_get_boolean(value);
       //*(guint8 *)addr=(guint8)g_value_get_uint(value);
@@ -747,7 +742,7 @@ void gstbml_set_param(GstBMLParameterTypes type,gpointer addr,const GValue *valu
 void gstbml_get_param(GstBMLParameterTypes type,gpointer addr,GValue *value) {
   switch(type) {
     case PT_NOTE:
-      g_value_set_string(value, gstbt_tone_conversion_note_number_2_string ((guint)(*(guint8 *)addr)));
+      //g_value_set_string(value, gstbt_tone_conversion_note_number_2_string ((guint)(*(guint8 *)addr)));
       break;
     case PT_SWITCH:
       g_value_set_boolean(value,(guint)(*(guint8 *)addr));

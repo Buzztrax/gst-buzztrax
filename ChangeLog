@@ -1,3 +1,8 @@
+2011-12-15  Stefan Sauer  <ensonic@users.sf.net>
+
+	* src/bml/common.c:
+	  Also switch buzzmachines to use enums instead of strings.
+
 2011-12-14  Stefan Sauer  <ensonic@users.sf.net>
 
 	* configure.ac:
@@ -5,7 +10,7 @@
 	* src/bml/Makefile.am:
 	* src/fluidsynth/Makefile.am:
 	* src/simsyn/Makefile.am:
-	  Split BT_LIBS into BT_LDFLAGS and BT_LIBS. Sanitize link order.
+	  Split GST_LDFLAGS into GST_LIBS and_GST_LDFLAGS. Sanitize link order.
 
 2011-12-09  Stefan Sauer  <ensonic@users.sf.net>
 
