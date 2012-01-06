@@ -24,7 +24,6 @@ ABOUT-NLS
 INSTALL
 COPYING
 intltool*
-m4
 mkinstalldirs
 coverage
 *.log
