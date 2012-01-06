@@ -1,5 +1,6 @@
 stamp-h1
 stamp-h.in
+compile
 missing
 ltmain.sh
 libtool

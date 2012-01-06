@@ -6,5 +6,3 @@ Makefile
 *.loT
 .libs
 .deps
-gstbmlorc.h
-tmp-orc.c
