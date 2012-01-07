@@ -11,7 +11,7 @@ libgstsimsyn_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) \
 	$(BASE_DEPS_CFLAGS)
 libgstsimsyn_la_LIBADD = \
 	$(top_builddir)/libgstbuzztard/libgstbuzztard.la \
-	$(GST_BASE_LIBS) $(GST_PLUGIN_LIBS)
+	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
 libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
 

@@ -317,6 +317,10 @@ PKG_CHECK_MODULES(CHECK, check >= 0.9.2,
   ]
 )
 
+dnl check for libraries
+AC_CHECK_LIBM
+AC_SUBST(LIBM)
+
 dnl Check for gtk-doc.
 m4_ifdef([GTK_DOC_CHECK], [
 GTK_DOC_CHECK([1.10],[--flavour no-tmpl])

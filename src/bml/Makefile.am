@@ -27,7 +27,7 @@ libgstbml_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) -I$(builddir) \
 libgstbml_la_LIBADD = \
 	$(top_builddir)/libgstbuzztard/libgstbuzztard.la \
 	native/libgstbmln.la $(BMLW_LA) \
-	$(GST_BASE_LIBS) $(ORC_LIBS) $(BML_LIBS) $(GST_PLUGIN_LIBS) -lm 
+	$(BASE_DEPS_LIBS) $(ORC_LIBS) $(BML_LIBS) $(GST_PLUGIN_LIBS) $(LIBM) 
 libgstbml_la_LDFLAGS =  $(GST_PLUGIN_LDFLAGS)
 libgstbml_la_LIBTOOLFLAGS = --tag=disable-static
 
