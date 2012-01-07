@@ -1,5 +1,3 @@
-## $Id$
-
 if BUILD_CHECK_TESTS
   TESTS_BIN = gst_buzztard
 else

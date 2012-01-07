@@ -1,5 +1,3 @@
-## $Id$
-
 noinst_LTLIBRARIES = libgstbmlw.la
 
 # wrapped

@@ -1,5 +1,3 @@
-$Id$
-
 = tempo =
 - should we rename 'tempo' to 'tempo_sync' or 'song_tempo'?
 - or can we remove the iface and use TAGS?

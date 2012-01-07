@@ -1,5 +1,3 @@
-## $Id$
-
 if BUILD_BMLW
 SUBDIRS = native wrapped .
 BMLW_LA = wrapped/libgstbmlw.la
