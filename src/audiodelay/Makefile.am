@@ -17,3 +17,5 @@ libgstaudiodelay_la_LIBTOOLFLAGS = --tag=disable-static
 
 # headers we need but don't want installed
 noinst_HEADERS = audiodelay.h
+
+include $(top_srcdir)/common.mak

@@ -36,7 +36,7 @@
  * One method that is useful to be overridden is gst_preset_get_property_names().
  * With that one can control which properties are saved and in which order.
  */
-/* @todo:
+/* TODO(ensonic): :
  * - we need locks to avoid two instances writing the preset file
  *   -> flock(fileno()), http://www.ecst.csuchico.edu/~beej/guide/ipc/flock.html
  *   -> better save the new file to a tempfile and then rename?
@@ -188,7 +188,7 @@ preset_skip_property (GParamSpec *property)
   if (((property->flags & G_PARAM_READWRITE) != G_PARAM_READWRITE) ||
     (property->flags & G_PARAM_CONSTRUCT_ONLY))
         return TRUE;
-  /* FIXME: skip GST_PARAM_NOT_PRESETABLE, see #522205 */
+  /* FIXME(ensonic): skip GST_PARAM_NOT_PRESETABLE, see #522205 */
   return FALSE;
 }
 
@@ -441,7 +441,7 @@ gst_preset_default_load_preset (GstPreset * self, const gchar * name)
           property = g_object_class_find_property (G_OBJECT_CLASS
               (GST_ELEMENT_GET_CLASS (self)), node->data);
 
-	      /* @todo:
+	      /* TODO(ensonic): :
           if(GSTBT_IS_PROPERTY_META(self)) {
             flags=GPOINTER_TO_INT(g_param_spec_get_qdata(property,gstbt_property_meta_quark_flags));
           }
@@ -466,7 +466,7 @@ gst_preset_default_load_preset (GstPreset * self, const gchar * name)
             GST_INFO ("parameter '%s' not in preset", property->name);
           }
         }
-        /* FIXME: handle childproxy properties as well
+        /* FIXME(ensonic): handle childproxy properties as well
          * (properties with '/' in the name)
          */
         g_list_free (properties);
@@ -581,7 +581,7 @@ gst_preset_default_save_preset (GstPreset * self, const gchar * name)
       }
       g_value_unset(&gvalue);
     }
-    /* FIXME: handle childproxy properties as well
+    /* FIXME(ensonic): handle childproxy properties as well
      * (properties with '/' in the name)
      */
     GST_INFO ("  saved");

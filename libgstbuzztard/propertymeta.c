@@ -89,7 +89,7 @@ GQuark gstbt_property_meta_quark_flags=0;
  * Returns: a string with the value in humand readable form, free memory when
  * done
  */
- // @todo make index generic (property name)
+ // TODO(ensonic): make index generic (property name)
 gchar *
 gstbt_property_meta_describe_property (GstBtPropertyMeta *self, glong index, GValue *value)
 {

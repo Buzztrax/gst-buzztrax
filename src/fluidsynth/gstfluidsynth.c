@@ -858,7 +858,7 @@ gst_fluidsynth_init (GstBtFluidsynth *src, GstBtFluidsynthClass * g_class)
   gst_fluidsynth_update_reverb (src);      /* update reverb settings */
   gst_fluidsynth_update_chorus (src);      /* update chorus settings */
 
-  /* FIXME: temporary for testing, see comment at the top */
+  /* FIXME(ensonic): temporary for testing, see comment at the top */
   {
     gchar **sf2,*sf2s[] = {
       "/usr/share/sounds/sf2/FluidR3_GM.sf2",

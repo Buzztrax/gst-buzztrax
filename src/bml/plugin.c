@@ -450,7 +450,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
   // init global data
   bml_plugin=plugin;
 
-  // @todo this is a hack
+  // TODO(ensonic): this is a hack
 #if HAVE_BMLW
   bmlw_set_master_info(120,4,44100);
 #endif

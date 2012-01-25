@@ -33,7 +33,7 @@
  * ]| Render a sine wave tone.
  * </refsect2>
  */
-/* @todo:
+/* TODO(ensonic): improvements
  * - implement property-meta iface (see gstbml)
  * - cut-off is now relative to samplerate, needs change
  * - we should do a linear fade down in the last inner_loop block as a anticlick
@@ -366,7 +366,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
           g_value_set_double(&val,0.0);
           gst_controller_set(src->volenv_controller,"value",decay,&val);
 
-          /* @todo: more advanced envelope
+          /* TODO(ensonic): more advanced envelope
           if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
           gst_controller_set(src->volenv_controller,"value",0,0.0);
           gst_controller_set(src->volenv_controller,"value",attack_time,1.0);
@@ -618,7 +618,7 @@ gst_sim_syn_create_sine (GstBtSimSyn * src, gint16 * samples)
     src->note_count += INNER_LOOP;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
-      /* @todo: move out of inner loop? */
+      /* TODO(ensonic): move out of inner loop? */
       if (G_UNLIKELY (accumulator >= M_PI_M2))
         accumulator -= M_PI_M2;
 
@@ -851,7 +851,7 @@ gst_sim_syn_create_sine_table (GstBtSimSyn * src, gint16 * samples)
   accumulator = src->accumulator;
 
   for (i = 0; i < ct; i++) {
-    /* @todo: add envelope */
+    /* TODO(ensonic): add envelope */
     accumulator += step;
     samples[i] = wave_table[((guint) (accumulator * scl)) & (WAVE_TABLE_SIZE - 1)];
   }

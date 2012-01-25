@@ -35,3 +35,4 @@ noinst_HEADERS = \
   gstbml.h gstbmlv.h \
   plugin.h common.h utils.h
 
+include $(top_srcdir)/common.mak

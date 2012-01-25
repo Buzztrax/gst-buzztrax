@@ -81,7 +81,7 @@ gchar *bml(gstbml_property_meta_describe_property(gpointer bmh, glong index, GVa
       break;
     case G_TYPE_ENUM:
       if(!(str=bml(describe_global_value(bmh, index, g_value_get_enum(event)))) || !*str) {
-        // @todo: get blurb for enum value
+        // TODO(ensonic): get blurb for enum value
         sprintf(def,"%d",g_value_get_enum(event));
         str=def;
       }
@@ -134,7 +134,7 @@ void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
     // if we call init here, it resets all parameter to deaults
     // including the voices to zero
-    // @todo: we need to do a test in EnsonicBCT to see what buzz calls when a machine
+    // TODO(ensonic): we need to do a test in EnsonicBCT to see what buzz calls when a machine
     //        exists and one changes the tempo
     //bml(init(bml->bm,0,NULL));
   }
@@ -270,7 +270,7 @@ void bml(gstbml_class_set_details(GstElementClass *klass, GstBMLClass *bml_class
   const gchar *extra_categories=gst_structure_get_string(bml_meta,"categories");
 
   /* construct the element details struct */
-  // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE?
+  // TODO(ensonic): do we want different charsets for BML_WRAPPED/BML_NATIVE?
   bml(get_machine_info(bmh,BM_PROP_SHORT_NAME,(void *)&str));
   details.longname=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
   bml(get_machine_info(bmh,BM_PROP_NAME,(void *)&str));
@@ -388,7 +388,7 @@ GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bmh, gin
 
     // build type name
     // we need to avoid creating this for GstBML and GstBMLV
-    // @todo: if we have done it for GstBML, can't we look it up and return it ?
+    // TODO(ensonic): if we have done it for GstBML, can't we look it up and return it ?
     class_type_name=g_type_name(G_TYPE_FROM_CLASS(klass));
     if(strncmp(class_type_name,"bmlv-",5)) {
       type_name=g_strdup_printf("%s%s",class_type_name,name);
@@ -836,7 +836,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
       }
       // is it a global param
       if(prop_id<bml_class->numglobalparams) {
-        // @todo cache this info
+        // TODO(ensonic): cache this info
         addr=bml(get_global_parameter_location(bm,prop_id));
         gstbml_set_param(type,addr,value);
         // DEBUG
@@ -849,7 +849,7 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
         prop_id-=bml_class->numglobalparams;
         // is it a voice00 param
         if(prop_id<bml_class->numtrackparams) {
-          // @todo cache this info
+          // TODO(ensonic): cache this info
           addr=bml(get_track_parameter_location(bm,0,prop_id));
           gstbml_set_param(type,addr,value);
           // DEBUG
@@ -934,7 +934,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
       prop_id-=bml_class->numattributes;
       // is it a global param
       if(prop_id<bml_class->numglobalparams) {
-        // @todo cache this info
+        // TODO(ensonic): cache this info
         addr=bml(get_global_parameter_location(bm,prop_id));
         gstbml_get_param(type,addr,value);
         // DEBUG
@@ -947,7 +947,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
         prop_id-=bml_class->numglobalparams;
         // is it a voice00 param
         if(prop_id<bml_class->numtrackparams) {
-          // @todo cache this info
+          // TODO(ensonic): cache this info
           addr=bml(get_track_parameter_location(bm,0,prop_id));
           gstbml_get_param(type,addr,value);
           // DEBUG

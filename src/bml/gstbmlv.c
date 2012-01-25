@@ -55,7 +55,7 @@ static gchar *bml(v_property_meta_describe_property(gpointer bmh, glong index, G
       break;
     case G_TYPE_ENUM:
       if(!(str=bml(describe_track_value(bmh, index, g_value_get_enum(event)))) || !*str) {
-        // @todo: get blurb for enum value
+        // TODO(ensonic): get blurb for enum value
         sprintf(def,"%d",g_value_get_enum(event));
         str=def;
       }
@@ -107,7 +107,7 @@ static void gst_bmlv_set_property(GObject *object, guint prop_id, const GValue *
   GST_DEBUG("id: %d", prop_id);
   GST_INFO("  bm=0x%p",bm);
 
-  // @todo cache this info
+  // TODO(ensonic): cache this info
   addr=(gint *)bml(get_track_parameter_location(bm,bmlv->voice,prop_id));
   type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
   flags=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gstbt_property_meta_quark_flags));
@@ -138,7 +138,7 @@ static void gst_bmlv_get_property(GObject * object, guint prop_id, GValue * valu
 
   addr=(gint *)bml(get_track_parameter_location(bm,bmlv->voice,prop_id));
   type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
-  // @todo cache this info
+  // TODO(ensonic): cache this info
   //bml(get_track_parameter_info(bm,prop_id,BM_PARA_TYPE,(void *)&type));
   gstbml_get_param(type,addr,value);
   /*{ DEBUG

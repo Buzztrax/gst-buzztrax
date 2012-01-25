@@ -31,23 +31,59 @@ gst_buzztard_CFLAGS = \
 
 endif
 
-# run any given test by running make <test>.check
+EXTRA_DIST = gtkdoccomplete.sh
+
+# make check           -- run all checks
+# make (test).check    -- run the given check once
+#	make (test).check BT_CHECKS="test5*" -- run the given testcase(s) only
 %.check: %
 	@$(TESTS_ENVIRONMENT)	\
 	./$*
 
-# gdb any given test by running make <test>.gdb
+# make (test).gdb      -- start up gdb for the given test
 %.gdb: %
-	CK_FORK=no				\
-	CK_DEFAULT_TIMEOUT=20	\
-	$(LIBTOOL) --mode=execute	\
+	@CK_FORK=no				\
+	$(TESTS_ENVIRONMENT)	\
 	gdb ./$*
 
-EXTRA_DIST = gtkdoccomplete.sh
+# make (test).refdbg   -- start up refdbg for the given test
+%.refdbg: %
+	@CK_FORK=no		\
+	$(TESTS_ENVIRONMENT)	\
+	refdbg -c "btnum=20 ; logobjs=0 ; $(REFDBG_RULE)" \
+	./$*
 
-help::
-	@echo "make check                   -- run all checks"
-	@echo "make (test).check            -- run the given check once"
-	@echo
-	@echo "make (test).gdb              -- start up gdb for the given test"
+if USE_VALGRIND
+VALPREFIX = \
+	CK_FORK=no CK_DEFAULT_TIMEOUT=500 \
+	LANG=C XDG_CACHE_HOME=$(abs_builddir) \
+	G_SLICE=always-malloc G_DEBUG=gc-friendly \
+	GLIBCPP_FORCE_NEW=1 GLIBCXX_FORCE_NEW=1
+VALDEFAULT = @VALGRIND@/bin/valgrind
+VALSUPP = @VALGRIND@/lib/valgrind
+VALSUPPRESSIONDEF = --suppressions=$(VALSUPP)/default.supp
+VALSUPPRESSIONOWN = --suppressions=$(top_builddir)/buzztard.supp \
+	--suppressions=$(top_builddir)/gst.supp \
+	--suppressions=$(top_builddir)/gtk.supp
+VALSUPPRESSION = $(VALSUPPRESSIONDEF) $(VALSUPPRESSIONOWN)
+VALOPTIONS = --trace-children=yes --num-callers=30 --read-var-info=yes \
+  --tool=memcheck --leak-check=full --leak-resolution=high --track-origins=yes
+VALCMD = $(VALPREFIX) $(VALDEFAULT) $(VALOPTIONS) $(VALSUPPRESSION)
 
+## for file in /tmp/bt_core.valgrind.pid*; do grep -q "ERROR SUMMARY: 0 errors from 0 contexts" $file ; if test $? == 0; then rm $file; fi; done
+## grep -H "ERROR SUMMARY: " /tmp/bt_core.valgrind.pid* | uniq
+
+# make valgrind        -- valgrind all tests
+valgrind:: $(TESTS_BIN)
+	for i in $^; do \
+	  rm -rf /tmp/$$i.valgrind.pid*; \
+	  $(VALCMD) --log-file=/tmp/$$i_valgrind.pid%p ./$$i; \
+	done
+
+# make (test).valgrind -- valgrind the given test"
+%.valgrind: %
+	rm -rf /tmp/$*.valgrind.pid*; \
+	$(VALCMD) --log-file=/tmp/$*.valgrind.pid%p ./$*;
+endif
+
+include $(top_srcdir)/common.mak

@@ -42,7 +42,7 @@ G_BEGIN_DECLS
 typedef enum {
   /* 12 tones with equal distance (equal temperament) */
   GSTBT_TONE_CONVERSION_CROMATIC=0,
-  /* @todo: add more */
+  /* TODO(ensonic): add more */
 } GstBtToneConversionTuning;
 
 #define GSTBT_TYPE_TONE_CONVERSION            (gstbt_tone_conversion_get_type ())

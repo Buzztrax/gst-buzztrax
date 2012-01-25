@@ -235,7 +235,7 @@ static gboolean gst_bml_transform_set_caps(GstBaseTransform * base, GstCaps * in
 
   if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate)) && (samplerate!=bml->samplerate)) {
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
-    // @todo: irks, this resets all parameter to their default
+    // TODO(ensonic): irks, this resets all parameter to their default
     //bml(init(bml->bm,0,NULL));
   }
 

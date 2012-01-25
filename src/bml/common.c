@@ -44,7 +44,7 @@ gchar** gstbml_preset_get_preset_names(GstBML *bml,GstBMLClass *klass) {
         machine_name=g_malloc0(size+1);
         if(!(fread(machine_name,size,1,in))) goto eof_error;
 
-        // @todo: need to cut off path and '.dll'
+        // TODO(ensonic): need to cut off path and '.dll'
         if(!strstr(klass->dll_name,machine_name)) {
           GST_WARNING("Preset for wrong machine? '%s' <> '%s'",klass->dll_name,machine_name);
         }
@@ -508,7 +508,7 @@ void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc,
   gchar *cname,*ptr1,*ptr2;
 
   GST_DEBUG("        tmp_name='%s'",tmp_name);
-  // @todo: do we want different charsets for BML_WRAPPED/BML_NATIVE?
+  // TODO(ensonic): do we want different charsets for BML_WRAPPED/BML_NATIVE?
   cname=g_convert(tmp_name,-1,"ASCII","WINDOWS-1252",NULL,NULL,NULL);
   if(!cname) {
     // weak fallback when conversion failed
@@ -625,7 +625,7 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParame
       break;
     case PT_SWITCH:
       //if(!(flags&GSTBT_PROPERTY_META_STATE)) {
-        /* @todo use better type for triggers
+        /* TODO(ensonic): use better type for triggers
          * this is how its define for buzz
          * [ 0 ... n=255 ... 1]
          *
@@ -659,7 +659,7 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParame
       }*/
       break;
     case PT_BYTE:
-      // @todo: gstreamer has no support for CHAR/UCHAR
+      // TODO(ensonic): gstreamer has no support for CHAR/UCHAR
       paramspec=g_param_spec_uint(name, nick, desc,
         min_val,max_val,def_val,
         pspec_flags);
@@ -684,7 +684,7 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParame
       break;
   }
   if(paramspec) {
-    // @todo: can we skip the gstbt_property_meta qdata business for some parameters
+    // TODO(ensonic): can we skip the gstbt_property_meta qdata business for some parameters
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark,GINT_TO_POINTER(TRUE));
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_min_val, GINT_TO_POINTER(saved_min_val));
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_max_val, GINT_TO_POINTER(saved_max_val));
@@ -827,7 +827,7 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
         has_data=TRUE;
         break;
       }
-/* FIXME: we not configure the FPU to DAZ|FZ in libbuzztard-core
+/* FIXME(ensonic): we not configure the FPU to DAZ|FZ in libbuzztard-core
  * this would not apply to other clients
  */
 #if 0

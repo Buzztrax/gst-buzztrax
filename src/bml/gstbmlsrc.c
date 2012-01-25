@@ -216,7 +216,7 @@ static gboolean gst_bml_src_set_caps(GstBaseSrc *base, GstCaps *caps) {
   structure = gst_caps_get_structure (caps, 0);
   if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate)) && (samplerate!=bml->samplerate)) {
     bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
-    // @todo: irks, this resets all parameter to their default
+    // TODO(ensonic): irks, this resets all parameter to their default
     //bml(init(bml->bm,0,NULL));
   }
 
@@ -433,7 +433,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
     GST_BUFFER_OFFSET_END(buf)=bml->n_samples;
   }
 
-  /* @todo: split up processing of the buffer into chunks so that params can
+  /* TODO(ensonic): split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
    */
   bml(gstbml_reset_triggers(bml,bml_class));
@@ -548,7 +548,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
     GST_BUFFER_OFFSET_END(buf)=bml->n_samples;
   }
 
-  /* @todo: split up processing of the buffer into chunks so that params can
+  /* TODO(ensonic): split up processing of the buffer into chunks so that params can
    * be updated when required (e.g. for the subticks-feature).
    */
   bml(gstbml_reset_triggers(bml,bml_class));

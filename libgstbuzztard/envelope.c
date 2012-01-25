@@ -98,7 +98,7 @@ gstbt_envelope_get_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_VALUE:
-      // @todo: gst_object_sync_values (G_OBJECT (env), env->running_time);
+      // TODO(ensonic): gst_object_sync_values (G_OBJECT (env), env->running_time);
       g_value_set_double (value, env->value);
       break;
     default:

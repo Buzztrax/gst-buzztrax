@@ -10,8 +10,9 @@ EXTRA_DIST = \
 	libgstbuzztard.pc.in \
 	TODO
 
-.PHONY: help coverage valgrind
+.PHONY: coverage valgrind
 
+# make coverage        -- run all checks and generate html coverage report (only availble when built using --enable-coverage)
 if USE_LCOV
 coverage::
 	mkdir -p ./coverage
@@ -23,9 +24,12 @@ coverage::
 	genhtml -o ./coverage --num-spaces 2 ./coverage/$(PACKAGE).info
 endif
 
+# make valgrind        -- run all checks under valgrind
 if USE_VALGRIND
 valgrind::
 	$(MAKE) -C tests valgrind
 endif
 
 CLEANFILES = $(pkgconfig_DATA)
+
+include $(top_srcdir)/common.mak

@@ -13,3 +13,4 @@ endif
 SUBDIRS = \
     audiodelay $(BML) $(FLUIDSYNTH) simsyn
 
+include $(top_srcdir)/common.mak

@@ -41,3 +41,4 @@ libgstbuzztard_la_LIBADD = $(BASE_DEPS_LIBS)
 libgstbuzztard_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@ \
     $(GST_LIB_LDFLAGS)
 
+include $(top_srcdir)/common.mak
