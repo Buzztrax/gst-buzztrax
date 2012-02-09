@@ -771,10 +771,10 @@ void gstbml_get_param(GstBMLParameterTypes type,gpointer addr,GValue *value) {
  */
 void gstbml_calculate_buffer_frames(GstBML *bml) {
   const gdouble ticks_per_minute=(gdouble)(bml->beats_per_minute*bml->ticks_per_beat);
+  const gdouble div=60.0/bml->subticks_per_tick;
 
-  // half fragment size buffers for better latency (mitigate queue effects)
-  bml->samples_per_buffer=((bml->samplerate*(60.0/2.0))/ticks_per_minute);
-  bml->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
+  bml->samples_per_buffer=((bml->samplerate*div)/ticks_per_minute);
+  bml->ticktime=(GstClockTime)(0.5+((GST_SECOND*div)/ticks_per_minute));
 }
 
 /**

@@ -254,10 +254,10 @@ chorus_waveform_get_type (void)
 static void gst_fluidsynth_calculate_buffer_frames(GstBtFluidsynth *self)
 {
   const gdouble ticks_per_minute=(gdouble)(self->beats_per_minute*self->ticks_per_beat);
+  const gdouble div=60.0/self->subticks_per_tick;
 
-  // half fragment size buffers for better latency (mitigate queue effects)
-  self->samples_per_buffer=((self->samplerate*(60.0/2.0))/ticks_per_minute);
-  self->ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
+  self->samples_per_buffer=((self->samplerate*div)/ticks_per_minute);
+  self->ticktime=(GstClockTime)(0.5+((GST_SECOND*div)/ticks_per_minute));
   GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
 }
 
