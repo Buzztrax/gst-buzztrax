@@ -254,19 +254,28 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
   guint mode=3; /*WM_READWRITE*/
 
   bml->running_time=gst_segment_to_stream_time(&base->segment,GST_FORMAT_TIME,GST_BUFFER_TIMESTAMP(outbuf));
-  data=(BMLData *)GST_BUFFER_DATA (outbuf);
-  samples_per_buffer=GST_BUFFER_SIZE(outbuf)/sizeof(BMLData);
+  
+  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_DISCONT)) {
+    bml->subtick_count=bml->subticks_per_tick;
+  }
 
-  /* split up processing of the buffer into chunks so that params can
-   * be updated when required (e.g. for the subticks-feature).
-   */
-  bml(gstbml_reset_triggers(bml,bml_class));
-  bml(gstbml_sync_values(bml,bml_class));
-  bml(tick(bm));
+  /* TODO(ensonic): sync on subticks ? */
+  if(bml->subtick_count>=bml->subticks_per_tick) {
+    bml(gstbml_reset_triggers(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class));
+    bml(tick(bm));
+    bml->subtick_count=1;
+  }
+  else {
+    bml->subtick_count++;
+  }
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base))
     return GST_FLOW_OK;
+
+  data=(BMLData *)GST_BUFFER_DATA(outbuf);
+  samples_per_buffer=GST_BUFFER_SIZE(outbuf)/sizeof(BMLData);
 
   /* if buffer has only silence process with different mode */
   if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_GAP)) {
@@ -306,19 +315,28 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
   guint mode=3; /*WM_READWRITE*/
 
   bml->running_time=gst_segment_to_stream_time(&base->segment,GST_FORMAT_TIME,GST_BUFFER_TIMESTAMP(outbuf));
-  data=(BMLData *)GST_BUFFER_DATA (outbuf);
-  samples_per_buffer=GST_BUFFER_SIZE(outbuf)/(sizeof(BMLData)*2);
 
-  /* split up processing of the buffer into chunks so that params can
-   * be updated when required (e.g. for the subticks-feature).
-   */
-  bml(gstbml_reset_triggers(bml,bml_class));
-  bml(gstbml_sync_values(bml,bml_class));
-  bml(tick(bm));
+  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_DISCONT)) {
+    bml->subtick_count=bml->subticks_per_tick;
+  }
+
+  /* TODO(ensonic): sync on subticks ? */
+  if(bml->subtick_count>=bml->subticks_per_tick) {
+    bml(gstbml_reset_triggers(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class));
+    bml(tick(bm));
+    bml->subtick_count=1;
+  }
+  else {
+    bml->subtick_count++;
+  }
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base))
     return GST_FLOW_OK;
+
+  data=(BMLData *)GST_BUFFER_DATA(outbuf);
+  samples_per_buffer=GST_BUFFER_SIZE(outbuf)/(sizeof(BMLData)*2);
 
   /* if buffer has only silence process with different mode */
   if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_GAP)) {
@@ -358,24 +376,20 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   guint mode=3; /*WM_READWRITE*/
 
   bml->running_time=gst_segment_to_stream_time(&base->segment,GST_FORMAT_TIME,GST_BUFFER_TIMESTAMP(inbuf));
-  datai=(BMLData *)GST_BUFFER_DATA (inbuf);
-  datao=(BMLData *)GST_BUFFER_DATA (outbuf);
-  samples_per_buffer=GST_BUFFER_SIZE(inbuf)/sizeof(BMLData);
 
-  // some buzzmachines expect a cleared buffer
-  //for(i=0;i<samples_per_buffer*2;i++) datao[i]=0.0f;
-  memset(datao,0,samples_per_buffer*2*sizeof(BMLData));
+  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_DISCONT)) {
+    bml->subtick_count=bml->subticks_per_tick;
+  }
 
-  GST_DEBUG_OBJECT(bml_transform,"input : %p,%d  output: %p,%d",
-    datai,GST_BUFFER_SIZE(inbuf),
-    datao,GST_BUFFER_SIZE(outbuf));
-
-  /* split up processing of the buffer into chunks so that params can
-   * be updated when required (e.g. for the subticks-feature).
-   */
-  bml(gstbml_reset_triggers(bml,bml_class));
-  bml(gstbml_sync_values(bml,bml_class));
-  bml(tick(bm));
+  if(bml->subtick_count>=bml->subticks_per_tick) {
+    bml(gstbml_reset_triggers(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class));
+    bml(tick(bm));
+    bml->subtick_count=1;
+  }
+  else {
+    bml->subtick_count++;
+  }
 
   /* don't process data in passthrough-mode */
   if (gst_base_transform_is_passthrough (base)) {
@@ -384,7 +398,14 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
     GST_WARNING_OBJECT(bml_transform,"m2s in passthrough mode");
     //return GST_FLOW_OK;
   }
-  /**/
+
+  datai=(BMLData *)GST_BUFFER_DATA (inbuf);
+  datao=(BMLData *)GST_BUFFER_DATA (outbuf);
+  samples_per_buffer=GST_BUFFER_SIZE(inbuf)/sizeof(BMLData);
+
+  // some buzzmachines expect a cleared buffer
+  //for(i=0;i<samples_per_buffer*2;i++) datao[i]=0.0f;
+  memset(datao,0,samples_per_buffer*2*sizeof(BMLData));
 
   /* if buffer has only silence process with different mode */
   if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_GAP)) {
@@ -500,7 +521,7 @@ static gboolean gst_bml_transform_start(GstBaseTransform * base) {
         GST_WARNING("unhandled type : %d",type);
     }
   }
-
+  
   return TRUE;
 }
 #endif

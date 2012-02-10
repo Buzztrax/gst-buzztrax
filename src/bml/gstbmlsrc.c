@@ -345,6 +345,8 @@ static gboolean gst_bml_src_do_seek(GstBaseSrc * base, GstSegment * segment) {
   GST_DEBUG_OBJECT(bml_src,"seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
     GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop),GST_TIME_ARGS(segment->last_stop),segment->rate);
 
+  bml->subtick_count=bml->subticks_per_tick;
+
   return TRUE;
 }
 
@@ -433,12 +435,16 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
     GST_BUFFER_OFFSET_END(buf)=bml->n_samples;
   }
 
-  /* TODO(ensonic): split up processing of the buffer into chunks so that params can
-   * be updated when required (e.g. for the subticks-feature).
-   */
-  bml(gstbml_reset_triggers(bml,bml_class));
-  bml(gstbml_sync_values(bml,bml_class));
-  bml(tick(bm));
+  /* TODO(ensonic): sync on subticks ? */
+  if(bml->subtick_count>=bml->subticks_per_tick) {
+    bml(gstbml_reset_triggers(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class));
+    bml(tick(bm));
+    bml->subtick_count=1;
+  }
+  else {
+    bml->subtick_count++;
+  }
 
   bml->running_time = next_running_time;
   bml->n_samples = n_samples;
@@ -548,12 +554,16 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
     GST_BUFFER_OFFSET_END(buf)=bml->n_samples;
   }
 
-  /* TODO(ensonic): split up processing of the buffer into chunks so that params can
-   * be updated when required (e.g. for the subticks-feature).
-   */
-  bml(gstbml_reset_triggers(bml,bml_class));
-  bml(gstbml_sync_values(bml,bml_class));
-  bml(tick(bm));
+  /* TODO(ensonic): sync on subticks ? */
+  if(bml->subtick_count>=bml->subticks_per_tick) {
+    bml(gstbml_reset_triggers(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class));
+    bml(tick(bm));
+    bml->subtick_count=1;
+  }
+  else {
+    bml->subtick_count++;
+  }
 
   bml->running_time = next_running_time;
   bml->n_samples = n_samples;
