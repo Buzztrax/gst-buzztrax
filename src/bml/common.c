@@ -590,25 +590,37 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParame
 
   GST_DEBUG("        name='%s', nick='%s', type=%d, flags=0x%x : val [%d ... d=%d/n=%d ... %d]",name,nick,type,flags, min_val,def_val,no_val,max_val);
   //*def = defval;
-  if(def_val<min_val) {
-    GST_WARNING("par=%d:%s, def_val < min_val",type,name);
-    saved_min_val=min_val;
-    min_val=def_val;
-  }
-  if(def_val>max_val) {
-    GST_WARNING("par=%d:%s, def_val > max_val",type,name);
-    // this does not work for enum types
-    saved_max_val=max_val;
-    max_val=def_val;
+  if(type!=PT_SWITCH) {
+    // for switch params usually min=max==-1
+    if(def_val<min_val) {
+      GST_WARNING("par=%d:%s, def_val < min_val",type,name);
+      saved_min_val=min_val;
+      min_val=def_val;
+    }
+    if(def_val>max_val) {
+      GST_WARNING("par=%d:%s, def_val > max_val",type,name);
+      saved_max_val=max_val;
+      max_val=def_val;
+    }
+  } else {
+    // avoid the min=max==-1 situation
+    min_val=0;
+    max_val=1;
   }
   if(!(flags&GSTBT_PROPERTY_META_STATE)) {
     // only trigger params need no_val handling
     if(no_val<min_val) {
-      GST_WARNING("par=%d:%s, no_val < min_val",type,name);
+      if (min_val!=-1) {
+        GST_WARNING("par=%d:%s, no_val < min_val",type,name);
+      }
+      saved_min_val=min_val;
       min_val=no_val;
     }
     if(no_val>max_val) {
-      GST_WARNING("par=%d:%s, no_val > max_val",type,name);
+      if (max_val!=-1) {
+        GST_WARNING("par=%d:%s, no_val > max_val",type,name);
+      }
+      saved_max_val=max_val;
       max_val=no_val;
     }
     def_val=no_val;
@@ -684,7 +696,7 @@ GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParame
       break;
   }
   if(paramspec) {
-    // TODO(ensonic): can we skip the gstbt_property_meta qdata business for some parameters
+    // TODO(ensonic): can we skip the gstbt_property_meta qdata business for some parameters?
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark,GINT_TO_POINTER(TRUE));
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_min_val, GINT_TO_POINTER(saved_min_val));
     g_param_spec_set_qdata(paramspec,gstbt_property_meta_quark_max_val, GINT_TO_POINTER(saved_max_val));
