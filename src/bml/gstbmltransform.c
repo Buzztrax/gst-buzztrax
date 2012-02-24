@@ -262,7 +262,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
   /* TODO(ensonic): sync on subticks ? */
   if(bml->subtick_count>=bml->subticks_per_tick) {
     bml(gstbml_reset_triggers(bml,bml_class));
-    bml(gstbml_sync_values(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class,GST_BUFFER_TIMESTAMP(outbuf)));
     bml(tick(bm));
     bml->subtick_count=1;
   }
@@ -323,7 +323,7 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
   /* TODO(ensonic): sync on subticks ? */
   if(bml->subtick_count>=bml->subticks_per_tick) {
     bml(gstbml_reset_triggers(bml,bml_class));
-    bml(gstbml_sync_values(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class,GST_BUFFER_TIMESTAMP(outbuf)));
     bml(tick(bm));
     bml->subtick_count=1;
   }
@@ -383,7 +383,7 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
 
   if(bml->subtick_count>=bml->subticks_per_tick) {
     bml(gstbml_reset_triggers(bml,bml_class));
-    bml(gstbml_sync_values(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class,GST_BUFFER_TIMESTAMP(outbuf)));
     bml(tick(bm));
     bml->subtick_count=1;
   }

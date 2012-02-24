@@ -190,10 +190,16 @@ static GstFlowReturn gst_sim_syn_create (GstBaseSrc * basesrc,
 static void gst_sim_syn_calculate_buffer_frames(GstBtSimSyn *self) {
   const gdouble ticks_per_minute=(gdouble)(self->beats_per_minute*self->ticks_per_beat);
   const gdouble div=60.0/self->subticks_per_tick;
+  const gdouble subticktime=((GST_SECOND*div)/ticks_per_minute);
+  GstClockTime ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
 
   self->samples_per_buffer=((self->samplerate*div)/ticks_per_minute);
-  self->ticktime=(GstClockTime)(0.5+((GST_SECOND*div)/ticks_per_minute));
+  self->ticktime=(GstClockTime)(0.5+subticktime);
   GST_DEBUG("samples_per_buffer=%lf",self->samples_per_buffer);
+  // the sequence is quantized to ticks and not subticks
+  // we need to compensate for the rounding errors :/
+  self->ticktime_err=((gdouble)ticktime-(gdouble)(self->subticks_per_tick*self->ticktime))/(gdouble)self->subticks_per_tick;
+  GST_DEBUG("ticktime err=%lf",self->ticktime_err);
 }
 
 static void gst_sim_syn_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
@@ -1144,6 +1150,7 @@ gst_sim_syn_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   time = segment->last_stop;
   src->reverse = (segment->rate<0.0);
   src->running_time = time;
+  src->ticktime_err_accum=0.0;
 
   /* now move to the time indicated */
   src->n_samples = gst_util_uint64_scale_int(time, src->samplerate, GST_SECOND);
@@ -1195,6 +1202,7 @@ gst_sim_syn_start (GstBaseSrc *basesrc)
 
   src->n_samples=G_GINT64_CONSTANT(0);
   src->running_time=G_GUINT64_CONSTANT(0);
+  src->ticktime_err_accum=0.0;
 
   return(TRUE);
 }
@@ -1259,6 +1267,7 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset, guint length,
     n_samples = src->n_samples + (src->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
   next_running_time = src->running_time + (src->reverse ? (-src->ticktime) : src->ticktime);
+  src->ticktime_err_accum = src->ticktime_err_accum + (src->reverse ? (-src->ticktime_err) : src->ticktime_err);
 
   /* allocate a new buffer suitable for this pad */
   res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
@@ -1269,12 +1278,12 @@ gst_sim_syn_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   }
 
   if (!src->reverse) {
-    GST_BUFFER_TIMESTAMP (buf) = src->running_time;
+    GST_BUFFER_TIMESTAMP (buf) = src->running_time + (GstClockTime)src->ticktime_err_accum;
     GST_BUFFER_DURATION (buf) = next_running_time - src->running_time;
     GST_BUFFER_OFFSET (buf) = src->n_samples;
     GST_BUFFER_OFFSET_END (buf) = n_samples;
   } else {
-    GST_BUFFER_TIMESTAMP (buf) = next_running_time;
+    GST_BUFFER_TIMESTAMP (buf) = next_running_time + (GstClockTime)src->ticktime_err_accum;
     GST_BUFFER_DURATION (buf) = src->running_time - next_running_time;
     GST_BUFFER_OFFSET (buf) = n_samples;
     GST_BUFFER_OFFSET_END (buf) = src->n_samples;

@@ -154,6 +154,7 @@ struct _GstBtSimSyn {
   gulong ticks_per_beat;
   gulong subticks_per_tick;
   GstClockTime ticktime;
+  gdouble ticktime_err,ticktime_err_accum;
 
   /* waveform specific context data */
   gdouble accumulator;			/* phase angle */

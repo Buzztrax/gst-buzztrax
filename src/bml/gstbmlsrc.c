@@ -310,6 +310,7 @@ static gboolean gst_bml_src_do_seek(GstBaseSrc * base, GstSegment * segment) {
   time = segment->last_stop;
   bml->reverse = (segment->rate<0.0);
   bml->running_time = time;
+  bml->ticktime_err_accum=0.0;
 
   /* now move to the time indicated */
   bml->n_samples = gst_util_uint64_scale_int(time, bml->samplerate, GST_SECOND);
@@ -414,6 +415,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
     n_samples = bml->n_samples + (bml->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
   next_running_time = bml->running_time + (bml->reverse ? (-bml->ticktime) : bml->ticktime);
+  bml->ticktime_err_accum = bml->ticktime_err_accum + (bml->reverse ? (-bml->ticktime_err) : bml->ticktime_err);
 
   /* allocate a new buffer suitable for this pad */
   res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
@@ -424,12 +426,12 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   }
 
   if (!bml->reverse) {
-    GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
+    GST_BUFFER_TIMESTAMP(buf)=bml->running_time + (GstClockTime)bml->ticktime_err_accum;
     GST_BUFFER_DURATION(buf)=next_running_time-bml->running_time;
     GST_BUFFER_OFFSET(buf)=bml->n_samples;
     GST_BUFFER_OFFSET_END(buf)=n_samples;
   } else {
-    GST_BUFFER_TIMESTAMP(buf)=next_running_time;
+    GST_BUFFER_TIMESTAMP(buf)=next_running_time + (GstClockTime)bml->ticktime_err_accum;
     GST_BUFFER_DURATION(buf)=bml->running_time-next_running_time;
     GST_BUFFER_OFFSET(buf)=n_samples;
     GST_BUFFER_OFFSET_END(buf)=bml->n_samples;
@@ -438,7 +440,7 @@ static GstFlowReturn gst_bml_src_create_mono(GstBaseSrc *base, GstClockTime offs
   /* TODO(ensonic): sync on subticks ? */
   if(bml->subtick_count>=bml->subticks_per_tick) {
     bml(gstbml_reset_triggers(bml,bml_class));
-    bml(gstbml_sync_values(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class,GST_BUFFER_TIMESTAMP(buf)));
     bml(tick(bm));
     bml->subtick_count=1;
   }
@@ -533,6 +535,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
     n_samples = bml->n_samples + (bml->reverse ? (-samples_per_buffer) : samples_per_buffer);
   }
   next_running_time = bml->running_time + (bml->reverse ? (-bml->ticktime) : bml->ticktime);
+  bml->ticktime_err_accum = bml->ticktime_err_accum + (bml->reverse ? (-bml->ticktime_err) : bml->ticktime_err);
 
   /* allocate a new buffer suitable for this pad */
   res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
@@ -543,12 +546,12 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   }
 
   if (!bml->reverse) {
-    GST_BUFFER_TIMESTAMP(buf)=bml->running_time;
+    GST_BUFFER_TIMESTAMP(buf)=bml->running_time + (GstClockTime)bml->ticktime_err_accum;
     GST_BUFFER_DURATION(buf)=next_running_time-bml->running_time;
     GST_BUFFER_OFFSET(buf)=bml->n_samples;
     GST_BUFFER_OFFSET_END(buf)=n_samples;
   } else {
-    GST_BUFFER_TIMESTAMP(buf)=next_running_time;
+    GST_BUFFER_TIMESTAMP(buf)=next_running_time + (GstClockTime)bml->ticktime_err_accum;
     GST_BUFFER_DURATION(buf)=bml->running_time-next_running_time;
     GST_BUFFER_OFFSET(buf)=n_samples;
     GST_BUFFER_OFFSET_END(buf)=bml->n_samples;
@@ -557,7 +560,7 @@ static GstFlowReturn gst_bml_src_create_stereo(GstBaseSrc *base, GstClockTime of
   /* TODO(ensonic): sync on subticks ? */
   if(bml->subtick_count>=bml->subticks_per_tick) {
     bml(gstbml_reset_triggers(bml,bml_class));
-    bml(gstbml_sync_values(bml,bml_class));
+    bml(gstbml_sync_values(bml,bml_class,GST_BUFFER_TIMESTAMP(buf)));
     bml(tick(bm));
     bml->subtick_count=1;
   }

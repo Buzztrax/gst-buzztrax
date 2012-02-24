@@ -79,6 +79,7 @@ struct _GstBML {
   gulong ticks_per_beat;
   gulong subticks_per_tick;
   gulong subtick_count;
+  gdouble ticktime_err,ticktime_err_accum;
 
   // pads
   GstPad **sinkpads,**srcpads;

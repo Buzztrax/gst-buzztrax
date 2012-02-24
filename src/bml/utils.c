@@ -967,7 +967,7 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
  *
  * updates the global and voice params
  */
-void bml(gstbml_sync_values(GstBML *bml, GstBMLClass *bml_class)) {
+void bml(gstbml_sync_values(GstBML *bml, GstBMLClass *bml_class, GstClockTime ts)) {
   GList *node;
   gulong i;
   GstBMLV *bmlv;
@@ -979,7 +979,7 @@ void bml(gstbml_sync_values(GstBML *bml, GstBMLClass *bml_class)) {
   for(i=0;i<bml_class->numglobalparams+bml_class->numtrackparams;i++) {
     g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],1,2);
   }
-  /*res=*/gst_object_sync_values(G_OBJECT(bml->self),bml->running_time);
+  /*res=*/gst_object_sync_values(G_OBJECT(bml->self),ts);
   for(i=0;i<bml_class->numglobalparams+bml_class->numtrackparams;i++) {
     g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],1,0);
   }
@@ -990,7 +990,7 @@ void bml(gstbml_sync_values(GstBML *bml, GstBMLClass *bml_class)) {
     for(i=0;i<bmlv_class->numtrackparams;i++) {
       g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],1,2);
     }
-    /*res=*/gst_object_sync_values(G_OBJECT(bmlv),bml->running_time);
+    /*res=*/gst_object_sync_values(G_OBJECT(bmlv),ts);
     //if(G_UNLIKELY(!res)) { GST_WARNING("voice sync failed"); }
     for(i=0;i<bmlv_class->numtrackparams;i++) {
       g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],1,0);

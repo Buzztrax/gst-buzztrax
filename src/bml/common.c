@@ -784,9 +784,16 @@ void gstbml_get_param(GstBMLParameterTypes type,gpointer addr,GValue *value) {
 void gstbml_calculate_buffer_frames(GstBML *bml) {
   const gdouble ticks_per_minute=(gdouble)(bml->beats_per_minute*bml->ticks_per_beat);
   const gdouble div=60.0/bml->subticks_per_tick;
+  const gdouble subticktime=((GST_SECOND*div)/ticks_per_minute);
+  GstClockTime ticktime=(GstClockTime)(0.5+((GST_SECOND*60.0)/ticks_per_minute));
 
   bml->samples_per_buffer=((bml->samplerate*div)/ticks_per_minute);
-  bml->ticktime=(GstClockTime)(0.5+((GST_SECOND*div)/ticks_per_minute));
+  bml->ticktime=(GstClockTime)(0.5+subticktime);
+  GST_DEBUG("samples_per_buffer=%lf",bml->samples_per_buffer);
+  // the sequence is quantized to ticks and not subticks
+  // we need to compensate for the rounding errors :/
+  bml->ticktime_err=((gdouble)ticktime-(gdouble)(bml->subticks_per_tick*bml->ticktime))/(gdouble)bml->subticks_per_tick;
+  GST_DEBUG("ticktime err=%lf",bml->ticktime_err);
 }
 
 /**
