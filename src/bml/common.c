@@ -840,7 +840,7 @@ void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data) {
         has_data=TRUE;
         break;
       }
-/* FIXME(ensonic): we not configure the FPU to DAZ|FZ in libbuzztard-core
+/* FIXME(ensonic): we configure the FPU to DAZ|FZ in libbuzztard-core
  * this would not apply to other clients
  */
 #if 0

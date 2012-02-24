@@ -223,6 +223,8 @@ static void gst_bmlv_class_init(GstBMLVClass *klass) {
         bml(get_track_parameter_info(bmh,i,BM_PARA_NO_VALUE,(void *)&no_val)) &&
         bml(get_track_parameter_info(bmh,i,BM_PARA_DEF_VALUE,(void *)&def_val))
       ) {
+        // FIXME(ensonic): need to ensure that we use the same names asm in the
+        // parent class as we use the name for the deduplication
         gstbml_convert_names(gobject_class, tmp_name, tmp_desc, &name, &nick, &desc);
         // create an enum on the fly
         if(type==PT_BYTE) {
