@@ -327,6 +327,7 @@ static gboolean gst_bml_src_do_seek(GstBaseSrc * base, GstSegment * segment) {
     } else {
       bml->check_eos = FALSE;
     }
+    bml->subtick_count=bml->subticks_per_tick;
   }
   else {
     if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
@@ -340,13 +341,12 @@ static gboolean gst_bml_src_do_seek(GstBaseSrc * base, GstSegment * segment) {
     } else {
       bml->check_eos = FALSE;
     }
+    bml->subtick_count=1;
   }
   bml->eos_reached = FALSE;
 
   GST_DEBUG_OBJECT(bml_src,"seek from %"GST_TIME_FORMAT" to %"GST_TIME_FORMAT" cur %"GST_TIME_FORMAT" rate %lf",
     GST_TIME_ARGS(segment->start),GST_TIME_ARGS(segment->stop),GST_TIME_ARGS(segment->last_stop),segment->rate);
-
-  bml->subtick_count=bml->subticks_per_tick;
 
   return TRUE;
 }
