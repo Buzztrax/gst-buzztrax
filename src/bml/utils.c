@@ -247,8 +247,12 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
   return(bmh);
 }
 
-/* it see that this is never called :/
+/* it seems that this is never called :/
  * due to that we 'leak' one instance of every buzzmachine we loaded
+ *
+ * FIXME(ensonic): count instances in _init() and call this on last finalize?
+ * - might not work as base_init won't be called again, we'd need to init the
+ *   klass variables lazily from _init
  */
 void bml(gstbml_base_finalize(GstBMLClass *klass)) {
   GST_INFO("!!!! klass=%p",klass);
