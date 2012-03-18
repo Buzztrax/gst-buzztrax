@@ -488,6 +488,13 @@ void bml(gstbml_class_prepare_properties(GObjectClass *klass, GstBMLClass *bml_c
   }
 #endif
 
+  /* TODO(ensonic): CMachineDataInput/Output, see FSM/Infector for usage
+   * - try using a properties (blob-data, blob-size) to emulate the
+   *   CMachineDataInput/Output
+   * - machines can read from the stream on Init() and write extradata on Save()
+   * - see also: song-io-buzz.c:read_mach_section()
+   */
+
   // register attributes as gobject properties
   if(bml(get_machine_info(bmh,BM_PROP_NUM_ATTRIBUTES,(void *)&num))) {
     GST_INFO("  machine has %d attributes ",num);
