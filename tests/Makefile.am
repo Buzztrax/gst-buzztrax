@@ -26,8 +26,7 @@ gst_buzztard_SOURCES= m-gst-buzztard.c m-gst-buzztard.h \
 gst_buzztard_CFLAGS = \
 	-I$(srcdir) -I$(top_srcdir) \
 	-DG_LOG_DOMAIN=\"gst-buzztard-check\" \
-	$(BASE_DEPS_CFLAGS) \
-	@VALGRIND_CFLAGS@
+	$(BASE_DEPS_CFLAGS)
 
 endif
 

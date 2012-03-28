@@ -18,11 +18,11 @@ libgstbuzztard_la_SOURCES = \
 	toneconversion.c \
 	$(PRESET_C) \
 	propertymeta.c \
-	tempo.c \
-	$(BUFFERPOOL_C)
+	tempo.c
 
 libgstbuzztard_la_CFLAGS = \
 	-I$(srcdir) \
+	$(GST_LIB_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 
 libgstbuzztardincludedir = $(includedir)/libgstbuzztard
@@ -34,8 +34,7 @@ libgstbuzztardinclude_HEADERS = \
 	toneconversion.h \
 	$(PRESET_H) \
 	propertymeta.h \
-	tempo.h \
-	$(BUFFERPOOL_H)
+	tempo.h
 
 libgstbuzztard_la_LIBADD = $(BASE_DEPS_LIBS)
 libgstbuzztard_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@ \

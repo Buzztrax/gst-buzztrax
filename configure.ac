@@ -12,7 +12,7 @@ dnl Initialise the autoconf/automake tool
 AC_PREREQ(2.61)
 AC_INIT([gst-buzztard],[0.7.0],[buzztard-devel@lists.sourceforge.net])
 AM_INIT_AUTOMAKE([-Wall check-news std-options])
-AC_CONFIG_SRCDIR([ChangeLog])
+AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_MACRO_DIR(m4)
 
@@ -20,6 +20,7 @@ AC_CONFIG_MACRO_DIR(m4)
 # by either passing --disable-silent-rules to configure or passing V=1
 # to make
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 
 GSTBT_MAJOR_VERSION=0
 GSTBT_MINOR_VERSION=7
@@ -49,20 +50,6 @@ AC_SUBST(GSTBT_MAJORMINOR)
 
 VERSION=${GSTBT_VERSION}
 
-dnl m4 - everyone who develops should have aclocal installed
-AC_PATH_PROG(PROG_ACLOCAL, aclocal, no)
-AC_MSG_CHECKING(where to install .m4 files to)
-if test "$PROG_ACLOCAL" = "no" ; then
-	acdir=${datadir}/aclocal
-else
-	acdir=`$PROG_ACLOCAL --print-ac-dir`
-	if test ! -w "$acdir" ; then
-		acdir=${datadir}/aclocal
-	fi
-fi
-AC_MSG_RESULT($acdir)
-AC_SUBST(acdir)
-
 dnl Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
@@ -75,6 +62,7 @@ AC_PROG_LIBTOOL
 AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
 
+dnl common switches for all buzztard modules
 
 dnl enable runtime debugging code
 AC_MSG_CHECKING(whether to enable runtime debugging code)
@@ -86,11 +74,13 @@ AC_MSG_RESULT($enable_debug)
 if test "x$enable_debug" = "xyes"; then
   AC_DEFINE(USE_DEBUG, [1], [enable runtime debugging code])
   DEBUG_CFLAGS="-O0 -Wall -Werror -g"
+  DEBUG_LDFLAGS="-Wl,--warn-common"
 else
   AC_DEFINE(G_DISABLE_ASSERT, [1], [if no runtime debugging, do not enable g_asserts])
   AC_DEFINE(G_DISABLE_CHECKS, [1], [if no runtime debugging, do not enable g_return_if_fail variants])
   AC_DEFINE(G_DISABLE_CAST_CHECKS, [1], [if no runtime debugging, do not enable dynamic type checks])
   DEBUG_CFLAGS=""
+  DEBUG_LDFLAGS=""
 fi
 
 
@@ -156,26 +146,22 @@ AC_ARG_WITH([valgrind],
         [ac_cv_use_valgrind=$withval],
         [ac_cv_use_valgrind=no])
 AC_MSG_RESULT($ac_cv_use_valgrind)
-VALGRIND=$ac_cv_use_valgrind
-AC_SUBST(VALGRIND)dnl
-AM_CONDITIONAL(USE_VALGRIND, test x$VALGRIND != xno)dnl
-
-VALGRIND_CPPFLAGS=
-if test $ac_cv_use_valgrind != no; then
-   AC_DEFINE(HAVE_VALGRIND, 1, [Define to 1 if valgrind is to be used.])
-   if test -f $ac_cv_use_valgrind/valgrind.h; then
-      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind
-   elif test -f $ac_cv_use_valgrind/include/valgrind.h; then
-      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind/include
-   elif test -f $ac_cv_use_valgrind/valgrind/valgrind.h; then
-      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind/valgrind
-   elif test -f $ac_cv_use_valgrind/include/valgrind/valgrind.h; then
-      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind/include/valgrind
-   elif test -f $ac_cv_use_valgrind/valgrind/include/valgrind.h; then
-      VALGRIND_CFLAGS=-I$ac_cv_use_valgrind/valgrind/include
-   fi
+have_valgrind="no"
+if test "x$ac_cv_use_valgrind" == "xyes"; then
+  AC_PATH_PROG(valgrind_path, [valgrind], [no])
+  if test "x$valgrind_path" != "xno"; then
+    valgrind_path=`dirname $valgrind_path`
+    VALGRIND=`dirname $valgrind_path`
+    have_valgrind="yes"
+  else
+    VALGRIND="no"
+  fi
+else
+  VALGRIND=$ac_cv_use_valgrind
+  have_valgrind="yes"
 fi
-AC_SUBST(VALGRIND_CFLAGS)dnl
+AC_SUBST(VALGRIND)
+AM_CONDITIONAL(USE_VALGRIND, test x$VALGRIND != xno)
 
 
 dnl Checks for libraries.
@@ -185,8 +171,9 @@ PKG_CHECK_MODULES(BASE_DEPS, \
   gstreamer-controller-0.10 >= 0.10.10 \
   gstreamer-plugins-base-0.10 >= 0.10.10 \
 )
-
-GST_LIB_LDFLAGS="-export-symbols-regex \^[_]*\(gstbt_\|GstBt\|GSTBT_\|gst_\|Gst\|GST_\).*"
+GST_LIB_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS"
+AC_SUBST(GST_LIB_CFLAGS)
+GST_LIB_LDFLAGS="$DEBUG_LDFLAGS -export-symbols-regex \^[_]*\(gstbt_\|GstBt\|GSTBT_\|gst_\|Gst\|GST_\).*"
 AC_SUBST(GST_LIB_LDFLAGS)
 
 dnl GStreamer plugin build
@@ -194,7 +181,7 @@ plugindir="\$(libdir)/gstreamer-$GST_MAJORMINOR"
 AC_SUBST(plugindir)
 GST_PLUGIN_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS"
 AC_SUBST(GST_PLUGIN_CFLAGS)
-GST_PLUGIN_LDFLAGS="-module -avoid-version -export-symbols-regex '[_]*(gst_|bt_|Bt|BT_).*'"
+GST_PLUGIN_LDFLAGS="$DEBUG_LDFLAGS -module -avoid-version -export-symbols-regex '[_]*(gst_|bt_|Bt|BT_).*'"
 AC_SUBST(GST_PLUGIN_LDFLAGS)
 GST_PLUGIN_LIBS="$COVERAGE_LIBS"
 AC_SUBST(GST_PLUGIN_LIBS)
@@ -319,12 +306,14 @@ dnl check for libraries
 AC_CHECK_LIBM
 AC_SUBST(LIBM)
 
+
 dnl Check for gtk-doc.
 m4_ifdef([GTK_DOC_CHECK], [
 GTK_DOC_CHECK([1.10],[--flavour no-tmpl])
 ],[
 AM_CONDITIONAL([ENABLE_GTK_DOC], false)
 ])
+
 
 dnl Substitutes
 AC_SUBST(BASE_DEPS_LIBS)
@@ -339,6 +328,7 @@ while true; do
 done
 AC_DEFINE_UNQUOTED(DATADIR, "$full_var", [data dir])
 AC_SUBST(DATADIR)
+
 
 AC_CONFIG_FILES(Makefile \
 	libgstbuzztard.pc \
@@ -372,6 +362,7 @@ Configuration
 	Coverage profiling         : ${enable_coverage}
 	Use of deprecated API      : ${enable_deprecated}
 	Check based unit tests     : ${have_check}
+	Use valgrind on the tests  : ${have_valgrind}
 "
 
 if test "x${have_bml}" = "xno" -o "x${have_fluidsynth}" = "xno" ; then
