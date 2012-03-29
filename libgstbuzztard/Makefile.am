@@ -1,11 +1,3 @@
-if BUILD_PRESET_IFACE
-PRESET_C = preset.c
-PRESET_H = preset.h
-else
-PRESET_C =
-PRESET_H =
-endif
-
 noinst_HEADERS = compat.h
 
 lib_LTLIBRARIES = libgstbuzztard.la
@@ -16,7 +8,6 @@ libgstbuzztard_la_SOURCES = \
 	help.c \
 	musicenums.c \
 	toneconversion.c \
-	$(PRESET_C) \
 	propertymeta.c \
 	tempo.c
 
@@ -32,7 +23,6 @@ libgstbuzztardinclude_HEADERS = \
 	help.h \
 	musicenums.h \
 	toneconversion.h \
-	$(PRESET_H) \
 	propertymeta.h \
 	tempo.h
 

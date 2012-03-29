@@ -83,9 +83,6 @@
 #include <libgstbuzztard/help.h>
 #endif
 #include "libgstbuzztard/propertymeta.h"
-#ifndef HAVE_GST_GSTPRESET_H
-#include "libgstbuzztard/preset.h"
-#endif
 #include "libgstbuzztard/tempo.h"
 
 #include "gstfluidsynth.h"

@@ -22,8 +22,6 @@ gstbt_tempo_get_type
 
 @HELP_DOC_TYPES@#include <libgstbuzztard/help.h>
 @HELP_DOC_TYPES@gstbt_help_get_type
-@PRESET_DOC_TYPES@#include <libgstbuzztard/preset.h>
-@PRESET_DOC_TYPES@gst_preset_get_type
 
 % own stuff
 

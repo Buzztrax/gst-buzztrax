@@ -433,13 +433,11 @@ static gboolean plugin_init (GstPlugin * plugin) {
 
   GST_INFO("lets go ===========================================================");
 
-#if GST_CHECK_VERSION(0,10,22)
   gst_plugin_add_dependency_simple (plugin,
     "BML_PATH",
     get_bml_path(),
     "so,dll",
     GST_PLUGIN_DEPENDENCY_FLAG_PATHS_ARE_DEFAULT_ONLY|GST_PLUGIN_DEPENDENCY_FLAG_FILE_NAME_IS_SUFFIX);
-#endif
 
   // init bml library
   if(!bml_setup()) {
@@ -462,12 +460,10 @@ static gboolean plugin_init (GstPlugin * plugin) {
   gst_bml_property_meta_quark_type=g_quark_from_string("GstBMLPropertyMeta::type");
 
   GST_INFO("scan for plugins");
-#if GST_CHECK_VERSION(0,10,24)
   bml_meta_all=(GstStructure *)gst_plugin_get_cache_data(plugin);
   if(bml_meta_all) {
     n=gst_structure_n_fields(bml_meta_all);
   }
-#endif
   GST_INFO("%d entries in cache",n);
   if(!n) {
     bml_meta_all=gst_structure_empty_new("bml");
@@ -475,9 +471,7 @@ static gboolean plugin_init (GstPlugin * plugin) {
     if(res) {
       n=gst_structure_n_fields(bml_meta_all);
       GST_INFO("%d entries after scanning",n);
-#if GST_CHECK_VERSION(0,10,24)
       gst_plugin_set_cache_data(plugin,bml_meta_all);
-#endif
     }
   }
   else {

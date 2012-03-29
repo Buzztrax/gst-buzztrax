@@ -47,9 +47,6 @@
 #endif
 #include <libgstbuzztard/musicenums.h>
 #include <libgstbuzztard/toneconversion.h>
-#ifndef HAVE_GST_GSTPRESET_H
-#include <libgstbuzztard/preset.h>
-#endif
 #include <libgstbuzztard/propertymeta.h>
 #include <libgstbuzztard/tempo.h>
 //-- orc

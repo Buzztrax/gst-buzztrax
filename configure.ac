@@ -12,8 +12,8 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 
 dnl dependencies
-REQ_GLIB=2.10.0
-REQ_GST=0.10.10
+REQ_GLIB=2.24.0
+REQ_GST=0.10.28
 
 
 dnl
@@ -185,20 +185,6 @@ AC_SUBST(GST_PLUGIN_LIBS)
 #CPPFLAGS="$ac_cppflags_save"
 #LDFLAGS="$ac_ldflags_save"
 
-
-AC_MSG_CHECKING([gstreamer version >= 0.10.20])
-if pkg-config --atleast-version=0.10.20 gstreamer-0.10; then
-  HAVE_GST_GSTPRESET=1
-  PRESET_DOC_TYPES="%"
-  AC_DEFINE(HAVE_GST_GSTPRESET_H, [1], [Define to 1 if gstreamer has the preset iface])
-  AC_MSG_RESULT(yes)
-else
-  HAVE_GST_GSTPRESET=0
-  PRESET_DOC_TYPES=
-  AC_MSG_RESULT(no)
-fi
-AM_CONDITIONAL(BUILD_PRESET_IFACE, test "$HAVE_GST_GSTPRESET" = "0")
-AC_SUBST(PRESET_DOC_TYPES)
 
 AC_MSG_CHECKING([gstreamer version >= 0.10.31])
 if pkg-config --atleast-version=0.10.31 gstreamer-0.10; then

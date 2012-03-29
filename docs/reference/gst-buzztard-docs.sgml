@@ -50,7 +50,6 @@
     <xi:include href="xml/gstbthelp.xml"/>
     <xi:include href="xml/gstbtpropertymeta.xml"/>
     <xi:include href="xml/gstbttempo.xml"/>
-    <xi:include href="xml/gstpreset.xml"/>
   </chapter>
 
   <chapter>
