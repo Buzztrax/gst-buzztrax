@@ -604,9 +604,7 @@ static void gst_bml_transform_init(GstBMLTransform *bml_transform) {
   }
   */
 
-#if GST_CHECK_VERSION(0,10,17)
   gst_base_transform_set_gap_aware (GST_BASE_TRANSFORM (bml_transform), TRUE);
-#endif
 
   GST_DEBUG("  done");
 }
