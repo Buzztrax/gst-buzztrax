@@ -1,3 +1,21 @@
+dnl Initialise the autoconf/automake tool
+AC_PREREQ(2.61)
+AC_INIT([gst-buzztard],[0.7.0],[buzztard-devel@lists.sourceforge.net])
+AM_INIT_AUTOMAKE([-Wall check-news std-options])
+AC_CONFIG_SRCDIR([README])
+AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_MACRO_DIR(m4)
+
+# Support silent build rules, requires at least automake-1.11. Disable by
+# either passing --disable-silent-rules to configure or passing V=1 to make
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
+
+dnl dependencies
+REQ_GLIB=2.10.0
+REQ_GST=0.10.10
+
+
 dnl
 dnl current  : the interface         : MAJOR + MINOR
 dnl revision : of the same interface : MICRO
@@ -7,21 +25,6 @@ dnl 1: when releasing a changed version : MICRO++
 dnl 2: when the interface has changed (adding functions) : MINOR++, MICRO=0
 dnl 3: when the interface has changed (removing functions) : MAJOR++, MINOR=0, MICRO=0
 dnl
-
-dnl Initialise the autoconf/automake tool
-AC_PREREQ(2.61)
-AC_INIT([gst-buzztard],[0.7.0],[buzztard-devel@lists.sourceforge.net])
-AM_INIT_AUTOMAKE([-Wall check-news std-options])
-AC_CONFIG_SRCDIR([README])
-AC_CONFIG_HEADERS(config.h)
-AC_CONFIG_MACRO_DIR(m4)
-
-# Support silent build rules, requires at least automake-1.11. Disable
-# by either passing --disable-silent-rules to configure or passing V=1
-# to make
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
-
-
 GSTBT_MAJOR_VERSION=0
 GSTBT_MINOR_VERSION=7
 GSTBT_MICRO_VERSION=0
@@ -147,10 +150,11 @@ AM_CONDITIONAL(USE_VALGRIND, test x$VALGRIND != xno)
 
 dnl Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
-  glib-2.0 >= 2.10.0 gobject-2.0  >= 2.10.0 gthread-2.0 >= 2.10.0 gmodule-2.0 >= 2.10.0 \
-  gstreamer-0.10 >= 0.10.10 gstreamer-base-0.10 >= 0.10.10 \
-  gstreamer-controller-0.10 >= 0.10.10 \
-  gstreamer-plugins-base-0.10 >= 0.10.10 \
+  glib-2.0 >= $REQ_GLIB gobject-2.0  >= $REQ_GLIB gthread-2.0 >= $REQ_GLIB \
+  gmodule-2.0 >= $REQ_GLIB \
+  gstreamer-0.10 >= $REQ_GST gstreamer-base-0.10 >= $REQ_GST \
+  gstreamer-controller-0.10 >= $REQ_GST \
+  gstreamer-plugins-base-0.10 >= $REQ_GST \
 )
 GST_LIB_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS"
 AC_SUBST(GST_LIB_CFLAGS)
