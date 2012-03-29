@@ -29,16 +29,10 @@ GSTBT_VERSION=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION.$GSTBT_MICRO_VERSION
 GSTBT_VERSION_INFO=`expr $GSTBT_MAJOR_VERSION + $GSTBT_MINOR_VERSION`:$GSTBT_MICRO_VERSION:$GSTBT_MINOR_VERSION
 GSTBT_VERSION_NUMBER=`expr $GSTBT_MAJOR_VERSION \* 10000 + $GSTBT_MINOR_VERSION \* 100 + $GSTBT_MICRO_VERSION`
 
-dnl our libraries and install dirs use major.minor as a version
-GSTBT_MAJORMINOR=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION
-dnl we override it here for release candidates
-dnl GSTBT_MAJORMINOR=0.6
-
 dnl that is needed to figure the directory name, where the plugin goes to
 GST_MAJORMINOR=0.10
 AC_DEFINE_UNQUOTED(GST_MAJORMINOR, "$GST_MAJORMINOR", [gstreamer series])
 AC_SUBST(GST_MAJORMINOR)
-
 
 AC_SUBST(GSTBT_MAJOR_VERSION)
 AC_SUBST(GSTBT_MINOR_VERSION)
@@ -46,7 +40,6 @@ AC_SUBST(GSTBT_MICRO_VERSION)
 AC_SUBST(GSTBT_VERSION)
 AC_SUBST(GSTBT_VERSION_INFO)
 AC_SUBST(GSTBT_VERSION_NUMBER)
-AC_SUBST(GSTBT_MAJORMINOR)
 
 VERSION=${GSTBT_VERSION}
 
@@ -91,7 +84,6 @@ AC_ARG_ENABLE([deprecated],
 	,
 	[
 		if test -f $ac_top_srcdir/autogen.sh; then
-			is_cvs_version=true
 			enable_deprecated=no
 		else
 			enable_deprecated=yes
