@@ -291,16 +291,6 @@ dnl Substitutes
 AC_SUBST(BASE_DEPS_LIBS)
 AC_SUBST(BASE_DEPS_CFLAGS)
 
-# needed for preset iface
-full_var=${datadir}
-while true; do
-    new_full_var="`eval echo $full_var`"
-    if test "x$new_full_var" = "x$full_var"; then break; fi
-    full_var=$new_full_var
-done
-AC_DEFINE_UNQUOTED(DATADIR, "$full_var", [data dir])
-AC_SUBST(DATADIR)
-
 
 AC_CONFIG_FILES(Makefile \
 	libgstbuzztard.pc \
