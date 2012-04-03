@@ -7,6 +7,7 @@ libgstsimsyn_la_SOURCES = simsyn.c
 
 # flags used to compile this plugin
 libgstsimsyn_la_CFLAGS = -I$(srcdir) -I$(top_srcdir) \
+  -DDATADIR=\"$(datadir)\" \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstsimsyn_la_LIBADD = \
