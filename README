@@ -23,6 +23,8 @@ pkg-config:
   export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOME/buzztard/lib/pkgconfig"
 gstreamer
   export GST_PLUGIN_PATH="$HOME/buzztard/lib/gstreamer-0.10"
+  
+  See the wiki at wiki.buzztard.org for more details.
 
 = installing in /usr/local =
 The default value for the --prefix configure option is /usr/local. Also in that
