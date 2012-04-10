@@ -76,7 +76,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_0,"GIS_0","g#0" },
       { GSTBT_NOTE_A_0,  "A_0",  "a-0" },
       { GSTBT_NOTE_AIS_0,"AIS_0","a#0" },
-      { GSTBT_NOTE_H_0,  "H_0",  "h-0" },
+      { GSTBT_NOTE_B_0,  "B_0",  "b-0" },
       /* 1 */
       { GSTBT_NOTE_C_1,  "C_1",  "c-1" },
       { GSTBT_NOTE_CIS_1,"CIS_1","c#1" },
@@ -89,7 +89,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_1,"GIS_1","g#1" },
       { GSTBT_NOTE_A_1,  "A_1",  "a-1" },
       { GSTBT_NOTE_AIS_1,"AIS_1","a#1" },
-      { GSTBT_NOTE_H_1,  "H_1",  "h-1" },
+      { GSTBT_NOTE_B_1,  "B_1",  "b-1" },
       /* 2 */
       { GSTBT_NOTE_C_2,  "C_2",  "c-2" },
       { GSTBT_NOTE_CIS_2,"CIS_2","c#2" },
@@ -102,7 +102,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_2,"GIS_2","g#2" },
       { GSTBT_NOTE_A_2,  "A_2",  "a-2" },
       { GSTBT_NOTE_AIS_2,"AIS_2","a#2" },
-      { GSTBT_NOTE_H_2,  "H_2",  "h-2" },
+      { GSTBT_NOTE_B_2,  "B_2",  "b-2" },
       /* 3 */
       { GSTBT_NOTE_C_3,  "C_3",  "c-3" },
       { GSTBT_NOTE_CIS_3,"CIS_3","c#3" },
@@ -115,7 +115,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_3,"GIS_3","g#3" },
       { GSTBT_NOTE_A_3,  "A_3",  "a-3" },
       { GSTBT_NOTE_AIS_3,"AIS_3","a#3" },
-      { GSTBT_NOTE_H_3,  "H_3",  "h-3" },
+      { GSTBT_NOTE_B_3,  "B_3",  "b-3" },
       /* 4 */
       { GSTBT_NOTE_C_4,  "C_4",  "c-4" },
       { GSTBT_NOTE_CIS_4,"CIS_4","c#4" },
@@ -128,7 +128,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_4,"GIS_4","g#4" },
       { GSTBT_NOTE_A_4,  "A_4",  "a-4" },
       { GSTBT_NOTE_AIS_4,"AIS_4","a#4" },
-      { GSTBT_NOTE_H_4,  "H_4",  "h-4" },
+      { GSTBT_NOTE_B_4,  "B_4",  "b-4" },
       /* 5 */
       { GSTBT_NOTE_C_5,  "C_5",  "c-5" },
       { GSTBT_NOTE_CIS_5,"CIS_5","c#5" },
@@ -141,7 +141,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_5,"GIS_5","g#5" },
       { GSTBT_NOTE_A_5,  "A_5",  "a-5" },
       { GSTBT_NOTE_AIS_5,"AIS_5","a#5" },
-      { GSTBT_NOTE_H_5,  "H_5",  "h-5" },
+      { GSTBT_NOTE_B_5,  "B_5",  "b-5" },
       /* 6 */
       { GSTBT_NOTE_C_6,  "C_6",  "c-6" },
       { GSTBT_NOTE_CIS_6,"CIS_6","c#6" },
@@ -154,7 +154,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_6,"GIS_6","g#6" },
       { GSTBT_NOTE_A_6,  "A_6",  "a-6" },
       { GSTBT_NOTE_AIS_6,"AIS_6","a#6" },
-      { GSTBT_NOTE_H_6,  "H_6",  "h-6" },
+      { GSTBT_NOTE_B_6,  "B_6",  "b-6" },
       /* 7 */
       { GSTBT_NOTE_C_7,  "C_7",  "c-7" },
       { GSTBT_NOTE_CIS_7,"CIS_7","c#7" },
@@ -167,7 +167,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_7,"GIS_7","g#7" },
       { GSTBT_NOTE_A_7,  "A_7",  "a-7" },
       { GSTBT_NOTE_AIS_7,"AIS_7","a#7" },
-      { GSTBT_NOTE_H_7,  "H_7",  "h-7" },
+      { GSTBT_NOTE_B_7,  "B_7",  "b-7" },
       /* 8 */
       { GSTBT_NOTE_C_8,  "C_8",  "c-8" },
       { GSTBT_NOTE_CIS_8,"CIS_8","c#8" },
@@ -180,7 +180,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_8,"GIS_8","g#8" },
       { GSTBT_NOTE_A_8,  "A_8",  "a-8" },
       { GSTBT_NOTE_AIS_8,"AIS_8","a#8" },
-      { GSTBT_NOTE_H_8,  "H_8",  "h-8" },
+      { GSTBT_NOTE_B_8,  "B_8",  "b-8" },
       /* 9 */
       { GSTBT_NOTE_C_9,  "C_9",  "c-9" },
       { GSTBT_NOTE_CIS_9,"CIS_9","c#9" },
@@ -193,7 +193,7 @@ GType gstbt_note_get_type(void) {
       { GSTBT_NOTE_GIS_9,"GIS_9","g#9" },
       { GSTBT_NOTE_A_9,  "A_9",  "a-9" },
       { GSTBT_NOTE_AIS_9,"AIS_9","a#9" },
-      { GSTBT_NOTE_H_9,  "H_9",  "h-9" },
+      { GSTBT_NOTE_B_9,  "B_9",  "b-9" },
       { 0, NULL, NULL},
     };
     type = g_enum_register_static("GstBtNote", values);
