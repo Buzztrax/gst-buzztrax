@@ -34,12 +34,14 @@ GHashTable *bml_category_by_machine_name;
 
 GQuark gst_bml_property_meta_quark_type;
 
+// we need to do this as this is compiled globally without bml/BML macros defined
 #if HAVE_BMLW
-extern gboolean bmlw_describe_plugin(gchar *pathname, gpointer bmh);
+extern gboolean bmlw_gstbml_inspect(gchar *file_name);
 extern gboolean bmlw_gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta);
 #endif
-extern gboolean bmln_describe_plugin(gchar *pathname, gpointer bmh);
+extern gboolean bmln_gstbml_inspect(gchar *file_name);
 extern gboolean bmln_gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta);
+
 
 typedef int (*bsearchcomparefunc)(const void *,const void *);
 
@@ -176,7 +178,6 @@ static gboolean dir_scan(const gchar *dir_name) {
   GDir *dir;
   gchar *file_name,*ext,*conv_entry_name,*cur_entry_name;
   const gchar *entry_name;
-  gpointer bmh;
   gboolean res=FALSE;
 
   /* @TODO: find a way to sync this with bml's testmachine report
@@ -341,29 +342,13 @@ static gboolean dir_scan(const gchar *dir_name) {
         GST_INFO("trying plugin '%s','%s'",cur_entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
-          if((bmh=bmlw_open(file_name))) {
-            if(bmlw_describe_plugin(file_name,bmh)) {
-              res=TRUE;
-            }
-            bmlw_close(bmh);
-          }
-          else {
-            GST_WARNING("machine %s could not be loaded",file_name);
-          }
+          res=bmlw_gstbml_inspect(file_name);
 #else
           GST_WARNING("no dll emulation on non x86 platforms");
 #endif
         }
         else {
-          if((bmh=bmln_open(file_name))) {
-            if(bmln_describe_plugin(file_name,bmh)) {
-              res=TRUE;
-            }
-            bmln_close(bmh);
-          }
-          else {
-            GST_WARNING("machine %s could not be loaded",file_name);
-          }
+          res=bmln_gstbml_inspect(file_name);
         }
         g_free(file_name);
       }
@@ -388,7 +373,6 @@ static gboolean dir_scan(const gchar *dir_name) {
  * After loading each library, the callback function is called to process it.
  * This function leaves items passed to the callback function open.
  */
-
 static gboolean bml_scan(void) {
   const gchar *bml_path;
   gchar **paths;

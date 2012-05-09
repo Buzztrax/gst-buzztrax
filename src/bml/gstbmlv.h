@@ -23,7 +23,8 @@
 #ifndef __GST_BMLV_H__
 #define __GST_BMLV_H__
 
-#include "plugin.h"
+#include <glib.h>
+#include <gst/gst.h>
 
 G_BEGIN_DECLS
 

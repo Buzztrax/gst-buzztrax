@@ -30,6 +30,22 @@ gpointer voice_class_bmh;
 
 //-- helper
 
+gboolean bml(gstbml_inspect(gchar *file_name)) {
+  gpointer bmh;
+  gboolean res=FALSE;
+
+  if((bmh=bml(open(file_name)))) {
+    if(bml(describe_plugin(file_name,bmh))) {
+      res=TRUE;
+    }
+    bml(close(bmh));
+  }
+  else {
+    GST_WARNING("machine %s could not be loaded",file_name);
+  }
+  return res;
+}
+
 /*
  * bml_is_polyphonic:
  *
@@ -44,8 +60,8 @@ gboolean bml(gstbml_is_polyphonic(gpointer bmh)) {
   if(bml(get_machine_info(bmh,BM_PROP_NUM_TRACK_PARAMS,(void *)&track_params))) {
     if(track_params>0) return(TRUE);
 #if 0
-  if(bml(bml_get_machine_info(bmh,BM_PROP_MIN_TRACKS,(void *)&min_voices)) &&
-    bml(bml_get_machine_info(bmh,BM_PROP_MAX_TRACKS,(void *)&max_voices))
+  if(bml(get_machine_info(bmh,BM_PROP_MIN_TRACKS,(void *)&min_voices)) &&
+    bml(get_machine_info(bmh,BM_PROP_MAX_TRACKS,(void *)&max_voices))
   ) {
     GST_INFO("min/max-voices=%d/%d",min_voices,max_voices);
     if((min_voices<=max_voices) && (max_voices>0)) return(TRUE);

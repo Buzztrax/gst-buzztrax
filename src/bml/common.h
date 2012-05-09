@@ -23,7 +23,7 @@
 #ifndef __GST_BML_COMMON_H__
 #define __GST_BML_COMMON_H__
 
-#include "plugin.h"
+#include "gstbml.h"
 
 G_BEGIN_DECLS
 

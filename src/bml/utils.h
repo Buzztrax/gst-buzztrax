@@ -23,11 +23,14 @@
 #ifndef __GST_BML_UTILS_H__
 #define __GST_BML_UTILS_H__
 
-#include "plugin.h"
+#include <glib.h>
+#include <gst/gst.h>
 
 G_BEGIN_DECLS
 
 //-- helper
+
+extern gboolean bml(gstbml_inspect(gchar *file_name));
 
 extern gboolean bml(gstbml_is_polyphonic(gpointer bmh));
 
