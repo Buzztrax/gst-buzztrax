@@ -23,6 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#if HAVE_BMLW
+#include <sys/wait.h>
+#endif
 
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
@@ -342,7 +345,33 @@ static gboolean dir_scan(const gchar *dir_name) {
         GST_INFO("trying plugin '%s','%s'",cur_entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
-          res=bmlw_gstbml_inspect(file_name);
+          pid_t pid;
+          int status;
+
+          /* Do a fork and try to open() the plugin there to avoid crashing on
+           * bad ones. This is not perfect, plugins can still crash later on.
+           * Also right now gstreamer will eat the signals :/
+           */
+          if((pid=fork())==0) {
+            // child
+            gpointer bmh;
+            if((bmh=bmlw_open(file_name))) {
+              bmlw_close(bmh);
+              exit(0);
+            }
+            exit(1);
+          }
+          waitpid(pid, &status, 0);
+          if(WIFEXITED(status)) {
+            if(WEXITSTATUS(status)==0) {
+              GST_WARNING("loading %s worked okay",file_name);
+              res=bmlw_gstbml_inspect(file_name);
+            } else {
+              GST_WARNING("try loading %s failed with exit code %d",file_name,WEXITSTATUS(status));
+            }
+          } else if(WIFSIGNALED(status)) {
+            GST_WARNING("try loading %s failed with signal %d",file_name,WTERMSIG(status));
+          }
 #else
           GST_WARNING("no dll emulation on non x86 platforms");
 #endif
