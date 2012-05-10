@@ -171,6 +171,49 @@ static const gchar *get_bml_path(void) {
 #endif
 }
 
+#if HAVE_BMLW
+static struct sigaction oldaction;
+static gboolean fault_handler_active = FALSE;
+
+static void fault_handler_restore(void) {
+  if (!fault_handler_active)
+    return;
+
+  fault_handler_active = FALSE;
+
+  sigaction (SIGSEGV, &oldaction, NULL);
+}
+
+static void fault_handler_sighandler(int signum) {
+  /* We need to restore the fault handler or we'll keep getting it */
+  fault_handler_restore();
+
+  switch (signum) {
+    case SIGSEGV:
+      g_print ("Caught a segmentation fault while loading plugin file:\n");
+      exit (-1);
+      break;
+    default:
+      g_print ("Caught unhandled signal on plugin loading\n");
+      break;
+  }
+}
+
+static void fault_handler_setup(void) {
+  struct sigaction action;
+
+  if (fault_handler_active)
+    return;
+
+  fault_handler_active = TRUE;
+
+  memset (&action, 0, sizeof (action));
+  action.sa_handler = fault_handler_sighandler;
+  sigaction (SIGSEGV, &action, &oldaction);
+}
+
+#endif
+
 /*
  * dir_scan:
  *
@@ -352,6 +395,7 @@ static gboolean dir_scan(const gchar *dir_name) {
            * bad ones. This is not perfect, plugins can still crash later on.
            * Also right now gstreamer will eat the signals :/
            */
+          fault_handler_setup();
           if((pid=fork())==0) {
             // child
             gpointer bmh;
@@ -361,6 +405,7 @@ static gboolean dir_scan(const gchar *dir_name) {
             }
             exit(1);
           }
+          fault_handler_restore();
           waitpid(pid, &status, 0);
           if(WIFEXITED(status)) {
             if(WEXITSTATUS(status)==0) {
