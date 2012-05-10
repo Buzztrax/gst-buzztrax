@@ -74,7 +74,7 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bmh)) {
     gchar *data_pathname=NULL;
     gboolean type_names_ok=TRUE;
     GstStructure *bml_meta;
-
+    GError *error=NULL;
     if((filename=strrchr(dllname,'/'))) {
       filename++;
     }
@@ -90,8 +90,13 @@ gboolean bml(describe_plugin(gchar *pathname, gpointer bmh)) {
     // get basename
     ext=g_strrstr(filename,".");
     *ext='\0';  // temporarily terminate
-    name=g_convert_with_fallback(filename,-1,"ASCII","WINDOWS-1252","-",NULL,NULL,NULL);
-    g_strstrip(name);
+    if(!(name=g_convert_with_fallback(filename,-1,"ASCII","WINDOWS-1252","-",NULL,NULL,&error))) {
+      GST_WARNING("trouble converting filename: '%s': %s",filename, error->message);
+      g_error_free(error);error=NULL;
+    }
+    if(name) {
+      g_strstrip(name);
+    }
     *ext='.';   // restore
     GST_INFO("  name is '%s'",name);
 

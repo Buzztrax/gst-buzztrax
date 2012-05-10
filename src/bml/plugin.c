@@ -253,6 +253,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     /* this is part of normal buzz installs these days, even its not a plugin */
     "CYANPHASE BUZZ OVERLOADER.DLL",
     "CYANPHASE DMO EFFECT ADAPTER.DLL",
+    "CYANPHASE DX EFFECT ADAPTER.DLL",
     "CYANPHASE SEA CUCUMBER.DLL",
     "CYANPHASE SONGINFO.DLL",
     "CYANPHASE UNNATIVE EFFECTS.DLL",
@@ -263,6 +264,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     "DEX RINGMOD.DLL",
     "DT_BLOCKFX (STEREO).DLL",
     "DT_BLOCKFX.DLL",
+    "EAX2OUTPUT.DLL",
     "FIRESLEDGE ANTIOPE-1.DLL",
     "FREQUENCY UNKNOWN FREQ IN.DLL",
     "FREQUENCY UNKNOWN FREQ OUT.DLL",
@@ -313,6 +315,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     "NINEREEDS DISCRETIZE.DLL",
     "NINEREEDS DISCRITIZE.DLL",
     "NINEREEDS FADE.DLL",
+    "NINEREEDS LFO.DLL",
     "NINEREEDS LFO FADE.DLL",
     "NINEREEDS NRS04.DLL",
     "NINEREEDS NRS05.DLL",
@@ -326,7 +329,9 @@ static gboolean dir_scan(const gchar *dir_name) {
     "REBIRTH MIDI 2.DLL",
     "REBIRTH MIDI.DLL",
     "REPEATER.DLL",
+    "RNZNANF VST EFFECT ADAPTER.DLL",
     "RNZNANF VST INSTRUMENT ADAPTER.DLL",
+    "RNZNANFNCNR VST EFFECT ADAPTER.DLL",
     "RNZNANFNCNR VST INSTRUMENT ADAPTER.DLL",
     "RNZNANFNR VST INSTRUMENT ADAPTER.DLL",
     "ROUT VST PLUGIN LOADER.DLL",
@@ -360,7 +365,9 @@ static gboolean dir_scan(const gchar *dir_name) {
     "ZNT WAVEEDIT.DLL",
     "ZU ?TAPS.DLL",
     "ZU MORPHIN FINAL DOSE.DLL",
+    "ZU MORPHIN.DLL",
     "ZU PARAMETRIC EQ.DLL",
+    "ZU SLICER.DLL",
     "ZU µTAPS.DLL",
     "ZU �TAPS.DLL",
     "Zu æTaps.dll"
@@ -377,8 +384,10 @@ static gboolean dir_scan(const gchar *dir_name) {
       GST_WARNING("file %s is not a valid file-name",entry_name);
       if((conv_entry_name=g_convert(entry_name,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL))) {
         cur_entry_name=conv_entry_name;
+      } else {
+        GST_WARNING("can't convert encoding for %s",entry_name);
+	    continue;
       }
-      //continue;
     }
 
     ext=strrchr(entry_name,'.');
