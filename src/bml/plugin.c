@@ -172,6 +172,7 @@ static const gchar *get_bml_path(void) {
 }
 
 #if HAVE_BMLW
+#if 0
 static struct sigaction oldaction;
 static gboolean fault_handler_active = FALSE;
 
@@ -211,7 +212,7 @@ static void fault_handler_setup(void) {
   action.sa_handler = fault_handler_sighandler;
   sigaction (SIGSEGV, &action, &oldaction);
 }
-
+#endif
 #endif
 
 /*
@@ -388,12 +389,14 @@ static gboolean dir_scan(const gchar *dir_name) {
         GST_INFO("trying plugin '%s','%s'",cur_entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
+#if 0
           pid_t pid;
           int status;
 
           /* Do a fork and try to open() the plugin there to avoid crashing on
            * bad ones. This is not perfect, plugins can still crash later on.
-           * Also right now gstreamer will eat the signals :/
+           * Also it seems that this causes troubles in the wine emulation
+           * state as some plugins that otherwise work, now fail later on :/
            */
           fault_handler_setup();
           if((pid=fork())==0) {
@@ -410,13 +413,16 @@ static gboolean dir_scan(const gchar *dir_name) {
           if(WIFEXITED(status)) {
             if(WEXITSTATUS(status)==0) {
               GST_WARNING("loading %s worked okay",file_name);
+#endif
               res=bmlw_gstbml_inspect(file_name);
+#if 0
             } else {
               GST_WARNING("try loading %s failed with exit code %d",file_name,WEXITSTATUS(status));
             }
           } else if(WIFSIGNALED(status)) {
             GST_WARNING("try loading %s failed with signal %d",file_name,WTERMSIG(status));
           }
+#endif
 #else
           GST_WARNING("no dll emulation on non x86 platforms");
 #endif
