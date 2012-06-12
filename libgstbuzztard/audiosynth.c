@@ -36,9 +36,9 @@
 #include <gst/controller/gstcontroller.h>
 #include <gst/audio/audio.h>
 
-#if !GST_CHECK_VERSION(0,10,31)
-#include <libgstbuzztard/help.h>
-#endif
+//#if !GST_CHECK_VERSION(0,10,31)
+//#include <libgstbuzztard/help.h>
+//#endif
 #include "libgstbuzztard/propertymeta.h"
 #include "libgstbuzztard/tempo.h"
 
@@ -53,10 +53,6 @@ enum
   PROP_BPM = 1,
   PROP_TPB,
   PROP_STPT,
-#if !GST_CHECK_VERSION(0,10,31)
-  // help interface
-  PROP_DOCU_URI,
-#endif
 };
 
 static GstStaticPadTemplate gst_audiosynth_src_template =
@@ -175,12 +171,6 @@ gst_audiosynth_base_init (gpointer g_class)
       "Source/Audio",
       "Base Audio synthesizer",
       "Tom Mast <amishmansteve@users.sourceforge.net>");
-#if GST_CHECK_VERSION(0,10,31)
-  gst_element_class_set_documentation_uri (element_class,
-      "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
-      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "" PACKAGE
-      "-GstBtAudioSynth.html");
-#endif
 }
 
 static void
@@ -215,11 +205,6 @@ gst_audiosynth_class_init (GstBtAudioSynthClass * klass)
   g_object_class_override_property (gobject_class, PROP_TPB, "ticks-per-beat");
   g_object_class_override_property (gobject_class, PROP_STPT,
       "subticks-per-tick");
-
-#if !GST_CHECK_VERSION(0,10,31)
-  g_object_class_override_property (gobject_class, PROP_DOCU_URI,
-      "documentation-uri");
-#endif
 }
 
 static void
@@ -264,15 +249,6 @@ gst_audiosynth_get_property (GObject * object, guint prop_id,
     case PROP_STPT:
       g_value_set_ulong (value, src->subticks_per_tick);
       break;
-#if !GST_CHECK_VERSION(0,10,31)
-      // help interface
-    case PROP_DOCU_URI:
-      g_value_set_static_string (value,
-          "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S
-          "html" G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "" PACKAGE
-          "-GstBtAudioSynth.html");
-      break;
-#endif
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -302,7 +278,7 @@ gst_audiosynth_init (GstBtAudioSynth * src, GstBtAudioSynthClass * g_class)
 static void
 gst_sim_syn_src_fixate (GstPad * pad, GstCaps * caps)
 {
-  GstBtSimSyn *src = GSTBT_SIM_SYN (GST_PAD_PARENT (pad));
+  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (GST_PAD_PARENT (pad));
   GstStructure *structure = gst_caps_get_structure (caps, 0);
 
   gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
@@ -449,7 +425,7 @@ gst_audiosynth_start (GstBaseSrc * basesrc)
   src->running_time = G_GUINT64_CONSTANT (0);
   src->ticktime_err_accum = 0.0;
 
-  return (TRUE);
+  return TRUE;
 }
 
 static GstFlowReturn
@@ -605,13 +581,6 @@ gstbt_audiosynth_get_type (void)
       NULL,                     /* interface_finalize */
       NULL                      /* interface_data */
     };
-#if !GST_CHECK_VERSION(0,10,31)
-    const GInterfaceInfo help_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
-#endif
     const GInterfaceInfo preset_interface_info = {
       NULL,                     /* interface_init */
       NULL,                     /* interface_finalize */

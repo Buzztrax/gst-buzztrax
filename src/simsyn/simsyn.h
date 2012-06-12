@@ -24,20 +24,18 @@
 
 
 #include <gst/gst.h>
-#include <gst/base/gstbasesrc.h>
 #include <gst/controller/gstcontroller.h>
 #include <libgstbuzztard/toneconversion.h>
 #include <libgstbuzztard/envelope.h>
+#include <libgstbuzztard/audiosynth.h>
 
 G_BEGIN_DECLS
-
 #define GSTBT_TYPE_SIM_SYN            (gstbt_sim_syn_get_type())
 #define GSTBT_SIM_SYN(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_SIM_SYN,GstBtSimSyn))
 #define GSTBT_IS_SIM_SYN(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_SIM_SYN))
 #define GSTBT_SIM_SYN_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_SIM_SYN,GstBtSimSynClass))
 #define GSTBT_IS_SIM_SYN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_SIM_SYN))
 #define GSTBT_SIM_SYN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_SIM_SYN,GstBtSimSynClass))
-
 /**
  * GstBtSimSynWave:
  * @GSTBT_SIM_SYN_WAVE_SINE: sine wave
@@ -55,7 +53,8 @@ G_BEGIN_DECLS
  *
  * Oscillator wave forms.
  */
-typedef enum {
+    typedef enum
+{
   GSTBT_SIM_SYN_WAVE_SINE,
   GSTBT_SIM_SYN_WAVE_SQUARE,
   GSTBT_SIM_SYN_WAVE_SAW,
@@ -80,7 +79,8 @@ typedef enum {
  *
  * Filter types.
  */
-typedef enum {
+typedef enum
+{
   GSTBT_SIM_SYN_FILTER_NONE,
   GSTBT_SIM_SYN_FILTER_LOWPASS,
   GSTBT_SIM_SYN_FILTER_HIPASS,
@@ -92,16 +92,18 @@ typedef enum {
 #define PINK_RANDOM_BITS       (16)
 #define PINK_RANDOM_SHIFT      ((sizeof(long)*8)-PINK_RANDOM_BITS)
 
-typedef struct {
-  glong      rows[PINK_MAX_RANDOM_ROWS];
-  glong      running_sum;   /* Used to optimize summing of generators. */
-  gint       index;         /* Incremented each sample. */
-  gint       index_mask;    /* Index wrapped by ANDing with this mask. */
-  gfloat     scalar;        /* Used to scale within range of -1.0 to +1.0 */
+typedef struct
+{
+  glong rows[PINK_MAX_RANDOM_ROWS];
+  glong running_sum;            /* Used to optimize summing of generators. */
+  gint index;                   /* Incremented each sample. */
+  gint index_mask;              /* Index wrapped by ANDing with this mask. */
+  gfloat scalar;                /* Used to scale within range of -1.0 to +1.0 */
 } GstBtPinkNoise;
 
-typedef struct {
-  gdouble    state;         /* noise state */
+typedef struct
+{
+  gdouble state;                /* noise state */
 } GstBtRedNoise;
 
 
@@ -115,12 +117,14 @@ typedef struct _GstBtSimSynClass GstBtSimSynClass;
  *
  * Class instance data.
  */
-struct _GstBtSimSyn {
-  GstBaseSrc parent;
+struct _GstBtSimSyn
+{
+  GstBtAudioSynth parent;
 
   /* < private > */
   /* parameters */
-  gdouble samples_per_buffer;
+  gboolean dispose_has_run;     /* validate if dispose has run */
+
   GstBtSimSynWave wave;
   GstBtNote note;
   gdouble volume;
@@ -129,50 +133,32 @@ struct _GstBtSimSyn {
   gdouble cutoff;
   gdouble resonance;
 
-  gboolean dispose_has_run;		/* validate if dispose has run */
-
-  void (*process)(GstBtSimSyn*, gint16 *);
-  void (*apply_filter)(GstBtSimSyn*, gint16 *);
-
-  gint samplerate;
-  GstClockTime running_time;            /* total running time */
-  gint64 n_samples;                     /* total samples sent */
-  gint64 n_samples_stop;
-  gboolean check_eos;
-  gboolean eos_reached;
-  guint generate_samples_per_buffer;	/* generate a partial buffer */
-  gboolean reverse;                  /* play backwards */
+  void (*process) (GstBtSimSyn *, gint16 *);
+  void (*apply_filter) (GstBtSimSyn *, gint16 *);
 
   GstBtToneConversion *n2f;
   gdouble freq;
   guint64 note_count, note_length;
-  GstBtEnvelope *volenv;                  /* volume-envelope */
+  GstBtEnvelope *volenv;        /* volume-envelope */
   GstController *volenv_controller;     /* volume-envelope controller */
 
-  /* tempo handling */
-  gulong beats_per_minute;
-  gulong ticks_per_beat;
-  gulong subticks_per_tick;
-  GstClockTime ticktime;
-  gdouble ticktime_err,ticktime_err_accum;
-
   /* waveform specific context data */
-  gdouble accumulator;			/* phase angle */
+  gdouble accumulator;          /* phase angle */
   GstBtPinkNoise pink;
   GstBtRedNoise red;
-  gint16 wave_table[ WAVE_TABLE_SIZE];
+  gint16 wave_table[WAVE_TABLE_SIZE];
 
   /* filter specific data */
   gdouble flt_low, flt_mid, flt_high;
   gdouble flt_res;
 };
 
-struct _GstBtSimSynClass {
-  GstBaseSrcClass parent_class;
+struct _GstBtSimSynClass
+{
+  GstBtAudioSynthClass parent_class;
 };
 
-GType gstbt_sim_syn_get_type(void);
+GType gstbt_sim_syn_get_type (void);
 
 G_END_DECLS
-
 #endif /* __GSTBT_SIM_SYN_H__ */

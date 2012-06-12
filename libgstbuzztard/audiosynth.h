@@ -33,7 +33,7 @@ G_BEGIN_DECLS
 typedef struct _GstBtAudioSynth GstBtAudioSynth;
 typedef struct _GstBtAudioSynthClass GstBtAudioSynthClass;
 
-typedef void (*GstBtAudioSynthProcessFunc) (GstBtAudioSynth *, gint16 *);
+typedef void (*GstBtAudioSynthProcessFunc) (GstBtAudioSynth * src, gint16 * samples);
 
 /**
  * GstBtAudioSynth:
