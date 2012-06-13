@@ -36,9 +36,6 @@
 #include <gst/controller/gstcontroller.h>
 #include <gst/audio/audio.h>
 
-//#if !GST_CHECK_VERSION(0,10,31)
-//#include <libgstbuzztard/help.h>
-//#endif
 #include "libgstbuzztard/propertymeta.h"
 #include "libgstbuzztard/tempo.h"
 
@@ -116,7 +113,7 @@ static void
 gst_audiosynth_tempo_change_tempo (GstBtTempo * tempo, glong beats_per_minute,
     glong ticks_per_beat, glong subticks_per_tick)
 {
-  GstBtAudioSynth *self = GSTBT_AUDIOSYNTH (tempo);
+  GstBtAudioSynth *self = GSTBT_AUDIO_SYNTH (tempo);
   gboolean changed = FALSE;
 
   if (beats_per_minute >= 0) {
@@ -211,7 +208,7 @@ static void
 gst_audiosynth_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (object);
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (object);
 
   if (src->dispose_has_run)
     return;
@@ -233,7 +230,7 @@ static void
 gst_audiosynth_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (object);
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (object);
 
   if (src->dispose_has_run)
     return;
@@ -278,7 +275,7 @@ gst_audiosynth_init (GstBtAudioSynth * src, GstBtAudioSynthClass * g_class)
 static void
 gst_sim_syn_src_fixate (GstPad * pad, GstCaps * caps)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (GST_PAD_PARENT (pad));
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (GST_PAD_PARENT (pad));
   GstStructure *structure = gst_caps_get_structure (caps, 0);
 
   gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
@@ -287,7 +284,7 @@ gst_sim_syn_src_fixate (GstPad * pad, GstCaps * caps)
 static gboolean
 gst_audiosynth_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (basesrc);
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
   const GstStructure *structure = gst_caps_get_structure (caps, 0);
   gboolean ret;
 
@@ -299,7 +296,7 @@ gst_audiosynth_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
 static gboolean
 gst_audiosynth_query (GstBaseSrc * basesrc, GstQuery * query)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (basesrc);
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
   gboolean res = FALSE;
 
   switch (GST_QUERY_TYPE (query)) {
@@ -361,7 +358,7 @@ error:
 static gboolean
 gst_audiosynth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (basesrc);
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
   GstClockTime time;
 
   time = segment->last_stop;
@@ -419,7 +416,7 @@ gst_audiosynth_is_seekable (GstBaseSrc * basesrc)
 static gboolean
 gst_audiosynth_start (GstBaseSrc * basesrc)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (basesrc);
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
 
   src->n_samples = G_GINT64_CONSTANT (0);
   src->running_time = G_GUINT64_CONSTANT (0);
@@ -432,7 +429,7 @@ static GstFlowReturn
 gst_audiosynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
     GstBuffer ** buffer)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (basesrc);
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
   GstFlowReturn res;
   GstBuffer *buf;
   GstClockTime next_running_time;
@@ -545,7 +542,7 @@ gst_audiosynth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
 static void
 gst_audiosynth_dispose (GObject * object)
 {
-  GstBtAudioSynth *src = GSTBT_AUDIOSYNTH (object);
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (object);
 
   if (src->dispose_has_run)
     return;

@@ -16,20 +16,20 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GSTBT_AUDIOSYNTH_H__
-#define __GSTBT_AUDIOSYNTH_H__
+#ifndef __GSTBT_AUDIO_SYNTH_H__
+#define __GSTBT_AUDIO_SYNTH_H__
 
 #include <gst/gst.h>
 #include <gst/base/gstbasesrc.h>
 #include <gst/controller/gstcontroller.h>
 
 G_BEGIN_DECLS
-#define GSTBT_TYPE_AUDIOSYNTH			        (gstbt_audiosynth_get_type())
-#define GSTBT_AUDIOSYNTH(obj)			        (G_TYPE_CHECK_INSTANCE_CAST((obj), GSTBT_TYPE_AUDIOSYNTH,GstBtAudioSynth))
-#define GSTBT_IS_AUDIOSYNTH(obj)		      (G_TYPE_CHECK_INSTANCE_TYPE((obj), GSTBT_TYPE_AUDIOSYNTH))
-#define GSTBT_AUDIOSYNTH_CLASS(klass)	    (G_TYPE_CHECK_CLASS_CAST((klass),GSTBT_TYPE_AUDIOSYNTH,GstBtAudioSynthClass))
-#define GSTBT_IS_AUDIOSYNTH_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE((klass), GSTBT_TYPE_AUDIOSYNTH))
-#define GSTBT_AUDIOSYNTH_GET_CLASS(ob)	  (G_TYPE_INSTANCE_GET_CLASS((obj), GSTBT_TYPE_AUDIOSYNTH,GstBtAudioSynthClass))
+#define GSTBT_TYPE_AUDIO_SYNTH			        (gstbt_audiosynth_get_type())
+#define GSTBT_AUDIO_SYNTH(obj)			        (G_TYPE_CHECK_INSTANCE_CAST((obj), GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynth))
+#define GSTBT_IS_AUDIO_SYNTH(obj)		      (G_TYPE_CHECK_INSTANCE_TYPE((obj), GSTBT_TYPE_AUDIO_SYNTH))
+#define GSTBT_AUDIO_SYNTH_CLASS(klass)	    (G_TYPE_CHECK_CLASS_CAST((klass),GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynthClass))
+#define GSTBT_IS_AUDIO_SYNTH_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE((klass), GSTBT_TYPE_AUDIO_SYNTH))
+#define GSTBT_AUDIO_SYNTH_GET_CLASS(ob)	  (G_TYPE_INSTANCE_GET_CLASS((obj), GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynthClass))
 typedef struct _GstBtAudioSynth GstBtAudioSynth;
 typedef struct _GstBtAudioSynthClass GstBtAudioSynthClass;
 
@@ -79,4 +79,4 @@ struct _GstBtAudioSynthClass
 GType gstbt_audiosynth_get_type (void);
 
 G_END_DECLS
-#endif /* __GSTBT_AUDIOSYNTH_H__ */
+#endif /* __GSTBT_AUDIO_SYNTH_H__ */
