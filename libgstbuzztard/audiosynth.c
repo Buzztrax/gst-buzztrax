@@ -430,6 +430,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
     GstBuffer ** buffer)
 {
   GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
+  GstBtAudioSynthClass *klass = GSTBT_AUDIO_SYNTH_GET_CLASS(src);
   GstFlowReturn res;
   GstBuffer *buf;
   GstClockTime next_running_time;
@@ -532,7 +533,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   src->running_time = next_running_time;
   src->n_samples = n_samples;
 
-  src->process(src, (gint16 *) GST_BUFFER_DATA(buf));
+  klass->process(src, (gint16 *) GST_BUFFER_DATA(buf));
 
   *buffer = buf;
 

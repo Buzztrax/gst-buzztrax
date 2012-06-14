@@ -25,11 +25,11 @@
 
 G_BEGIN_DECLS
 #define GSTBT_TYPE_AUDIO_SYNTH			        (gstbt_audio_synth_get_type())
-#define GSTBT_AUDIO_SYNTH(obj)			        (G_TYPE_CHECK_INSTANCE_CAST((obj), GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynth))
-#define GSTBT_IS_AUDIO_SYNTH(obj)		      (G_TYPE_CHECK_INSTANCE_TYPE((obj), GSTBT_TYPE_AUDIO_SYNTH))
-#define GSTBT_AUDIO_SYNTH_CLASS(klass)	    (G_TYPE_CHECK_CLASS_CAST((klass),GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynthClass))
-#define GSTBT_IS_AUDIO_SYNTH_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE((klass), GSTBT_TYPE_AUDIO_SYNTH))
-#define GSTBT_AUDIO_SYNTH_GET_CLASS(ob)	  (G_TYPE_INSTANCE_GET_CLASS((obj), GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynthClass))
+#define GSTBT_AUDIO_SYNTH(obj)			        (G_TYPE_CHECK_INSTANCE_CAST((obj) ,GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynth))
+#define GSTBT_IS_AUDIO_SYNTH(obj)		        (G_TYPE_CHECK_INSTANCE_TYPE((obj) ,GSTBT_TYPE_AUDIO_SYNTH))
+#define GSTBT_AUDIO_SYNTH_CLASS(klass)	    (G_TYPE_CHECK_CLASS_CAST((klass)  ,GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynthClass))
+#define GSTBT_IS_AUDIO_SYNTH_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE((klass)  ,GSTBT_TYPE_AUDIO_SYNTH))
+#define GSTBT_AUDIO_SYNTH_GET_CLASS(obj)	  (G_TYPE_INSTANCE_GET_CLASS((obj)  ,GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynthClass))
 typedef struct _GstBtAudioSynth GstBtAudioSynth;
 typedef struct _GstBtAudioSynthClass GstBtAudioSynthClass;
 
