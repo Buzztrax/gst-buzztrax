@@ -24,7 +24,7 @@
 #include <gst/controller/gstcontroller.h>
 
 G_BEGIN_DECLS
-#define GSTBT_TYPE_AUDIO_SYNTH			        (gstbt_audiosynth_get_type())
+#define GSTBT_TYPE_AUDIO_SYNTH			        (gstbt_audio_synth_get_type())
 #define GSTBT_AUDIO_SYNTH(obj)			        (G_TYPE_CHECK_INSTANCE_CAST((obj), GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynth))
 #define GSTBT_IS_AUDIO_SYNTH(obj)		      (G_TYPE_CHECK_INSTANCE_TYPE((obj), GSTBT_TYPE_AUDIO_SYNTH))
 #define GSTBT_AUDIO_SYNTH_CLASS(klass)	    (G_TYPE_CHECK_CLASS_CAST((klass),GSTBT_TYPE_AUDIO_SYNTH,GstBtAudioSynthClass))
@@ -33,7 +33,6 @@ G_BEGIN_DECLS
 typedef struct _GstBtAudioSynth GstBtAudioSynth;
 typedef struct _GstBtAudioSynthClass GstBtAudioSynthClass;
 
-typedef void (*GstBtAudioSynthProcessFunc) (GstBtAudioSynth * src, gint16 * samples);
 
 /**
  * GstBtAudioSynth:
@@ -73,10 +72,10 @@ struct _GstBtAudioSynthClass
   GstBaseSrcClass parent_class;
 
   /* virtual function */
-  GstBtAudioSynthProcessFunc process;
+  void (*process) (GstBtAudioSynth * src, gint16 * samples);
 };
 
-GType gstbt_audiosynth_get_type (void);
+GType gstbt_audio_synth_get_type (void);
 
 G_END_DECLS
 #endif /* __GSTBT_AUDIO_SYNTH_H__ */

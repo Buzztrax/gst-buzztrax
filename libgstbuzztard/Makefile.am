@@ -3,13 +3,14 @@ noinst_HEADERS = compat.h
 lib_LTLIBRARIES = libgstbuzztard.la
 
 libgstbuzztard_la_SOURCES = \
+	audiosynth.c \	
 	childbin.c \
 	envelope.c \
 	help.c \
 	musicenums.c \
 	toneconversion.c \
 	propertymeta.c \
-	tempo.c
+	tempo.c 
 
 libgstbuzztard_la_CFLAGS = \
 	-I$(srcdir) \
@@ -18,6 +19,7 @@ libgstbuzztard_la_CFLAGS = \
 
 libgstbuzztardincludedir = $(includedir)/libgstbuzztard
 libgstbuzztardinclude_HEADERS = \
+	audiosynth.h \
 	childbin.h \
 	envelope.h \
 	help.h \

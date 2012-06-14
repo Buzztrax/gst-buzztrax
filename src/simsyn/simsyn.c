@@ -1000,7 +1000,7 @@ gstbt_sim_syn_get_type (void)
     };
 
     type =
-        g_type_register_static (GST_TYPE_BASE_SRC, "GstBtSimSyn",
+        g_type_register_static (GSTBT_TYPE_AUDIO_SYNTH, "GstBtAudioSynth",
         &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
         &property_meta_interface_info);
