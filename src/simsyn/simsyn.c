@@ -190,7 +190,7 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
 {
   GObjectClass *gobject_class;
 
-  parent_class = g_type_class_peek_parent (klass);
+  parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
 
   gobject_class = (GObjectClass *) klass;
 
@@ -1000,7 +1000,7 @@ gstbt_sim_syn_get_type (void)
     };
 
     type =
-        g_type_register_static (GSTBT_TYPE_AUDIO_SYNTH, "GstBtAudioSynth",
+        g_type_register_static (GSTBT_TYPE_AUDIO_SYNTH, "GstBtSimSyn",
         &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
         &property_meta_interface_info);
