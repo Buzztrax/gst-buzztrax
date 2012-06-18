@@ -82,7 +82,7 @@ enum
   PROP_DECAY,
   PROP_FILTER,
   PROP_CUTOFF,
- #if !GST_CHECK_VERSION(0,10,31)
+#if !GST_CHECK_VERSION(0,10,31)
   // help iface
   PROP_DOCU_URI,
 #endif
@@ -104,7 +104,7 @@ gst_sim_syn_wave_get_type (void)
     {GSTBT_SIM_SYN_WAVE_PINK_NOISE, "Pink noise", "pink-noise"},
     {GSTBT_SIM_SYN_WAVE_SINE_TAB, "Sine table", "sine table"},
     {GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE, "White Gaussian noise",
-          "gaussian-noise"},
+        "gaussian-noise"},
     {GSTBT_SIM_SYN_WAVE_RED_NOISE, "Red (brownian) noise", "red-noise"},
     {GSTBT_SIM_SYN_WAVE_BLUE_NOISE, "Blue noise", "blue-noise"},
     {GSTBT_SIM_SYN_WAVE_VIOLET_NOISE, "Violet noise", "violet-noise"},
@@ -148,6 +148,7 @@ static void gst_sim_syn_set_property (GObject * object,
 static void gst_sim_syn_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gst_sim_syn_dispose (GObject * object);
+static void gst_sim_syn_process (GstBtSimSyn * src, gint16 * samples);
 
 static void gst_sim_syn_change_wave (GstBtSimSyn * src);
 static void gst_sim_syn_change_volume (GstBtSimSyn * src);
@@ -175,11 +176,12 @@ gst_sim_syn_base_init (gpointer g_class)
 static void
 gst_sim_syn_class_init (GstBtSimSynClass * klass)
 {
-  GObjectClass *gobject_class;
+  GObjectClass *gobject_class = (GObjectClass *) klass;
+  GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
 
   parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
 
-  gobject_class = (GObjectClass *) klass;
+  audio_synth_class->process = gst_sim_syn_process ();
 
   gobject_class->set_property = gst_sim_syn_set_property;
   gobject_class->get_property = gst_sim_syn_get_property;
@@ -255,8 +257,8 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
           src->note_count = 0L;
           src->flt_low = src->flt_mid = src->flt_high = 0.0;
           /* src->samplerate will be one second */
-          attack = ((GstBtAudioSynth*)src)->samplerate / 1000;
-          decay = ((GstBtAudioSynth*)src)->samplerate * src->decay;
+          attack = ((GstBtAudioSynth *) src)->samplerate / 1000;
+          decay = ((GstBtAudioSynth *) src)->samplerate * src->decay;
           if (attack > decay)
             attack = decay - 10;
           src->note_length = decay;
@@ -396,10 +398,10 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
 static void
 gst_sim_syn_create_sine (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i = 0, j, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i = 0, j, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble step, amp, ampf, accumulator;
 
-  step = M_PI_M2 * src->freq / ((GstBtAudioSynth*)src)->samplerate;
+  step = M_PI_M2 * src->freq / ((GstBtAudioSynth *) src)->samplerate;
   ampf = src->volume * 32767.0;
   accumulator = src->accumulator;
 
@@ -423,10 +425,10 @@ gst_sim_syn_create_sine (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_square (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i = 0, j, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i = 0, j, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble step, amp, ampf, accumulator;
 
-  step = M_PI_M2 * src->freq / ((GstBtAudioSynth*)src)->samplerate;
+  step = M_PI_M2 * src->freq / ((GstBtAudioSynth *) src)->samplerate;
   ampf = src->volume * 32767.0;
   accumulator = src->accumulator;
 
@@ -449,10 +451,10 @@ gst_sim_syn_create_square (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_saw (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i = 0, j, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i = 0, j, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble step, amp, ampf, accumulator;
 
-  step = M_PI_M2 * src->freq / ((GstBtAudioSynth*)src)->samplerate;
+  step = M_PI_M2 * src->freq / ((GstBtAudioSynth *) src)->samplerate;
   ampf = src->volume * 32767.0 / M_PI;
   accumulator = src->accumulator;
 
@@ -479,10 +481,10 @@ gst_sim_syn_create_saw (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_triangle (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i = 0, j, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i = 0, j, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble step, amp, ampf, accumulator;
 
-  step = M_PI_M2 * src->freq / ((GstBtAudioSynth*)src)->samplerate;
+  step = M_PI_M2 * src->freq / ((GstBtAudioSynth *) src)->samplerate;
   ampf = src->volume * 32767.0 / M_PI;
   accumulator = src->accumulator;
 
@@ -511,13 +513,14 @@ gst_sim_syn_create_triangle (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_silence (GstBtSimSyn * src, gint16 * samples)
 {
-  memset (samples, 0, ((GstBtAudioSynth*)src)->generate_samples_per_buffer * sizeof (gint16));
+  memset (samples, 0,
+      ((GstBtAudioSynth *) src)->generate_samples_per_buffer * sizeof (gint16));
 }
 
 static void
 gst_sim_syn_create_white_noise (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i = 0, j, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i = 0, j, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble amp, ampf;
 
   ampf = src->volume * 65535.0;
@@ -599,7 +602,7 @@ gst_sim_syn_generate_pink_noise_value (GstBtPinkNoise * pink)
 static void
 gst_sim_syn_create_pink_noise (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i = 0, j, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i = 0, j, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   GstBtPinkNoise *pink = &src->pink;
   gdouble amp, ampf;
 
@@ -635,11 +638,11 @@ gst_sim_syn_init_sine_table (GstBtSimSyn * src)
 static void
 gst_sim_syn_create_sine_table (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble step, scl, accumulator;
   gint16 *__restrict__ wave_table = src->wave_table;
 
-  step = M_PI_M2 * src->freq / ((GstBtAudioSynth*)src)->samplerate;
+  step = M_PI_M2 * src->freq / ((GstBtAudioSynth *) src)->samplerate;
   scl = (gdouble) WAVE_TABLE_SIZE / M_PI_M2;
   accumulator = src->accumulator;
 
@@ -663,7 +666,7 @@ gst_sim_syn_create_sine_table (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_gaussian_white_noise (GstBtSimSyn * src, gint16 * samples)
 {
-  gint i = 0, j, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  gint i = 0, j, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble amp, ampf;
 
   ampf = src->volume * 32767.0;
@@ -687,7 +690,7 @@ gst_sim_syn_create_gaussian_white_noise (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_red_noise (GstBtSimSyn * src, gint16 * samples)
 {
-  gint i = 0, j, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  gint i = 0, j, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble amp, ampf;
   gdouble state = src->red.state;
 
@@ -716,7 +719,7 @@ gst_sim_syn_create_red_noise (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_blue_noise (GstBtSimSyn * src, gint16 * samples)
 {
-  gint i, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  gint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   static gdouble flip = 1.0;
 
   gst_sim_syn_create_pink_noise (src, samples);
@@ -729,7 +732,7 @@ gst_sim_syn_create_blue_noise (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_create_violet_noise (GstBtSimSyn * src, gint16 * samples)
 {
-  gint i, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  gint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   static gdouble flip = 1.0;
 
   gst_sim_syn_create_red_noise (src, samples);
@@ -739,13 +742,25 @@ gst_sim_syn_create_violet_noise (GstBtSimSyn * src, gint16 * samples)
   }
 }
 
+static void
+gst_sim_syn_process (GstBtSimSyn * src, gint16 * samples)
+{
+  if ((src->freq != 0.0) && (src->volenv->value > 0.0001)) {
+    src->process (src, (gint16 *) GST_BUFFER_DATA (buf));
+    if (src->apply_filter)
+      src->apply_filter (src, (gint16 *) GST_BUFFER_DATA (buf));
+  } else {
+    gst_sim_syn_create_silence (src, (gint16 *) GST_BUFFER_DATA (buf));
+    GST_BUFFER_FLAG_SET (buf, GST_BUFFER_FLAG_GAP);
+  }
+}
 
 /* Filters */
 
 static void
 gst_sim_syn_filter_lowpass (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble flt_low = src->flt_low;
   gdouble flt_mid = src->flt_mid;
   gdouble flt_high = src->flt_high;
@@ -767,7 +782,7 @@ gst_sim_syn_filter_lowpass (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_hipass (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble flt_low = src->flt_low;
   gdouble flt_mid = src->flt_mid;
   gdouble flt_high = src->flt_high;
@@ -789,7 +804,7 @@ gst_sim_syn_filter_hipass (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_bandpass (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble flt_low = src->flt_low;
   gdouble flt_mid = src->flt_mid;
   gdouble flt_high = src->flt_high;
@@ -811,7 +826,7 @@ gst_sim_syn_filter_bandpass (GstBtSimSyn * src, gint16 * samples)
 static void
 gst_sim_syn_filter_bandstop (GstBtSimSyn * src, gint16 * samples)
 {
-  guint i, ct = ((GstBtAudioSynth*)src)->generate_samples_per_buffer;
+  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gdouble flt_low = src->flt_low;
   gdouble flt_mid = src->flt_mid;
   gdouble flt_high = src->flt_high;
@@ -931,19 +946,24 @@ gst_sim_syn_change_filter (GstBtSimSyn * src)
   }
 
 }
+
 static void
-gst_sim_syn_dispose (GObject *object)
+gst_sim_syn_dispose (GObject * object)
 {
   GstBtSimSyn *src = GSTBT_SIM_SYN (object);
 
-  if (src->dispose_has_run) return;
+  if (src->dispose_has_run)
+    return;
   src->dispose_has_run = TRUE;
 
-  if (src->n2f) g_object_unref (src->n2f);
-  if (src->volenv_controller) g_object_unref (src->volenv_controller);
-  if (src->volenv) g_object_unref (src->volenv);
+  if (src->n2f)
+    g_object_unref (src->n2f);
+  if (src->volenv_controller)
+    g_object_unref (src->volenv_controller);
+  if (src->volenv)
+    g_object_unref (src->volenv);
 
-  G_OBJECT_CLASS(parent_class)->dispose(object);
+  G_OBJECT_CLASS (parent_class)->dispose (object);
 }
 
 GType
