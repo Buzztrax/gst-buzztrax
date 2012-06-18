@@ -75,30 +75,19 @@ GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
 enum
 {
-#if !GST_CHECK_VERSION(0,10,31)
-  // help iface
-  PROP_DOCU_URI,
-#endif
   // dynamic class properties
-  PROP_NOTE,
+  PROP_NOTE = 1,
   PROP_WAVE,
   PROP_VOLUME,
   PROP_DECAY,
   PROP_FILTER,
   PROP_CUTOFF,
+ #if !GST_CHECK_VERSION(0,10,31)
+  // help iface
+  PROP_DOCU_URI,
+#endif
   PROP_RESONANCE
 };
-
-static GstStaticPadTemplate gst_sim_syn_src_template =
-GST_STATIC_PAD_TEMPLATE ("src",
-    GST_PAD_SRC,
-    GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("audio/x-raw-int, "
-        "endianness = (int) BYTE_ORDER, "
-        "signed = (boolean) true, "
-        "width = (int) 16, "
-        "depth = (int) 16, " "rate = (int) [ 1, MAX ], " "channels = (int) 1")
-    );
 
 #define GSTBT_TYPE_SIM_SYN_WAVE (gst_sim_syn_wave_get_type())
 static GType
@@ -171,8 +160,6 @@ gst_sim_syn_base_init (gpointer g_class)
 {
   GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
 
-  gst_element_class_add_pad_template (element_class,
-      gst_static_pad_template_get (&gst_sim_syn_src_template));
   gst_element_class_set_details_simple (element_class,
       "Simple Synth",
       "Source/Audio",

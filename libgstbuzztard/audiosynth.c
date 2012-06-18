@@ -148,7 +148,6 @@ static void
 gstbt_audio_synth_tempo_interface_init (gpointer g_iface, gpointer iface_data)
 {
   GstBtTempoInterface *iface = g_iface;
-
   GST_INFO ("initializing interface");
 
   iface->change_tempo = gstbt_audio_synth_tempo_change_tempo;
