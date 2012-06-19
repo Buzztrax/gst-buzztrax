@@ -55,15 +55,13 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gst/controller/gstcontroller.h>
-#include <gst/audio/audio.h>
 
-//#include <gst/childbin/childbin.h>
+#include "libgstbuzztard/propertymeta.h"
+#include "libgstbuzztard/tempo.h"
+
 #if !GST_CHECK_VERSION(0,10,31)
 #include <libgstbuzztard/help.h>
 #endif
-#include "libgstbuzztard/propertymeta.h"
-#include "libgstbuzztard/tempo.h"
 
 #include "simsyn.h"
 
@@ -83,7 +81,7 @@ enum
   PROP_FILTER,
   PROP_CUTOFF,
 #if !GST_CHECK_VERSION(0,10,31)
-  // help iface
+  // help interface
   PROP_DOCU_URI,
 #endif
   PROP_RESONANCE
@@ -148,7 +146,7 @@ static void gst_sim_syn_set_property (GObject * object,
 static void gst_sim_syn_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gst_sim_syn_dispose (GObject * object);
-static void gst_sim_syn_process (GstBtSimSyn * src, gint16 * samples);
+static void gst_sim_syn_process (GstBtAudioSynth * base, gint16 * samples);
 
 static void gst_sim_syn_change_wave (GstBtSimSyn * src);
 static void gst_sim_syn_change_volume (GstBtSimSyn * src);
@@ -181,7 +179,7 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
 
   parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
 
-  audio_synth_class->process = gst_sim_syn_process ();
+  audio_synth_class->process = gst_sim_syn_process;
 
   gobject_class->set_property = gst_sim_syn_set_property;
   gobject_class->get_property = gst_sim_syn_get_property;
@@ -350,7 +348,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
       g_value_set_double (value, src->resonance);
       break;
 #if !GST_CHECK_VERSION(0,10,31)
-      // help iface
+      // help interface
     case PROP_DOCU_URI:
       g_value_set_static_string (value,
           "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S
@@ -743,15 +741,17 @@ gst_sim_syn_create_violet_noise (GstBtSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_process (GstBtSimSyn * src, gint16 * samples)
+gst_sim_syn_process (GstBtAudioSynth * base, gint16 * samples)
 {
+  GstBtSimSyn *src = ((GstBtSimSyn *) base);
+
   if ((src->freq != 0.0) && (src->volenv->value > 0.0001)) {
-    src->process (src, (gint16 *) GST_BUFFER_DATA (buf));
+    src->process (src, samples);
     if (src->apply_filter)
-      src->apply_filter (src, (gint16 *) GST_BUFFER_DATA (buf));
+      src->apply_filter (src, samples);
   } else {
-    gst_sim_syn_create_silence (src, (gint16 *) GST_BUFFER_DATA (buf));
-    GST_BUFFER_FLAG_SET (buf, GST_BUFFER_FLAG_GAP);
+    gst_sim_syn_create_silence (src, samples);
+    GST_BUFFER_FLAG_SET (samples, GST_BUFFER_FLAG_GAP);
   }
 }
 
@@ -944,7 +944,6 @@ gst_sim_syn_change_filter (GstBtSimSyn * src)
       GST_ERROR ("invalid filter-type: %d", src->filter);
       break;
   }
-
 }
 
 static void

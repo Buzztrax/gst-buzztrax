@@ -23,7 +23,9 @@
  * @title: GstBtAudioSynth
  * @short_description: base audio synthesizer
  *
- * Base audio synthesizer to build from
+ * Base audio synthesizer to use as a foundation for new synthesizers. Handles
+ * tempo, seeking, fixating, and the pad template. The pure virtual process
+ * method must be implemented by the child class.
  *
  */
 
