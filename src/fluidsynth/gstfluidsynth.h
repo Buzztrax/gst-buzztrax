@@ -34,12 +34,12 @@
 
 G_BEGIN_DECLS
 
-#define GSTBT_TYPE_FLUID_SYNTH            (gstbt_fluid_synth_get_type())
-#define GSTBT_FLUID_SYNTH(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_FLUID_SYNTH,GstBtFluidsynth))
-#define GSTBT_IS_FLUID_SYNTH(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_FLUID_SYNTH))
-#define GSTBT_FLUID_SYNTH_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_FLUID_SYNTH,GstBtFluidsynthClass))
-#define GSTBT_IS_FLUID_SYNTH_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_FLUID_SYNTH))
-#define GSTBT_FLUID_SYNTH_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_FLUID_SYNTH,GstBtFluidsynthClass))
+#define GSTBT_TYPE_FLUIDSYNTH            (gstbt_fluidsynth_get_type())
+#define GSTBT_FLUIDSYNTH(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynth))
+#define GSTBT_IS_FLUIDSYNTH(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_FLUIDSYNTH))
+#define GSTBT_FLUIDSYNTH_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynthClass))
+#define GSTBT_IS_FLUIDSYNTH_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_FLUIDSYNTH))
+#define GSTBT_FLUIDSYNTH_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynthClass))
 
 typedef struct _GstBtFluidsynth GstBtFluidsynth;
 typedef struct _GstBtFluidsynthClass GstBtFluidsynthClass;
@@ -92,7 +92,7 @@ struct _GstBtFluidsynthClass {
   GstBtAudioSynthClass parent_class;
 };
 
-GType gstbt_fluid_synth_get_type(void);
+GType gstbt_fluidsynth_get_type(void);
 
 G_END_DECLS
 
