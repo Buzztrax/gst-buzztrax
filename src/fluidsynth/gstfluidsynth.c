@@ -777,7 +777,8 @@ static gboolean
 gst_fluidsynth_setup (GstPad * pad, GstCaps * caps)
 {
   GstStructure *structure = gst_caps_get_structure (caps, 0);
-  // Set channels to 2
+
+  /* Set channels to 2 */
   if (!gst_structure_fixate_field_nearest_int (structure, "channels", 2))
     return FALSE;
 

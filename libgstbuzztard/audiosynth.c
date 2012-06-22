@@ -197,11 +197,11 @@ gstbt_audio_synth_class_init (GstBtAudioSynthClass * klass)
   gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gstbt_audio_synth_start);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gstbt_audio_synth_create);
 
-  // make process and setup method pure virtual
+  /* make process and setup method pure virtual */
   klass->process = NULL;
   klass->setup = NULL;
 
-  // override interface properties
+  /* override interface properties */
   g_object_class_override_property (gobject_class, PROP_BPM,
       "beats-per-minute");
   g_object_class_override_property (gobject_class, PROP_TPB, "ticks-per-beat");
@@ -219,7 +219,7 @@ gstbt_audio_synth_set_property (GObject * object, guint prop_id,
     return;
 
   switch (prop_id) {
-      // tempo interface
+      /* tempo interface */
     case PROP_BPM:
     case PROP_TPB:
     case PROP_STPT:
@@ -241,7 +241,7 @@ gstbt_audio_synth_get_property (GObject * object, guint prop_id,
     return;
 
   switch (prop_id) {
-      // tempo interface
+      /* tempo interface */
     case PROP_BPM:
       g_value_set_ulong (value, src->beats_per_minute);
       break;
@@ -287,8 +287,7 @@ gstbt_audio_synth_src_fixate (GstPad * pad, GstCaps * caps)
   gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
 
   if (!klass->setup (pad, caps))
-    // TODO(tom): error handle here...
-    g_print ("Error in setup()");
+    GST_ERROR_OBJECT (pad, "class lacks setup() vmethod implementation");
 }
 
 static gboolean

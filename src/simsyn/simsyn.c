@@ -397,7 +397,8 @@ static gboolean
 gst_sim_syn_setup (GstPad * pad, GstCaps * caps)
 {
   GstStructure *structure = gst_caps_get_structure (caps, 0);
-  // Set channels to 1
+
+  /* set channels to 1 */
   if (!gst_structure_fixate_field_nearest_int (structure, "channels", 1))
     return FALSE;
 
