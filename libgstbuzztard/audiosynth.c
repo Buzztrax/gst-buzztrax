@@ -298,7 +298,7 @@ gstbt_audio_synth_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
   gboolean ret;
 
   ret = gst_structure_get_int (structure, "rate", &src->samplerate);
-
+  ret &= gst_structure_get_int (structure, "channels", &src->channels);
   return ret;
 }
 
@@ -511,7 +511,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
 
   /* allocate a new buffer suitable for this pad */
   res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
-      src->generate_samples_per_buffer * sizeof (gint16),
+      src->generate_samples_per_buffer * src->channels * sizeof (gint16),
       GST_PAD_CAPS (basesrc->srcpad), &buf);
   if (res != GST_FLOW_OK) {
     return res;

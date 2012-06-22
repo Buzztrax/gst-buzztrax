@@ -51,6 +51,7 @@ struct _GstBtAudioSynth
   gboolean dispose_has_run;     /* validate if dispose has run */
 
   gint samplerate;
+  gint channels;
   GstClockTime running_time;    /* total running time */
   gint64 n_samples;             /* total samples sent */
   gint64 n_samples_stop;
