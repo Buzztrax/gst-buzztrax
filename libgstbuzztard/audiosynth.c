@@ -286,9 +286,9 @@ gstbt_audio_synth_src_fixate (GstPad * pad, GstCaps * caps)
 
   gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
 
-  if (!klass->setup (src, caps))
+  if (!klass->setup (pad, caps))
     // TODO(tom): error handle here...
-    printf ("Error in setup()");
+    g_print ("Error in setup()");
 }
 
 static gboolean

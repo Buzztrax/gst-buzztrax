@@ -396,13 +396,9 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
 static gboolean
 gst_sim_syn_setup (GstPad * pad, GstCaps * caps)
 {
-  GstCaps *newcaps = gst_pad_get_allowed_caps (pad);
-  GstStructure *newstructure = gst_caps_get_structure (newcaps, 0);
+  GstStructure *structure = gst_caps_get_structure (caps, 0);
   // Set channels to 1
-  gst_structure_set (newstructure, "channels", G_TYPE_INT, 1, NULL);
-
-  gst_pad_fixate_caps (pad, newcaps);
-  if (!gst_pad_set_caps (pad, newcaps))
+  if (!gst_structure_fixate_field_nearest_int (structure, "channels", 1))
     return FALSE;
 
   return TRUE;

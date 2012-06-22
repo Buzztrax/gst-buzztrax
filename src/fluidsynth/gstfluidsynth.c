@@ -141,6 +141,7 @@ static void gst_fluidsynth_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gst_fluidsynth_dispose (GObject * object);
 static void gst_fluidsynth_process (GstBtAudioSynth * base, gint16 * samples);
+static gboolean gst_fluidsynth_setup (GstPad * pad, GstCaps * caps);
 
 static void gst_fluidsynth_update_reverb (GstBtFluidsynth * gstsynth);
 static void gst_fluidsynth_update_chorus (GstBtFluidsynth * gstsynth);
@@ -308,6 +309,7 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
   parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
 
   audio_synth_class->process = gst_fluidsynth_process;
+  audio_synth_class->setup = gst_fluidsynth_setup;
 
   gobject_class->set_property = gst_fluidsynth_set_property;
   gobject_class->get_property = gst_fluidsynth_get_property;
@@ -315,10 +317,8 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
 
   /* set a log handler */
 #ifndef GST_DISABLE_GST_DEBUG
-  fluid_set_log_function (FLUID_PANIC, gst_fluidsynth_error_log_function,
-      NULL);
-  fluid_set_log_function (FLUID_ERR, gst_fluidsynth_warning_log_function,
-      NULL);
+  fluid_set_log_function (FLUID_PANIC, gst_fluidsynth_error_log_function, NULL);
+  fluid_set_log_function (FLUID_ERR, gst_fluidsynth_warning_log_function, NULL);
   fluid_set_log_function (FLUID_WARN, gst_fluidsynth_warning_log_function,
       NULL);
   fluid_set_log_function (FLUID_INFO, gst_fluidsynth_info_log_function, NULL);
@@ -497,8 +497,7 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
       GST_INFO ("Switch to program: %d, %d", src->program >> 7,
           src->program & 0x7F);
       fluid_synth_program_select (src->fluid, /*chan */ 0,
-          src->instrument_patch,
-          src->program >> 7, src->program & 0x7F);
+          src->instrument_patch, src->program >> 7, src->program & 0x7F);
       break;
       // not yet GST_PARAM_CONTROLLABLE
     case PROP_INSTRUMENT_PATCH:
@@ -518,8 +517,7 @@ gst_fluidsynth_set_property (GObject * object, guint prop_id,
         GST_INFO ("soundfont loaded as %d", src->instrument_patch);
         //fluid_synth_program_reset(src->fluid);
         fluid_synth_program_select (src->fluid, /*chan */ 0,
-            src->instrument_patch,
-            src->program >> 7, src->program & 0x7F);
+            src->instrument_patch, src->program >> 7, src->program & 0x7F);
       }
       break;
     case PROP_INTERP:
@@ -738,8 +736,8 @@ gst_fluidsynth_init (GstBtFluidsynth * src, GstBtFluidsynthClass * g_class)
   } else
     g_warning ("Failed to create MIDI input router");
 
-  gst_fluidsynth_update_reverb (src);  /* update reverb settings */
-  gst_fluidsynth_update_chorus (src);  /* update chorus settings */
+  gst_fluidsynth_update_reverb (src);   /* update reverb settings */
+  gst_fluidsynth_update_chorus (src);   /* update chorus settings */
 
   /* FIXME(ensonic): temporary for testing, see comment at the top */
   {
@@ -773,6 +771,17 @@ gst_fluidsynth_init (GstBtFluidsynth * src, GstBtFluidsynthClass * g_class)
   } else {
     GST_INFO ("soundfont loaded as %d", src->instrument_patch);
   }
+}
+
+static gboolean
+gst_fluidsynth_setup (GstPad * pad, GstCaps * caps)
+{
+  GstStructure *structure = gst_caps_get_structure (caps, 0);
+  // Set channels to 2
+  if (!gst_structure_fixate_field_nearest_int (structure, "channels", 2))
+    return FALSE;
+
+  return TRUE;
 }
 
 static void
