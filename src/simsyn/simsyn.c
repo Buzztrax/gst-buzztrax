@@ -147,6 +147,7 @@ static void gst_sim_syn_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gst_sim_syn_dispose (GObject * object);
 static void gst_sim_syn_process (GstBtAudioSynth * base, gint16 * samples);
+static gboolean gst_sim_syn_setup (GstPad * pad, GstCaps * caps);
 
 static void gst_sim_syn_change_wave (GstBtSimSyn * src);
 static void gst_sim_syn_change_volume (GstBtSimSyn * src);
@@ -180,6 +181,7 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
   parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
 
   audio_synth_class->process = gst_sim_syn_process;
+  audio_synth_class->setup = gst_sim_syn_setup;
 
   gobject_class->set_property = gst_sim_syn_set_property;
   gobject_class->get_property = gst_sim_syn_get_property;
@@ -389,6 +391,21 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
   src->flt_res = 1.0 / src->resonance;
   gst_sim_syn_change_filter (src);
 
+}
+
+static gboolean
+gst_sim_syn_setup (GstPad * pad, GstCaps * caps)
+{
+  GstCaps *newcaps = gst_pad_get_allowed_caps (pad);
+  GstStructure *newstructure = gst_caps_get_structure (newcaps, 0);
+  // Set channels to 1
+  gst_structure_set (newstructure, "channels", G_TYPE_INT, 1, NULL);
+
+  gst_pad_fixate_caps (pad, newcaps);
+  if (!gst_pad_set_caps (pad, newcaps))
+    return FALSE;
+
+  return TRUE;
 }
 
 /* Wave generators */

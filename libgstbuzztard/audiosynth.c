@@ -24,8 +24,8 @@
  * @short_description: base audio synthesizer
  *
  * Base audio synthesizer to use as a foundation for new synthesizers. Handles
- * tempo, seeking, fixating, and the pad template. The pure virtual process
- * method must be implemented by the child class.
+ * tempo, seeking, and fixating. The pure virtual process and setup
+ * methods must be implemented by the child class.
  *
  */
 
@@ -61,7 +61,8 @@ GST_STATIC_PAD_TEMPLATE ("src",
     GST_STATIC_CAPS ("audio/x-raw-int, "
         "endianness = (int) BYTE_ORDER, "
         "signed = (boolean) true, "
-        "width = (int) 16, " "depth = (int) 16, " "rate = (int) [ 1, MAX ]")
+        "width = (int) 16, " "depth = (int) 16, " "rate = (int) [ 1, MAX ], "
+        "channels = (int) [ 1, 2 ]")
     );
 
 static GstBaseSrcClass *parent_class = NULL;
@@ -77,13 +78,15 @@ static void gstbt_audio_synth_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gstbt_audio_synth_dispose (GObject * object);
 
-static gboolean gstbt_audio_synth_setcaps (GstBaseSrc * basesrc, GstCaps * caps);
+static gboolean gstbt_audio_synth_setcaps (GstBaseSrc * basesrc,
+    GstCaps * caps);
 static void gstbt_audio_synth_src_fixate (GstPad * pad, GstCaps * caps);
 
 static gboolean gstbt_audio_synth_is_seekable (GstBaseSrc * basesrc);
 static gboolean gstbt_audio_synth_do_seek (GstBaseSrc * basesrc,
     GstSegment * segment);
-static gboolean gstbt_audio_synth_query (GstBaseSrc * basesrc, GstQuery * query);
+static gboolean gstbt_audio_synth_query (GstBaseSrc * basesrc,
+    GstQuery * query);
 
 static gboolean gstbt_audio_synth_start (GstBaseSrc * basesrc);
 static GstFlowReturn gstbt_audio_synth_create (GstBaseSrc * basesrc,
@@ -112,8 +115,8 @@ gstbt_audio_synth_calculate_buffer_frames (GstBtAudioSynth * self)
 }
 
 static void
-gstbt_audio_synth_tempo_change_tempo (GstBtTempo * tempo, glong beats_per_minute,
-    glong ticks_per_beat, glong subticks_per_tick)
+gstbt_audio_synth_tempo_change_tempo (GstBtTempo * tempo,
+    glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick)
 {
   GstBtAudioSynth *self = GSTBT_AUDIO_SYNTH (tempo);
   gboolean changed = FALSE;
@@ -194,8 +197,9 @@ gstbt_audio_synth_class_init (GstBtAudioSynthClass * klass)
   gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gstbt_audio_synth_start);
   gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gstbt_audio_synth_create);
 
-  // make process method pure virtual
+  // make process and setup method pure virtual
   klass->process = NULL;
+  klass->setup = NULL;
 
   // override interface properties
   g_object_class_override_property (gobject_class, PROP_BPM,
@@ -277,9 +281,14 @@ static void
 gstbt_audio_synth_src_fixate (GstPad * pad, GstCaps * caps)
 {
   GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (GST_PAD_PARENT (pad));
+  GstBtAudioSynthClass *klass = GSTBT_AUDIO_SYNTH_GET_CLASS (src);
   GstStructure *structure = gst_caps_get_structure (caps, 0);
 
   gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
+
+  if (!klass->setup (src, caps))
+    // TODO(tom): error handle here...
+    printf ("Error in setup()");
 }
 
 static gboolean
@@ -427,11 +436,11 @@ gstbt_audio_synth_start (GstBaseSrc * basesrc)
 }
 
 static GstFlowReturn
-gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
-    GstBuffer ** buffer)
+gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
+    guint length, GstBuffer ** buffer)
 {
   GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
-  GstBtAudioSynthClass *klass = GSTBT_AUDIO_SYNTH_GET_CLASS(src);
+  GstBtAudioSynthClass *klass = GSTBT_AUDIO_SYNTH_GET_CLASS (src);
   GstFlowReturn res;
   GstBuffer *buf;
   GstClockTime next_running_time;
@@ -534,7 +543,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset, guint length,
   src->running_time = next_running_time;
   src->n_samples = n_samples;
 
-  klass->process(src, (gint16 *) GST_BUFFER_DATA(buf));
+  klass->process (src, (gint16 *) GST_BUFFER_DATA (buf));
 
   *buffer = buf;
 
@@ -576,7 +585,7 @@ gstbt_audio_synth_get_type (void)
       NULL                      /* interface_data */
     };
     const GInterfaceInfo tempo_interface_info = {
-      (GInterfaceInitFunc) gstbt_audio_synth_tempo_interface_init, /* interface_init */
+      (GInterfaceInitFunc) gstbt_audio_synth_tempo_interface_init,      /* interface_init */
       NULL,                     /* interface_finalize */
       NULL                      /* interface_data */
     };
