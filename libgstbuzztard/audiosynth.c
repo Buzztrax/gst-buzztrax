@@ -165,6 +165,9 @@ gstbt_audio_synth_base_init (gpointer g_class)
 {
   GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
 
+  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "audiosynth",
+      GST_DEBUG_FG_BLUE | GST_DEBUG_BG_BLACK, "Base Audio synthesizer");
+
   gst_element_class_add_pad_template (element_class,
       gst_static_pad_template_get (&gstbt_audio_synth_src_template));
   gst_element_class_set_details_simple (element_class,
@@ -286,8 +289,11 @@ gstbt_audio_synth_src_fixate (GstPad * pad, GstCaps * caps)
 
   gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
 
-  if (!klass->setup (pad, caps))
+  if (klass->setup) {
+    klass->setup (pad, caps);
+  } else {
     GST_ERROR_OBJECT (pad, "class lacks setup() vmethod implementation");
+  }
 }
 
 static gboolean
@@ -511,7 +517,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
 
   /* allocate a new buffer suitable for this pad */
   res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
-      src->generate_samples_per_buffer * src->channels * sizeof (gint16),
+      src->channels * src->generate_samples_per_buffer * sizeof (gint16),
       GST_PAD_CAPS (basesrc->srcpad), &buf);
   if (res != GST_FLOW_OK) {
     return res;
@@ -542,7 +548,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
   src->running_time = next_running_time;
   src->n_samples = n_samples;
 
-  klass->process (src, (gint16 *) GST_BUFFER_DATA (buf));
+  klass->process (src, buf);
 
   *buffer = buf;
 

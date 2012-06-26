@@ -146,7 +146,7 @@ static void gst_sim_syn_set_property (GObject * object,
 static void gst_sim_syn_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gst_sim_syn_dispose (GObject * object);
-static void gst_sim_syn_process (GstBtAudioSynth * base, gint16 * samples);
+static void gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data);
 static gboolean gst_sim_syn_setup (GstPad * pad, GstCaps * caps);
 
 static void gst_sim_syn_change_wave (GstBtSimSyn * src);
@@ -755,17 +755,17 @@ gst_sim_syn_create_violet_noise (GstBtSimSyn * src, gint16 * samples)
 }
 
 static void
-gst_sim_syn_process (GstBtAudioSynth * base, gint16 * samples)
+gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 {
   GstBtSimSyn *src = ((GstBtSimSyn *) base);
 
   if ((src->freq != 0.0) && (src->volenv->value > 0.0001)) {
-    src->process (src, samples);
+    src->process (src, (gint16 *) GST_BUFFER_DATA (data));
     if (src->apply_filter)
-      src->apply_filter (src, samples);
+      src->apply_filter (src, (gint16 *) GST_BUFFER_DATA (data));
   } else {
-    gst_sim_syn_create_silence (src, samples);
-    GST_BUFFER_FLAG_SET (samples, GST_BUFFER_FLAG_GAP);
+    gst_sim_syn_create_silence (src, (gint16 *) GST_BUFFER_DATA (data));
+    GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
 }
 

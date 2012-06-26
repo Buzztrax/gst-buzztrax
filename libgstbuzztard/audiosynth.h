@@ -73,7 +73,7 @@ struct _GstBtAudioSynthClass
   GstBaseSrcClass parent_class;
 
   /* virtual functions */
-  void (*process) (GstBtAudioSynth * src, gint16 * samples);
+  void (*process) (GstBtAudioSynth * src, GstBuffer * data);
   gboolean (*setup)   (GstPad * pad, GstCaps * caps);
 };
 

@@ -140,7 +140,7 @@ static void gst_fluidsynth_set_property (GObject * object,
 static void gst_fluidsynth_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gst_fluidsynth_dispose (GObject * object);
-static void gst_fluidsynth_process (GstBtAudioSynth * base, gint16 * samples);
+static void gst_fluidsynth_process (GstBtAudioSynth * base, GstBuffer * data);
 static gboolean gst_fluidsynth_setup (GstPad * pad, GstCaps * caps);
 
 static void gst_fluidsynth_update_reverb (GstBtFluidsynth * gstsynth);
@@ -815,7 +815,7 @@ gst_fluidsynth_update_chorus (GstBtFluidsynth * gstsynth)
 }
 
 static void
-gst_fluidsynth_process (GstBtAudioSynth * base, gint16 * samples)
+gst_fluidsynth_process (GstBtAudioSynth * base, GstBuffer * data)
 {
   GstBtFluidsynth *src = ((GstBtFluidsynth *) base);
 
@@ -828,7 +828,7 @@ gst_fluidsynth_process (GstBtAudioSynth * base, gint16 * samples)
   }
   fluid_synth_write_s16 (src->fluid,
       ((GstBtAudioSynth *) src)->generate_samples_per_buffer,
-      GST_BUFFER_DATA (samples), 0, 2, GST_BUFFER_DATA (samples), 1, 2);
+      GST_BUFFER_DATA (data), 0, 2, GST_BUFFER_DATA (data), 1, 2);
 }
 
 static void
