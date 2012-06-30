@@ -114,6 +114,20 @@ gstbml_preset_set_meta
 # stuff that we want for gstreamer
 
 <SECTION>
+<FILE>gstbtaudiosynth</FILE>
+GstBtAudioSynth
+<SUBSECTION Standard>
+GstBtAudioSynthClass
+GSTBT_AUDIO_SYNTH
+GSTBT_IS_AUDIO_SYNTH
+GSTBT_AUDIO_SYNTH_CLASS
+GSTBT_IS_AUDIO_SYNTH_CLASS
+GSTBT_AUDIO_SYNTH_GET_CLASS
+GSTBT_TYPE_AUDIO_SYNTH
+gstbt_audio_synth_get_type
+</SECTION>
+
+<SECTION>
 <FILE>gstbtchildbin</FILE>
 GstBtChildBin
 gstbt_child_bin_add_child

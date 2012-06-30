@@ -19,14 +19,14 @@
  */
 
 /**
- * SECTION:audiosynth
+ * SECTION:gstbtaudiosynth
  * @title: GstBtAudioSynth
  * @short_description: base audio synthesizer
  *
  * Base audio synthesizer to use as a foundation for new synthesizers. Handles
- * tempo, seeking, and fixating. The pure virtual process and setup
- * methods must be implemented by the child class.
- *
+ * tempo, seeking, trick mode playback and format negotiation.
+ * The pure virtual process and setup methods must be implemented by the child
+ * class.
  */
 
 #ifdef HAVE_CONFIG_H
