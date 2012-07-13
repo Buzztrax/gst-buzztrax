@@ -37,6 +37,9 @@
 /*
  * if this is in gstreamer we could enhance jacksink to call:
  * jack_set_timebase_callback()
+ *
+ * Can we use an event instead? The application would send a tempo event to the
+ * sink and this would propagate upstream.
  */
 
 #include "tempo.h"

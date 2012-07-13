@@ -1,6 +1,6 @@
 = tempo =
-- should we rename 'tempo' to 'tempo_sync' or 'song_tempo'?
-- or can we remove the iface and use TAGS?
+a) should we rename 'tempo' to 'tempo_sync' or 'song_tempo'?
+b) can we remove the iface and use TAGS?
   - we already have GST_TAG_BEATS_PER_MINUTE
     gst_tag_register (GST_TAG_BEATS_PER_MINUTE, GST_TAG_FLAG_META, G_TYPE_DOUBLE,
       _("beats per minute"), _("number of beats per minute in audio"), NULL);
@@ -8,21 +8,30 @@
     where to register them?
   - the main problem with tags instead of an iface is that it is not easy to
     change it while playing, we'd need to use the playback rate
+c) can we use events?
+   - the application would push them on to the sink and they travel up to the
+     sources
 
-= GstBaseSynthesizer =
-- we can provide shared defaults for:
-  - _start, _is_seekable, _do_seek, _query, _src_fixate
-  - most of _create, _setcaps
-  - the subclass want to:
-    - have its own _setup (from setcaps) and _render (from create) methods
-    - specify the caps for the src pad
+= GstSimsyn =
+- have more variants in the same plugin (share code, like oszillators and filter)
+  - we'd like to have one with
+    - dual-osc
+    - two ADSR envelopes
+    - each envelope can modulate volume and filter-cutoff/resonance
 
 = GstSidSynth =
 - polyphonic generator using a sid emulation
 - sid has 3 voices, would be cool if we could hide it and create new sid
   instances as needed
 - needs to check the parameter layout (global and per voice)
-  - we probably need to each of the instances
+
+= synth components =
+The libgstbuzztard already has components, such as the envelope and tone-
+conversion helpers. It would be nice to extend on this. Ideally simsyn would be
+a composite object of:
+* oscillator
+* filter
+* envelope
 
 = debugging =
 G_SLICE=always-malloc G_DEBUG=gc-friendly GLIBCPP_FORCE_NEW=1 GLIBCXX_FORCE_NEW=1 valgrind --tool=memcheck --leak-check=full --leak-resolution=high --trace-children=yes --num-callers=20 --suppressions=$HOME/projects/gstreamer/gstreamer/common/gst.supp gst-launch -q >/dev/null audiotestsrc num-buffers=10 ! bml-EQ-10 ! fakesink
