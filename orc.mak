@@ -21,10 +21,10 @@
 #
 
 
-EXTRA_DIST = $(ORC_SOURCE).orc
+EXTRA_DIST += $(ORC_SOURCE).orc
 
 ORC_NODIST_SOURCES = tmp-orc.c $(ORC_SOURCE).h
-BUILT_SOURCES = tmp-orc.c $(ORC_SOURCE).h
+BUILT_SOURCES += tmp-orc.c $(ORC_SOURCE).h
 
 
 orc-update: tmp-orc.c $(ORC_SOURCE).h
@@ -56,18 +56,17 @@ endif
 clean-local: clean-orc
 .PHONY: clean-orc
 clean-orc:
-	rm -f tmp-orc.c $(ORC_SOURCE).h
+	rm -f tmp-orc.c $(ORC_SOURCE).h \
+	  $(builddir)/$(ORC_SOURCE)-dist.c $(builddir)/$(ORC_SOURCE)-dist.h
 
 dist-hook: dist-hook-orc
 .PHONY: dist-hook-orc
 dist-hook-orc: tmp-orc.c $(ORC_SOURCE).h
 	rm -f tmp-orc.c~
-	if test $(abs_srcdir) == $(abs_builddir) ; then \
-	  cmp -s tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c || \
-	    cp tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c; \
-	  cmp -s $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h || \
-	    cp $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h; \
-	fi
-	cp -p $(srcdir)/$(ORC_SOURCE)-dist.c $(distdir)/
-	cp -p $(srcdir)/$(ORC_SOURCE)-dist.h $(distdir)/
+	cmp -s tmp-orc.c $(builddir)/$(ORC_SOURCE)-dist.c || \
+    cp tmp-orc.c $(builddir)/$(ORC_SOURCE)-dist.c;
+	cmp -s $(ORC_SOURCE).h $(builddir)/$(ORC_SOURCE)-dist.h || \
+    cp $(ORC_SOURCE).h $(builddir)/$(ORC_SOURCE)-dist.h;
+	cp -p $(builddir)/$(ORC_SOURCE)-dist.c $(distdir)/
+	cp -p $(builddir)/$(ORC_SOURCE)-dist.h $(distdir)/
 

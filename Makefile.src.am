@@ -30,15 +30,12 @@ noinst_HEADERS += \
   src/bml/gstbml.h src/bml/gstbmlv.h \
   src/bml/plugin.h src/bml/common.h src/bml/utils.h
 
-ORC_SOURCE = src/bml/gstbmlorc
-include $(top_srcdir)/orc.mak
-
 # native
 libgstbmln_la_SOURCES = \
   src/bml/gstbml.c src/bml/gstbmlsrc.c src/bml/gstbmltransform.c \
   src/bml/gstbmlv.c src/bml/utils.c
 libgstbmln_la_CFLAGS = -DBML_NATIVE \
-  -I$(srcdir) -I$(builddir) \
+  -I$(srcdir) -I$(builddir) -I$(builddir)/src/bml \
   $(GST_PLUGIN_CFLAGS) \
   $(BASE_DEPS_CFLAGS) \
   $(ORC_CFLAGS) \
@@ -49,7 +46,7 @@ libgstbmlw_la_SOURCES = \
   src/bml/gstbml.c src/bml/gstbmlsrc.c src/bml/gstbmltransform.c \
   src/bml/gstbmlv.c src/bml/utils.c
 libgstbmlw_la_CFLAGS = -DBML_WRAPPED \
-  -I$(srcdir) -I$(builddir) \
+  -I$(srcdir) -I$(builddir) -I$(builddir)/src/bml \
   $(GST_PLUGIN_CFLAGS) \
   $(BASE_DEPS_CFLAGS) \
   $(ORC_CFLAGS) \
@@ -66,7 +63,7 @@ noinst_LTLIBRARIES = libgstbmln.la $(BMLW_LA)
 libgstbml_la_SOURCES = src/bml/plugin.c src/bml/common.c
 nodist_libgstbml_la_SOURCES = $(ORC_NODIST_SOURCES)
 libgstbml_la_CFLAGS = \
-  -I$(srcdir) -I$(top_srcdir) -I$(builddir) \
+  -I$(srcdir) -I$(builddir) -I$(builddir)/src/bml \
   -DLIBDIR=\"\${libdir}\" \
   $(GST_PLUGIN_CFLAGS) \
   $(BASE_DEPS_CFLAGS) \

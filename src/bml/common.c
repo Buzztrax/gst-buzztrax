@@ -20,6 +20,7 @@
  */
 
 #include "plugin.h"
+#include "gstbmlorc.h"
 
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);

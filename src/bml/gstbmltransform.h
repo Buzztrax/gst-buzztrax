@@ -24,6 +24,7 @@
 #define __GST_BML_TRANSFORM_H__
 
 #include "gstbml.h"
+#include "gstbmlorc.h"
 
 G_BEGIN_DECLS
 
