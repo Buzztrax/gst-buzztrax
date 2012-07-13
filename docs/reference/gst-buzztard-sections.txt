@@ -142,18 +142,6 @@ gstbt_child_bin_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbthelp</FILE>
-GstBtHelp
-<SUBSECTION Standard>
-GstBtHelpInterface
-GSTBT_HELP
-GSTBT_IS_HELP
-GSTBT_TYPE_HELP
-GSTBT_HELP_GET_INTERFACE
-gstbt_help_get_type
-</SECTION>
-
-<SECTION>
 <FILE>gstbttempo</FILE>
 GstBtTempo
 gstbt_tempo_change_tempo

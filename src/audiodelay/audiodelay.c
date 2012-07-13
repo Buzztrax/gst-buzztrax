@@ -48,9 +48,6 @@
 #include <gst/controller/gstcontroller.h>
 #include <gst/audio/audio.h>
 
-#if !GST_CHECK_VERSION(0,10,31)
-#include <libgstbuzztard/help.h>
-#endif
 #include <libgstbuzztard/tempo.h>
 
 #include "audiodelay.h"
@@ -73,11 +70,7 @@ enum {
   // tempo iface
   PROP_BPM,
   PROP_TPB,
-  PROP_STPT,
-#if !GST_CHECK_VERSION(0,10,31)
-  // help iface
-  PROP_DOCU_URI
-#endif
+  PROP_STPT
 };
 
 #define DELAYTIME_MAX 1000
@@ -170,8 +163,6 @@ static void gst_audio_delay_tempo_interface_init(gpointer g_iface, gpointer ifac
 
   iface->change_tempo = gst_audio_delay_tempo_change_tempo;
 }
-
-/* help interface implementations */
 
 /* GObject vmethod implementations */
 
@@ -316,12 +307,6 @@ gst_audio_delay_get_property (GObject * object, guint prop_id,
     case PROP_STPT:
       g_value_set_ulong(value, filter->subticks_per_tick);
       break;
-#if !GST_CHECK_VERSION(0,10,31)
-    // help iface
-    case PROP_DOCU_URI:
-      g_value_set_static_string(value, "file://"DATADIR""G_DIR_SEPARATOR_S"gtk-doc"G_DIR_SEPARATOR_S"html"G_DIR_SEPARATOR_S""PACKAGE""G_DIR_SEPARATOR_S""PACKAGE"-GstBtAudioDelay.html");
-      break;
-#endif
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -487,18 +472,8 @@ GType gstbt_audio_delay_get_type (void)
       NULL,               /* interface_finalize */
       NULL                /* interface_data */
     };
-#if !GST_CHECK_VERSION(0,10,31)
-    const GInterfaceInfo help_interface_info = {
-      NULL,               /* interface_init */
-      NULL,               /* interface_finalize */
-      NULL                /* interface_data */
-    };
-#endif
     type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, "GstBtAudioDelay", &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static(type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
-#if !GST_CHECK_VERSION(0,10,31)
-    g_type_add_interface_static(type, GSTBT_TYPE_HELP, &help_interface_info);
-#endif
   }
   return type;
 }

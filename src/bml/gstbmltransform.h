@@ -50,7 +50,7 @@ struct _GstBMLTransformClass {
   GstBMLClass bml_class;
 };
 
-extern GType bml(transform_get_type(const char *name, gboolean is_polyphonic, gboolean has_help));
+extern GType bml(transform_get_type(const char *name, gboolean is_polyphonic));
 
 G_END_DECLS
 

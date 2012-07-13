@@ -78,9 +78,6 @@
 
 #include "libgstbuzztard/propertymeta.h"
 #include "libgstbuzztard/tempo.h"
-#if !GST_CHECK_VERSION(0,10,31)
-#include <libgstbuzztard/help.h>
-#endif
 
 #include "gstfluidsynth.h"
 
@@ -96,10 +93,6 @@ enum
   PROP_NOTE = 1,
   PROP_NOTE_LENGTH,
   PROP_NOTE_VELOCITY,
-#if !GST_CHECK_VERSION(0,10,31)
-  // help interface
-  PROP_DOCU_URI,
-#endif
   PROP_PROGRAM,
   // not yet GST_PARAM_CONTROLLABLE
   PROP_INSTRUMENT_PATCH,
@@ -677,15 +670,6 @@ gst_fluidsynth_get_property (GObject * object, guint prop_id,
     case PROP_CHORUS_WAVEFORM:
       g_value_set_enum (value, src->chorus_waveform);
       break;
-#if !GST_CHECK_VERSION(0,10,31)
-      // help iface
-    case PROP_DOCU_URI:
-      g_value_set_static_string (value,
-          "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S
-          "html" G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "" PACKAGE
-          "-GstFluidSynth.html");
-      break;
-#endif
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -883,13 +867,6 @@ gstbt_fluidsynth_get_type (void)
       NULL,                     /* interface_finalize */
       NULL                      /* interface_data */
     };
-#if !GST_CHECK_VERSION(0,10,31)
-    const GInterfaceInfo help_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
-#endif
     const GInterfaceInfo preset_interface_info = {
       NULL,                     /* interface_init */
       NULL,                     /* interface_finalize */
@@ -902,9 +879,6 @@ gstbt_fluidsynth_get_type (void)
     g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
         &property_meta_interface_info);
     g_type_add_interface_static (type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
-#if !GST_CHECK_VERSION(0,10,31)
-    g_type_add_interface_static (type, GSTBT_TYPE_HELP, &help_interface_info);
-#endif
     g_type_add_interface_static (type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;

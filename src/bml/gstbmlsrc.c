@@ -719,7 +719,7 @@ static void gst_bml_src_base_init(GstBMLSrcClass *klass) {
 }
 
 
-GType bml(src_get_type(const char *element_type_name, gboolean is_polyphonic, gboolean has_help)) {
+GType bml(src_get_type(const char *element_type_name, gboolean is_polyphonic)) {
   const GTypeInfo element_type_info = {
     sizeof (GstBMLSrcClass),
     (GBaseInitFunc) gst_bml_src_base_init,
@@ -751,13 +751,6 @@ GType bml(src_get_type(const char *element_type_name, gboolean is_polyphonic, gb
     NULL,               /* interface_finalize */
     NULL                /* interface_data */
   };
-#if !GST_CHECK_VERSION(0,10,31)
-  const GInterfaceInfo help_interface_info = {
-    NULL,               /* interface_init */
-    NULL,               /* interface_finalize */
-    NULL                /* interface_data */
-  };
-#endif
   const GInterfaceInfo preset_interface_info = {
     (GInterfaceInitFunc) gst_bml_preset_interface_init,        /* interface_init */
     NULL,               /* interface_finalize */
@@ -778,16 +771,10 @@ GType bml(src_get_type(const char *element_type_name, gboolean is_polyphonic, gb
     g_type_add_interface_static(element_type, GST_TYPE_CHILD_PROXY, &child_proxy_interface_info);
     g_type_add_interface_static(element_type, GSTBT_TYPE_CHILD_BIN, &child_bin_interface_info);
   }
-#if !GST_CHECK_VERSION(0,10,31)
-  // check if this plugin has user docs
-  if(has_help) {
-    g_type_add_interface_static(element_type, GSTBT_TYPE_HELP, &help_interface_info);
-  }
-#endif
   // add presets iface
   g_type_add_interface_static(element_type, GST_TYPE_PRESET, &preset_interface_info);
 
-  GST_INFO("succefully registered type interfaces");
+  GST_INFO("successfully registered type interfaces");
 
   return(element_type);
 }

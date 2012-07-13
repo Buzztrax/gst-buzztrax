@@ -161,7 +161,6 @@ void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per
 gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta)) {
   const gchar *element_type_name=gst_structure_get_string(bml_meta,"element-type-name");
   const gchar *voice_type_name=gst_structure_get_string(bml_meta,"voice-type-name");
-  const gchar *help_filename=gst_structure_get_string(bml_meta,"help-filename");
   gint type;
   GType element_type=G_TYPE_INVALID,voice_type=G_TYPE_INVALID;
   gboolean res=FALSE;
@@ -182,11 +181,11 @@ gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta))
       GST_WARNING("  unimplemented plugin type %d for '%s'",type,element_type_name);
       break;
     case MT_GENERATOR: // (Source)
-      element_type = bml(src_get_type(element_type_name,(voice_type_name!=NULL),(help_filename!=NULL)));
+      element_type = bml(src_get_type(element_type_name,(voice_type_name!=NULL)));
       break;
     case MT_EFFECT: // (Processor)
       // base transform only supports elements with one source and one sink pad
-      element_type = bml(transform_get_type(element_type_name,(voice_type_name!=NULL),(help_filename!=NULL)));
+      element_type = bml(transform_get_type(element_type_name,(voice_type_name!=NULL)));
       break;
     default:
       GST_WARNING("  invalid plugin type %d for '%s'",type,element_type_name);
@@ -501,12 +500,6 @@ void bml(gstbml_class_prepare_properties(GObjectClass *klass, GstBMLClass *bml_c
     g_object_class_override_property(klass, prop_id, "children");
     prop_id++;
   }
-#if !GST_CHECK_VERSION(0,10,31)
-  if(bml_class->help_uri) {
-    g_object_class_override_property(klass, prop_id, "documentation-uri");
-    prop_id++;
-  }
-#endif
 
   /* TODO(ensonic): CMachineDataInput/Output, see FSM/Infector for usage
    * - try using a properties (blob-data, blob-size) to emulate the
@@ -821,15 +814,6 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
         }
         props_skip++;
       }
-#if !GST_CHECK_VERSION(0,10,31)
-      if(bml_class->help_uri) {
-        if(prop_id==(props_skip+1)) {
-          GST_WARNING_OBJECT(bml->self,"documentation-uri property is read only");
-          handled=TRUE;
-        }
-        props_skip++;
-      }
-#endif
       break;
   }
   prop_id-=props_skip;
@@ -926,15 +910,6 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
         }
         props_skip++;
       }
-#if !GST_CHECK_VERSION(0,10,31)
-      if(bml_class->help_uri) {
-        if(prop_id==(props_skip+1)) {
-          g_value_set_string(value,bml_class->help_uri);
-          handled=TRUE;
-        }
-        props_skip++;
-      }
-#endif
       break;
   }
   prop_id-=props_skip;

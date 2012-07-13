@@ -48,7 +48,6 @@
   <chapter>
     <title>GStreamer Buzztard interfaces</title>
     <xi:include href="xml/gstbtchildbin.xml"/>
-    <xi:include href="xml/gstbthelp.xml"/>
     <xi:include href="xml/gstbtpropertymeta.xml"/>
     <xi:include href="xml/gstbttempo.xml"/>
   </chapter>

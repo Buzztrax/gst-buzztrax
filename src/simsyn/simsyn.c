@@ -59,10 +59,6 @@
 #include "libgstbuzztard/propertymeta.h"
 #include "libgstbuzztard/tempo.h"
 
-#if !GST_CHECK_VERSION(0,10,31)
-#include <libgstbuzztard/help.h>
-#endif
-
 #include "simsyn.h"
 
 #define M_PI_M2 ( M_PI + M_PI )
@@ -80,10 +76,6 @@ enum
   PROP_DECAY,
   PROP_FILTER,
   PROP_CUTOFF,
-#if !GST_CHECK_VERSION(0,10,31)
-  // help interface
-  PROP_DOCU_URI,
-#endif
   PROP_RESONANCE
 };
 
@@ -349,15 +341,6 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
     case PROP_RESONANCE:
       g_value_set_double (value, src->resonance);
       break;
-#if !GST_CHECK_VERSION(0,10,31)
-      // help interface
-    case PROP_DOCU_URI:
-      g_value_set_static_string (value,
-          "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S
-          "html" G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "" PACKAGE
-          "-GstBtSimSyn.html");
-      break;
-#endif
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -1006,13 +989,6 @@ gstbt_sim_syn_get_type (void)
       NULL,                     /* interface_finalize */
       NULL                      /* interface_data */
     };
-#if !GST_CHECK_VERSION(0,10,31)
-    const GInterfaceInfo help_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
-#endif
     const GInterfaceInfo preset_interface_info = {
       NULL,                     /* interface_init */
       NULL,                     /* interface_finalize */
@@ -1025,9 +1001,6 @@ gstbt_sim_syn_get_type (void)
     g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
         &property_meta_interface_info);
     g_type_add_interface_static (type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
-#if !GST_CHECK_VERSION(0,10,31)
-    g_type_add_interface_static (type, GSTBT_TYPE_HELP, &help_interface_info);
-#endif
     g_type_add_interface_static (type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;
