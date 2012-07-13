@@ -1,0 +1,115 @@
+# plugindir is set in configure
+
+plugin_LTLIBRARIES = \
+  libgstaudiodelay.la \
+  libgstsimsyn.la
+
+noinst_HEADERS = \
+  src/audiodelay/audiodelay.h \
+  src/simsyn/simsyn.h
+
+# audiodelay
+libgstaudiodelay_la_SOURCES = src/audiodelay/audiodelay.c
+libgstaudiodelay_la_CFLAGS = \
+  -I$(srcdir) -I$(top_srcdir) \
+  -DDATADIR=\"$(datadir)\" \
+	$(GST_PLUGIN_CFLAGS) \
+	$(BASE_DEPS_CFLAGS)
+libgstaudiodelay_la_LIBADD = \
+	libgstbuzztard.la \
+	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
+libgstaudiodelay_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstaudiodelay_la_LIBTOOLFLAGS = --tag=disable-static
+
+
+if BML_SUPPORT
+
+plugin_LTLIBRARIES += libgstbml.la
+noinst_HEADERS += \
+  src/bml/gstbmlsrc.h src/bml/gstbmltransform.h \
+  src/bml/gstbml.h src/bml/gstbmlv.h \
+  src/bml/plugin.h src/bml/common.h src/bml/utils.h
+
+ORC_SOURCE = src/bml/gstbmlorc
+include $(top_srcdir)/orc.mak
+
+# native
+libgstbmln_la_SOURCES = \
+  src/bml/gstbml.c src/bml/gstbmlsrc.c src/bml/gstbmltransform.c \
+  src/bml/gstbmlv.c src/bml/utils.c
+libgstbmln_la_CFLAGS = -DBML_NATIVE \
+  -I$(srcdir) -I$(builddir) \
+  $(GST_PLUGIN_CFLAGS) \
+  $(BASE_DEPS_CFLAGS) \
+  $(ORC_CFLAGS) \
+  $(BML_CFLAGS)
+  
+# wrapped
+libgstbmlw_la_SOURCES = \
+  src/bml/gstbml.c src/bml/gstbmlsrc.c src/bml/gstbmltransform.c \
+  src/bml/gstbmlv.c src/bml/utils.c
+libgstbmlw_la_CFLAGS = -DBML_WRAPPED \
+  -I$(srcdir) -I$(builddir) \
+  $(GST_PLUGIN_CFLAGS) \
+  $(BASE_DEPS_CFLAGS) \
+  $(ORC_CFLAGS) \
+  $(BML_CFLAGS)
+
+if BUILD_BMLW
+BMLW_LA = libgstbmlw.la
+else
+BMLW_LA = 
+endif
+
+noinst_LTLIBRARIES = libgstbmln.la $(BMLW_LA)
+
+libgstbml_la_SOURCES = src/bml/plugin.c src/bml/common.c
+nodist_libgstbml_la_SOURCES = $(ORC_NODIST_SOURCES)
+libgstbml_la_CFLAGS = \
+  -I$(srcdir) -I$(top_srcdir) -I$(builddir) \
+  -DLIBDIR=\"\${libdir}\" \
+  $(GST_PLUGIN_CFLAGS) \
+  $(BASE_DEPS_CFLAGS) \
+  $(ORC_CFLAGS) \
+  $(BML_CFLAGS)
+libgstbml_la_LIBADD = \
+	libgstbuzztard.la \
+	libgstbmln.la $(BMLW_LA) \
+	$(BASE_DEPS_LIBS) $(ORC_LIBS) $(BML_LIBS) $(GST_PLUGIN_LIBS) $(LIBM) 
+libgstbml_la_LDFLAGS =  $(GST_PLUGIN_LDFLAGS)
+libgstbml_la_LIBTOOLFLAGS = --tag=disable-static
+
+endif
+
+
+if FLUIDSYNTH_SUPPORT
+plugin_LTLIBRARIES += libgstfluidsynth.la
+noinst_HEADERS += src/fluidsynth/gstfluidsynth.h
+
+libgstfluidsynth_la_SOURCES = src/fluidsynth/gstfluidsynth.c
+libgstfluidsynth_la_CFLAGS = \
+  -I$(srcdir) -I$(top_srcdir) \
+  -DDATADIR=\"$(datadir)\" \
+	$(GST_PLUGIN_CFLAGS) \
+	$(BASE_DEPS_CFLAGS) \
+	$(FLUIDSYNTH_CFLAGS)
+libgstfluidsynth_la_LIBADD = \
+	libgstbuzztard.la  \
+	$(BASE_DEPS_LIBS) $(FLUIDSYNTH_LIBS) $(GST_PLUGIN_LIBS)
+libgstfluidsynth_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstfluidsynth_la_LIBTOOLFLAGS = --tag=disable-static
+endif
+
+
+libgstsimsyn_la_SOURCES = src/simsyn/simsyn.c
+libgstsimsyn_la_CFLAGS = \
+  -I$(srcdir) -I$(top_srcdir) \
+  -DDATADIR=\"$(datadir)\" \
+	$(GST_PLUGIN_CFLAGS) \
+	$(BASE_DEPS_CFLAGS)
+libgstsimsyn_la_LIBADD = \
+	libgstbuzztard.la \
+	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
+libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
+

@@ -57,7 +57,9 @@ AC_PROG_LN_S
 AC_PROG_SED
 AC_ISC_POSIX
 AM_PROG_CC_C_O
+AM_PROG_MKDIR_P
 PKG_PROG_PKG_CONFIG
+
 
 dnl common switches for all buzztard modules
 
@@ -294,18 +296,8 @@ AC_SUBST(BASE_DEPS_CFLAGS)
 
 AC_CONFIG_FILES(Makefile \
 	libgstbuzztard.pc \
-	docs/Makefile \
 	docs/reference/Makefile \
-	docs/reference/gst-buzztard.types \
-	libgstbuzztard/Makefile \
-	src/Makefile \
-	src/audiodelay/Makefile \
-	src/bml/Makefile \
-	src/bml/native/Makefile \
-	src/bml/wrapped/Makefile \
-	src/fluidsynth/Makefile \
-	src/simsyn/Makefile \
-	tests/Makefile
+	docs/reference/gst-buzztard.types
 )
 AC_OUTPUT
 

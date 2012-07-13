@@ -1,14 +1,54 @@
-SUBDIRS = libgstbuzztard src docs tests
+## Process this file with automake to produce Makefile.in
+
+SUBDIRS = 
+# see fake subdir rules
+FAKE_SUBDIRS = \
+  docs/reference
+DIST_SUBDIRS = $(SUBDIRS) $(FAKE_SUBDIRS)
 
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libgstbuzztard.pc
-
 EXTRA_DIST = \
 	libgstbuzztard.pc.in \
 	TODO
+
+CLEANFILES = $(pkgconfig_DATA)
+
+include $(top_srcdir)/Makefile.lib.am
+include $(top_srcdir)/Makefile.src.am
+include $(top_srcdir)/Makefile.tests.am
+
+#-- pkg config
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libgstbuzztard.pc
+
+#-- fake subdir rules
+
+docs: docs-reference 
+
+docs-reference: libgstbuzztard.la
+	@$(MAKE) -C docs/reference
+
+all-local: docs
+
+check-local:
+	@for dir in $(FAKE_SUBDIRS); do $(MAKE) -C $$dir check; done
+
+clean-local:
+	@for dir in $(FAKE_SUBDIRS); do \
+	  if test -f $$dir/Makefile; then \
+	    $(MAKE) -C $$dir clean; \
+	  fi; \
+	done	
+
+install-data-local: install-gconf
+	@for dir in $(FAKE_SUBDIRS); do $(MAKE) -C $$dir install-data; done
+
+uninstall-local: uninstall-gconf
+	@for dir in $(FAKE_SUBDIRS); do $(MAKE) -C $$dir uninstall; done
+
 
 .PHONY: coverage valgrind
 
@@ -29,7 +69,5 @@ if USE_VALGRIND
 valgrind::
 	$(MAKE) -C tests valgrind
 endif
-
-CLEANFILES = $(pkgconfig_DATA)
 
 include $(top_srcdir)/common.mak
