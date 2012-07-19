@@ -341,11 +341,6 @@ gst_fluidsynth_class_init (GstBtFluidsynthClass * klass)
 
   delete_fluid_settings (bag.settings); /* not needed anymore */
 
-#if !GST_CHECK_VERSION(0,10,31)
-  g_object_class_override_property (gobject_class, PROP_DOCU_URI,
-      "documentation-uri");
-#endif
-
   // register own properties
 
   g_object_class_install_property (gobject_class, PROP_NOTE,

@@ -179,11 +179,6 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
   gobject_class->get_property = gst_sim_syn_get_property;
   gobject_class->dispose = gst_sim_syn_dispose;
 
-#if !GST_CHECK_VERSION(0,10,31)
-  g_object_class_override_property (gobject_class, PROP_DOCU_URI,
-      "documentation-uri");
-#endif
-
   // register own properties
 
   g_object_class_install_property (gobject_class, PROP_NOTE,
@@ -373,7 +368,6 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
   src->resonance = 0.8;
   src->flt_res = 1.0 / src->resonance;
   gst_sim_syn_change_filter (src);
-
 }
 
 static gboolean
