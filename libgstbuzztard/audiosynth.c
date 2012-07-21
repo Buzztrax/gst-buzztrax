@@ -290,7 +290,7 @@ gstbt_audio_synth_src_fixate (GstPad * pad, GstCaps * caps)
   gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
 
   if (klass->setup) {
-    klass->setup (pad, caps);
+    klass->setup (src, pad, caps);
   } else {
     GST_ERROR_OBJECT (pad, "class lacks setup() vmethod implementation");
   }

@@ -134,7 +134,8 @@ static void gst_fluidsynth_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gst_fluidsynth_dispose (GObject * object);
 static void gst_fluidsynth_process (GstBtAudioSynth * base, GstBuffer * data);
-static gboolean gst_fluidsynth_setup (GstPad * pad, GstCaps * caps);
+static gboolean gst_fluidsynth_setup (GstBtAudioSynth * base, GstPad * pad,
+    GstCaps * caps);
 
 static void gst_fluidsynth_update_reverb (GstBtFluidsynth * gstsynth);
 static void gst_fluidsynth_update_chorus (GstBtFluidsynth * gstsynth);
@@ -753,7 +754,7 @@ gst_fluidsynth_init (GstBtFluidsynth * src, GstBtFluidsynthClass * g_class)
 }
 
 static gboolean
-gst_fluidsynth_setup (GstPad * pad, GstCaps * caps)
+gst_fluidsynth_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 {
   GstStructure *structure = gst_caps_get_structure (caps, 0);
 

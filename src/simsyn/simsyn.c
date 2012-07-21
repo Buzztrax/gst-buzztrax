@@ -139,7 +139,8 @@ static void gst_sim_syn_get_property (GObject * object,
     guint prop_id, GValue * value, GParamSpec * pspec);
 static void gst_sim_syn_dispose (GObject * object);
 static void gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data);
-static gboolean gst_sim_syn_setup (GstPad * pad, GstCaps * caps);
+static gboolean gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad,
+    GstCaps * caps);
 
 static void gst_sim_syn_change_wave (GstBtSimSyn * src);
 static void gst_sim_syn_change_volume (GstBtSimSyn * src);
@@ -371,7 +372,7 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
 }
 
 static gboolean
-gst_sim_syn_setup (GstPad * pad, GstCaps * caps)
+gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 {
   GstStructure *structure = gst_caps_get_structure (caps, 0);
 
