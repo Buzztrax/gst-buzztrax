@@ -187,8 +187,9 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
           "Musical note (e.g. 'c-3', 'd#4')", GSTBT_TYPE_NOTE, GSTBT_NOTE_NONE,
           G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_WAVE, g_param_spec_enum ("wave", "Waveform", "Oscillator waveform", GSTBT_TYPE_SIM_SYN_WAVE,     /* enum type */
-          GSTBT_SIM_SYN_WAVE_SINE,      /* default value */
+  g_object_class_install_property (gobject_class, PROP_WAVE,
+      g_param_spec_enum ("wave", "Waveform", "Oscillator waveform",
+          GSTBT_TYPE_SIM_SYN_WAVE, GSTBT_SIM_SYN_WAVE_SINE,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_VOLUME,
@@ -201,8 +202,9 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
           "Volume decay of the tone in seconds", 0.001, 4.0, 0.5,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_FILTER, g_param_spec_enum ("filter", "Filtertype", "Type of audio filter", GSTBT_TYPE_SIM_SYN_FILTER,    /* enum type */
-          GSTBT_SIM_SYN_FILTER_LOWPASS, /* default value */
+  g_object_class_install_property (gobject_class, PROP_FILTER,
+      g_param_spec_enum ("filter", "Filtertype", "Type of audio filter",
+          GSTBT_TYPE_SIM_SYN_FILTER, GSTBT_SIM_SYN_FILTER_LOWPASS,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_CUTOFF,
