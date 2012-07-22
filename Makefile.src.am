@@ -2,10 +2,22 @@
 
 plugin_LTLIBRARIES = \
   libgstaudiodelay.la \
+  libgstsidsyn.la \
   libgstsimsyn.la
 
 noinst_HEADERS = \
   src/audiodelay/audiodelay.h \
+  src/sidsyn/sidsyn.h \
+  src/sidsyn/sidsynv.h \
+  src/sidsyn/envelope.h \
+  src/sidsyn/extfilt.h \
+  src/sidsyn/filter.h \
+  src/sidsyn/pot.h \
+  src/sidsyn/siddefs.h \
+  src/sidsyn/sidemu.h \
+  src/sidsyn/spline.h \
+  src/sidsyn/voice.h \
+  src/sidsyn/wave.h \
   src/simsyn/simsyn.h
 
 # audiodelay
@@ -109,4 +121,34 @@ libgstsimsyn_la_LIBADD = \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
 libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
+
+
+libgstsidsyn_la_SOURCES = \
+  src/sidsyn/sidsyn.cc \
+  src/sidsyn/sidsynv.cc \
+  src/sidsyn/envelope.cc \
+  src/sidsyn/extfilt.cc \
+  src/sidsyn/filter.cc \
+  src/sidsyn/pot.cc \
+  src/sidsyn/sidemu.cc \
+  src/sidsyn/voice.cc \
+  src/sidsyn/wave.cc \
+  src/sidsyn/wave6581_PST.cc \
+  src/sidsyn/wave6581_PS_.cc \
+  src/sidsyn/wave6581_P_T.cc \
+  src/sidsyn/wave6581__ST.cc \
+  src/sidsyn/wave8580_PST.cc \
+  src/sidsyn/wave8580_PS_.cc \
+  src/sidsyn/wave8580_P_T.cc \
+  src/sidsyn/wave8580__ST.cc
+libgstsidsyn_la_CXXFLAGS = \
+  -I$(srcdir) -I$(top_srcdir) \
+  -DDATADIR=\"$(datadir)\" \
+	$(GST_PLUGIN_CFLAGS) \
+	$(BASE_DEPS_CFLAGS)
+libgstsidsyn_la_LIBADD = \
+	libgstbuzztard.la \
+	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
+libgstsidsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstsidsyn_la_LIBTOOLFLAGS = --tag=disable-static
 
