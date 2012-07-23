@@ -857,18 +857,12 @@ gstbt_fluidsynth_get_type (void)
       NULL,                     /* interface_finalize */
       NULL                      /* interface_data */
     };
-    const GInterfaceInfo preset_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
 
     type =
         g_type_register_static (GSTBT_TYPE_AUDIO_SYNTH, "GstBtFluidsynth",
         &element_type_info, (GTypeFlags) 0);
     g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
         &property_meta_interface_info);
-    g_type_add_interface_static (type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;
 }
