@@ -48,7 +48,7 @@ typedef enum
   GSTBT_SID_SYN_WAVE_SAW = (1<<5),
   GSTBT_SID_SYN_WAVE_SQUARE = (1<<6),
   GSTBT_SID_SYN_WAVE_NOISE = (1<<7)
-} GstBtSimSynWave;
+} GstBtSidSynWave;
 
 typedef struct _GstBtSidSynV GstBtSidSynV;
 typedef struct _GstBtSidSynVClass GstBtSidSynVClass;
@@ -67,7 +67,7 @@ struct _GstBtSidSynV
   GstBtNote note;
   gboolean note_set, gate;
   gboolean sync, ringmod, filter;
-  GstBtSimSynWave wave;
+  GstBtSidSynWave wave;
   guint pulse_width;
   guint attack, decay, sustain, release;
 };

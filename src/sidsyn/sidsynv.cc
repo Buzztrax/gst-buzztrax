@@ -87,7 +87,7 @@ gst_sid_synv_set_property (GObject * object, guint prop_id,
       src->ringmod = g_value_get_boolean (value);
       break;
     case PROP_WAVE:
-      src->wave = (GstBtSimSynWave) g_value_get_enum (value);
+      src->wave = (GstBtSidSynWave) g_value_get_enum (value);
       break;
     case PROP_PULSE_WIDTH:
       src->pulse_width = g_value_get_uint (value);

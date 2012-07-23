@@ -301,7 +301,7 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
 	  gint gate = voice->gate; 
 	  gint sync = voice->sync;
 	  gint ringmod = voice->ringmod;
-	  GstBtSimSynWave wave = voice->wave;
+	  GstBtSidSynWave wave = voice->wave;
         
     if (voice->filter)
       filters |= (1 << t);
