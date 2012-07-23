@@ -35,11 +35,6 @@ typedef struct {
 } SID;
 #endif
 
-#define PALFRAMERATE 50
-#define PALCLOCKRATE 985248
-#define NTSCFRAMERATE 60
-#define NTSCCLOCKRATE 1022727
-#define NUM_REGS 29
 #define NUM_VOICES 3
 
 G_BEGIN_DECLS
@@ -85,8 +80,6 @@ struct _GstBtSidSyn
 
 	gint clockrate;
 	SID *emu;
-
-	guchar regs[NUM_REGS];
 
 	// states:
 	GstBtSidSynV *voices[NUM_VOICES];

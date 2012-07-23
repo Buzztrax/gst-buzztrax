@@ -44,6 +44,11 @@
 
 #include "sidsyn.h"
 
+#define PALFRAMERATE 50
+#define PALCLOCKRATE 985248
+#define NTSCFRAMERATE 60
+#define NTSCCLOCKRATE 1022727
+
 #define GST_CAT_DEFAULT sid_syn_debug
 GST_DEBUG_CATEGORY (GST_CAT_DEFAULT);
 
@@ -258,11 +263,13 @@ gst_sid_syn_init (GstBtSidSyn * src, GstBtSidSynClass * g_class)
 	src->volume = 15;
 }
 
+#define NUM_REGS 29
+
 static void
 gst_sid_syn_update_regs (GstBtSidSyn *src)
 {
   gint i;
-  guchar *regs = src->regs;
+  guchar regs[NUM_REGS];
   //gint samplerate = ((GstBtAudioSynth *)src)->samplerate;
   const guchar freqtbllo[] = {
     0x17,0x27,0x39,0x4b,0x5f,0x74,0x8a,0xa1,0xba,0xd4,0xf0,0x0e,

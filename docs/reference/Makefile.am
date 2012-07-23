@@ -6,7 +6,7 @@ AUTOMAKE_OPTIONS = 1.6
 # The name of the module, e.g. 'glib'.
 DOC_MODULE=gst-buzztard
 
-BUILT_SOURCES=gst-buzztard.types
+BUILT_SOURCES=$(DOC_MODULE).types
 
 # The top-level SGML file. You can change this if you want to.
 DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.sgml
@@ -44,7 +44,7 @@ SCAN_OPTIONS=
 
 # Extra options to supply to gtkdoc-mkdb.
 # e.g. MKDB_OPTIONS=--sgml-mode --output-format=xml
-MKDB_OPTIONS=--sgml-mode --name-space=gstbt
+MKDB_OPTIONS=--sgml-mode --name-space=gstbt --source-suffixes=c,cc,h
 
 # Extra options to supply to gtkdoc-mktmpl
 # e.g. MKTMPL_OPTIONS=--only-section-tmpl
@@ -65,9 +65,11 @@ CFILE_GLOB= \
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
+# FIXME: this does not support path and thus is ambigous
 IGNORE_HFILES=config.h \
 	m-gst-buzztard.h \
 	$(BML_IGNORE_H) gstbmlorc.h gstbmlorc-dist.h \
+	$(top_srcdir)/src/sidsyn/envelope.h extfilt.h filter.h pot.h siddefs.h sidemu.h spline.h voice.h wave.h \
 	$(FLUIDSYNTH_IGNORE_H)
 
 # Images to copy into HTML directory.
