@@ -37,17 +37,25 @@ G_BEGIN_DECLS
  * GstBtSidSynWave:
  * @GSTBT_SID_SYN_WAVE_TRIANGLE: triangle wave
  * @GSTBT_SID_SYN_WAVE_SAW: saw wave
- * @GSTBT_SID_SYN_WAVE_SQUARE: square wave
+ * @GSTBT_SID_SYN_WAVE_SAW_TRIANGLE: saw + triangle wave 
+ * @GSTBT_SID_SYN_WAVE_PULSE: square wave with pulse width modulation
+ * @GSTBT_SID_SYN_WAVE_PULSE_TRIANGLE: square + triangle wave
+ * @GSTBT_SID_SYN_WAVE_PULSE_SAW: square + saw wave
+ * @GSTBT_SID_SYN_WAVE_PULSE_SAW_TRIANGLE: square + saw + triangle wave
  * @GSTBT_SID_SYN_WAVE_NOISE: noise
  *
  * Oscillator wave forms.
  */
 typedef enum
 {
-  GSTBT_SID_SYN_WAVE_TRIANGLE = (1<<4),
-  GSTBT_SID_SYN_WAVE_SAW = (1<<5),
-  GSTBT_SID_SYN_WAVE_SQUARE = (1<<6),
-  GSTBT_SID_SYN_WAVE_NOISE = (1<<7)
+  GSTBT_SID_SYN_WAVE_TRIANGLE = (1<<0),
+  GSTBT_SID_SYN_WAVE_SAW = (1<<1),
+  GSTBT_SID_SYN_WAVE_SAW_TRIANGLE = ((1<<1)|(1<<0)),
+  GSTBT_SID_SYN_WAVE_PULSE = (1<<2),
+  GSTBT_SID_SYN_WAVE_PULSE_TRIANGLE = ((1<<2)|(1<<0)),
+  GSTBT_SID_SYN_WAVE_PULSE_SAW = ((1<<2)|(1<<1)),
+  GSTBT_SID_SYN_WAVE_PULSE_SAW_TRIANGLE = ((1<<2)|(1<<1)|(1<<0)),
+  GSTBT_SID_SYN_WAVE_NOISE = (1<<3)
 } GstBtSidSynWave;
 
 typedef struct _GstBtSidSynV GstBtSidSynV;
@@ -66,10 +74,11 @@ struct _GstBtSidSynV
   /* parameters */
   GstBtNote note;
   gboolean note_set, gate;
-  gboolean sync, ringmod, filter;
+  gboolean sync, ringmod, test, filter;
   GstBtSidSynWave wave;
   guint pulse_width;
   guint attack, decay, sustain, release;
+  guint tone;
 };
 
 struct _GstBtSidSynVClass

@@ -36,6 +36,7 @@ enum
   PROP_NOTE = 1,
   PROP_SYNC,
   PROP_RING_MOD,
+  PROP_TEST,
 	PROP_WAVE,
 	PROP_PULSE_WIDTH,
 	PROP_FILTER_VOICE,
@@ -53,7 +54,11 @@ gst_sid_syn_wave_get_type (void)
   static const GEnumValue enums[] = {
     {GSTBT_SID_SYN_WAVE_TRIANGLE, "Triangle", "triangle"},
     {GSTBT_SID_SYN_WAVE_SAW, "Saw", "saw"},
-    {GSTBT_SID_SYN_WAVE_SQUARE, "Square", "square"},
+    {GSTBT_SID_SYN_WAVE_SAW_TRIANGLE, "Saw+Triangle", "saw-triangle"},
+    {GSTBT_SID_SYN_WAVE_PULSE, "Pulse", "pulse"},
+    {GSTBT_SID_SYN_WAVE_PULSE_TRIANGLE, "Pulse+Triangle", "pulse-triangle"},
+    {GSTBT_SID_SYN_WAVE_PULSE_SAW, "Pulse+Saw", "pulse-saw"},
+    {GSTBT_SID_SYN_WAVE_PULSE_SAW_TRIANGLE, "Pulse+Saw+Triangle", "pulse-saw-triangle"},
     {GSTBT_SID_SYN_WAVE_NOISE, "Noise", "noise"},
     {0, NULL, NULL},
   };
@@ -85,6 +90,9 @@ gst_sid_synv_set_property (GObject * object, guint prop_id,
       break;
     case PROP_RING_MOD:
       src->ringmod = g_value_get_boolean (value);
+      break;
+    case PROP_TEST:
+      src->test = g_value_get_boolean (value);
       break;
     case PROP_WAVE:
       src->wave = (GstBtSidSynWave) g_value_get_enum (value);
@@ -125,6 +133,9 @@ gst_sid_synv_get_property (GObject * object, guint prop_id,
       break;
     case PROP_RING_MOD:
       g_value_set_boolean (value, src->ringmod);
+      break;
+    case PROP_TEST:
+      g_value_set_boolean (value, src->test);
       break;
     case PROP_WAVE:
       g_value_set_enum (value, src->wave);
@@ -187,6 +198,10 @@ gstbt_sid_synv_class_init (GstBtSidSynVClass * klass)
 
   g_object_class_install_property (gobject_class, PROP_RING_MOD,
       g_param_spec_boolean ("ringmod", "Ringmod", "Ringmod with voice 3", FALSE, 
+          pflags2));
+
+  g_object_class_install_property (gobject_class, PROP_TEST,
+      g_param_spec_boolean ("test", "Test", "Control test bit", FALSE, 
           pflags2));
 
   g_object_class_install_property (gobject_class, PROP_WAVE,

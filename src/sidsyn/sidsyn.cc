@@ -23,7 +23,11 @@
  * @title: GstBtSidSyn
  * @short_description: c64 sid synthesizer
  *
- * A synthesizer based on the RSID emulation library.
+ * A synthesizer based on the RSID emulation library of the C64 sound chip.
+ * The element provides a sound generator with 3 voices.
+ *
+ * For technical details see:
+ * http://en.wikipedia.org/wiki/MOS_Technology_SID#Technical_details.
  *
  * <refsect2>
  * <title>Example launch line</title>
@@ -44,9 +48,9 @@
 
 #include "sidsyn.h"
 
-#define PALFRAMERATE 50
+//#define PALFRAMERATE 50
 #define PALCLOCKRATE 985248
-#define NTSCFRAMERATE 60
+//#define NTSCFRAMERATE 60
 #define NTSCCLOCKRATE 1022727
 
 #define GST_CAT_DEFAULT sid_syn_debug
@@ -269,7 +273,7 @@ static void
 gst_sid_syn_update_regs (GstBtSidSyn *src)
 {
   gint i;
-  guchar regs[NUM_REGS];
+  guchar regs[NUM_REGS] = {0, };
   //gint samplerate = ((GstBtAudioSynth *)src)->samplerate;
   const guchar freqtbllo[] = {
     0x17,0x27,0x39,0x4b,0x5f,0x74,0x8a,0xa1,0xba,0xd4,0xf0,0x0e,
@@ -299,14 +303,15 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
   gint filters = 0;
   for (gint t = 0; t < NUM_VOICES; t++) {
     GstBtSidSynV *voice = src->voices[t];
-	  gint tone = 0, note = 0;
-	  gint attack = voice->attack;
-	  gint decay = voice->decay;
-	  gint sustain = voice->sustain;
-	  gint release = voice->release;
-	  gint gate = voice->gate; 
-	  gint sync = voice->sync;
-	  gint ringmod = voice->ringmod;
+	  guint tone = voice->tone;
+	  guint attack = voice->attack;
+	  guint decay = voice->decay;
+	  guint sustain = voice->sustain;
+	  guint release = voice->release;
+	  guint gate = voice->gate; 
+	  guint sync = voice->sync;
+	  guint ringmod = voice->ringmod;
+	  guint test = voice->test;
 	  GstBtSidSynWave wave = voice->wave;
         
     if (voice->filter)
@@ -315,32 +320,38 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
     if (voice->note_set) {
       voice->note_set = FALSE;
       
-      note = voice->note;
       gdouble freq =
-          gstbt_tone_conversion_translate_from_number (src->n2f, note);
-      GST_WARNING_OBJECT (src, "%1d: note-on: %d, %lf Hz", t, note, freq);
+          gstbt_tone_conversion_translate_from_number (src->n2f, voice->note);
+      GST_WARNING_OBJECT (src, "%1d: note-on: %d, %lf Hz", t, voice->note, freq);
       if (freq >= 0.0) {
-        // set up note
-        //float tnote = voice->note;
-        //float Fout = 440.0f * pow(2.0f, (tnote - 69.0f) / 12.0f) * 44100 / 44100;
+        // set up note (C-0 .. H-6)
+        // PAL:  x = f * (18*2^24)/17734475 (0 - 3848 Hz)
+        // NTSC: x = f * (14*2^24)/14318318 (0 - 3995 Hz)
+        //
+        //float Fout = 440.0f * pow(2.0f, (voice->note - 69.0f) / 12.0f) * 44100 / 44100;
         //Fout / 0.058725357f;	// Fout = (Fn * 0.058725357) Hz for PAL
-        tone = freq;
+        voice->tone = tone = (guint)((freq * (1L<<24)) / PALCLOCKRATE);
         voice->gate = gate = TRUE;
         //GST_WARNING_OBJECT (src, "me: %lf, orig: %lf", freq, Fout);
       } else {
         // stop voice
         voice->gate = gate = FALSE;
+        voice->tone = tone = 0;
       }
-      regs[0x00 + t*7] = freqtbllo[note];
-      regs[0x01 + t*7] = freqtblhi[note];
     }
+    regs[0x00 + t*7] = (guchar)(tone & 0xFF);
+    regs[0x01 + t*7] = (guchar)(tone >> 8);
+    //regs[0x00 + t*7] = freqtbllo[note];
+    //regs[0x01 + t*7] = freqtblhi[note];
+    GST_DEBUG_OBJECT (src, "me: 0x%x, orig: 0x%x", tone,
+        (freqtblhi[voice->note]<<8)|freqtbllo[voice->note]);
           
     regs[0x02 + t*7] = (guchar) (voice->pulse_width & 0xFF);
     regs[0x03 + t*7] = (guchar) (voice->pulse_width >> 8);
     regs[0x05 + t*7] = (guchar) ((attack << 4) | decay);
     regs[0x06 + t*7] = (guchar) ((sustain << 4) | release);
-    // we don't expose the test bit (1<<3)
-    regs[0x04 + t*7] = (guchar) (wave | (ringmod << 2) | (sync << 1) | gate);
+    regs[0x04 + t*7] = (guchar) ((wave << 4 )|
+      (test << 3) | (ringmod << 2) | (sync << 1) | gate);
     GST_DEBUG ("%1d: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
       t, regs[0x00 + t*7], regs[0x01 + t*7], regs[0x02 + t*7], regs[0x03 + t*7],
       regs[0x04 + t*7], regs[0x05 + t*7], regs[0x06 + t*7]);
@@ -349,6 +360,7 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
   regs[0x15] = (guchar) (src->cutoff & 7);
   regs[0x16] = (guchar) (src->cutoff >> 3);
   regs[0x17] = (guchar) (src->resonance << 4) | filters;
+  // FIXME: I think we can also set several filter bits
   regs[0x18] = (guchar) ((1 << (gint)src->mode) << 4) | src->volume;
   
   for (i = 0; i < NUM_REGS; i++) {
