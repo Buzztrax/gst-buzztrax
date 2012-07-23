@@ -23,7 +23,7 @@
  * @title: GstBtSidSyn
  * @short_description: c64 sid synthesizer
  *
- * DOCUMENT ME.
+ * A synthesizer based on the RSID emulation library.
  *
  * <refsect2>
  * <title>Example launch line</title>
@@ -41,7 +41,6 @@
 
 #include <libgstbuzztard/childbin.h>
 #include "libgstbuzztard/propertymeta.h"
-#include "libgstbuzztard/tempo.h"
 
 #include "sidsyn.h"
 
@@ -444,11 +443,6 @@ gstbt_sid_syn_get_type (void)
       NULL,                     /* interface_finalize */
       NULL                      /* interface_data */
     };
-    const GInterfaceInfo tempo_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
     const GInterfaceInfo preset_interface_info = {
       NULL,                     /* interface_init */
       NULL,                     /* interface_finalize */
@@ -464,7 +458,6 @@ gstbt_sid_syn_get_type (void)
         &child_bin_interface_info);
     g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
         &property_meta_interface_info);
-    g_type_add_interface_static (type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
     g_type_add_interface_static (type, GST_TYPE_PRESET, &preset_interface_info);
   }
   return type;
