@@ -28,7 +28,12 @@
 #include <libgstbuzztard/toneconversion.h>
 
 #include "sidsynv.h"
+#ifndef __GTK_DOC_IGNORE__
 #include "sidemu.h"
+#else
+typedef struct {
+} SID;
+#endif
 
 #define PALFRAMERATE 50
 #define PALCLOCKRATE 985248

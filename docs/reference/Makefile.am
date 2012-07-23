@@ -56,8 +56,12 @@ FIXXREF_OPTIONS=--extra-dir=$(glib_prefix)/share/gtk-doc/html/ \
 	--extra-dir=$(gst_prefix)/share/gtk-doc/html/
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
-HFILE_GLOB=$(top_srcdir)/libgstbuzztard/*.h $(top_srcdir)/src/*/*.c
-CFILE_GLOB=$(top_srcdir)/libgstbuzztard/*.c $(top_srcdir)/src/*/*.h
+HFILE_GLOB= \
+  $(top_srcdir)/libgstbuzztard/*.h \
+  $(top_srcdir)/src/*/*.h
+CFILE_GLOB= \
+  $(top_srcdir)/libgstbuzztard/*.c \
+  $(top_srcdir)/src/*/*.c $(top_srcdir)/src/sidsyn/sidsyn*.cc
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
@@ -83,12 +87,15 @@ expand_content_files=
 # CFLAGS and LDFLAGS for compiling gtkdoc-scangobj with your library.
 # Only needed if you are using gtkdoc-scangobj to dynamically query widget
 # signals and properties.
-GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/src $(BASE_DEPS_CFLAGS)
+GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/src \
+  $(BASE_DEPS_CFLAGS) \
+  -D__GTK_DOC_IGNORE__
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
 	$(top_builddir)/libgstbuzztard.la \
 	$(top_builddir)/libgstaudiodelay.la \
 	$(BML_LA) \
 	$(FLUIDSYNTH_LA) \
+	$(top_builddir)/libgstsidsyn.la \
 	$(top_builddir)/libgstsimsyn.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.

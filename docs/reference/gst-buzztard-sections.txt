@@ -38,6 +38,31 @@ gstbt_fluidsynth_get_type
 </SECTION>
 
 <SECTION>
+<FILE>gstsidsyn</FILE>
+GstBtSidSyn
+GstBtSidSynV
+GstBtSidSynMode
+GstBtSidSynWave
+<SUBSECTION Standard>
+GstBtSidSynClass
+GstBtSidSynVClass
+GSTBT_SID_SYN
+GSTBT_IS_SID_SYN
+GSTBT_SID_SYN_CLASS
+GSTBT_IS_SID_SYN_CLASS
+GSTBT_SID_SYN_GET_CLASS
+GSTBT_TYPE_SID_SYN
+GSTBT_SID_SYNV
+GSTBT_IS_SID_SYNV
+GSTBT_SID_SYNV_CLASS
+GSTBT_IS_SID_SYNV_CLASS
+GSTBT_SID_SYNV_GET_CLASS
+GSTBT_TYPE_SID_SYNV
+gstbt_sid_syn_get_type
+gstbt_sid_synv_get_type
+</SECTION>
+
+<SECTION>
 <FILE>gstsimsyn</FILE>
 GstBtSimSyn
 GstBtSimSynFilter

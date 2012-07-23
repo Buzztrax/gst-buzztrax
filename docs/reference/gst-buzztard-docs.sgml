@@ -57,6 +57,7 @@
     <xi:include href="xml/gstaudiodelay.xml"/>
     <xi:include href="xml/gstbml.xml"/>
     <xi:include href="xml/gstfluidsynth.xml"/>
+    <xi:include href="xml/gstsidsyn.xml"/>
     <xi:include href="xml/gstsimsyn.xml"/>
   </chapter>
   
