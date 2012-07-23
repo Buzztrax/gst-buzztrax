@@ -38,7 +38,6 @@
 #include <gst/controller/gstcontroller.h>
 #include <gst/audio/audio.h>
 
-#include "libgstbuzztard/propertymeta.h"
 #include "libgstbuzztard/tempo.h"
 
 #include "audiosynth.h"
@@ -584,11 +583,6 @@ gstbt_audio_synth_get_type (void)
       0,                        /* n_preallocs */
       (GInstanceInitFunc) gstbt_audio_synth_init
     };
-    const GInterfaceInfo property_meta_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
     const GInterfaceInfo tempo_interface_info = {
       (GInterfaceInitFunc) gstbt_audio_synth_tempo_interface_init,      /* interface_init */
       NULL,                     /* interface_finalize */
@@ -603,8 +597,6 @@ gstbt_audio_synth_get_type (void)
     type =
         g_type_register_static (GST_TYPE_BASE_SRC, "GstBtAudioSynth",
         &element_type_info, G_TYPE_FLAG_ABSTRACT);
-    g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
-        &property_meta_interface_info);
     g_type_add_interface_static (type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
     g_type_add_interface_static (type, GST_TYPE_PRESET, &preset_interface_info);
   }
