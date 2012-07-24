@@ -69,8 +69,60 @@ gst_sid_syn_wave_get_type (void)
   return type;
 }
 
+static void gst_sid_synv_property_meta_interface_init (gpointer const g_iface,
+    gpointer const iface_data);
 
-G_DEFINE_TYPE (GstBtSidSynV, gstbt_sid_synv, GST_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_CODE (GstBtSidSynV, gstbt_sid_synv, GST_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
+        gst_sid_synv_property_meta_interface_init));
+
+//-- property meta interface implementations
+
+
+static gchar *
+gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta *property_meta,
+  glong prop_id, GValue *value)
+{
+  //GstBtSidSynV *src = GSTBT_SID_SYNV (property_meta);
+  gchar *res = NULL;
+  static const gchar *attack[] = {
+		"2 ms",	"8 ms",	"16 ms", "24 ms",	"38 ms", "56 ms", "68 ms", "80 ms",
+		"100 ms",	"240 ms",	"500 ms",	"800 ms",	"1 s", "3 s", "5 s", "8 s"
+  };
+  static const gchar *decay_release[] = {
+    "6 ms", "24 ms", "48 ms", "72 ms", "114 ms", "168 ms", "204 ms", "240 ms",
+    "300 ms", "750 ms", "1.5 s", "2.4 s", "3 s", "9 s", "15 s", "24 s",
+  };
+
+  switch (prop_id + 1) {
+    case PROP_ATTACK:
+      res = g_strdup (attack [g_value_get_uint (value)]);
+      break;
+    case PROP_DECAY:
+      res = g_strdup (decay_release [g_value_get_uint (value)]);
+      break;
+    case PROP_RELEASE:
+      res = g_strdup (decay_release [g_value_get_uint (value)]);
+      break;
+    default:
+      break;
+  }
+  return res;
+}
+
+static void
+gst_sid_synv_property_meta_interface_init (gpointer const g_iface,
+    gpointer const iface_data)
+{
+  GstBtPropertyMetaInterface *const iface = 
+      (GstBtPropertyMetaInterface *const)g_iface;
+
+  GST_INFO("initializing iface");
+
+  iface->describe_property = gst_sid_synv_property_meta_describe_property;
+}
+
+//-- sid syn voice class implementation
 
 static void
 gst_sid_synv_set_property (GObject * object, guint prop_id,
