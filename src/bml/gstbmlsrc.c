@@ -91,11 +91,12 @@ gst_bml_property_meta_describe_property (GstBtPropertyMeta * property_meta,
     guint prop_id, const GValue * value)
 {
   GstBMLSrc *bml_src = GST_BML_SRC (property_meta);
+  GstBML *bml = GST_BML (bml_src);
   GstBMLSrcClass *klass = GST_BML_SRC_GET_CLASS (bml_src);
   GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return (bml (gstbml_property_meta_describe_property (bml_class->bmh, prop_id,
-              value)));
+  return (bml (gstbml_property_meta_describe_property (bml_class, bml,
+              prop_id, value)));
 }
 
 static void

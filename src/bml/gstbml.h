@@ -36,7 +36,6 @@ typedef enum {
   ARG_STPT,
   ARG_HOST_CALLBACKS, // buzztard host callbacks
   //ARG_VOICES,  // child bin iface
-  //ARG_DOCU_URI,// help iface
   ARG_LAST
 } GstBMLPropertyIDs;
 

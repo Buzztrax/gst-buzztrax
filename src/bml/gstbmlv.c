@@ -41,13 +41,16 @@ bml (v_property_meta_describe_property (gpointer bmh, guint prop_id,
   gchar def[20];
   GType base, type = G_VALUE_TYPE (value);
 
+  // property ids have an offset of 1
+  prop_id--;
+
   while ((base = g_type_parent (type)))
     type = base;
 
   switch (type) {
     case G_TYPE_INT:
       if (!(str =
-              bml (describe_track_value (bmh, prop_id - 1,
+              bml (describe_track_value (bmh, prop_id,
                       g_value_get_int (value)))) || !*str) {
         sprintf (def, "%d", g_value_get_int (value));
         str = def;
@@ -55,7 +58,7 @@ bml (v_property_meta_describe_property (gpointer bmh, guint prop_id,
       break;
     case G_TYPE_UINT:
       if (!(str =
-              bml (describe_track_value (bmh, prop_id - 1,
+              bml (describe_track_value (bmh, prop_id,
                       (gint) g_value_get_uint (value)))) || !*str) {
         sprintf (def, "%u", g_value_get_uint (value));
         str = def;
@@ -63,7 +66,7 @@ bml (v_property_meta_describe_property (gpointer bmh, guint prop_id,
       break;
     case G_TYPE_ENUM:
       if (!(str =
-              bml (describe_track_value (bmh, prop_id - 1,
+              bml (describe_track_value (bmh, prop_id,
                       g_value_get_enum (value)))) || !*str) {
         // TODO(ensonic): get blurb for enum value
         sprintf (def, "%d", g_value_get_enum (value));

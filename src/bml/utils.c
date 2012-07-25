@@ -82,13 +82,22 @@ bml (gstbml_is_polyphonic (gpointer bmh))
 //-- common iface functions
 
 gchar *
-bml (gstbml_property_meta_describe_property (gpointer bmh, guint prop_id,
-        const GValue * value))
+bml (gstbml_property_meta_describe_property (GstBMLClass * bml_class,
+        GstBML * bml, guint prop_id, const GValue * value))
 {
   const gchar *str = NULL;
+  gpointer bmh = bml_class->bmh;
+  gpointer bm = bml->bm;
   gchar *res;
   gchar def[20];
   GType base, type = G_VALUE_TYPE (value);
+  guint props_skip = ARG_LAST - 1;
+
+  if (bml (gstbml_is_polyphonic (bm))) {
+    props_skip++;
+  }
+  // property ids have an offset of 1
+  prop_id -= (props_skip + bml_class->numattributes + 1);
 
   while ((base = g_type_parent (type)))
     type = base;
@@ -96,7 +105,7 @@ bml (gstbml_property_meta_describe_property (gpointer bmh, guint prop_id,
   switch (type) {
     case G_TYPE_INT:
       if (!(str =
-              bml (describe_global_value (bmh, prop_id - 1,
+              bml (describe_global_value (bmh, prop_id,
                       g_value_get_int (value)))) || !*str) {
         sprintf (def, "%d", g_value_get_int (value));
         str = def;
@@ -104,7 +113,7 @@ bml (gstbml_property_meta_describe_property (gpointer bmh, guint prop_id,
       break;
     case G_TYPE_UINT:
       if (!(str =
-              bml (describe_global_value (bmh, prop_id - 1,
+              bml (describe_global_value (bmh, prop_id,
                       (gint) g_value_get_uint (value)))) || !*str) {
         sprintf (def, "%u", g_value_get_uint (value));
         str = def;
@@ -112,7 +121,7 @@ bml (gstbml_property_meta_describe_property (gpointer bmh, guint prop_id,
       break;
     case G_TYPE_ENUM:
       if (!(str =
-              bml (describe_global_value (bmh, prop_id - 1,
+              bml (describe_global_value (bmh, prop_id,
                       g_value_get_enum (value)))) || !*str) {
         // TODO(ensonic): get blurb for enum value
         sprintf (def, "%d", g_value_get_enum (value));
@@ -1184,8 +1193,8 @@ bml (gstbml_reset_triggers (GstBML * bml, GstBMLClass * bml_class))
     }
   }
   for (i = 0; i < bml_class->numtrackparams; i++) {
-    if (g_atomic_int_compare_and_exchange (&bml->
-            triggers_changed[bml_class->numglobalparams + i], 2, 0)) {
+    if (g_atomic_int_compare_and_exchange (&bml->triggers_changed[bml_class->
+                numglobalparams + i], 2, 0)) {
       pspec = bml_class->track_property[i];
       addr = bml (get_track_parameter_location (bm, 0, i));
       reset_triggers (pspec, addr);
