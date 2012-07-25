@@ -36,7 +36,7 @@ extern gboolean bml(gstbml_is_polyphonic(gpointer bmh));
 
 //-- common iface functions
 
-extern gchar *bml(gstbml_property_meta_describe_property(gpointer bmh, glong index, GValue *event));
+extern gchar *bml(gstbml_property_meta_describe_property(gpointer bmh, guint prop_id, const GValue *event));
 extern void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick));
 
 //-- common class functions

@@ -109,14 +109,14 @@ gst_bml_child_proxy_interface_init (gpointer g_iface, gpointer iface_data)
 
 static gchar *
 gst_bml_property_meta_describe_property (GstBtPropertyMeta * property_meta,
-    glong index, GValue * event)
+    guint prop_id, const GValue * value)
 {
   GstBMLTransform *bml_transform = GST_BML_TRANSFORM (property_meta);
   GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
   GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return (bml (gstbml_property_meta_describe_property (bml_class->bmh, index,
-              event)));
+  return (bml (gstbml_property_meta_describe_property (bml_class->bmh, prop_id,
+              value)));
 }
 
 static void

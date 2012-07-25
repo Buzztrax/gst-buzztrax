@@ -81,7 +81,7 @@ G_DEFINE_TYPE_WITH_CODE (GstBtSidSynV, gstbt_sid_synv, GST_TYPE_OBJECT,
 
 static gchar *
 gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta *property_meta,
-  glong prop_id, GValue *value)
+  guint prop_id, const GValue *value)
 {
   //GstBtSidSynV *src = GSTBT_SID_SYNV (property_meta);
   gchar *res = NULL;
@@ -94,7 +94,7 @@ gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta *property_meta,
     "300 ms", "750 ms", "1.5 s", "2.4 s", "3 s", "9 s", "15 s", "24 s",
   };
 
-  switch (prop_id + 1) {
+  switch (prop_id) {
     case PROP_ATTACK:
       res = g_strdup (attack [g_value_get_uint (value)]);
       break;
