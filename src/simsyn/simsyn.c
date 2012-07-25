@@ -145,6 +145,9 @@ static void gst_sim_syn_change_wave (GstBtSimSyn * src);
 static void gst_sim_syn_change_volume (GstBtSimSyn * src);
 static void gst_sim_syn_change_filter (GstBtSimSyn * src);
 
+static void gst_sim_syn_trigger_note (GstBtSimSyn * src);
+static void gst_sim_syn_create_silence (GstBtSimSyn * src, gint16 * samples);
+
 //-- simsyn implementation
 
 static void
@@ -229,52 +232,8 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_NOTE:
-      src->note = g_value_get_enum (value);
-      if (src->note) {
-        gdouble freq;
-
-        GST_DEBUG ("new note -> '%d'", src->note);
-        freq =
-            gstbt_tone_conversion_translate_from_number (src->n2f, src->note);
-        if (freq >= 0.0) {
-          guint64 attack, decay;
-          GValue val = { 0, };
-
-          src->freq = freq;
-          /* trigger volume 'envelope' */
-          src->volenv->value = 0.001;
-          src->note_count = 0L;
-          src->flt_low = src->flt_mid = src->flt_high = 0.0;
-          /* src->samplerate will be one second */
-          attack = ((GstBtAudioSynth *) src)->samplerate / 1000;
-          decay = ((GstBtAudioSynth *) src)->samplerate * src->decay;
-          if (attack > decay)
-            attack = decay - 10;
-          src->note_length = decay;
-          g_value_init (&val, G_TYPE_DOUBLE);
-          gst_controller_unset_all (src->volenv_controller, "value");
-          g_value_set_double (&val, 0.001);     // why is this not 0.0?
-          gst_controller_set (src->volenv_controller, "value",
-              G_GUINT64_CONSTANT (0), &val);
-          g_value_set_double (&val, 1.0);
-          gst_controller_set (src->volenv_controller, "value", attack, &val);
-          g_value_set_double (&val, 0.0);
-          gst_controller_set (src->volenv_controller, "value", decay, &val);
-
-          /* TODO(ensonic): more advanced envelope
-             if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
-             gst_controller_set(src->volenv_controller,"value",0,0.0);
-             gst_controller_set(src->volenv_controller,"value",attack_time,1.0);
-             gst_controller_set(src->volenv_controller,"value",attack_time+decay_time,sustain_level);
-             gst_controller_set(src->volenv_controller,"value",note_time,sustain_level);
-             gst_controller_set(src->volenv_controller,"value",note_time+release_time,0.0);
-           */
-        } else {
-          src->freq = 0.0;
-          /* stop volume 'envelope' */
-          src->volenv->value = 0.0;
-        }
-      }
+      if ((src->note = g_value_get_enum (value)))
+        gst_sim_syn_trigger_note (src);
       break;
     case PROP_WAVE:
       //GST_INFO("change wave %d -> %d",g_value_get_enum (value),src->wave);
@@ -382,6 +341,71 @@ gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
     return FALSE;
 
   return TRUE;
+}
+
+static void
+gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
+{
+  GstBtSimSyn *src = ((GstBtSimSyn *) base);
+
+  //if ((src->freq != 0.0) && (src->volenv->value > 0.0001)) {
+  if ((src->freq != 0.0) && (src->note_count < src->note_length)) {
+    src->process (src, (gint16 *) GST_BUFFER_DATA (data));
+    if (src->apply_filter)
+      src->apply_filter (src, (gint16 *) GST_BUFFER_DATA (data));
+  } else {
+    gst_sim_syn_create_silence (src, (gint16 *) GST_BUFFER_DATA (data));
+    GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
+  }
+}
+
+static void
+gst_sim_syn_trigger_note (GstBtSimSyn * src)
+{
+  gdouble freq;
+
+  GST_DEBUG ("new note -> '%d'", src->note);
+  freq = gstbt_tone_conversion_translate_from_number (src->n2f, src->note);
+  if (freq >= 0.0) {
+    guint64 attack, decay;
+    GValue val = { 0, };
+    gint samplerate = ((GstBtAudioSynth *) src)->samplerate;
+    GstController *ctrl = src->volenv_controller;
+
+    src->freq = freq;
+    /* trigger volume 'envelope' and reset other states */
+    src->volenv->value = 0.001;
+    src->note_count = 0L;
+    src->flt_low = src->flt_mid = src->flt_high = 0.0;
+    /* src->samplerate will be one second */
+    attack = samplerate / 1000;
+    decay = samplerate * src->decay;
+    if (attack > decay)
+      attack = decay - 10;
+    src->note_length = decay;
+    g_value_init (&val, G_TYPE_DOUBLE);
+    gst_controller_unset_all (ctrl, "value");
+    g_value_set_double (&val, 0.0);
+    gst_controller_set (ctrl, "value", G_GUINT64_CONSTANT (0), &val);
+    g_value_set_double (&val, 1.0);
+    gst_controller_set (ctrl, "value", attack, &val);
+    g_value_set_double (&val, 0.0);
+    gst_controller_set (ctrl, "value", decay, &val);
+
+    /* TODO(ensonic): more advanced envelope
+       if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
+       gst_controller_set(ctrl,"value",0,0.0);
+       gst_controller_set(ctrl,"value",attack_time,1.0);
+       gst_controller_set(ctrl,"value",attack_time+decay_time,sustain_level);
+       gst_controller_set(ctrl,"value",note_time,sustain_level);
+       gst_controller_set(ctrl,"value",note_time+release_time,0.0);
+     */
+    g_value_unset (&val);
+  } else {
+    src->freq = 0.0;
+    /* stop volume 'envelope' */
+    src->volenv->value = 0.0;
+  }
 }
 
 /* Wave generators */
@@ -730,21 +754,6 @@ gst_sim_syn_create_violet_noise (GstBtSimSyn * src, gint16 * samples)
   for (i = 0; i < ct; i++) {
     samples[i] *= flip;
     flip *= -1.0;
-  }
-}
-
-static void
-gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
-{
-  GstBtSimSyn *src = ((GstBtSimSyn *) base);
-
-  if ((src->freq != 0.0) && (src->volenv->value > 0.0001)) {
-    src->process (src, (gint16 *) GST_BUFFER_DATA (data));
-    if (src->apply_filter)
-      src->apply_filter (src, (gint16 *) GST_BUFFER_DATA (data));
-  } else {
-    gst_sim_syn_create_silence (src, (gint16 *) GST_BUFFER_DATA (data));
-    GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
 }
 
