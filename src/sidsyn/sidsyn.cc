@@ -62,28 +62,11 @@ enum
   PROP_CUTOFF,
   PROP_RESONANCE,
   PROP_VOLUME,
-  PROP_MODE
+  PROP_FILTER_LOW_PASS,
+  PROP_FILTER_BAND_PASS,
+  PROP_FILTER_HI_PASS,
+  PROP_VOICE_3_OFF
 };
-
-#define GSTBT_TYPE_SID_SYN_MODE (gst_sid_syn_mode_get_type())
-static GType
-gst_sid_syn_mode_get_type (void)
-{
-  static GType type = 0;
-  static const GEnumValue enums[] = {
-    {GSTBT_SID_SYN_MODE_LOWPASS, "LowPass", "lowpass"},
-    {GSTBT_SID_SYN_MODE_BANDPASS, "BandPass", "bandpass"},
-    {GSTBT_SID_SYN_MODE_HIPASS, "HiPass", "hipass"},
-    {GSTBT_SID_SYN_MODE_VOICE_3_OFF, "Voice3Off", "voice-3-off"},
-    {0, NULL, NULL},
-  };
-
-  if (G_UNLIKELY (!type)) {
-    type = g_enum_register_static ("GstBtSidSynMode", enums);
-  }
-  return type;
-}
-
 
 static GstBtAudioSynthClass *parent_class = NULL;
 
@@ -174,10 +157,21 @@ gst_sid_syn_class_init (GstBtSidSynClass * klass)
       g_param_spec_uint ("volume", "Volume", "Volume of tone",
           0, 15, 15, pflags));
   
-  g_object_class_install_property (gobject_class, PROP_MODE,
-      g_param_spec_enum ("mode", "Mode", "Filter/Osc. mode", 
-          GSTBT_TYPE_SID_SYN_MODE,
-          GSTBT_SID_SYN_MODE_LOWPASS, pflags));
+  g_object_class_install_property (gobject_class, PROP_FILTER_LOW_PASS,
+      g_param_spec_boolean ("low-pass", "LowPass", "Enable LowPass Filter",
+          FALSE, pflags));
+
+  g_object_class_install_property (gobject_class, PROP_FILTER_BAND_PASS,
+      g_param_spec_boolean ("band-pass", "BandPass", "Enable BandPass Filter",
+          FALSE, pflags));
+
+  g_object_class_install_property (gobject_class, PROP_FILTER_HI_PASS,
+      g_param_spec_boolean ("hi-pass", "HiPass", "Enable HiPass Filter",
+          FALSE, pflags));
+
+  g_object_class_install_property (gobject_class, PROP_VOICE_3_OFF,
+      g_param_spec_boolean ("voice3-off", "Voice3Off", 
+          "Detach voice 3 from mixer",  FALSE, pflags));
 }
 
 static void
@@ -201,8 +195,17 @@ gst_sid_syn_set_property (GObject * object, guint prop_id,
     case PROP_VOLUME:
       src->volume = g_value_get_uint (value);
       break;
-    case PROP_MODE:
-      src->mode = (GstBtSidSynMode) g_value_get_enum (value);
+    case PROP_FILTER_LOW_PASS:
+      src->filter_low_pass = g_value_get_boolean (value);
+      break;
+    case PROP_FILTER_BAND_PASS:
+      src->filter_band_pass = g_value_get_boolean (value);
+      break;
+    case PROP_FILTER_HI_PASS:
+      src->filter_hi_pass = g_value_get_boolean (value);
+      break;
+    case PROP_VOICE_3_OFF:
+      src->voice_3_off = g_value_get_boolean (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -232,8 +235,17 @@ gst_sid_syn_get_property (GObject * object, guint prop_id,
     case PROP_VOLUME:
       g_value_set_uint (value, src->volume);
       break;
-    case PROP_MODE:
-      g_value_set_enum (value, (gint) src->mode);
+    case PROP_FILTER_LOW_PASS:
+      g_value_set_boolean (value, src->filter_low_pass);
+      break;
+    case PROP_FILTER_BAND_PASS:
+      g_value_set_boolean (value, src->filter_band_pass);
+      break;
+    case PROP_FILTER_HI_PASS:
+      g_value_set_boolean (value, src->filter_hi_pass);
+      break;
+    case PROP_VOICE_3_OFF:
+      g_value_set_boolean (value, src->voice_3_off);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -263,7 +275,6 @@ gst_sid_syn_init (GstBtSidSyn * src, GstBtSidSynClass * g_class)
 	}
 	src->cutoff = 1024;
 	src->resonance = 2;
-	src->mode = GSTBT_SID_SYN_MODE_LOWPASS;
 	src->volume = 15;
 }
 
@@ -360,8 +371,8 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
   regs[0x15] = (guchar) (src->cutoff & 7);
   regs[0x16] = (guchar) (src->cutoff >> 3);
   regs[0x17] = (guchar) (src->resonance << 4) | filters;
-  // FIXME: I think we can also set several filter bits
-  regs[0x18] = (guchar) ((1 << (gint)src->mode) << 4) | src->volume;
+  regs[0x18] = (guchar) ((src->voice_3_off << 7) | (src->filter_hi_pass << 6) |
+      (src->filter_band_pass << 5) | (src->filter_low_pass << 4) | src->volume);
   
   for (i = 0; i < NUM_REGS; i++) {
     src->emu->write (i, regs[i]);

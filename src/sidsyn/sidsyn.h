@@ -45,23 +45,6 @@ G_BEGIN_DECLS
 #define GSTBT_IS_SID_SYN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_SID_SYN))
 #define GSTBT_SID_SYN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_SID_SYN,GstBtSidSynClass))
 
-/**
- * GstBtSidSynMode:
- * @GSTBT_SID_SYN_MODE_LOWPASS: low pass
- * @GSTBT_SID_SYN_MODE_BANDPASS: band pass
- * @GSTBT_SID_SYN_MODE_HIPASS: high pass
- * @GSTBT_SID_SYN_MODE_VOICE_3_OFF: voice 3 off
- *
- * Filter/Osc modes.
- */
-typedef enum
-{
-  GSTBT_SID_SYN_MODE_LOWPASS,
-  GSTBT_SID_SYN_MODE_BANDPASS,
-  GSTBT_SID_SYN_MODE_HIPASS,
-  GSTBT_SID_SYN_MODE_VOICE_3_OFF
-} GstBtSidSynMode;
-
 typedef struct _GstBtSidSyn GstBtSidSyn;
 typedef struct _GstBtSidSynClass GstBtSidSynClass;
 
@@ -84,7 +67,10 @@ struct _GstBtSidSyn
 	// states:
 	GstBtSidSynV *voices[NUM_VOICES];
 	gint cutoff, resonance, volume;
-	GstBtSidSynMode mode;
+	gboolean filter_low_pass;
+	gboolean filter_band_pass;
+	gboolean filter_hi_pass;
+	gboolean voice_3_off;
 	GstBtToneConversion *n2f;
 };
 
