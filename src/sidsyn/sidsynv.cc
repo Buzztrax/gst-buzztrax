@@ -95,6 +95,10 @@ gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta *property_meta,
   };
 
   switch (prop_id) {
+    case PROP_PULSE_WIDTH:
+      res = g_strdup_printf ("%5.1lf %%",
+          (gfloat) g_value_get_uint (value) / 40.95);
+      break;
     case PROP_ATTACK:
       res = g_strdup (attack [g_value_get_uint (value)]);
       break;
