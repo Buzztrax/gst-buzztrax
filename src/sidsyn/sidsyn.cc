@@ -28,6 +28,7 @@
  *
  * For technical details see:
  * http://en.wikipedia.org/wiki/MOS_Technology_SID#Technical_details.
+ * http://www.waitingforfriday.com/index.php/Commodore_SID_6581_Datasheet.
  *
  * <refsect2>
  * <title>Example launch line</title>
@@ -82,6 +83,7 @@ static void gst_sid_syn_dispose (GObject * object);
 static void gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data);
 static gboolean gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps);
 
+
 //-- child proxy interface implementations
 
 static GstObject *gst_sid_syn_child_proxy_get_child_by_index(GstChildProxy *child_proxy, guint index) {
@@ -104,6 +106,39 @@ static void gst_sid_syn_child_proxy_interface_init(gpointer g_iface, gpointer if
 
   iface->get_child_by_index = gst_sid_syn_child_proxy_get_child_by_index;
   iface->get_children_count = gst_sid_syn_child_proxy_get_children_count;
+}
+
+//-- property meta interface implementations
+
+static gchar *
+gst_sid_syn_property_meta_describe_property (GstBtPropertyMeta * property_meta,
+    guint prop_id, const GValue * value)
+{
+  //GstBtSidSyn *src = GSTBT_SID_SYN (property_meta);
+  gchar *res = NULL;
+
+  switch (prop_id) {
+    case PROP_CUTOFF:
+      res = g_strdup_printf ("%7.1lf Hz",
+          30.0 + (gfloat) g_value_get_uint (value) * 10000.0/2047.0);
+      break;
+    default:
+      break;
+  }
+  return res;
+}
+
+static void
+gst_sid_syn_property_meta_interface_init (gpointer const g_iface,
+    gpointer const iface_data)
+{
+  GstBtPropertyMetaInterface *const iface =
+      (GstBtPropertyMetaInterface * const) g_iface;
+
+  GST_INFO ("initializing iface");
+
+  iface->describe_property = gst_sid_syn_property_meta_describe_property;
+
 }
 
 //-- sidsyn implementation
@@ -426,7 +461,7 @@ gstbt_sid_syn_get_type (void)
       NULL                     /* interface_data */
     };
     const GInterfaceInfo property_meta_interface_info = {
-      NULL,                     /* interface_init */
+      (GInterfaceInitFunc) gst_sid_syn_property_meta_interface_init,
       NULL,                     /* interface_finalize */
       NULL                      /* interface_data */
     };
