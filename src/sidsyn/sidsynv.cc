@@ -58,7 +58,8 @@ gst_sid_syn_wave_get_type (void)
     {GSTBT_SID_SYN_WAVE_PULSE, "Pulse", "pulse"},
     {GSTBT_SID_SYN_WAVE_PULSE_TRIANGLE, "Pulse+Triangle", "pulse-triangle"},
     {GSTBT_SID_SYN_WAVE_PULSE_SAW, "Pulse+Saw", "pulse-saw"},
-    {GSTBT_SID_SYN_WAVE_PULSE_SAW_TRIANGLE, "Pulse+Saw+Triangle", "pulse-saw-triangle"},
+    {GSTBT_SID_SYN_WAVE_PULSE_SAW_TRIANGLE, "Pulse+Saw+Triangle",
+          "pulse-saw-triangle"},
     {GSTBT_SID_SYN_WAVE_NOISE, "Noise", "noise"},
     {0, NULL, NULL},
   };
@@ -80,14 +81,14 @@ G_DEFINE_TYPE_WITH_CODE (GstBtSidSynV, gstbt_sid_synv, GST_TYPE_OBJECT,
 
 
 static gchar *
-gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta *property_meta,
-  guint prop_id, const GValue *value)
+gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta * property_meta,
+    guint prop_id, const GValue * value)
 {
   //GstBtSidSynV *src = GSTBT_SID_SYNV (property_meta);
   gchar *res = NULL;
   static const gchar *attack[] = {
-		"2 ms",	"8 ms",	"16 ms", "24 ms",	"38 ms", "56 ms", "68 ms", "80 ms",
-		"100 ms",	"240 ms",	"500 ms",	"800 ms",	"1 s", "3 s", "5 s", "8 s"
+    "2 ms", "8 ms", "16 ms", "24 ms", "38 ms", "56 ms", "68 ms", "80 ms",
+    "100 ms", "240 ms", "500 ms", "800 ms", "1 s", "3 s", "5 s", "8 s"
   };
   static const gchar *decay_release[] = {
     "6 ms", "24 ms", "48 ms", "72 ms", "114 ms", "168 ms", "204 ms", "240 ms",
@@ -100,13 +101,13 @@ gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta *property_meta,
           (gfloat) g_value_get_uint (value) / 40.95);
       break;
     case PROP_ATTACK:
-      res = g_strdup (attack [g_value_get_uint (value)]);
+      res = g_strdup (attack[g_value_get_uint (value)]);
       break;
     case PROP_DECAY:
-      res = g_strdup (decay_release [g_value_get_uint (value)]);
+      res = g_strdup (decay_release[g_value_get_uint (value)]);
       break;
     case PROP_RELEASE:
-      res = g_strdup (decay_release [g_value_get_uint (value)]);
+      res = g_strdup (decay_release[g_value_get_uint (value)]);
       break;
     default:
       break;
@@ -118,10 +119,10 @@ static void
 gst_sid_synv_property_meta_interface_init (gpointer const g_iface,
     gpointer const iface_data)
 {
-  GstBtPropertyMetaInterface *const iface = 
-      (GstBtPropertyMetaInterface *const)g_iface;
+  GstBtPropertyMetaInterface *const iface =
+      (GstBtPropertyMetaInterface * const) g_iface;
 
-  GST_INFO("initializing iface");
+  GST_INFO ("initializing iface");
 
   iface->describe_property = gst_sid_synv_property_meta_describe_property;
 }
@@ -235,9 +236,9 @@ static void
 gstbt_sid_synv_class_init (GstBtSidSynVClass * klass)
 {
   GObjectClass *const gobject_class = G_OBJECT_CLASS (klass);
-  const GParamFlags pflags1 = (GParamFlags) 
+  const GParamFlags pflags1 = (GParamFlags)
       (G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS);
-  const GParamFlags pflags2 = (GParamFlags) 
+  const GParamFlags pflags2 = (GParamFlags)
       (G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS);
 
   gobject_class->set_property = gst_sid_synv_set_property;
@@ -253,17 +254,16 @@ gstbt_sid_synv_class_init (GstBtSidSynVClass * klass)
           pflags2));
 
   g_object_class_install_property (gobject_class, PROP_RING_MOD,
-      g_param_spec_boolean ("ringmod", "Ringmod", "Ringmod with voice 3", FALSE, 
+      g_param_spec_boolean ("ringmod", "Ringmod", "Ringmod with voice 3", FALSE,
           pflags2));
 
   g_object_class_install_property (gobject_class, PROP_TEST,
-      g_param_spec_boolean ("test", "Test", "Control test bit", FALSE, 
+      g_param_spec_boolean ("test", "Test", "Control test bit", FALSE,
           pflags2));
 
   g_object_class_install_property (gobject_class, PROP_WAVE,
       g_param_spec_enum ("wave", "Waveform", "Oscillator waveform",
-          GSTBT_TYPE_SID_SYN_WAVE, GSTBT_SID_SYN_WAVE_TRIANGLE, 
-          pflags2));
+          GSTBT_TYPE_SID_SYN_WAVE, GSTBT_SID_SYN_WAVE_TRIANGLE, pflags2));
 
   g_object_class_install_property (gobject_class, PROP_PULSE_WIDTH,
       g_param_spec_uint ("pulse-width", "Pulse Width", "Pulse Width", 0, 4095,
@@ -278,10 +278,10 @@ gstbt_sid_synv_class_init (GstBtSidSynVClass * klass)
 
   g_object_class_install_property (gobject_class, PROP_DECAY,
       g_param_spec_uint ("decay", "Decay", "Decay", 0, 15, 2, pflags2));
-  
+
   g_object_class_install_property (gobject_class, PROP_SUSTAIN,
       g_param_spec_uint ("sustain", "Sustain", "Sustain", 0, 15, 10, pflags2));
-  
+
   g_object_class_install_property (gobject_class, PROP_RELEASE,
       g_param_spec_uint ("release", "Release", "Release", 0, 15, 5, pflags2));
 }
