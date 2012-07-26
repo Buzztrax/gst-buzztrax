@@ -58,6 +58,34 @@ typedef enum
   GSTBT_SID_SYN_WAVE_NOISE = (1<<3)
 } GstBtSidSynWave;
 
+/**
+ * GstBtSidSynEffect:
+ * @GSTBT_SID_SYN_EFFECT_ARPEGGIO: arpeggio
+ * @GSTBT_SID_SYN_EFFECT_PORTAMENTO_UP: portamento up
+ * @GSTBT_SID_SYN_EFFECT_PORTAMENTO_DOWN: portamento down
+ * @GSTBT_SID_SYN_EFFECT_PORTAMENTO: portamento
+ * @GSTBT_SID_SYN_EFFECT_VIBRATO: vibrato
+ * @GSTBT_SID_SYN_EFFECT_GLISSANDO_CONTROL: glissando control
+ * @GSTBT_SID_SYN_EFFECT_VIBRATO_TYPE: vibrato type
+ * @GSTBT_SID_SYN_EFFECT_FINETUNE: finetune
+ * @GSTBT_SID_SYN_EFFECT_NONE: none
+ *
+ * Track effects.
+ */
+typedef enum
+{
+  GSTBT_SID_SYN_EFFECT_ARPEGGIO = 0,
+  GSTBT_SID_SYN_EFFECT_PORTAMENTO_UP = 1,
+  GSTBT_SID_SYN_EFFECT_PORTAMENTO_DOWN = 2,
+  GSTBT_SID_SYN_EFFECT_PORTAMENTO = 3,
+  GSTBT_SID_SYN_EFFECT_VIBRATO = 4,
+  GSTBT_SID_SYN_EFFECT_GLISSANDO_CONTROL = 0xE3,
+  GSTBT_SID_SYN_EFFECT_VIBRATO_TYPE = 0xE4,
+  GSTBT_SID_SYN_EFFECT_FINETUNE = 0xE5,
+  GSTBT_SID_SYN_EFFECT_NONE = 0xFF,
+} GstBtSidSynEffect;
+
+
 typedef struct _GstBtSidSynV GstBtSidSynV;
 typedef struct _GstBtSidSynVClass GstBtSidSynVClass;
 
@@ -73,12 +101,16 @@ struct _GstBtSidSynV
   /* < private > */
   /* parameters */
   GstBtNote note;
-  gboolean note_set, gate;
-  gboolean sync, ringmod, test, filter;
+  gboolean gate, sync, ringmod, test, filter;
   GstBtSidSynWave wave;
   guint pulse_width;
   guint attack, decay, sustain, release;
-  guint tone;
+  GstBtSidSynEffect effect_type;
+  guint effect_value;
+  
+  /* state */
+  gboolean note_set, effect_set;
+  gdouble freq, finetune;
 };
 
 struct _GstBtSidSynVClass

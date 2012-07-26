@@ -324,30 +324,88 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
 
   for (i = 0; i < NUM_VOICES; i++) {
     GstBtSidSynV *v = src->voices[i];
+    guint tone;
         
     if (v->filter)
       filters |= (1 << i);
 
+    // init note
     if (v->note_set) {
-      gdouble freq =
-          gstbt_tone_conversion_translate_from_number (src->n2f, v->note);
-      GST_INFO_OBJECT (src, "%1d: note-on: %d, %lf Hz", i, v->note, freq);
-      v->note_set = FALSE;      
-      if (freq >= 0.0) {
-        // set up note (C-0 .. H-6)
-        // PAL:  x = f * (18*2^24)/17734475 (0 - 3848 Hz)
-        // NTSC: x = f * (14*2^24)/14318318 (0 - 3995 Hz)
-        v->tone = (guint)((freq * (1L<<24)) / src->clockrate);
+      // set up note (C-0 .. H-6)
+      v->freq = gstbt_tone_conversion_translate_from_number (src->n2f, v->note);
+      GST_INFO_OBJECT (src, "%1d: note-on: %d, %lf Hz", i, v->note, v->freq);
+      if (v->freq > 0.0) {
         v->gate = TRUE;
       } else {
         // stop voice
         v->gate = FALSE;
-        v->tone = 0;
+      }        
+      v->note_set = FALSE;      
+    }
+    // init effects
+    if (v->effect_set) {
+      guint value = v->effect_value;
+      switch (v->effect_type) {
+        case GSTBT_SID_SYN_EFFECT_ARPEGGIO:
+          break;
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO_UP:
+          break;
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO_DOWN:
+          break;
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO:
+          break;
+        case GSTBT_SID_SYN_EFFECT_VIBRATO:
+          break;
+        case GSTBT_SID_SYN_EFFECT_GLISSANDO_CONTROL:
+          break;
+        case GSTBT_SID_SYN_EFFECT_VIBRATO_TYPE:
+          break;
+        case GSTBT_SID_SYN_EFFECT_FINETUNE:
+          // center around 128
+          if (value >= 128) {
+            v->finetune = pow (2.0,((value-128)/256.0)/12.0);
+          } else {
+            v->finetune = 1.0 / pow (2.0,((128-value)/256.0)/12.0);
+          }
+          GST_INFO_OBJECT (src, "%1d: finetune: %d -> %lf", i, value,
+              v->finetune);
+          v->freq *= v->finetune;
+          break;
+        default:
+          break;;
+      }
+      v->effect_set = FALSE;
+    }
+    // apply effects
+    if (v->effect_type != GSTBT_SID_SYN_EFFECT_NONE) {
+      switch (v->effect_type) {
+        case GSTBT_SID_SYN_EFFECT_ARPEGGIO:
+          break;
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO_UP:
+          break;
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO_DOWN:
+          break;
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO:
+          break;
+        case GSTBT_SID_SYN_EFFECT_VIBRATO:
+          break;
+        default:
+          break;
       }
     }
-    regs[0x00 + i*7] = (guchar)(v->tone & 0xFF);
-    regs[0x01 + i*7] = (guchar)(v->tone >> 8);
-    GST_DEBUG_OBJECT (src, "%1d: tone: 0x%x", i, v->tone);
+    
+    if (v->freq > 0.0) {
+      GST_INFO_OBJECT (src, "%1d: freq: %lf Hz", i, v->freq);
+      // PAL:  x = f * (18*2^24)/17734475 (0 - 3848 Hz)
+      // NTSC: x = f * (14*2^24)/14318318 (0 - 3995 Hz)
+      tone = (guint)((v->freq * (1L<<24)) / src->clockrate);
+    } else {
+      tone = 0;
+    }
+
+    regs[0x00 + i*7] = (guchar)(tone & 0xFF);
+    regs[0x01 + i*7] = (guchar)(tone >> 8);
+    GST_DEBUG_OBJECT (src, "%1d: tone: 0x%x", i, tone);
           
     regs[0x02 + i*7] = (guchar) (v->pulse_width & 0xFF);
     regs[0x03 + i*7] = (guchar) (v->pulse_width >> 8);
@@ -401,11 +459,11 @@ gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
   }
   gst_sid_syn_update_regs (src); 
   
-  GST_INFO_OBJECT (src, "generate %d samples", n);
+  GST_LOG_OBJECT (src, "generate %d samples", n);
 
   while (samples > 0) {
     gint tdelta = (gint)(scale * samples) + 4;
-    GST_INFO_OBJECT (src, "tdelta %d", tdelta);
+    GST_LOG_OBJECT (src, "tdelta %d", tdelta);
     gint result = src->emu->clock (tdelta, out, n);
     out = &out[result];
     samples -= result;

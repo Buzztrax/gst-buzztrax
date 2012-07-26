@@ -37,14 +37,37 @@ enum
   PROP_SYNC,
   PROP_RING_MOD,
   PROP_TEST,
-	PROP_WAVE,
-	PROP_PULSE_WIDTH,
-	PROP_FILTER_VOICE,
-	PROP_ATTACK,
-	PROP_DECAY,
-	PROP_SUSTAIN,
-	PROP_RELEASE  
+  PROP_WAVE,
+  PROP_PULSE_WIDTH,
+  PROP_FILTER_VOICE,
+  PROP_ATTACK,
+  PROP_DECAY,
+  PROP_SUSTAIN,
+  PROP_RELEASE,
+  PROP_EFFECT_TYPE,
+  PROP_EFFECT_VALUE
 };
+/* TODO(ensonic): add effect type and effect param props
+type  param desc
+00    xy    arpeggio, +x halftones, +y halftones
+01    xx    slide pitch up, xx speed
+02    xx    slide pitch down, xx speed
+03    xx    tone portamento (portamento to note) (00 keep going), xx speed
+04    xy    vibrato, x speed, y depth (if 0 keep previous)
+E3    0x    glissando control, pitch effects would be quantised to semitones
+E4    0x    vibrato type (continous = no phase reset)
+            0 = Sine
+            1 = Ramp down
+            2 = Square
+            4 = Continuous sine
+            5 = Continuous ramp down
+            6 = Continuous square
+E5    xx    set finetune (00=-1/2 semitone, 80=0, FF=+1/2 semitone
+
+- all the effects here would modulate the frequency
+- note-on would init to freq to note + apply fine tune
+- on each of the subticks process the fx and update freq
+*/
 
 #define GSTBT_TYPE_SID_SYN_WAVE (gst_sid_syn_wave_get_type())
 static GType
@@ -66,6 +89,30 @@ gst_sid_syn_wave_get_type (void)
 
   if (G_UNLIKELY (!type)) {
     type = g_enum_register_static ("GstBtSidSynWave", enums);
+  }
+  return type;
+}
+
+#define GSTBT_TYPE_SID_SYN_EFFECT (gst_sid_syn_effect_get_type())
+static GType
+gst_sid_syn_effect_get_type (void)
+{
+  static GType type = 0;
+  static const GEnumValue enums[] = {
+    {GSTBT_SID_SYN_EFFECT_ARPEGGIO, "Arpeggio", "arpeggio"},
+    {GSTBT_SID_SYN_EFFECT_PORTAMENTO_UP, "Portamento up", "portamento-up"},
+    {GSTBT_SID_SYN_EFFECT_PORTAMENTO_DOWN, "Portamento down", "portamento-down"},
+    {GSTBT_SID_SYN_EFFECT_PORTAMENTO, "Portamento", "portamento"},
+    {GSTBT_SID_SYN_EFFECT_VIBRATO, "Vibrato", "vibrato"},
+    {GSTBT_SID_SYN_EFFECT_GLISSANDO_CONTROL, "Glissando control", "glissando-control"},
+    {GSTBT_SID_SYN_EFFECT_VIBRATO_TYPE, "Vibrato type", "vibrato-type"},
+    {GSTBT_SID_SYN_EFFECT_FINETUNE, "Finetune", "finetune"},
+    {GSTBT_SID_SYN_EFFECT_NONE, "None", "none"},
+    {0, NULL, NULL},
+  };
+
+  if (G_UNLIKELY (!type)) {
+    type = g_enum_register_static ("GstBtSidSynEffect", enums);
   }
   return type;
 }
@@ -172,6 +219,14 @@ gst_sid_synv_set_property (GObject * object, guint prop_id,
     case PROP_RELEASE:
       src->release = g_value_get_uint (value);
       break;
+    case PROP_EFFECT_TYPE:
+      src->effect_type = (GstBtSidSynEffect) g_value_get_enum (value);
+      src->effect_set = TRUE;
+      break;
+    case PROP_EFFECT_VALUE:
+      src->effect_value = g_value_get_uint (value);
+      src->effect_set = TRUE;
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -214,6 +269,12 @@ gst_sid_synv_get_property (GObject * object, guint prop_id,
       break;
     case PROP_RELEASE:
       g_value_set_uint (value, src->release);
+      break;
+    case PROP_EFFECT_TYPE:
+      g_value_set_enum (value, src->effect_type);
+      break;
+    case PROP_EFFECT_VALUE:
+      g_value_set_uint (value, src->effect_value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -284,4 +345,12 @@ gstbt_sid_synv_class_init (GstBtSidSynVClass * klass)
 
   g_object_class_install_property (gobject_class, PROP_RELEASE,
       g_param_spec_uint ("release", "Release", "Release", 0, 15, 5, pflags2));
+
+  g_object_class_install_property (gobject_class, PROP_EFFECT_TYPE,
+      g_param_spec_enum ("effect-type", "Effect type", "Effect Type",
+          GSTBT_TYPE_SID_SYN_EFFECT, GSTBT_SID_SYN_EFFECT_NONE, pflags2));
+
+  g_object_class_install_property (gobject_class, PROP_EFFECT_VALUE,   
+      g_param_spec_uint ("effect-value", "Effect value", "Effect parameter(s)",
+          0, 255, 0, pflags2));
 }
