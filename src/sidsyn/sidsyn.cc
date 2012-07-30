@@ -54,6 +54,9 @@
 //#define NTSCFRAMERATE 60
 #define NTSCCLOCKRATE 1022727
 
+#define M_PI_M2 ( M_PI + M_PI )
+#define NUM_STEPS 6
+
 #define GST_CAT_DEFAULT sid_syn_debug
 GST_DEBUG_CATEGORY (GST_CAT_DEFAULT);
 
@@ -320,7 +323,8 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
 {
   gint i;
   guchar regs[NUM_REGS] = {0, };
-  gint filters = 0;
+  guint filters = 0;
+  guint subticks = NUM_STEPS * ((GstBtAudioSynth *)src)->subticks_per_tick;
 
   for (i = 0; i < NUM_VOICES; i++) {
     GstBtSidSynV *v = src->voices[i];
@@ -332,6 +336,7 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
     // init note
     if (v->note_set) {
       // set up note (C-0 .. H-6)
+      v->prev_freq = v->freq;
       v->freq = gstbt_tone_conversion_translate_from_number (src->n2f, v->note);
       GST_INFO_OBJECT (src, "%1d: note-on: %d, %lf Hz", i, v->note, v->freq);
       if (v->freq > 0.0) {
@@ -345,16 +350,69 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
     // init effects
     if (v->effect_set) {
       guint value = v->effect_value;
+      // arpeggio, portamento and vibrato is only active until the next tick
       switch (v->effect_type) {
-        case GSTBT_SID_SYN_EFFECT_ARPEGGIO:
-          break;
+      case GSTBT_SID_SYN_EFFECT_ARPEGGIO: {
+          if (value > 0) {
+            // need to use _prev_note to also work after note_off
+            guint note = 
+                gstbt_tone_conversion_note_number_offset (v->prev_note, (value & 0xF));
+            v->arp_freq[0] = v->finetune *
+              gstbt_tone_conversion_translate_from_number (src->n2f, note);
+            note = 
+              gstbt_tone_conversion_note_number_offset (v->prev_note, (value >> 4));
+            v->arp_freq[1] = v->finetune *
+              gstbt_tone_conversion_translate_from_number (src->n2f, note);          
+            v->arp_freq[2] = v->freq;
+            v->fx_ticks_remain = subticks;
+            GST_INFO_OBJECT (src, "%1d: arpeggio: %d + %d -> %lf, %lf, %lf",
+              i, v->prev_note, value, v->arp_freq[0],v->arp_freq[1],v->arp_freq[2]);
+          } else {
+            v->effect_type = GSTBT_SID_SYN_EFFECT_NONE;
+          }
+        } break;
         case GSTBT_SID_SYN_EFFECT_PORTAMENTO_UP:
+          v->portamento = pow (2.0, (value / 512.0)); // <- relate this to the subticks
+          v->fx_ticks_remain = subticks;
           break;
         case GSTBT_SID_SYN_EFFECT_PORTAMENTO_DOWN:
+          v->portamento = 1.0 / pow (2.0, (value / 512.0));
+          v->fx_ticks_remain = subticks;
           break;
         case GSTBT_SID_SYN_EFFECT_PORTAMENTO:
+          if (v->prev_freq > 0.0 && v->freq > 0.0) {
+            if (value > 0) {
+              if (v->freq > v->prev_freq) {
+                v->portamento = pow (2.0, (value / 512.0));
+              } else {
+                v->portamento = 1.0 / pow (2.0, (value / 512.0));
+              }
+              v->want_freq = v->freq;
+              v->freq = v->prev_freq;
+            }
+            v->fx_ticks_remain = subticks;
+            GST_INFO_OBJECT (src, "%1d: portamento: %d -> %lf, %lf -> %lf",
+              i, value, v->portamento, v->freq, v->want_freq);
+          } else {
+            v->effect_type = GSTBT_SID_SYN_EFFECT_NONE;
+          }
           break;
         case GSTBT_SID_SYN_EFFECT_VIBRATO:
+          if (value >0) {
+            guint val;
+            v->vib_pos = 0.0;
+            v->vib_center = v->freq;
+            val = value >> 4;
+            if (val > 0) {
+              // 0xF: 1 cycle per tick
+              v->vib_speed = (val * val) * M_PI_M2 / 225.0;
+            }
+            val = value & 0xF;
+            if (val > 0) {
+              v->vib_depth = (val * val) / 700.0;
+            }
+          }
+          v->fx_ticks_remain = subticks;
           break;
         case GSTBT_SID_SYN_EFFECT_GLISSANDO_CONTROL:
           break;
@@ -377,21 +435,52 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
       v->effect_set = FALSE;
     }
     // apply effects
-    if (v->effect_type != GSTBT_SID_SYN_EFFECT_NONE) {
+    if (v->fx_ticks_remain) {
+      GST_INFO_OBJECT (src, "%1d: fx 0x%02x ticks left %2d", i,
+        v->effect_type, v->fx_ticks_remain);
       switch (v->effect_type) {
         case GSTBT_SID_SYN_EFFECT_ARPEGGIO:
+          v->freq = v->arp_freq[v->fx_ticks_remain%3];
           break;
         case GSTBT_SID_SYN_EFFECT_PORTAMENTO_UP:
-          break;
         case GSTBT_SID_SYN_EFFECT_PORTAMENTO_DOWN:
+          v->freq *= v->portamento;
           break;
         case GSTBT_SID_SYN_EFFECT_PORTAMENTO:
+          v->freq *= v->portamento;
+          if (((v->portamento > 1.0) && (v->freq > v->want_freq)) ||
+              ((v->portamento < 1.0) && (v->freq < v->want_freq))) {
+            v->freq = v->want_freq;
+            v->effect_type = GSTBT_SID_SYN_EFFECT_NONE;
+            GST_WARNING_OBJECT (src, "%1d: portamento done",i);
+          }
           break;
-        case GSTBT_SID_SYN_EFFECT_VIBRATO:
-          break;
+        case GSTBT_SID_SYN_EFFECT_VIBRATO: {
+          gdouble	depth = 0.0;
+        
+          switch (v->vib_type) {
+            case 0:
+              depth = sin (v->vib_pos);
+              break;
+            case 1:
+              depth = v->vib_pos / M_PI - 1.0;
+              break;
+            case 2:
+              depth = v->vib_pos >= M_PI ? 1.0 : -1.0;
+              break;
+            default:
+              break;
+          }
+          depth *= v->vib_depth;
+          v->freq = v->vib_center * pow(2.0, depth);
+          v->vib_pos += v->vib_speed;
+          if (v->vib_pos >= M_PI_M2)
+            v->vib_pos -= M_PI_M2;
+        } break;
         default:
           break;
       }
+      v->fx_ticks_remain--;
     }
     
     if (v->freq > 0.0) {
@@ -434,6 +523,7 @@ gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 {
   GstBtSidSyn *src = ((GstBtSidSyn *) base);
   GstStructure *structure = gst_caps_get_structure (caps, 0);
+  gint i;
 
   /* set channels to 1 */
   if (!gst_structure_fixate_field_nearest_int (structure, "channels", 1))
@@ -441,32 +531,73 @@ gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
   
   src->emu->set_sampling_parameters (src->clockrate, SAMPLE_FAST,
       base->samplerate);
+  
+  for (i = 0; i < NUM_VOICES; i++) {
+    src->voices[i]->prev_freq = 0.0;
+    src->voices[i]->want_freq = 0.0;
+  }
 
   return TRUE;
 }
 
+// TODO(ensonic): silence detection (gate off + release time is over)
 static void
 gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 {
   GstBtSidSyn *src = ((GstBtSidSyn *) base);
   gint16 *out = (gint16 *) GST_BUFFER_DATA (data);
-  gint i, n = base->generate_samples_per_buffer, samples = n;
+  gint i, n, m, samples;
   gdouble scale = (gdouble)src->clockrate / (gdouble)base->samplerate;
+  gint step = NUM_STEPS * (base->subtick_count - 1);
+  gint step_mod = base->subticks_per_tick;
+  gint fx_ticks_remain = 0;
 
   for (i = 0; i < NUM_VOICES; i++) {
-    gst_object_sync_values (G_OBJECT (src->voices[i]), 
-        GST_BUFFER_TIMESTAMP (data));
+    GstBtSidSynV *v = src->voices[i];
+    gst_object_sync_values ((GObject *)v, GST_BUFFER_TIMESTAMP (data));
+    fx_ticks_remain += v->fx_ticks_remain; 
   }
-  gst_sid_syn_update_regs (src); 
   
-  GST_LOG_OBJECT (src, "generate %d samples", n);
+  GST_DEBUG_OBJECT (src, "generate %d samples (using %d subticks)", base->generate_samples_per_buffer, 
+    base->subticks_per_tick);
+  
+  if (!fx_ticks_remain) {
+    /* no need to subdivide if no effect runs */
+    m = base->generate_samples_per_buffer;
+    samples = m;
+    
+    GST_LOG_OBJECT (src, "subtick: %2d -- -- sync", step/6);
+    gst_sid_syn_update_regs (src);
 
-  while (samples > 0) {
-    gint tdelta = (gint)(scale * samples) + 4;
-    GST_LOG_OBJECT (src, "tdelta %d", tdelta);
-    gint result = src->emu->clock (tdelta, out, n);
-    out = &out[result];
-    samples -= result;
+    while (samples > 0) {
+      gint tdelta = (gint)(scale * samples) + 4;
+      gint result = src->emu->clock (tdelta, out, m);
+      out = &out[result];
+      samples -= result;
+    }
+  } else {
+    /* In trackers subtick is called 'speed' and is 6 by default, For arpeggio,
+     * we want to ensure we have a multiple of 3. More subdivisions are good for
+     * smooth fx anyway.
+     */
+    n = base->generate_samples_per_buffer / NUM_STEPS;
+    m = base->generate_samples_per_buffer - ((NUM_STEPS - 1) * n);
+    samples = m;
+    for (i = 0; i < NUM_STEPS; i++, step++) {
+      if ((step % step_mod) == 0) {
+        GST_LOG_OBJECT (src, "subtick: %2d %2d %2d sync", step/6, i, (step % step_mod));
+        gst_sid_syn_update_regs (src);
+      } else {
+        GST_LOG_OBJECT (src, "subtick: %2d %2d %2d", step/6, i, (step % step_mod));
+      }
+      while (samples > 0) {
+        gint tdelta = (gint)(scale * samples) + 4;
+        gint result = src->emu->clock (tdelta, out, m);
+        out = &out[result];
+        samples -= result;
+      }
+      samples = n;
+    }
   }
 }
 

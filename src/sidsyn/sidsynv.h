@@ -100,7 +100,7 @@ struct _GstBtSidSynV
 
   /* < private > */
   /* parameters */
-  GstBtNote note;
+  GstBtNote note, prev_note;
   gboolean gate, sync, ringmod, test, filter;
   GstBtSidSynWave wave;
   guint pulse_width;
@@ -110,7 +110,13 @@ struct _GstBtSidSynV
   
   /* state */
   gboolean note_set, effect_set;
-  gdouble freq, finetune;
+  gdouble freq;
+  gdouble prev_freq, want_freq;                      // for portamento
+  gdouble arp_freq[3];                               // for arpeggio
+  gdouble vib_pos, vib_depth, vib_speed, vib_center; // for vibrato
+  guint vib_type;
+  gdouble finetune, portamento;
+  gulong fx_ticks_remain;
 };
 
 struct _GstBtSidSynVClass

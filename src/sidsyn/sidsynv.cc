@@ -65,7 +65,6 @@ E4    0x    vibrato type (continous = no phase reset)
 E5    xx    set finetune (00=-1/2 semitone, 80=0, FF=+1/2 semitone
 
 - all the effects here would modulate the frequency
-- note-on would init to freq to note + apply fine tune
 - on each of the subticks process the fx and update freq
 */
 
@@ -183,12 +182,16 @@ gst_sid_synv_set_property (GObject * object, guint prop_id,
   GstBtSidSynV *src = GSTBT_SID_SYNV (object);
 
   switch (prop_id) {
-    case PROP_NOTE:
-      src->note = (GstBtNote) g_value_get_enum (value);
-      if (src->note) {
+    case PROP_NOTE: {
+      guint note = g_value_get_enum (value);
+      if (note) {
+        src->note = (GstBtNote) note;
         src->note_set = TRUE;
       }
-      break;
+      if (note != GSTBT_NOTE_OFF) {
+        src->prev_note = src->note;
+      }
+    } break;
     case PROP_SYNC:
       src->sync = g_value_get_boolean (value);
       break;
@@ -219,13 +222,16 @@ gst_sid_synv_set_property (GObject * object, guint prop_id,
     case PROP_RELEASE:
       src->release = g_value_get_uint (value);
       break;
-    case PROP_EFFECT_TYPE:
-      src->effect_type = (GstBtSidSynEffect) g_value_get_enum (value);
-      src->effect_set = TRUE;
-      break;
+    case PROP_EFFECT_TYPE: {
+      guint effect_type = g_value_get_enum (value);
+      if (effect_type != GSTBT_SID_SYN_EFFECT_NONE) {
+        src->effect_type = (GstBtSidSynEffect) effect_type;
+        src->effect_set = TRUE;
+        GST_INFO_OBJECT (src, "set fx: %d",src->effect_type);
+      }
+    } break;
     case PROP_EFFECT_VALUE:
       src->effect_value = g_value_get_uint (value);
-      src->effect_set = TRUE;
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -291,6 +297,7 @@ gstbt_sid_synv_init (GstBtSidSynV * self)
   self->decay = 2;
   self->sustain = 10;
   self->release = 5;
+  self->finetune = 1.0;
 }
 
 static void
@@ -348,9 +355,9 @@ gstbt_sid_synv_class_init (GstBtSidSynVClass * klass)
 
   g_object_class_install_property (gobject_class, PROP_EFFECT_TYPE,
       g_param_spec_enum ("effect-type", "Effect type", "Effect Type",
-          GSTBT_TYPE_SID_SYN_EFFECT, GSTBT_SID_SYN_EFFECT_NONE, pflags2));
+          GSTBT_TYPE_SID_SYN_EFFECT, GSTBT_SID_SYN_EFFECT_NONE, pflags1));
 
   g_object_class_install_property (gobject_class, PROP_EFFECT_VALUE,   
       g_param_spec_uint ("effect-value", "Effect value", "Effect parameter(s)",
-          0, 255, 0, pflags2));
+          0, 255, 0, pflags1));
 }

@@ -41,6 +41,7 @@ gstbt_fluidsynth_get_type
 <FILE>gstsidsyn</FILE>
 GstBtSidSyn
 GstBtSidSynV
+GstBtSidSynEffect
 GstBtSidSynWave
 <SUBSECTION Private>
 NUM_VOICES
