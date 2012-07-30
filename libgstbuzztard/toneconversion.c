@@ -37,8 +37,9 @@
 
 //-- property ids
 
-enum {
-  GSTBT_TONE_CONVERSION_TUNING=1
+enum
+{
+  GSTBT_TONE_CONVERSION_TUNING = 1
 };
 
 //-- the class
@@ -48,79 +49,91 @@ G_DEFINE_TYPE (GstBtToneConversion, gstbt_tone_conversion, G_TYPE_OBJECT);
 
 //-- enums
 
-GType gstbt_tone_conversion_tuning_get_type(void) {
+GType
+gstbt_tone_conversion_tuning_get_type (void)
+{
   static GType type = 0;
 
-  if(G_UNLIKELY(!type)) {
+  if (G_UNLIKELY (!type)) {
     static const GEnumValue values[] = {
-      { GSTBT_TONE_CONVERSION_CROMATIC,"GSTBT_TONE_CONVERSION_CROMATIC","cromatic tuning" },
-      { 0, NULL, NULL},
+      {GSTBT_TONE_CONVERSION_CROMATIC, "GSTBT_TONE_CONVERSION_CROMATIC",
+          "cromatic tuning"},
+      {0, NULL, NULL},
     };
-    type = g_enum_register_static("GstBtToneConversionTuning", values);
+    type = g_enum_register_static ("GstBtToneConversionTuning", values);
   }
   return type;
 }
 
 //-- helpers
 
-static gboolean note_string_to_values (const gchar *note, guint *tone, guint *octave) {
-  if(!note) return(FALSE);
-  if((strlen(note)!=3)) return(FALSE);
-  if(!(note[1]=='-' || note[1]=='#')) return (FALSE);
-  if(!(note[2]>='0' && note[2]<='9')) return (FALSE);
-  g_assert(tone);
-  g_assert(octave);
+static gboolean
+note_string_to_values (const gchar * note, guint * tone, guint * octave)
+{
+  if (!note)
+    return (FALSE);
+  if ((strlen (note) != 3))
+    return (FALSE);
+  if (!(note[1] == '-' || note[1] == '#'))
+    return (FALSE);
+  if (!(note[2] >= '0' && note[2] <= '9'))
+    return (FALSE);
+  g_assert (tone);
+  g_assert (octave);
 
   // parse note
-  switch(note[0]) {
+  switch (note[0]) {
     case 'c':
     case 'C':
-      *tone=(note[1]=='-')?0:1;
+      *tone = (note[1] == '-') ? 0 : 1;
       break;
     case 'd':
     case 'D':
-      *tone=(note[1]=='-')?2:3;
+      *tone = (note[1] == '-') ? 2 : 3;
       break;
     case 'e':
     case 'E':
-      *tone=4;
+      *tone = 4;
       break;
     case 'f':
     case 'F':
-      *tone=(note[1]=='-')?5:6;
+      *tone = (note[1] == '-') ? 5 : 6;
       break;
     case 'g':
     case 'G':
-      *tone=(note[1]=='-')?7:8;
+      *tone = (note[1] == '-') ? 7 : 8;
       break;
     case 'a':
     case 'A':
-      *tone=(note[1]=='-')?9:10;
+      *tone = (note[1] == '-') ? 9 : 10;
       break;
     case 'b':
     case 'B':
     case 'h':
     case 'H':
-      *tone=11;
+      *tone = 11;
       break;
     default:
-      g_return_val_if_reached(FALSE);
+      g_return_val_if_reached (FALSE);
   }
-  *octave=note[2]-'0';
-  return(TRUE);
+  *octave = note[2] - '0';
+  return (TRUE);
 }
 
-static gboolean note_number_to_values (guint note, guint *tone, guint *octave) {
-  g_return_val_if_fail(note<GSTBT_NOTE_LAST,0);
-  g_assert(tone);
-  g_assert(octave);
+static gboolean
+note_number_to_values (guint note, guint * tone, guint * octave)
+{
+  g_return_val_if_fail (note < GSTBT_NOTE_LAST, 0);
+  g_assert (tone);
+  g_assert (octave);
 
-  if(note==0) return(FALSE);
+  if (note == 0)
+    return (FALSE);
 
-  note-=1;
-  *octave=note/16;
-  *tone=note-(*octave*16);
-  return(TRUE);
+  note -= 1;
+  *octave = note / 16;
+  *tone = note - (*octave * 16);
+  return (TRUE);
 }
 
 //-- constructor methods
@@ -134,47 +147,57 @@ static gboolean note_number_to_values (guint note, guint *tone, guint *octave) {
  *
  * Returns: a new #GstBtToneConversion translator
  */
-GstBtToneConversion *gstbt_tone_conversion_new(GstBtToneConversionTuning tuning) {
+GstBtToneConversion *
+gstbt_tone_conversion_new (GstBtToneConversionTuning tuning)
+{
   GstBtToneConversion *self;
 
-  if(!(self=GSTBT_TONE_CONVERSION(g_object_new(GSTBT_TYPE_TONE_CONVERSION,"tuning",tuning,NULL)))) {
+  if (!(self =
+          GSTBT_TONE_CONVERSION (g_object_new (GSTBT_TYPE_TONE_CONVERSION,
+                  "tuning", tuning, NULL)))) {
     goto Error;
   }
-  return(self);
+  return (self);
 Error:
-  return(NULL);
+  return (NULL);
 }
 
 //-- methods
 
-static gdouble gstbt_tone_conversion_translate_cromatic(GstBtToneConversion *self,guint octave, guint tone) {
-  gdouble frequency=0.0, step;
+static gdouble
+gstbt_tone_conversion_translate_cromatic (GstBtToneConversion * self,
+    guint octave, guint tone)
+{
+  gdouble frequency = 0.0, step;
   guint steps, i;
 
-  g_assert(tone<12);
-  g_assert(octave<10);
+  g_assert (tone < 12);
+  g_assert (octave < 10);
 
-  /* calculated base frequency A-0=55 Hz*/
-  frequency=(gdouble)(55<<octave);
+  /* calculated base frequency A-0=55 Hz */
+  frequency = (gdouble) (55 << octave);
   /* do tone stepping */
-  step=pow(2.0,(1.0/12.0));
-  if(tone<=9) {
+  step = pow (2.0, (1.0 / 12.0));
+  if (tone <= 9) {
     // go down
-    steps=9-tone;
-    for(i=0;i<steps;i++) frequency/=step;
-  }
-  else {
+    steps = 9 - tone;
+    for (i = 0; i < steps; i++)
+      frequency /= step;
+  } else {
     // go up
-    steps=tone-9;
-    for(i=0;i<steps;i++) frequency*=step;
+    steps = tone - 9;
+    for (i = 0; i < steps; i++)
+      frequency *= step;
   }
-  return(frequency);
+  return (frequency);
 }
 
-static void gstbt_tone_conversion_change_tuning(GstBtToneConversion *self) {
-  switch(self->tuning) {
+static void
+gstbt_tone_conversion_change_tuning (GstBtToneConversion * self)
+{
+  switch (self->tuning) {
     case GSTBT_TONE_CONVERSION_CROMATIC:
-      self->translate=gstbt_tone_conversion_translate_cromatic;
+      self->translate = gstbt_tone_conversion_translate_cromatic;
       break;
   }
 }
@@ -190,19 +213,22 @@ static void gstbt_tone_conversion_change_tuning(GstBtToneConversion *self) {
  *
  * Returns: the frequency of the note or 0.0 in case of an error
  */
-gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gchar *note) {
+gdouble
+gstbt_tone_conversion_translate_from_string (GstBtToneConversion * self,
+    gchar * note)
+{
   guint tone, octave;
 
-  g_return_val_if_fail(note,0.0);
+  g_return_val_if_fail (note, 0.0);
 
-  if(note[0]=='o' && note[1]=='f' && note[2]=='f') {
-    return(-1.0);
+  if (note[0] == 'o' && note[1] == 'f' && note[2] == 'f') {
+    return (-1.0);
   }
 
-  if(note_string_to_values(note,&tone,&octave))
-    return(self->translate(self,octave,tone));
+  if (note_string_to_values (note, &tone, &octave))
+    return (self->translate (self, octave, tone));
   else
-    return(0.0);
+    return (0.0);
 }
 
 /**
@@ -214,15 +240,19 @@ gdouble gstbt_tone_conversion_translate_from_string(GstBtToneConversion *self,gc
  *
  * Returns: the frequency of the note or 0.0 in case of an error
  */
-gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self, guint note) {
+gdouble
+gstbt_tone_conversion_translate_from_number (GstBtToneConversion * self,
+    guint note)
+{
   guint tone, octave;
 
-  if(note==GSTBT_NOTE_OFF) return (-1.0);
-  
-  if(note_number_to_values(note,&tone,&octave))
-    return(self->translate(self,octave,tone));
+  if (note == GSTBT_NOTE_OFF)
+    return (-1.0);
+
+  if (note_number_to_values (note, &tone, &octave))
+    return (self->translate (self, octave, tone));
   else
-    return(0.0);  
+    return (0.0);
 }
 
 /**
@@ -234,17 +264,19 @@ gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self, g
  *
  * Returns: the note number or 0 in case of an error.
  */
-guint gstbt_tone_conversion_note_string_2_number(const gchar *note) {
+guint
+gstbt_tone_conversion_note_string_2_number (const gchar * note)
+{
   guint tone, octave;
 
-  if(note[0]=='o' && note[1]=='f' && note[2]=='f') {
-    return(GSTBT_NOTE_OFF);
+  if (note[0] == 'o' && note[1] == 'f' && note[2] == 'f') {
+    return (GSTBT_NOTE_OFF);
   }
 
-  if(note_string_to_values(note,&tone,&octave))
-    return (1+(octave<<4)+tone);
+  if (note_string_to_values (note, &tone, &octave))
+    return (1 + (octave << 4) + tone);
   else
-    return(0);
+    return (0);
 }
 
 /**
@@ -258,19 +290,52 @@ guint gstbt_tone_conversion_note_string_2_number(const gchar *note) {
  *
  * Returns: the note as string or an empty string in the case of an error.
  */
-const gchar *gstbt_tone_conversion_note_number_2_string(guint note) {
+const gchar *
+gstbt_tone_conversion_note_number_2_string (guint note)
+{
   static gchar str[4];
-  static const gchar key[12][3]= { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#", "b-" };
+  static const gchar key[12][3] =
+      { "c-", "c#", "d-", "d#", "e-", "f-", "f#", "g-", "g#", "a-", "a#",
+    "b-"
+  };
   guint tone, octave;
 
-  if(note==GSTBT_NOTE_OFF) return ("off");
+  if (note == GSTBT_NOTE_OFF)
+    return ("off");
 
-  if(note_number_to_values(note,&tone,&octave)) {
-    sprintf(str,"%2s%1d",key[tone],octave);
-    return(str);
-  }
-  else
-    return("");
+  if (note_number_to_values (note, &tone, &octave)) {
+    sprintf (str, "%2s%1d", key[tone], octave);
+    return (str);
+  } else
+    return ("");
+}
+
+/**
+ * gstbt_tone_conversion_note_number_offset:
+ * @note: a musical note as number
+ * @semitones: the semitone offset
+ *
+ * Adds the given semitone offset to the given note number.
+ *
+ * Returns: the note plus a semitone offset
+ */
+guint
+gstbt_tone_conversion_note_number_offset (guint note, guint semitones)
+{
+  guint tone, octave;
+
+  if (note == GSTBT_NOTE_OFF)
+    return (GSTBT_NOTE_OFF);
+
+  if (note_number_to_values (note, &tone, &octave)) {
+    tone += semitones;
+    octave += tone / 12;
+    tone = tone % 12;
+    if (octave > 9)
+      octave = 9;
+    return (1 + (octave << 4) + tone);
+  } else
+    return note;
 }
 
 //-- wrapper
@@ -278,75 +343,82 @@ const gchar *gstbt_tone_conversion_note_number_2_string(guint note) {
 //-- class internals
 
 /* returns a property for the given property_id for this object */
-static void gstbt_tone_conversion_get_property(GObject      *object,
-                               guint         property_id,
-                               GValue       *value,
-                               GParamSpec   *pspec)
+static void
+gstbt_tone_conversion_get_property (GObject * object,
+    guint property_id, GValue * value, GParamSpec * pspec)
 {
-  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
+  GstBtToneConversion *self = GSTBT_TONE_CONVERSION (object);
 
-  if(self->dispose_has_run) return;
+  if (self->dispose_has_run)
+    return;
 
   switch (property_id) {
-    case GSTBT_TONE_CONVERSION_TUNING: {
-      g_value_set_enum(value, self->tuning);
-    } break;
-    default: {
-       G_OBJECT_WARN_INVALID_PROPERTY_ID(object,property_id,pspec);
-    } break;
+    case GSTBT_TONE_CONVERSION_TUNING:{
+      g_value_set_enum (value, self->tuning);
+    }
+      break;
+    default:{
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
+      break;
   }
 }
 
 /* sets the given properties for this object */
-static void gstbt_tone_conversion_set_property(GObject      *object,
-                              guint         property_id,
-                              const GValue *value,
-                              GParamSpec   *pspec)
+static void
+gstbt_tone_conversion_set_property (GObject * object,
+    guint property_id, const GValue * value, GParamSpec * pspec)
 {
-  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
+  GstBtToneConversion *self = GSTBT_TONE_CONVERSION (object);
 
-  if(self->dispose_has_run) return;
+  if (self->dispose_has_run)
+    return;
 
   switch (property_id) {
-    case GSTBT_TONE_CONVERSION_TUNING: {
-      self->tuning = g_value_get_enum(value);
-	  gstbt_tone_conversion_change_tuning(self);
-    } break;
-    default: {
-      G_OBJECT_WARN_INVALID_PROPERTY_ID(object,property_id,pspec);
-    } break;
+    case GSTBT_TONE_CONVERSION_TUNING:{
+      self->tuning = g_value_get_enum (value);
+      gstbt_tone_conversion_change_tuning (self);
+    }
+      break;
+    default:{
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
+      break;
   }
 }
 
-static void gstbt_tone_conversion_dispose(GObject *object)
+static void
+gstbt_tone_conversion_dispose (GObject * object)
 {
-  GstBtToneConversion *self = GSTBT_TONE_CONVERSION(object);
+  GstBtToneConversion *self = GSTBT_TONE_CONVERSION (object);
 
-  if(self->dispose_has_run) return;
+  if (self->dispose_has_run)
+    return;
   self->dispose_has_run = TRUE;
 
-  G_OBJECT_CLASS(gstbt_tone_conversion_parent_class)->dispose(object);
+  G_OBJECT_CLASS (gstbt_tone_conversion_parent_class)->dispose (object);
 }
 
-static void gstbt_tone_conversion_init(GstBtToneConversion *self)
+static void
+gstbt_tone_conversion_init (GstBtToneConversion * self)
 {
 }
 
-static void gstbt_tone_conversion_class_init(GstBtToneConversionClass *klass)
+static void
+gstbt_tone_conversion_class_init (GstBtToneConversionClass * klass)
 {
-  GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
   gobject_class->set_property = gstbt_tone_conversion_set_property;
   gobject_class->get_property = gstbt_tone_conversion_get_property;
-  gobject_class->dispose      = gstbt_tone_conversion_dispose;
+  gobject_class->dispose = gstbt_tone_conversion_dispose;
 
-  g_object_class_install_property(gobject_class,GSTBT_TONE_CONVERSION_TUNING,
-                                  g_param_spec_enum("tuning",
-                                    "tuning prop",
-                                    "selection frequency tuning table",
-                                    GSTBT_TYPE_TONE_CONVERSION_TUNING,
-                                    GSTBT_TONE_CONVERSION_CROMATIC,
-                                    G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
+  g_object_class_install_property (gobject_class, GSTBT_TONE_CONVERSION_TUNING,
+      g_param_spec_enum ("tuning",
+          "tuning prop",
+          "selection frequency tuning table",
+          GSTBT_TYPE_TONE_CONVERSION_TUNING,
+          GSTBT_TONE_CONVERSION_CROMATIC,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
 }
-

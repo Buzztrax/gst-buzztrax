@@ -132,6 +132,28 @@ START_TEST(test_translate_num_series) {
 END_TEST
 
 
+START_TEST(test_convert_note_string_2_number) {
+  ck_assert_int_eq(gstbt_tone_conversion_note_string_2_number("c-0"),GSTBT_NOTE_C_0);
+  ck_assert_int_eq(gstbt_tone_conversion_note_string_2_number("off"),GSTBT_NOTE_OFF);
+}
+END_TEST
+
+
+START_TEST(test_convert_note_number_2_string) {
+  ck_assert_str_eq(gstbt_tone_conversion_note_number_2_string(GSTBT_NOTE_C_0),"c-0");
+  ck_assert_str_eq(gstbt_tone_conversion_note_number_2_string(GSTBT_NOTE_OFF),"off");
+}
+END_TEST
+
+
+START_TEST(test_note_number_offset) {
+  ck_assert_int_eq(gstbt_tone_conversion_note_number_offset(GSTBT_NOTE_C_0,0),GSTBT_NOTE_C_0);
+  ck_assert_int_eq(gstbt_tone_conversion_note_number_offset(GSTBT_NOTE_C_0,5),GSTBT_NOTE_F_0);
+  ck_assert_int_eq(gstbt_tone_conversion_note_number_offset(GSTBT_NOTE_F_0,10),GSTBT_NOTE_DIS_1);
+}
+END_TEST
+
+
 TCase *gst_buzztard_note2frequency_example_case(void) {
   TCase *tc = tcase_create("GstBtToneConversionExamples");
 
@@ -140,6 +162,9 @@ TCase *gst_buzztard_note2frequency_example_case(void) {
   tcase_add_test(tc,test_translate_str_series);
   tcase_add_test(tc,test_translate_num_base);
   tcase_add_test(tc,test_translate_num_series);
+  tcase_add_test(tc,test_convert_note_string_2_number);
+  tcase_add_test(tc,test_convert_note_number_2_string);
+  tcase_add_test(tc,test_note_number_offset);
   tcase_add_unchecked_fixture(tc, test_setup, test_teardown);
   return(tc);
 }

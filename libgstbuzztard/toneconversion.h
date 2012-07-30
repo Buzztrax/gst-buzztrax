@@ -86,6 +86,8 @@ gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,gu
 guint gstbt_tone_conversion_note_string_2_number(const gchar *note);
 const gchar *gstbt_tone_conversion_note_number_2_string(guint note);
 
+guint gstbt_tone_conversion_note_number_offset(guint note, guint semitones);
+
 G_END_DECLS
 
 #endif /* __GSTBT_TONE_CONVERSION_H__ */
