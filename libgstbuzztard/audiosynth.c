@@ -396,6 +396,7 @@ gstbt_audio_synth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
     } else {
       src->check_eos = FALSE;
     }
+    src->subtick_count = src->subticks_per_tick;
   } else {
     if (GST_CLOCK_TIME_IS_VALID (segment->stop)) {
       segment->time = segment->stop;
@@ -408,6 +409,7 @@ gstbt_audio_synth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
     } else {
       src->check_eos = FALSE;
     }
+    src->subtick_count = 1;
   }
   src->eos_reached = FALSE;
 
@@ -534,6 +536,12 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
     GST_BUFFER_DURATION (buf) = src->running_time - next_running_time;
     GST_BUFFER_OFFSET (buf) = n_samples;
     GST_BUFFER_OFFSET_END (buf) = src->n_samples;
+  }
+
+  if (src->subtick_count >= src->subticks_per_tick) {
+    src->subtick_count = 1;
+  } else {
+    src->subtick_count++;
   }
 
   gst_object_sync_values (G_OBJECT (src), GST_BUFFER_TIMESTAMP (buf));
