@@ -415,8 +415,10 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
           v->fx_ticks_remain = subticks;
           break;
         case GSTBT_SID_SYN_EFFECT_GLISSANDO_CONTROL:
+          v->quantize_freq = value & 0x1;
           break;
         case GSTBT_SID_SYN_EFFECT_VIBRATO_TYPE:
+          v->vib_type = value & 0x3;
           break;
         case GSTBT_SID_SYN_EFFECT_FINETUNE:
           // center around 128

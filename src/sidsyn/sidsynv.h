@@ -116,6 +116,7 @@ struct _GstBtSidSynV
   gdouble vib_pos, vib_depth, vib_speed, vib_center; // for vibrato
   guint vib_type;
   gdouble finetune, portamento;
+  gboolean quantize_freq;                            // glissando control
   gulong fx_ticks_remain;
 };
 
