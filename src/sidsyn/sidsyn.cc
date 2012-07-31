@@ -24,7 +24,9 @@
  * @short_description: c64 sid synthesizer
  *
  * A synthesizer based on the RSID emulation library of the C64 sound chip.
- * The element provides a sound generator with 3 voices.
+ * The element provides a sound generator with 3 voices. It implements a couple
+ * of effects, well know from trackers such as pitch slides, arpeggio and
+ * vibrato.
  *
  * For technical details see:
  * http://en.wikipedia.org/wiki/MOS_Technology_SID#Technical_details.
