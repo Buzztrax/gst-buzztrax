@@ -130,7 +130,7 @@ static gchar *
 gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta * property_meta,
     guint prop_id, const GValue * value)
 {
-  //GstBtSidSynV *src = GSTBT_SID_SYNV (property_meta);
+  GstBtSidSynV *src = GSTBT_SID_SYNV (property_meta);
   gchar *res = NULL;
   static const gchar *attack[] = {
     "2 ms", "8 ms", "16 ms", "24 ms", "38 ms", "56 ms", "68 ms", "80 ms",
@@ -154,6 +154,54 @@ gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta * property_meta,
       break;
     case PROP_RELEASE:
       res = g_strdup (decay_release[g_value_get_uint (value)]);
+      break;
+    case PROP_EFFECT_TYPE: {
+      GEnumClass * enum_class = 
+          (GEnumClass *) g_type_class_ref (GSTBT_TYPE_SID_SYN_EFFECT);
+      GEnumValue * enum_value = g_enum_get_value (enum_class,
+          g_value_get_enum (value));
+      if (enum_value) {
+        res = g_strdup (enum_value->value_name);
+      } else {
+        res = g_strdup ("None");
+      }
+      g_type_class_unref (enum_class);
+    } break;
+    case PROP_EFFECT_VALUE:
+#if 0      
+      // FIXME(ensonic): just nagivating the pattern, won't update the type
+      // we really need to know the type from the pattern row
+      switch (src->effect_type) {
+        case GSTBT_SID_SYN_EFFECT_ARPEGGIO:
+          res = 
+              g_strdup ("Semitones up for two notes (first and second column)");
+          break;
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO_UP:
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO_DOWN:
+          res = g_strdup ("Speed for pitch slide");
+          break;
+        case GSTBT_SID_SYN_EFFECT_PORTAMENTO:
+          res = g_strdup ("Speed for pitch slide to new note, 00 keep going");
+          break;
+        case GSTBT_SID_SYN_EFFECT_VIBRATO:
+          res = 
+              g_strdup ("Speed + Depth for vibrato (first and second column)");
+          break;
+        case GSTBT_SID_SYN_EFFECT_GLISSANDO_CONTROL:
+          res = g_strdup (src->quantize_freq ? "quantized" : "smooth");
+          break;
+        case GSTBT_SID_SYN_EFFECT_VIBRATO_TYPE: {
+          static const gchar *waves[] = { "Sine", "Ramp down", "Square" };
+          res = 
+              g_strdup_printf ("Vibrato waveform: %s", waves[src->vib_type]);
+        } break;
+        case GSTBT_SID_SYN_EFFECT_FINETUNE:
+          g_strdup ("Pitch finetuning in cents for voice.");
+          break;
+        default:
+          break;
+      }
+#endif
       break;
     default:
       break;
