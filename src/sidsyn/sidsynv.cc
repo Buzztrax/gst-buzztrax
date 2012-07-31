@@ -130,7 +130,7 @@ static gchar *
 gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta * property_meta,
     guint prop_id, const GValue * value)
 {
-  GstBtSidSynV *src = GSTBT_SID_SYNV (property_meta);
+  //GstBtSidSynV *src = GSTBT_SID_SYNV (property_meta);
   gchar *res = NULL;
   static const gchar *attack[] = {
     "2 ms", "8 ms", "16 ms", "24 ms", "38 ms", "56 ms", "68 ms", "80 ms",
