@@ -125,6 +125,22 @@ G_DEFINE_TYPE_WITH_CODE (GstBtSidSynV, gstbt_sid_synv, GST_TYPE_OBJECT,
 
 //-- property meta interface implementations
 
+static gchar *
+g_enum_get_value_name (GType type, const GValue * value)
+{
+  gchar *res = NULL;
+  GEnumClass * enum_class = (GEnumClass *) g_type_class_ref (type);
+  GEnumValue * enum_value = g_enum_get_value (enum_class, 
+      g_value_get_enum (value));
+  
+  if (enum_value) {
+    res = g_strdup (enum_value->value_name);
+  } else {
+    res = g_strdup ("None");
+  }
+  g_type_class_unref (enum_class);
+  return res;
+}
 
 static gchar *
 gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta * property_meta,
@@ -142,6 +158,9 @@ gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta * property_meta,
   };
 
   switch (prop_id) {
+    case PROP_WAVE:
+      res = g_enum_get_value_name (GSTBT_TYPE_SID_SYN_WAVE, value);
+      break;
     case PROP_PULSE_WIDTH:
       res = g_strdup_printf ("%5.1lf %%",
           (gfloat) g_value_get_uint (value) / 40.95);
@@ -155,18 +174,9 @@ gst_sid_synv_property_meta_describe_property (GstBtPropertyMeta * property_meta,
     case PROP_RELEASE:
       res = g_strdup (decay_release[g_value_get_uint (value)]);
       break;
-    case PROP_EFFECT_TYPE: {
-      GEnumClass * enum_class = 
-          (GEnumClass *) g_type_class_ref (GSTBT_TYPE_SID_SYN_EFFECT);
-      GEnumValue * enum_value = g_enum_get_value (enum_class,
-          g_value_get_enum (value));
-      if (enum_value) {
-        res = g_strdup (enum_value->value_name);
-      } else {
-        res = g_strdup ("None");
-      }
-      g_type_class_unref (enum_class);
-    } break;
+    case PROP_EFFECT_TYPE:
+      res = g_enum_get_value_name (GSTBT_TYPE_SID_SYN_EFFECT, value);
+      break;
     case PROP_EFFECT_VALUE:
 #if 0      
       // FIXME(ensonic): just nagivating the pattern, won't update the type
