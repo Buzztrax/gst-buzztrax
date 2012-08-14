@@ -33,6 +33,9 @@
 #else
 typedef struct {
 } SID;
+typedef enum chip_model {
+  MOS
+} chip_model;
 #endif
 
 #define NUM_VOICES 3
@@ -63,6 +66,7 @@ struct _GstBtSidSyn
 
 	gint clockrate;
 	SID *emu;
+	chip_model chip;
 
 	// states:
 	GstBtSidSynV *voices[NUM_VOICES];

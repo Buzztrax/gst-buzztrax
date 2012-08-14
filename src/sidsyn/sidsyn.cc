@@ -71,7 +71,8 @@ enum
   PROP_FILTER_LOW_PASS,
   PROP_FILTER_BAND_PASS,
   PROP_FILTER_HI_PASS,
-  PROP_VOICE_3_OFF
+  PROP_VOICE_3_OFF,
+  PROP_CHIP
 };
 
 static GstBtAudioSynthClass *parent_class = NULL;
@@ -89,6 +90,24 @@ static void gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data);
 static gboolean gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps);
 
 
+#define GSTBT_TYPE_SID_SYN_CHIP (gst_sid_syn_chip_get_type())
+static GType
+gst_sid_syn_chip_get_type (void)
+{
+  static GType type = 0;
+  static const GEnumValue enums[] = {
+    {MOS6581, "MOS6581", "MOS6581"},
+    {MOS8580, "MOS8580", "MOS8580"},
+    {0, NULL, NULL},
+  };
+
+  if (G_UNLIKELY (!type)) {
+    type = g_enum_register_static ("GstBtSidSynChip", enums);
+  }
+  return type;
+}
+
+
 //-- child proxy interface implementations
 
 static GstObject *gst_sid_syn_child_proxy_get_child_by_index(GstChildProxy *child_proxy, guint index) {
@@ -102,7 +121,6 @@ static GstObject *gst_sid_syn_child_proxy_get_child_by_index(GstChildProxy *chil
 static guint gst_sid_syn_child_proxy_get_children_count(GstChildProxy *child_proxy) {
   return NUM_VOICES;
 }
-
 
 static void gst_sid_syn_child_proxy_interface_init(gpointer g_iface, gpointer iface_data) {
   GstChildProxyInterface *iface = (GstChildProxyInterface *)g_iface;
@@ -170,9 +188,11 @@ gst_sid_syn_class_init (GstBtSidSynClass * klass)
 {
   GObjectClass *gobject_class = (GObjectClass *) klass;
   GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
-  const GParamFlags pflags = (GParamFlags) 
+  const GParamFlags pflags1 = (GParamFlags) 
       (G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS);
-
+  const GParamFlags pflags2 = (GParamFlags) 
+      (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+      
   parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
 
   audio_synth_class->process = gst_sid_syn_process;
@@ -187,31 +207,35 @@ gst_sid_syn_class_init (GstBtSidSynClass * klass)
   // register own properties
   g_object_class_install_property (gobject_class, PROP_CUTOFF,
       g_param_spec_uint ("cut-off", "Cut-Off",
-          "Audio filter cut-off frequency", 0, 2047, 1024, pflags));
+          "Audio filter cut-off frequency", 0, 2047, 1024, pflags1));
 
   g_object_class_install_property (gobject_class, PROP_RESONANCE,
       g_param_spec_uint ("resonance", "Resonance", "Audio filter resonance",
-          0, 15, 2, pflags));
+          0, 15, 2, pflags1));
 
   g_object_class_install_property (gobject_class, PROP_VOLUME,
       g_param_spec_uint ("volume", "Volume", "Volume of tone",
-          0, 15, 15, pflags));
+          0, 15, 15, pflags1));
   
   g_object_class_install_property (gobject_class, PROP_FILTER_LOW_PASS,
       g_param_spec_boolean ("low-pass", "LowPass", "Enable LowPass Filter",
-          FALSE, pflags));
+          FALSE, pflags1));
 
   g_object_class_install_property (gobject_class, PROP_FILTER_BAND_PASS,
       g_param_spec_boolean ("band-pass", "BandPass", "Enable BandPass Filter",
-          FALSE, pflags));
+          FALSE, pflags1));
 
   g_object_class_install_property (gobject_class, PROP_FILTER_HI_PASS,
       g_param_spec_boolean ("hi-pass", "HiPass", "Enable HiPass Filter",
-          FALSE, pflags));
+          FALSE, pflags1));
 
   g_object_class_install_property (gobject_class, PROP_VOICE_3_OFF,
       g_param_spec_boolean ("voice3-off", "Voice3Off", 
-          "Detach voice 3 from mixer",  FALSE, pflags));
+          "Detach voice 3 from mixer",  FALSE, pflags1));
+
+  g_object_class_install_property (gobject_class, PROP_CHIP,
+      g_param_spec_enum ("chip", "Chip model", "Chip model to emulate",
+          GSTBT_TYPE_SID_SYN_CHIP, MOS6581, pflags2));
 }
 
 static void
@@ -246,6 +270,9 @@ gst_sid_syn_set_property (GObject * object, guint prop_id,
       break;
     case PROP_VOICE_3_OFF:
       src->voice_3_off = g_value_get_boolean (value);
+      break;
+    case PROP_CHIP:
+      src->chip = (chip_model) g_value_get_enum (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -287,6 +314,9 @@ gst_sid_syn_get_property (GObject * object, guint prop_id,
     case PROP_VOICE_3_OFF:
       g_value_set_boolean (value, src->voice_3_off);
       break;
+    case PROP_CHIP:
+      g_value_set_enum (value, src->chip);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -301,9 +331,7 @@ gst_sid_syn_init (GstBtSidSyn * src, GstBtSidSynClass * g_class)
 
   src->clockrate = PALCLOCKRATE;
   src->emu = new SID;
-  // make a proeprty?
-  //src->emu->set_chip_model (MOS8580);
-	src->emu->set_chip_model (MOS6581);
+  src->chip = MOS6581;
 	src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_CROMATIC);
 	
 	for (i = 0; i < NUM_VOICES; i++) {
@@ -533,6 +561,8 @@ gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
   if (!gst_structure_fixate_field_nearest_int (structure, "channels", 1))
     return FALSE;
   
+  src->emu->reset ();
+	src->emu->set_chip_model (src->chip);
   src->emu->set_sampling_parameters (src->clockrate, SAMPLE_FAST,
       base->samplerate);
   
