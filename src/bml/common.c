@@ -27,102 +27,145 @@ GST_DEBUG_CATEGORY_EXTERN (GST_CAT_DEFAULT);
 
 //-- preset iface
 
+static void
+gstbml_preset_parse_preset_file (GstBMLClass * klass, const gchar * preset_path)
+{
+  FILE *in;
+
+  if ((in = fopen (preset_path, "rb"))) {
+    guint32 i, version, size, count;
+    guint32 tracks, params;
+    guint32 *data;
+    gchar *machine_name, *preset_name, *comment;
+
+    // read header
+    if (!(fread (&version, sizeof (version), 1, in)))
+      goto eof_error;
+    if (!(fread (&size, sizeof (size), 1, in)))
+      goto eof_error;
+
+    machine_name = g_malloc0 (size + 1);
+    if (!(fread (machine_name, size, 1, in)))
+      goto eof_error;
+
+    // need to cut off path and '.dll'
+    if (!strstr (klass->dll_name, machine_name)) {
+      GST_WARNING ("Preset for wrong machine? '%s' <> '%s'",
+          klass->dll_name, machine_name);
+    }
+
+    if (!(fread (&count, sizeof (count), 1, in)))
+      goto eof_error;
+
+    GST_INFO
+        ("reading %u presets for machine '%s' (version %u, dllname '%s')",
+        count, machine_name, version, klass->dll_name);
+
+    // read presets
+    for (i = 0; i < count; i++) {
+      gboolean add;
+
+      if (!(fread (&size, sizeof (size), 1, in)))
+        goto eof_error;
+
+      preset_name = g_malloc0 (size + 1);
+      if (!(fread (preset_name, size, 1, in)))
+        goto eof_error;
+      GST_INFO ("  reading preset %d: %p '%s'", i, preset_name, preset_name);
+      if (!(fread (&tracks, sizeof (tracks), 1, in)))
+        goto eof_error;
+      if (!(fread (&params, sizeof (params), 1, in)))
+        goto eof_error;
+      // read preset data
+      GST_INFO ("  data size %u", (4 * (2 + params)));
+      data = g_malloc (4 * (2 + params));
+      data[0] = tracks;
+      data[1] = params;
+      if (!(fread (&data[2], 4 * params, 1, in)))
+        goto eof_error;
+
+      add = (g_hash_table_lookup (klass->preset_data, (gpointer) preset_name)
+          == NULL);
+      g_hash_table_insert (klass->preset_data, (gpointer) preset_name,
+          (gpointer) data);
+
+      if (!(fread (&size, sizeof (size), 1, in)))
+        goto eof_error;
+
+      if (size) {
+        comment = g_malloc0 (size + 1);
+        if (!(fread (comment, size, 1, in)))
+          goto eof_error;
+        g_hash_table_insert (klass->preset_comments, (gpointer) preset_name,
+            (gpointer) comment);
+      } else {
+        comment = NULL;
+      }
+
+      GST_INFO ("    %u tracks, %u params, comment '%s'", tracks, params,
+          comment);
+
+      if (add) {
+        klass->presets =
+            g_list_insert_sorted (klass->presets, (gpointer) preset_name,
+            (GCompareFunc) strcmp);
+      } else {
+        g_free (preset_name);
+      }
+    }
+    g_free (machine_name);
+
+  eof_error:
+    fclose (in);
+  } else {
+    GST_INFO ("can't open preset file: '%s'", preset_path);
+  }
+}
+
+static gchar *
+gstbml_preset_make_preset_file_name (GstBMLClass * klass, gchar * preset_dir)
+{
+  gchar *preset_path, *base_name, *ext;
+
+  if ((base_name = strrchr (klass->preset_path, '/'))) {
+    base_name++;
+  } else {
+    base_name = klass->preset_path;
+  }
+  ext = g_strrstr (base_name, ".");
+  *ext = '\0';                  // temporarily terminate
+  preset_path = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.prs", preset_dir,
+      base_name);
+  *ext = '.';                   // restore
+
+  return preset_path;
+}
+
 gchar **
 gstbml_preset_get_preset_names (GstBML * bml, GstBMLClass * klass)
 {
   if (!klass->presets) {
+    gchar *preset_path, *preset_dir;
+
+    // create data hash if its not there
+    if (!klass->preset_data) {
+      klass->preset_data = g_hash_table_new (g_str_hash, g_str_equal);
+    }
+    if (!klass->preset_comments) {
+      klass->preset_comments = g_hash_table_new (g_str_hash, g_str_equal);
+    }
+    // load them from system path and then from local path 
     if (klass->preset_path) {
-      FILE *in;
-
-      if ((in = fopen (klass->preset_path, "rb"))) {
-        guint32 i, version, size, count;
-        guint32 tracks, params;
-        guint32 *data;
-        gchar *machine_name, *preset_name, *comment;
-
-        // read header
-        if (!(fread (&version, sizeof (version), 1, in)))
-          goto eof_error;
-        if (!(fread (&size, sizeof (size), 1, in)))
-          goto eof_error;
-
-        machine_name = g_malloc0 (size + 1);
-        if (!(fread (machine_name, size, 1, in)))
-          goto eof_error;
-
-        // TODO(ensonic): need to cut off path and '.dll'
-        if (!strstr (klass->dll_name, machine_name)) {
-          GST_WARNING ("Preset for wrong machine? '%s' <> '%s'",
-              klass->dll_name, machine_name);
-        }
-
-        if (!(fread (&count, sizeof (count), 1, in)))
-          goto eof_error;
-
-        GST_INFO
-            ("reading %u presets for machine '%s' (version %u, dllname '%s')",
-            count, machine_name, version, klass->dll_name);
-
-        // create data hash if its not there
-        if (!klass->preset_data) {
-          klass->preset_data = g_hash_table_new (g_str_hash, g_str_equal);
-        }
-        if (!klass->preset_comments) {
-          klass->preset_comments = g_hash_table_new (g_str_hash, g_str_equal);
-        }
-        // read presets
-        for (i = 0; i < count; i++) {
-          if (!(fread (&size, sizeof (size), 1, in)))
-            goto eof_error;
-
-          preset_name = g_malloc0 (size + 1);
-          if (!(fread (preset_name, size, 1, in)))
-            goto eof_error;
-          GST_INFO ("  reading preset %d: %p '%s'", i, preset_name,
-              preset_name);
-          if (!(fread (&tracks, sizeof (tracks), 1, in)))
-            goto eof_error;
-          if (!(fread (&params, sizeof (params), 1, in)))
-            goto eof_error;
-          // read preset data
-          GST_INFO ("  data size %u", (4 * (2 + params)));
-          data = g_malloc (4 * (2 + params));
-          data[0] = tracks;
-          data[1] = params;
-          if (!(fread (&data[2], 4 * params, 1, in)))
-            goto eof_error;
-          g_hash_table_insert (klass->preset_data, (gpointer) preset_name,
-              (gpointer) data);
-
-          if (!(fread (&size, sizeof (size), 1, in)))
-            goto eof_error;
-
-          if (size) {
-            comment = g_malloc0 (size + 1);
-            if (!(fread (comment, size, 1, in)))
-              goto eof_error;
-            g_hash_table_insert (klass->preset_comments, (gpointer) preset_name,
-                (gpointer) comment);
-          } else
-            comment = NULL;
-
-          GST_INFO ("    %u tracks, %u params, comment '%s'", tracks, params,
-              comment);
-
-          klass->presets =
-              g_list_insert_sorted (klass->presets, (gpointer) preset_name,
-              (GCompareFunc) strcmp);
-        }
-        g_free (machine_name);
-
-      eof_error:
-        fclose (in);
-      } else {
-        GST_INFO ("can't open preset file: '%s'", klass->preset_path);
-      }
+      gstbml_preset_parse_preset_file (klass, klass->preset_path);
     } else {
       GST_INFO ("no preset path for machine");
     }
+    preset_dir = g_build_filename (g_get_user_data_dir (),
+        "gstreamer-" GST_MAJORMINOR, "presets", NULL);
+    preset_path = gstbml_preset_make_preset_file_name (klass, preset_dir);
+    gstbml_preset_parse_preset_file (klass, preset_path);
+    g_free (preset_dir);
+    g_free (preset_path);
   } else {
     GST_INFO ("return cached preset list");
   }
@@ -242,13 +285,22 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
 static gboolean
 gstbml_preset_save_presets_file (GstBMLClass * klass)
 {
+  gboolean res = FALSE;
+
   if (klass->preset_path) {
     FILE *out;
-    gchar *bak_file_name;
+    gchar *preset_path, *preset_dir, *bak_file_name;
     gboolean backup = TRUE;
 
+    // always safe to a local path (like in the upstream impl
+    preset_dir = g_build_filename (g_get_user_data_dir (),
+        "gstreamer-" GST_MAJORMINOR, "presets", NULL);
+    g_mkdir_with_parents (preset_dir, 0755);
+    preset_path = gstbml_preset_make_preset_file_name (klass, preset_dir);
+    g_free (preset_dir);
+
     // create backup if possible
-    bak_file_name = g_strdup_printf ("%s.bak", klass->preset_path);
+    bak_file_name = g_strdup_printf ("%s.bak", preset_path);
     if (g_file_test (bak_file_name, G_FILE_TEST_EXISTS)) {
       if (g_unlink (bak_file_name)) {
         backup = FALSE;
@@ -256,16 +308,15 @@ gstbml_preset_save_presets_file (GstBMLClass * klass)
       }
     }
     if (backup) {
-      if (g_rename (klass->preset_path, bak_file_name)) {
-        GST_INFO ("cannot backup file : %s -> %s", klass->preset_path,
-            bak_file_name);
+      if (g_rename (preset_path, bak_file_name)) {
+        GST_INFO ("cannot backup file : %s -> %s", preset_path, bak_file_name);
       }
     }
     g_free (bak_file_name);
 
-    GST_INFO ("about to save presets '%s'", klass->preset_path);
+    GST_INFO ("about to save presets '%s'", preset_path);
 
-    if ((out = fopen (klass->preset_path, "wb"))) {
+    if ((out = fopen (preset_path, "wb"))) {
       guint32 version, size, count;
       gchar *machine_name, *ext, *preset_name, *comment;
       guint32 *data;
@@ -323,10 +374,13 @@ gstbml_preset_save_presets_file (GstBMLClass * klass)
       }
     eof_error:
       fclose (out);
-      return (TRUE);
+      res = TRUE;
+    } else {
+      GST_WARNING ("can't open preset file %s for writing", preset_path);
     }
+    g_free (preset_path);
   }
-  return (FALSE);
+  return res;
 }
 
 gboolean
