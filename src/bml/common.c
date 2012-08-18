@@ -154,18 +154,16 @@ gstbml_preset_get_preset_names (GstBML * bml, GstBMLClass * klass)
     if (!klass->preset_comments) {
       klass->preset_comments = g_hash_table_new (g_str_hash, g_str_equal);
     }
-    // load them from system path and then from local path 
-    if (klass->preset_path) {
-      gstbml_preset_parse_preset_file (klass, klass->preset_path);
-    } else {
-      GST_INFO ("no preset path for machine");
-    }
+    // load them from local path and then from system path 
     preset_dir = g_build_filename (g_get_user_data_dir (),
         "gstreamer-" GST_MAJORMINOR, "presets", NULL);
     preset_path = gstbml_preset_make_preset_file_name (klass, preset_dir);
     gstbml_preset_parse_preset_file (klass, preset_path);
     g_free (preset_dir);
     g_free (preset_path);
+    if (klass->preset_path) {
+      gstbml_preset_parse_preset_file (klass, klass->preset_path);
+    }
   } else {
     GST_INFO ("return cached preset list");
   }
