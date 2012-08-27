@@ -6,7 +6,7 @@
 #include <simsyn/simsyn.h>
 
 gstbt_audio_delay_get_type
-@FLUIDSYNTH_DOC_TYPES@gstbt_fluidsynth_get_type
+@FLUIDSYNTH_DOC_TYPES@gstbt_fluid_synth_get_type
 gstbt_sid_syn_get_type
 gstbt_sid_synv_get_type
 gstbt_sim_syn_get_type

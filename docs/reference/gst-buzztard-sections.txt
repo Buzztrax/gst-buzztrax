@@ -25,16 +25,18 @@ gstbt_audio_delay_get_type
 
 <SECTION>
 <FILE>gstfluidsynth</FILE>
-GstBtFluidsynth
+GstBtFluidSynth
+GstBtFluidSynthInterpolationMode
+GstBtFluidSynthChorusWaveform
 <SUBSECTION Standard>
-GstBtFluidsynthClass
-GSTBT_FLUIDSYNTH
-GSTBT_IS_FLUIDSYNTH
-GSTBT_FLUIDSYNTH_CLASS
-GSTBT_IS_FLUIDSYNTH_CLASS
-GSTBT_FLUIDSYNTH_GET_CLASS
-GSTBT_TYPE_FLUIDSYNTH
-gstbt_fluidsynth_get_type
+GstBtFluidSynthClass
+GSTBT_FLUID_SYNTH
+GSTBT_IS_FLUID_SYNTH
+GSTBT_FLUID_SYNTH_CLASS
+GSTBT_IS_FLUID_SYNTH_CLASS
+GSTBT_FLUID_SYNTH_GET_CLASS
+GSTBT_TYPE_FLUID_SYNTH
+gstbt_fluid_synth_get_type
 </SECTION>
 
 <SECTION>

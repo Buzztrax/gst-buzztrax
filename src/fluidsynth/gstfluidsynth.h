@@ -22,8 +22,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GSTBT_FLUIDSYNTH_H__
-#define __GSTBT_FLUIDSYNTH_H__
+#ifndef __GSTBT_FLUID_SYNTH_H__
+#define __GSTBT_FLUID_SYNTH_H__
 
 #include <gst/gst.h>
 #include <gst/controller/gstcontroller.h>
@@ -34,22 +34,52 @@
 
 G_BEGIN_DECLS
 
-#define GSTBT_TYPE_FLUIDSYNTH            (gstbt_fluidsynth_get_type())
-#define GSTBT_FLUIDSYNTH(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynth))
-#define GSTBT_IS_FLUIDSYNTH(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_FLUIDSYNTH))
-#define GSTBT_FLUIDSYNTH_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynthClass))
-#define GSTBT_IS_FLUIDSYNTH_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_FLUIDSYNTH))
-#define GSTBT_FLUIDSYNTH_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_FLUIDSYNTH,GstBtFluidsynthClass))
-
-typedef struct _GstBtFluidsynth GstBtFluidsynth;
-typedef struct _GstBtFluidsynthClass GstBtFluidsynthClass;
+#define GSTBT_TYPE_FLUID_SYNTH            (gstbt_fluid_synth_get_type())
+#define GSTBT_FLUID_SYNTH(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_FLUID_SYNTH,GstBtFluidSynth))
+#define GSTBT_IS_FLUID_SYNTH(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_FLUID_SYNTH))
+#define GSTBT_FLUID_SYNTH_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_FLUID_SYNTH,GstBtFluidSynthClass))
+#define GSTBT_IS_FLUID_SYNTH_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_FLUID_SYNTH))
+#define GSTBT_FLUID_SYNTH_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_FLUID_SYNTH,GstBtFluidSynthClass))
 
 /**
- * GstBtFluidsynth:
+ * GstBtFluidSynthInterpolationMode:
+ * @GSTBT_FLUID_SYNTH_INTERPOLATION_MODE_NONE: no interpolation
+ * @GSTBT_FLUID_SYNTH_INTERPOLATION_MODE_LINEAR: linear interpolation
+ * @GSTBT_FLUID_SYNTH_INTERPOLATION_MODE_4THORDER: 4th order interpolation
+ * @GSTBT_FLUID_SYNTH_INTERPOLATION_MODE_7THORDER: 7th order interpolation
+ *
+ * Synthesis engine interpolation mode.
+ */
+typedef enum
+{
+  GSTBT_FLUID_SYNTH_INTERPOLATION_MODE_NONE = FLUID_INTERP_NONE,
+  GSTBT_FLUID_SYNTH_INTERPOLATION_MODE_LINEAR = FLUID_INTERP_LINEAR,
+  GSTBT_FLUID_SYNTH_INTERPOLATION_MODE_4THORDER = FLUID_INTERP_4THORDER,
+  GSTBT_FLUID_SYNTH_INTERPOLATION_MODE_7THORDER = FLUID_INTERP_7THORDER
+} GstBtFluidSynthInterpolationMode;
+
+/**
+ * GstBtFluidSynthChorusWaveform:
+ * @GSTBT_FLUID_SYNTH_CHORUS_MOD_SINE: sine wave
+ * @GSTBT_FLUID_SYNTH_CHORUS_MOD_TRIANGLE: triangle wave
+ *
+ * Modulation waveform for the chorus effect.
+ */
+typedef enum
+{
+  GSTBT_FLUID_SYNTH_CHORUS_MOD_SINE = FLUID_CHORUS_MOD_SINE,
+  GSTBT_FLUID_SYNTH_CHORUS_MOD_TRIANGLE = FLUID_CHORUS_MOD_TRIANGLE
+} GstBtFluidSynthChorusWaveform;
+
+typedef struct _GstBtFluidSynth GstBtFluidSynth;
+typedef struct _GstBtFluidSynthClass GstBtFluidSynthClass;
+
+/**
+ * GstBtFluidSynth:
  *
  * Class instance data.
  */
-struct _GstBtFluidsynth {
+struct _GstBtFluidSynth {
   GstBtAudioSynth parent;
 
   /* < private > */
@@ -70,30 +100,30 @@ struct _GstBtFluidsynth {
   gchar *instrument_patch_path;
   gint instrument_patch;
 
-  int interp;				                /* interpolation type */
+  GstBtFluidSynthInterpolationMode interp; /* interpolation type */
 
   gboolean reverb_enable;		        /* reverb enable */
-  double reverb_room_size;		      /* reverb room size */
-  double reverb_damp;			          /* reverb damping */
-  double reverb_width;			        /* reverb width */
-  double reverb_level;			        /* reverb level */
+  gdouble reverb_room_size;		      /* reverb room size */
+  gdouble reverb_damp;			        /* reverb damping */
+  gdouble reverb_width;			        /* reverb width */
+  gdouble reverb_level;			        /* reverb level */
   gboolean reverb_update;
 
   gboolean chorus_enable;		        /* chorus enable */
-  int chorus_count;			            /* chorus voice count */
-  double chorus_level;			        /* chorus level */
-  double chorus_freq;			          /* chorus freq */
-  double chorus_depth;			        /* chorus depth */
-  int chorus_waveform;			        /* chorus waveform */
+  gint chorus_count;			          /* chorus voice count */
+  gdouble chorus_level;			        /* chorus level */
+  gdouble chorus_freq;			        /* chorus freq */
+  gdouble chorus_depth;			        /* chorus depth */
+  GstBtFluidSynthChorusWaveform chorus_waveform; /* chorus waveform */
   gboolean chorus_update;
 };
 
-struct _GstBtFluidsynthClass {
+struct _GstBtFluidSynthClass {
   GstBtAudioSynthClass parent_class;
 };
 
-GType gstbt_fluidsynth_get_type(void);
+GType gstbt_fluid_synth_get_type(void);
 
 G_END_DECLS
 
-#endif /* __GSTBT_FLUIDSYNTH_H__ */
+#endif /* __GSTBT_FLUID_SYNTH_H__ */
