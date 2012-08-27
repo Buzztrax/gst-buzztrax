@@ -22,7 +22,6 @@
 #ifndef __GSTBT_SIM_SYN_H__
 #define __GSTBT_SIM_SYN_H__
 
-
 #include <gst/gst.h>
 #include <gst/controller/gstcontroller.h>
 #include <libgstbuzztard/toneconversion.h>
@@ -30,12 +29,14 @@
 #include <libgstbuzztard/audiosynth.h>
 
 G_BEGIN_DECLS
+
 #define GSTBT_TYPE_SIM_SYN            (gstbt_sim_syn_get_type())
 #define GSTBT_SIM_SYN(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj),GSTBT_TYPE_SIM_SYN,GstBtSimSyn))
 #define GSTBT_IS_SIM_SYN(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj),GSTBT_TYPE_SIM_SYN))
 #define GSTBT_SIM_SYN_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_SIM_SYN,GstBtSimSynClass))
 #define GSTBT_IS_SIM_SYN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_SIM_SYN))
 #define GSTBT_SIM_SYN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_SIM_SYN,GstBtSimSynClass))
+
 /**
  * GstBtSimSynWave:
  * @GSTBT_SIM_SYN_WAVE_SINE: sine wave
@@ -46,14 +47,17 @@ G_BEGIN_DECLS
  * @GSTBT_SIM_SYN_WAVE_WHITE_NOISE: white noise
  * @GSTBT_SIM_SYN_WAVE_PINK_NOISE: pink noise
  * @GSTBT_SIM_SYN_WAVE_SINE_TAB: sine wave (precalculated)
- * @GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE: white (zero mean) Gaussian noise;  volume sets the standard deviation of the noise in units of the range of values of the sample type, e.g. volume=0.1 produces noise with a standard deviation of 0.1*32767=3277 with 16-bit integer samples, or 0.1*1.0=0.1 with floating-point samples.
+ * @GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE: white (zero mean) Gaussian noise;
+ *   volume sets the standard deviation of the noise in units of the range of
+ *   values of the sample type, e.g. volume=0.1 produces noise with a standard
+ *   deviation of 0.1*32767=3277 with 16-bit integer samples, or 0.1*1.0=0.1 with floating-point samples.
  * @GSTBT_SIM_SYN_WAVE_RED_NOISE: red (brownian) noise
  * @GSTBT_SIM_SYN_WAVE_BLUE_NOISE: spectraly inverted pink noise
  * @GSTBT_SIM_SYN_WAVE_VIOLET_NOISE: spectraly inverted red (brownian) noise
  *
  * Oscillator wave forms.
  */
-    typedef enum
+typedef enum
 {
   GSTBT_SIM_SYN_WAVE_SINE,
   GSTBT_SIM_SYN_WAVE_SQUARE,

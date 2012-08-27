@@ -186,8 +186,7 @@ gst_audio_delay_base_init (gpointer klass)
 #if GST_CHECK_VERSION(0,10,31)
   gst_element_class_set_documentation_uri (element_class,
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
-      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "" PACKAGE
-      "-GstBtAudioDelay.html");
+      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtAudioDelay.html");
 #endif
 }
 

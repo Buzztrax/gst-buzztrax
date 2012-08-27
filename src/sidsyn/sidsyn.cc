@@ -25,8 +25,8 @@
  *
  * A synthesizer based on the RSID emulation library of the C64 sound chip.
  * The element provides a sound generator with 3 voices. It implements a couple
- * of effects, well know from trackers such as pitch slides, arpeggio and
- * vibrato.
+ * of effects (see #GstBtSidSynEffect), which are well known from trackers such
+ * as pitch slides, arpeggio and vibrato.
  *
  * For technical details see:
  * http://en.wikipedia.org/wiki/MOS_Technology_SID#Technical_details.
@@ -178,8 +178,7 @@ gst_sid_syn_base_init (gpointer g_class)
 #if GST_CHECK_VERSION(0,10,31)
   gst_element_class_set_documentation_uri (element_class,
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
-      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "" PACKAGE
-      "-GstBtSidSyn.html");
+      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtSidSyn.html");
 #endif
 }
 
