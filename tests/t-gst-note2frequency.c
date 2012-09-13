@@ -38,7 +38,7 @@ START_TEST(test_translate_str_null) {
   GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
   
@@ -55,7 +55,7 @@ START_TEST(test_translate_str_length) {
   GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 
@@ -78,7 +78,7 @@ START_TEST(test_translate_str_delim) {
   GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 
@@ -95,7 +95,7 @@ START_TEST(test_translate_enum_range) {
   GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
   g_log_set_always_fatal(g_log_set_always_fatal(G_LOG_FATAL_MASK)&~G_LOG_LEVEL_CRITICAL);
 

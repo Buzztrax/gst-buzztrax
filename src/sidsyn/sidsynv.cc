@@ -242,6 +242,7 @@ gst_sid_synv_set_property (GObject * object, guint prop_id,
   switch (prop_id) {
     case PROP_NOTE: {
       guint note = g_value_get_enum (value);
+      GST_INFO_OBJECT (src, "note: %d", note);
       if (note) {
         src->note = (GstBtNote) note;
         src->note_set = TRUE;

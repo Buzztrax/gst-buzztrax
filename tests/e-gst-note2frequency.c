@@ -37,7 +37,7 @@ static void test_teardown(void) {
 START_TEST(test_create_obj) {
   GstBtToneConversion *n2f;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
   fail_unless(G_OBJECT(n2f)->ref_count == 1, NULL);
 
@@ -50,7 +50,7 @@ START_TEST(test_translate_str_base) {
   GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
 
   frq=gstbt_tone_conversion_translate_from_string(n2f,"A-3");
@@ -75,7 +75,7 @@ START_TEST(test_translate_str_series) {
 	"c-2",NULL };
   guint i=0;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
   
   while(notes[i]) {
@@ -96,7 +96,7 @@ START_TEST(test_translate_num_base) {
   GstBtToneConversion *n2f;
   gdouble frq;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
 
   frq=gstbt_tone_conversion_translate_from_number(n2f,GSTBT_NOTE_A_3);
@@ -113,7 +113,7 @@ START_TEST(test_translate_num_series) {
   gdouble frq,frq_prev=0.0;
   guint i,j;
   
-  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_CROMATIC);
+  n2f=gstbt_tone_conversion_new(GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
   fail_unless(n2f != NULL, NULL);
   
   for(i=0;i<9;i++) {

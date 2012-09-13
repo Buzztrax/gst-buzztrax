@@ -309,7 +309,7 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
   src->volume = 0.8;
   src->freq = 0.0;
   src->decay = 0.5;
-  src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_CROMATIC);
+  src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
 
   /* set the waveform */
   src->wave = GSTBT_SIM_SYN_WAVE_SINE;

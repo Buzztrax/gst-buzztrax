@@ -331,7 +331,7 @@ gst_sid_syn_init (GstBtSidSyn * src, GstBtSidSynClass * g_class)
   src->clockrate = PALCLOCKRATE;
   src->emu = new SID;
   src->chip = MOS6581;
-	src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_CROMATIC);
+	src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
 	
 	for (i = 0; i < NUM_VOICES; i++) {
 	  src->voices[i] = (GstBtSidSynV *) g_object_new (GSTBT_TYPE_SID_SYNV, NULL);
@@ -515,7 +515,7 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
     }
     
     if (v->freq > 0.0) {
-      GST_INFO_OBJECT (src, "%1d: freq: %lf Hz", i, v->freq);
+      GST_DEBUG_OBJECT (src, "%1d: freq: %lf Hz", i, v->freq);
       // PAL:  x = f * (18*2^24)/17734475 (0 - 3848 Hz)
       // NTSC: x = f * (14*2^24)/14318318 (0 - 3995 Hz)
       tone = (guint)((v->freq * (1L<<24)) / src->clockrate);

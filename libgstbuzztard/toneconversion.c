@@ -56,7 +56,8 @@ gstbt_tone_conversion_tuning_get_type (void)
 
   if (G_UNLIKELY (!type)) {
     static const GEnumValue values[] = {
-      {GSTBT_TONE_CONVERSION_CROMATIC, "GSTBT_TONE_CONVERSION_CROMATIC",
+      {GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT,
+            "GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT",
           "cromatic tuning"},
       {0, NULL, NULL},
     };
@@ -165,7 +166,7 @@ Error:
 //-- methods
 
 static gdouble
-gstbt_tone_conversion_translate_cromatic (GstBtToneConversion * self,
+gstbt_tone_conversion_translate_equal_temperament (GstBtToneConversion * self,
     guint octave, guint tone)
 {
   gdouble frequency = 0.0, step;
@@ -196,8 +197,8 @@ static void
 gstbt_tone_conversion_change_tuning (GstBtToneConversion * self)
 {
   switch (self->tuning) {
-    case GSTBT_TONE_CONVERSION_CROMATIC:
-      self->translate = gstbt_tone_conversion_translate_cromatic;
+    case GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT:
+      self->translate = gstbt_tone_conversion_translate_equal_temperament;
       break;
   }
 }
@@ -418,7 +419,7 @@ gstbt_tone_conversion_class_init (GstBtToneConversionClass * klass)
           "tuning prop",
           "selection frequency tuning table",
           GSTBT_TYPE_TONE_CONVERSION_TUNING,
-          GSTBT_TONE_CONVERSION_CROMATIC,
+          GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
 }
