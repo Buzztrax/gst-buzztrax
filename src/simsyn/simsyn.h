@@ -141,6 +141,7 @@ struct _GstBtSimSyn
   void (*process) (GstBtSimSyn *, gint16 *);
   void (*apply_filter) (GstBtSimSyn *, gint16 *);
 
+  GstBtToneConversionTuning tuning;
   GstBtToneConversion *n2f;
   gdouble freq;
   guint64 note_count, note_length;

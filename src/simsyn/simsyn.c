@@ -68,8 +68,10 @@ GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 
 enum
 {
+  // static class properties
+  PROP_TUNING = 1,
   // dynamic class properties
-  PROP_NOTE = 1,
+  PROP_NOTE,
   PROP_WAVE,
   PROP_VOLUME,
   PROP_DECAY,
@@ -182,6 +184,11 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
   gobject_class->dispose = gst_sim_syn_dispose;
 
   // register own properties
+  g_object_class_install_property (gobject_class, PROP_TUNING,
+      g_param_spec_enum ("tuning", "Tuning",
+          "Harmonic tuning", GSTBT_TYPE_TONE_CONVERSION_TUNING,
+          GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_NOTE,
       g_param_spec_enum ("note", "Musical note",
@@ -230,6 +237,14 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
     return;
 
   switch (prop_id) {
+    case PROP_TUNING:{
+      GstBtToneConversion *n2f = src->n2f;
+      src->tuning = g_value_get_enum (value);
+      src->n2f = gstbt_tone_conversion_new (src->tuning);
+      if (n2f)
+        g_object_unref (n2f);
+      break;
+    }
     case PROP_NOTE:
       if ((src->note = g_value_get_enum (value)))
         gst_sim_syn_trigger_note (src);
@@ -309,7 +324,9 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
   src->volume = 0.8;
   src->freq = 0.0;
   src->decay = 0.5;
-  src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
+
+  src->tuning = GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT;
+  src->n2f = gstbt_tone_conversion_new (src->tuning);
 
   /* set the waveform */
   src->wave = GSTBT_SIM_SYN_WAVE_SINE;
