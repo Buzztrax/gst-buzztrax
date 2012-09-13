@@ -12,18 +12,30 @@ c) can we use events?
    - the application would push them on to the sink and they travel up to the
      sources
 
+= GstBtChildBin =
+- would be useful for the GstIirEqualizerNBands (num-bands->children)
+
+
 = GstSimsyn =
 - have more variants in the same plugin (share code, like oszillators and filter)
   - we'd like to have one with
     - dual-osc
     - two ADSR envelopes
     - each envelope can modulate volume and filter-cutoff/resonance
+  - current simsyn is missing key-tracking for the filter
 
-= GstSidSynth =
-- polyphonic generator using a sid emulation
-- sid has 3 voices, would be cool if we could hide it and create new sid
-  instances as needed
-- needs to check the parameter layout (global and per voice)
+= FrozenTrackPlayer (MemoryAudioSource) =
+- when playing pre-recorded tracks, one would trigger them at the start with the
+  root note
+- one problem here is that we can't start playback in the middle of the song or
+  loop parts
+- we want a special machine that only has a wave-table parameter and plays the
+  sample.
+  - we should re-work memory audio source for it
+  - it can be a local machine (not installed as a separate plugin), but we'd
+    need to move it into bt-core (so that it works outside of the ui too)
+  - machine.c currently checks for "host-callbacks" property and uses that to
+    pass the BuzzCallbacks. The element can use them to access the wavetable.
 
 = synth components =
 The libgstbuzztard already has components, such as the envelope and tone-

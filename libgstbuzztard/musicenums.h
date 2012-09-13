@@ -173,6 +173,10 @@ extern GType gstbt_trigger_switch_get_type(void);
  *
  * Note numbers.
  */
+/* values follow the buzz numbering scheme.
+ * Other schemes are:
+ * MIDI Tuning Standard: numbers from 0 to 127 to represent C-1 to G+9
+ */
 typedef enum {
   GSTBT_NOTE_OFF=255,
   GSTBT_NOTE_NONE=0,
