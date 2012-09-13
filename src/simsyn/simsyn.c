@@ -237,14 +237,10 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
     return;
 
   switch (prop_id) {
-    case PROP_TUNING:{
-      GstBtToneConversion *n2f = src->n2f;
+    case PROP_TUNING:
       src->tuning = g_value_get_enum (value);
-      src->n2f = gstbt_tone_conversion_new (src->tuning);
-      if (n2f)
-        g_object_unref (n2f);
+      g_object_set (src->n2f, "tuning", src->tuning, NULL);
       break;
-    }
     case PROP_NOTE:
       if ((src->note = g_value_get_enum (value)))
         gst_sim_syn_trigger_note (src);
@@ -293,6 +289,9 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
     return;
 
   switch (prop_id) {
+    case PROP_TUNING:
+      g_value_set_enum (value, src->tuning);
+      break;
     case PROP_WAVE:
       g_value_set_enum (value, src->wave);
       break;
