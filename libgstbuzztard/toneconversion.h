@@ -34,16 +34,16 @@ G_BEGIN_DECLS
 
 /**
  * GstBtToneConversionTuning:
- * @GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT: 12 tones with equal distance (equal temperament)
+ * @GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT: 12 tones with equal distance
+ * @GSTBT_TONE_CONVERSION_JUST_INTONATION: 12 tones with just intonation
  *
  * Supported tuning types.
  * see http://en.wikipedia.org/wiki/Musical_tuning
  */
 typedef enum {
-  /* 12 tones with equal distance */
   GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT=0,
+  GSTBT_TONE_CONVERSION_JUST_INTONATION
   /* TODO(ensonic): add more tunings
-   * JUST_INTONATION
    * PYTHAGOREAN_TUNING
    * MEANTONE_TEMPERAMENT
    * WELL_TEMPERAMENT

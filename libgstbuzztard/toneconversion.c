@@ -58,7 +58,10 @@ gstbt_tone_conversion_tuning_get_type (void)
     static const GEnumValue values[] = {
       {GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT,
             "GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT",
-          "cromatic tuning"},
+          "equal temperament"},
+      {GSTBT_TONE_CONVERSION_JUST_INTONATION,
+            "GSTBT_TONE_CONVERSION_JUST_INTONATION",
+          "just intonation"},
       {0, NULL, NULL},
     };
     type = g_enum_register_static ("GstBtToneConversionTuning", values);
@@ -179,7 +182,7 @@ gstbt_tone_conversion_translate_equal_temperament (GstBtToneConversion * self,
   frequency = (gdouble) (55 << octave);
   /* do tone stepping */
   step = pow (2.0, (1.0 / 12.0));
-  if (tone <= 9) {
+  if (tone < 9) {
     // go down
     steps = 9 - tone;
     for (i = 0; i < steps; i++)
@@ -190,7 +193,40 @@ gstbt_tone_conversion_translate_equal_temperament (GstBtToneConversion * self,
     for (i = 0; i < steps; i++)
       frequency *= step;
   }
-  return (frequency);
+  return frequency;
+}
+
+static gdouble
+gstbt_tone_conversion_translate_just_intonation (GstBtToneConversion * self,
+    guint octave, guint tone)
+{
+  gdouble frequency = 0.0;
+  gdouble steps[12] = {
+    1.0,
+    16.0 / 15.0,
+    9.0 / 8.0,
+    6.0 / 5.0,
+    5.0 / 4.0,
+    4.0 / 3.0,
+    7.0 / 5.0,
+    3.0 / 2.0,
+    8.0 / 5.0,
+    5.0 / 3.0,
+    16.0 / 9.0,
+    15.0 / 8.0
+  };
+
+  g_assert (tone < 12);
+  g_assert (octave < 10);
+
+  /* calculated base frequency A-0=55 Hz */
+  frequency = (gdouble) (55 << octave);
+  if (tone < 9) {
+    frequency /= steps[9 - tone];
+  } else {
+    frequency *= steps[tone - 9];
+  }
+  return frequency;
 }
 
 static void
@@ -199,6 +235,11 @@ gstbt_tone_conversion_change_tuning (GstBtToneConversion * self)
   switch (self->tuning) {
     case GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT:
       self->translate = gstbt_tone_conversion_translate_equal_temperament;
+      break;
+    case GSTBT_TONE_CONVERSION_JUST_INTONATION:
+      self->translate = gstbt_tone_conversion_translate_just_intonation;
+      break;
+    default:
       break;
   }
 }
@@ -354,13 +395,11 @@ gstbt_tone_conversion_get_property (GObject * object,
     return;
 
   switch (property_id) {
-    case GSTBT_TONE_CONVERSION_TUNING:{
+    case GSTBT_TONE_CONVERSION_TUNING:
       g_value_set_enum (value, self->tuning);
-    }
       break;
-    default:{
+    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    }
       break;
   }
 }
@@ -376,14 +415,12 @@ gstbt_tone_conversion_set_property (GObject * object,
     return;
 
   switch (property_id) {
-    case GSTBT_TONE_CONVERSION_TUNING:{
+    case GSTBT_TONE_CONVERSION_TUNING:
       self->tuning = g_value_get_enum (value);
       gstbt_tone_conversion_change_tuning (self);
-    }
       break;
-    default:{
+    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    }
       break;
   }
 }
