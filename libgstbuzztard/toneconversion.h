@@ -36,13 +36,16 @@ G_BEGIN_DECLS
  * GstBtToneConversionTuning:
  * @GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT: 12 tones with equal distance
  * @GSTBT_TONE_CONVERSION_JUST_INTONATION: 12 tones with just intonation
+ * @GSTBT_TONE_CONVERSION_PYTHAGOREAN_TUNING: 12 tones with pythagorean tuning
+ * @GSTBT_TONE_CONVERSION_COUNT: number of tunings
  *
  * Supported tuning types.
  * see http://en.wikipedia.org/wiki/Musical_tuning
  */
 typedef enum {
   GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT=0,
-  GSTBT_TONE_CONVERSION_JUST_INTONATION
+  GSTBT_TONE_CONVERSION_JUST_INTONATION,
+  GSTBT_TONE_CONVERSION_PYTHAGOREAN_TUNING,
   /* TODO(ensonic): add more tunings
    * PYTHAGOREAN_TUNING
    * MEANTONE_TEMPERAMENT
@@ -62,6 +65,7 @@ typedef enum {
    *
    * there are also tonal systems using 19, 24 and 31 keys per octave
    */
+   GSTBT_TONE_CONVERSION_COUNT
 } GstBtToneConversionTuning;
 
 #define GSTBT_TYPE_TONE_CONVERSION            (gstbt_tone_conversion_get_type ())

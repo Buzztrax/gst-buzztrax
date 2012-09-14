@@ -62,6 +62,9 @@ gstbt_tone_conversion_tuning_get_type (void)
       {GSTBT_TONE_CONVERSION_JUST_INTONATION,
             "GSTBT_TONE_CONVERSION_JUST_INTONATION",
           "just intonation"},
+      {GSTBT_TONE_CONVERSION_PYTHAGOREAN_TUNING,
+            "GSTBT_TONE_CONVERSION_PYTHAGOREAN_TUNING",
+          "pythagorean tuning"},
       {0, NULL, NULL},
     };
     type = g_enum_register_static ("GstBtToneConversionTuning", values);
@@ -229,6 +232,37 @@ gstbt_tone_conversion_translate_just_intonation (GstBtToneConversion * self,
   return frequency;
 }
 
+static gdouble
+gstbt_tone_conversion_translate_pythagorean_tuning (GstBtToneConversion * self,
+    guint octave, guint tone)
+{
+  gdouble frequency = 0.0;
+  gdouble steps[12] = {
+    1.0,
+    256.0 / 234.0,
+    9.0 / 8.0,
+    32.0 / 27.0,
+    81.0 / 64.0,
+    4.0 / 3.0,
+    729.0 / 512.0,              /* or 1024.0 / 729.0 */
+    3.0 / 2.0,
+    128.0 / 81.0,
+    27.0 / 16.0,
+    16.0 / 9.0,
+    243.0 / 128.0
+  };
+
+  g_assert (tone < 12);
+  g_assert (octave < 10);
+
+  /* calculated base frequency A-0=55 Hz */
+  frequency = (gdouble) (55 << octave);
+  /* steps assume that C is the base and thus we rebase the ratios to the 9th
+   * step = A */
+  frequency *= (steps[tone] / steps[9]);
+  return frequency;
+}
+
 static void
 gstbt_tone_conversion_change_tuning (GstBtToneConversion * self)
 {
@@ -238,6 +272,9 @@ gstbt_tone_conversion_change_tuning (GstBtToneConversion * self)
       break;
     case GSTBT_TONE_CONVERSION_JUST_INTONATION:
       self->translate = gstbt_tone_conversion_translate_just_intonation;
+      break;
+    case GSTBT_TONE_CONVERSION_PYTHAGOREAN_TUNING:
+      self->translate = gstbt_tone_conversion_translate_pythagorean_tuning;
       break;
     default:
       break;

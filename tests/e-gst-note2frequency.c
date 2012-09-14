@@ -179,9 +179,11 @@ gst_buzztard_note2frequency_example_case (void)
 
   tcase_add_test (tc, test_create_obj);
   tcase_add_test (tc, test_translate_str_base);
-  tcase_add_loop_test (tc, test_translate_str_series, 0, 2);
+  tcase_add_loop_test (tc, test_translate_str_series, 0,
+      GSTBT_TONE_CONVERSION_COUNT);
   tcase_add_test (tc, test_translate_num_base);
-  tcase_add_loop_test (tc, test_translate_num_series, 0, 2);
+  tcase_add_loop_test (tc, test_translate_num_series, 0,
+      GSTBT_TONE_CONVERSION_COUNT);
   tcase_add_test (tc, test_convert_note_string_2_number);
   tcase_add_test (tc, test_convert_note_number_2_string);
   tcase_add_test (tc, test_note_number_offset);
