@@ -75,6 +75,7 @@ struct _GstBtSidSyn
 	gboolean filter_band_pass;
 	gboolean filter_hi_pass;
 	gboolean voice_3_off;
+	GstBtToneConversionTuning tuning;
 	GstBtToneConversion *n2f;
 };
 

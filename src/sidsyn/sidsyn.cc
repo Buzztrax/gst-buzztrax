@@ -64,15 +64,18 @@ GST_DEBUG_CATEGORY (GST_CAT_DEFAULT);
 
 enum
 {
+  // static class properties
   PROP_CHILDREN = 1,
+  PROP_CHIP,
+  PROP_TUNING,
+  // dynamic class properties
   PROP_CUTOFF,
   PROP_RESONANCE,
   PROP_VOLUME,
   PROP_FILTER_LOW_PASS,
   PROP_FILTER_BAND_PASS,
   PROP_FILTER_HI_PASS,
-  PROP_VOICE_3_OFF,
-  PROP_CHIP
+  PROP_VOICE_3_OFF
 };
 
 static GstBtAudioSynthClass *parent_class = NULL;
@@ -204,6 +207,16 @@ gst_sid_syn_class_init (GstBtSidSynClass * klass)
   g_object_class_override_property (gobject_class, PROP_CHILDREN, "children");
 
   // register own properties
+
+  g_object_class_install_property (gobject_class, PROP_CHIP,
+      g_param_spec_enum ("chip", "Chip model", "Chip model to emulate",
+          GSTBT_TYPE_SID_SYN_CHIP, MOS6581, pflags2));
+
+  g_object_class_install_property (gobject_class, PROP_TUNING,
+      g_param_spec_enum ("tuning", "Tuning",
+          "Harmonic tuning", GSTBT_TYPE_TONE_CONVERSION_TUNING,
+          GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT, pflags2));
+
   g_object_class_install_property (gobject_class, PROP_CUTOFF,
       g_param_spec_uint ("cut-off", "Cut-Off",
           "Audio filter cut-off frequency", 0, 2047, 1024, pflags1));
@@ -231,10 +244,6 @@ gst_sid_syn_class_init (GstBtSidSynClass * klass)
   g_object_class_install_property (gobject_class, PROP_VOICE_3_OFF,
       g_param_spec_boolean ("voice3-off", "Voice3Off", 
           "Detach voice 3 from mixer",  FALSE, pflags1));
-
-  g_object_class_install_property (gobject_class, PROP_CHIP,
-      g_param_spec_enum ("chip", "Chip model", "Chip model to emulate",
-          GSTBT_TYPE_SID_SYN_CHIP, MOS6581, pflags2));
 }
 
 static void
@@ -248,6 +257,13 @@ gst_sid_syn_set_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_CHILDREN:
+      break;
+    case PROP_CHIP:
+      src->chip = (chip_model) g_value_get_enum (value);
+      break;
+    case PROP_TUNING:
+      src->tuning = (GstBtToneConversionTuning) g_value_get_enum (value);
+      g_object_set (src->n2f, "tuning", src->tuning, NULL);
       break;
     case PROP_CUTOFF:
       src->cutoff = g_value_get_uint (value);
@@ -270,9 +286,6 @@ gst_sid_syn_set_property (GObject * object, guint prop_id,
     case PROP_VOICE_3_OFF:
       src->voice_3_off = g_value_get_boolean (value);
       break;
-    case PROP_CHIP:
-      src->chip = (chip_model) g_value_get_enum (value);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -291,6 +304,12 @@ gst_sid_syn_get_property (GObject * object, guint prop_id,
   switch (prop_id) {
     case PROP_CHILDREN:
       g_value_set_ulong (value, NUM_VOICES);
+      break;
+    case PROP_CHIP:
+      g_value_set_enum (value, src->chip);
+      break;
+    case PROP_TUNING:
+      g_value_set_enum (value, src->tuning);
       break;
     case PROP_CUTOFF:
       g_value_set_uint (value, src->cutoff);
@@ -313,9 +332,6 @@ gst_sid_syn_get_property (GObject * object, guint prop_id,
     case PROP_VOICE_3_OFF:
       g_value_set_boolean (value, src->voice_3_off);
       break;
-    case PROP_CHIP:
-      g_value_set_enum (value, src->chip);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -331,7 +347,8 @@ gst_sid_syn_init (GstBtSidSyn * src, GstBtSidSynClass * g_class)
   src->clockrate = PALCLOCKRATE;
   src->emu = new SID;
   src->chip = MOS6581;
-	src->n2f = gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
+  src->tuning = GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT;
+	src->n2f = gstbt_tone_conversion_new (src->tuning);
 	
 	for (i = 0; i < NUM_VOICES; i++) {
 	  src->voices[i] = (GstBtSidSynV *) g_object_new (GSTBT_TYPE_SID_SYNV, NULL);
