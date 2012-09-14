@@ -221,11 +221,11 @@ gstbt_tone_conversion_translate_just_intonation (GstBtToneConversion * self,
 
   /* calculated base frequency A-0=55 Hz */
   frequency = (gdouble) (55 << octave);
-  if (tone < 9) {
-    frequency /= steps[9 - tone];
-  } else {
-    frequency *= steps[tone - 9];
-  }
+  //GST_INFO("frq1 : %lf", (tone < 9) ? frequency / steps[9 - tone] : frequency * steps[tone - 9]);
+  //GST_INFO("frq2 : %lf", frequency * (steps[tone] / steps[9]));
+  /* steps assume that C is the base and thus we rebase the ratios to the 9th
+   * step = A */
+  frequency *= (steps[tone] / steps[9]);
   return frequency;
 }
 
