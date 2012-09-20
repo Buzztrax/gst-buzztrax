@@ -362,13 +362,21 @@ gst_sid_syn_init (GstBtSidSyn * src, GstBtSidSynClass * g_class)
 	src->volume = 15;
 }
 
-#define NUM_REGS 29
+// we only want to write registers if the values have changed
+#define WRITE_REG(reg) G_STMT_START { \
+  const gint r = (reg);               \
+  if ((gint)regs[r] != pregs[r]) {    \
+    src->emu->write (r, regs[r]);     \
+    pregs[r] = (gint)regs[r];         \
+  }                                   \
+} G_STMT_END
 
 static void
 gst_sid_syn_update_regs (GstBtSidSyn *src)
 {
   gint i;
-  guchar regs[NUM_REGS] = {0, };
+  gint *pregs = src->regs;
+  guchar regs[NUM_REGS];
   guint filters = 0;
   guint subticks = NUM_STEPS * ((GstBtAudioSynth *)src)->subticks_per_tick;
 
@@ -553,6 +561,14 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
     GST_DEBUG ("%1d: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
       i, regs[0x00 + i*7], regs[0x01 + i*7], regs[0x02 + i*7], regs[0x03 + i*7],
       regs[0x04 + i*7], regs[0x05 + i*7], regs[0x06 + i*7]);
+    
+    WRITE_REG(0x00 + i*7);
+    WRITE_REG(0x01 + i*7);
+    WRITE_REG(0x02 + i*7);
+    WRITE_REG(0x03 + i*7);
+    WRITE_REG(0x05 + i*7);
+    WRITE_REG(0x06 + i*7);
+    WRITE_REG(0x04 + i*7);
   }
 
   regs[0x15] = (guchar) (src->cutoff & 7);
@@ -560,10 +576,11 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
   regs[0x17] = (guchar) (src->resonance << 4) | filters;
   regs[0x18] = (guchar) ((src->voice_3_off << 7) | (src->filter_hi_pass << 6) |
       (src->filter_band_pass << 5) | (src->filter_low_pass << 4) | src->volume);
+  WRITE_REG(0x15);
+  WRITE_REG(0x16);
+  WRITE_REG(0x17);
+  WRITE_REG(0x18);
   
-  for (i = 0; i < NUM_REGS; i++) {
-    src->emu->write (i, regs[i]);
-  }
 }
 
 static gboolean
@@ -585,6 +602,9 @@ gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
   for (i = 0; i < NUM_VOICES; i++) {
     src->voices[i]->prev_freq = 0.0;
     src->voices[i]->want_freq = 0.0;
+  }
+  for (i = 0; i < NUM_REGS; i++) {
+    src->regs[i] = -1;
   }
 
   return TRUE;

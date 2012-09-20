@@ -39,6 +39,7 @@ typedef enum chip_model {
 #endif
 
 #define NUM_VOICES 3
+#define NUM_REGS 29
 
 G_BEGIN_DECLS
 #define GSTBT_TYPE_SID_SYN            (gstbt_sid_syn_get_type())
@@ -68,7 +69,8 @@ struct _GstBtSidSyn
 	SID *emu;
 	chip_model chip;
 
-	// states:
+	/* states */
+	gint regs[NUM_REGS];
 	GstBtSidSynV *voices[NUM_VOICES];
 	gint cutoff, resonance, volume;
 	gboolean filter_low_pass;
