@@ -242,6 +242,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       g_object_set (src->n2f, "tuning", src->tuning, NULL);
       break;
     case PROP_NOTE:
+      //GST_INFO("trigger note %d -> %d",g_value_get_enum (value),src->note);
       if ((src->note = g_value_get_enum (value)))
         gst_sim_syn_trigger_note (src);
       break;
