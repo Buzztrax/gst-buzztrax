@@ -157,6 +157,9 @@ gst_sim_syn_base_init (gpointer g_class)
 {
   GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
 
+  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "simsyn",
+      GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
+
   gst_element_class_set_details_simple (element_class,
       "Simple Synth",
       "Source/Audio",
@@ -1014,22 +1017,3 @@ gstbt_sim_syn_get_type (void)
   }
   return type;
 }
-
-static gboolean
-plugin_init (GstPlugin * plugin)
-{
-  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "simsyn",
-      GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
-
-  /* initialize gst controller library */
-  gst_controller_init (NULL, NULL);
-
-  return gst_element_register (plugin, "simsyn", GST_RANK_NONE,
-      GSTBT_TYPE_SIM_SYN);
-}
-
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
-    GST_VERSION_MINOR,
-    "simsyn",
-    "Simple audio synthesizer",
-    plugin_init, VERSION, "LGPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN);

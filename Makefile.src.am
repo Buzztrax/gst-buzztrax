@@ -110,7 +110,7 @@ libgstfluidsynth_la_LIBTOOLFLAGS = --tag=disable-static
 endif
 
 
-libgstsimsyn_la_SOURCES = src/simsyn/simsyn.c
+libgstsimsyn_la_SOURCES = src/simsyn/plugin.c src/simsyn/simsyn.c
 libgstsimsyn_la_CFLAGS = \
   -I$(srcdir) -I$(top_srcdir) \
   -DDATADIR=\"$(datadir)\" \
