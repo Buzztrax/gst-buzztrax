@@ -69,7 +69,6 @@ gstbt_sid_synv_get_type
 <SECTION>
 <FILE>gstsimsyn</FILE>
 GstBtSimSyn
-GstBtSimSynFilter
 GstBtSimSynWave
 <SUBSECTION Standard>
 GstBtSimSynClass
@@ -221,6 +220,23 @@ GSTBT_IS_ENVELOPE_CLASS
 GSTBT_ENVELOPE_GET_CLASS
 GSTBT_TYPE_ENVELOPE
 gstbt_envelope_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstbtfiltersvf</FILE>
+GstBtFilterSVF
+gstbt_filter_svf_new
+<SUBSECTION Standard>
+GstBtEnvelopeClass
+GSTBT_FILTER_SVF
+GSTBT_IS_FILTER_SVF
+GSTBT_FILTER_SVF_CLASS
+GSTBT_IS_FILTER_SVF_CLASS
+GSTBT_FILTER_SVF_GET_CLASS
+GSTBT_TYPE_FILTER_SVF
+GSTBT_TYPE_FILTER_SVF_TYPE
+gstbt_filter_svf_get_type
+gstbt_filter_svf_type_get_type
 </SECTION>
 
 <SECTION>

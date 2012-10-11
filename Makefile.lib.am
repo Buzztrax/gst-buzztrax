@@ -6,6 +6,7 @@ libgstbuzztard_la_SOURCES = \
 	libgstbuzztard/audiosynth.c \	
 	libgstbuzztard/childbin.c \
 	libgstbuzztard/envelope.c \
+	libgstbuzztard/filter-svf.c \
 	libgstbuzztard/musicenums.c \                                                             
 	libgstbuzztard/toneconversion.c \
 	libgstbuzztard/propertymeta.c \
@@ -21,6 +22,7 @@ libgstbuzztardinclude_HEADERS = \
 	libgstbuzztard/audiosynth.h \
 	libgstbuzztard/childbin.h \
 	libgstbuzztard/envelope.h \
+	libgstbuzztard/filter-svf.h \
 	libgstbuzztard/musicenums.h \
 	libgstbuzztard/toneconversion.h \
 	libgstbuzztard/propertymeta.h \

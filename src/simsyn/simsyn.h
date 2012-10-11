@@ -26,6 +26,7 @@
 #include <gst/controller/gstcontroller.h>
 #include <libgstbuzztard/toneconversion.h>
 #include <libgstbuzztard/envelope.h>
+#include <libgstbuzztard/filter-svf.h>
 #include <libgstbuzztard/audiosynth.h>
 
 G_BEGIN_DECLS
@@ -74,25 +75,6 @@ typedef enum
   GSTBT_SIM_SYN_WAVE_VIOLET_NOISE
 } GstBtSimSynWave;
 
-/**
- * GstBtSimSynFilter:
- * @GSTBT_SIM_SYN_FILTER_NONE: no filtering
- * @GSTBT_SIM_SYN_FILTER_LOWPASS: low pass
- * @GSTBT_SIM_SYN_FILTER_HIPASS: high pass
- * @GSTBT_SIM_SYN_FILTER_BANDPASS: band pass
- * @GSTBT_SIM_SYN_FILTER_BANDSTOP: band stop (notch)
- *
- * Filter types.
- */
-typedef enum
-{
-  GSTBT_SIM_SYN_FILTER_NONE,
-  GSTBT_SIM_SYN_FILTER_LOWPASS,
-  GSTBT_SIM_SYN_FILTER_HIPASS,
-  GSTBT_SIM_SYN_FILTER_BANDPASS,
-  GSTBT_SIM_SYN_FILTER_BANDSTOP
-} GstBtSimSynFilter;
-
 #define PINK_MAX_RANDOM_ROWS   (30)
 #define PINK_RANDOM_BITS       (16)
 #define PINK_RANDOM_SHIFT      ((sizeof(long)*8)-PINK_RANDOM_BITS)
@@ -134,12 +116,8 @@ struct _GstBtSimSyn
   GstBtNote note;
   gdouble volume;
   gdouble decay;
-  GstBtSimSynFilter filter;
-  gdouble cutoff;
-  gdouble resonance;
 
   void (*process) (GstBtSimSyn *, gint16 *);
-  void (*apply_filter) (GstBtSimSyn *, gint16 *);
 
   GstBtToneConversionTuning tuning;
   GstBtToneConversion *n2f;
@@ -147,6 +125,8 @@ struct _GstBtSimSyn
   guint64 note_count, note_length;
   GstBtEnvelope *volenv;        /* volume-envelope */
   GstController *volenv_controller;     /* volume-envelope controller */
+  
+  GstBtFilterSVF *filter;
 
   /* waveform specific context data */
   gdouble accumulator;          /* phase angle */
@@ -154,9 +134,6 @@ struct _GstBtSimSyn
   GstBtRedNoise red;
   gint16 wave_table[WAVE_TABLE_SIZE];
 
-  /* filter specific data */
-  gdouble flt_low, flt_mid, flt_high;
-  gdouble flt_res;
 };
 
 struct _GstBtSimSynClass

@@ -41,6 +41,7 @@
     <title>GStreamer Buzztard classes</title>
     <xi:include href="xml/gstbtaudiosynth.xml"/>
     <xi:include href="xml/gstbtenvelope.xml"/>
+    <xi:include href="xml/gstbtfiltersvf.xml"/>
     <xi:include href="xml/gstbtmusicenums.xml"/>
     <xi:include href="xml/gstbttoneconversion.xml"/>
   </chapter>

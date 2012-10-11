@@ -108,26 +108,6 @@ gst_sim_syn_wave_get_type (void)
   return type;
 }
 
-#define GSTBT_TYPE_SIM_SYN_FILTER (gst_sim_syn_filter_get_type())
-static GType
-gst_sim_syn_filter_get_type (void)
-{
-  static GType type = 0;
-  static const GEnumValue enums[] = {
-    {GSTBT_SIM_SYN_FILTER_NONE, "None", "none"},
-    {GSTBT_SIM_SYN_FILTER_LOWPASS, "LowPass", "lowpass"},
-    {GSTBT_SIM_SYN_FILTER_HIPASS, "HiPass", "hipass"},
-    {GSTBT_SIM_SYN_FILTER_BANDPASS, "BandPass", "bandpass"},
-    {GSTBT_SIM_SYN_FILTER_BANDSTOP, "BandStop", "bandstop"},
-    {0, NULL, NULL},
-  };
-
-  if (G_UNLIKELY (!type)) {
-    type = g_enum_register_static ("GstBtSimSynFilter", enums);
-  }
-  return type;
-}
-
 static GstBtAudioSynthClass *parent_class = NULL;
 
 static void gst_sim_syn_base_init (gpointer klass);
@@ -145,7 +125,6 @@ static gboolean gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad,
 
 static void gst_sim_syn_change_wave (GstBtSimSyn * src);
 static void gst_sim_syn_change_volume (GstBtSimSyn * src);
-static void gst_sim_syn_change_filter (GstBtSimSyn * src);
 
 static void gst_sim_syn_trigger_note (GstBtSimSyn * src);
 static void gst_sim_syn_create_silence (GstBtSimSyn * src, gint16 * samples);
@@ -215,7 +194,7 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
 
   g_object_class_install_property (gobject_class, PROP_FILTER,
       g_param_spec_enum ("filter", "Filtertype", "Type of audio filter",
-          GSTBT_TYPE_SIM_SYN_FILTER, GSTBT_SIM_SYN_FILTER_LOWPASS,
+          GSTBT_TYPE_FILTER_SVF_TYPE, GSTBT_FILTER_SVF_LOWPASS,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_CUTOFF,
@@ -264,18 +243,13 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       src->decay = g_value_get_double (value);
       break;
     case PROP_FILTER:
-      //GST_INFO("change filter %d -> %d",g_value_get_enum (value),src->filter);
-      src->filter = g_value_get_enum (value);
-      gst_sim_syn_change_filter (src);
+      g_object_set_property ((GObject *) (src->filter), "type", value);
       break;
     case PROP_CUTOFF:
-      //GST_INFO("change cutoff %lf -> %lf",g_value_get_double (value),src->cutoff);
-      src->cutoff = g_value_get_double (value);
+      g_object_set_property ((GObject *) (src->filter), "cut-off", value);
       break;
     case PROP_RESONANCE:
-      //GST_INFO("change resonance %lf -> %lf",g_value_get_double (value),src->resonance);
-      src->resonance = g_value_get_double (value);
-      src->flt_res = 1.0 / src->resonance;
+      g_object_set_property ((GObject *) (src->filter), "resonance", value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -306,13 +280,13 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
       g_value_set_double (value, src->decay);
       break;
     case PROP_FILTER:
-      g_value_set_enum (value, src->filter);
+      g_object_get_property ((GObject *) (src->filter), "type", value);
       break;
     case PROP_CUTOFF:
-      g_value_set_double (value, src->cutoff);
+      g_object_get_property ((GObject *) (src->filter), "cut-off", value);
       break;
     case PROP_RESONANCE:
-      g_value_set_double (value, src->resonance);
+      g_object_get_property ((GObject *) (src->filter), "resonance", value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -342,12 +316,7 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
   gst_controller_set_interpolation_mode (src->volenv_controller, "value",
       GST_INTERPOLATE_LINEAR);
 
-  /* set filter */
-  src->filter = GSTBT_SIM_SYN_FILTER_LOWPASS;
-  src->cutoff = 0.8;
-  src->resonance = 0.8;
-  src->flt_res = 1.0 / src->resonance;
-  gst_sim_syn_change_filter (src);
+  src->filter = gstbt_filter_svf_new ();
 }
 
 static gboolean
@@ -366,14 +335,15 @@ static void
 gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 {
   GstBtSimSyn *src = ((GstBtSimSyn *) base);
+  gint16 *d = (gint16 *) GST_BUFFER_DATA (data);
+  guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
 
-  //if ((src->freq != 0.0) && (src->volenv->value > 0.0001)) {
   if ((src->freq != 0.0) && (src->note_count < src->note_length)) {
-    src->process (src, (gint16 *) GST_BUFFER_DATA (data));
-    if (src->apply_filter)
-      src->apply_filter (src, (gint16 *) GST_BUFFER_DATA (data));
+    src->process (src, d);
+    if (src->filter->process)
+      src->filter->process (src->filter, ct, d);
   } else {
-    gst_sim_syn_create_silence (src, (gint16 *) GST_BUFFER_DATA (data));
+    gst_sim_syn_create_silence (src, d);
     GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
 }
@@ -395,7 +365,7 @@ gst_sim_syn_trigger_note (GstBtSimSyn * src)
     /* trigger volume 'envelope' and reset other states */
     src->volenv->value = 0.001;
     src->note_count = 0L;
-    src->flt_low = src->flt_mid = src->flt_high = 0.0;
+    //src->flt_low = src->flt_mid = src->flt_high = 0.0;
     /* src->samplerate will be one second */
     attack = samplerate / 1000;
     decay = samplerate * src->decay;
@@ -776,97 +746,6 @@ gst_sim_syn_create_violet_noise (GstBtSimSyn * src, gint16 * samples)
   }
 }
 
-/* Filters */
-
-static void
-gst_sim_syn_filter_lowpass (GstBtSimSyn * src, gint16 * samples)
-{
-  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
-  gdouble flt_low = src->flt_low;
-  gdouble flt_mid = src->flt_mid;
-  gdouble flt_high = src->flt_high;
-  gdouble flt_res = src->flt_res;
-  gdouble cutoff = src->cutoff;
-
-  for (i = 0; i < ct; i++) {
-    flt_high = (gdouble) samples[i] - (flt_mid * flt_res) - flt_low;
-    flt_mid += (flt_high * cutoff);
-    flt_low += (flt_mid * cutoff);
-
-    samples[i] = (gint16) CLAMP ((glong) flt_low, G_MININT16, G_MAXINT16);
-  }
-  src->flt_low = flt_low;
-  src->flt_mid = flt_mid;
-  src->flt_high = flt_high;
-}
-
-static void
-gst_sim_syn_filter_hipass (GstBtSimSyn * src, gint16 * samples)
-{
-  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
-  gdouble flt_low = src->flt_low;
-  gdouble flt_mid = src->flt_mid;
-  gdouble flt_high = src->flt_high;
-  gdouble flt_res = src->flt_res;
-  gdouble cutoff = src->cutoff;
-
-  for (i = 0; i < ct; i++) {
-    flt_high = (gdouble) samples[i] - (flt_mid * flt_res) - flt_low;
-    flt_mid += (flt_high * cutoff);
-    flt_low += (flt_mid * cutoff);
-
-    samples[i] = (gint16) CLAMP ((glong) flt_high, G_MININT16, G_MAXINT16);
-  }
-  src->flt_low = flt_low;
-  src->flt_mid = flt_mid;
-  src->flt_high = flt_high;
-}
-
-static void
-gst_sim_syn_filter_bandpass (GstBtSimSyn * src, gint16 * samples)
-{
-  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
-  gdouble flt_low = src->flt_low;
-  gdouble flt_mid = src->flt_mid;
-  gdouble flt_high = src->flt_high;
-  gdouble flt_res = src->flt_res;
-  gdouble cutoff = src->cutoff;
-
-  for (i = 0; i < ct; i++) {
-    flt_high = (gdouble) samples[i] - (flt_mid * flt_res) - flt_low;
-    flt_mid += (flt_high * cutoff);
-    flt_low += (flt_mid * cutoff);
-
-    samples[i] = (gint16) CLAMP ((glong) flt_mid, G_MININT16, G_MAXINT16);
-  }
-  src->flt_low = flt_low;
-  src->flt_mid = flt_mid;
-  src->flt_high = flt_high;
-}
-
-static void
-gst_sim_syn_filter_bandstop (GstBtSimSyn * src, gint16 * samples)
-{
-  guint i, ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
-  gdouble flt_low = src->flt_low;
-  gdouble flt_mid = src->flt_mid;
-  gdouble flt_high = src->flt_high;
-  gdouble flt_res = src->flt_res;
-  gdouble cutoff = src->cutoff;
-
-  for (i = 0; i < ct; i++) {
-    flt_high = (gdouble) samples[i] - (flt_mid * flt_res) - flt_low;
-    flt_mid += (flt_high * cutoff);
-    flt_low += (flt_mid * cutoff);
-
-    samples[i] =
-        (gint16) CLAMP ((glong) (flt_low + flt_high), G_MININT16, G_MAXINT16);
-  }
-  src->flt_low = flt_low;
-  src->flt_mid = flt_mid;
-  src->flt_high = flt_high;
-}
-
 /*
  * gst_sim_syn_change_wave:
  * Assign function pointer of wave genrator.
@@ -938,35 +817,6 @@ gst_sim_syn_change_volume (GstBtSimSyn * src)
   }
 }
 
-/*
- * gst_sim_syn_change_filter:
- * Assign filter type function
- */
-static void
-gst_sim_syn_change_filter (GstBtSimSyn * src)
-{
-  switch (src->filter) {
-    case GSTBT_SIM_SYN_FILTER_NONE:
-      src->apply_filter = NULL;
-      break;
-    case GSTBT_SIM_SYN_FILTER_LOWPASS:
-      src->apply_filter = gst_sim_syn_filter_lowpass;
-      break;
-    case GSTBT_SIM_SYN_FILTER_HIPASS:
-      src->apply_filter = gst_sim_syn_filter_hipass;
-      break;
-    case GSTBT_SIM_SYN_FILTER_BANDPASS:
-      src->apply_filter = gst_sim_syn_filter_bandpass;
-      break;
-    case GSTBT_SIM_SYN_FILTER_BANDSTOP:
-      src->apply_filter = gst_sim_syn_filter_bandstop;
-      break;
-    default:
-      GST_ERROR ("invalid filter-type: %d", src->filter);
-      break;
-  }
-}
-
 static void
 gst_sim_syn_dispose (GObject * object)
 {
@@ -982,6 +832,9 @@ gst_sim_syn_dispose (GObject * object)
     g_object_unref (src->volenv_controller);
   if (src->volenv)
     g_object_unref (src->volenv);
+
+  if (src->filter)
+    g_object_unref (src->filter);
 
   G_OBJECT_CLASS (parent_class)->dispose (object);
 }
