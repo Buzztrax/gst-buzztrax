@@ -41,11 +41,6 @@
  *     ac_f=1.0;
  *     ac_s=1.0/INNER_LOOP;
  *   }
- *
- * - add a more advanced element (polysyn)
- *   - polyphonic
- *   - multiple oscillators per voice with detune
- *   - real envelopes per osczillator
  */
 
 #ifdef HAVE_CONFIG_H
@@ -126,7 +121,6 @@ static gboolean gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad,
 static void gst_sim_syn_change_wave (GstBtSimSyn * src);
 static void gst_sim_syn_change_volume (GstBtSimSyn * src);
 
-static void gst_sim_syn_trigger_note (GstBtSimSyn * src);
 static void gst_sim_syn_create_silence (GstBtSimSyn * src, gint16 * samples);
 
 //-- simsyn implementation
@@ -224,9 +218,13 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       g_object_set (src->n2f, "tuning", src->tuning, NULL);
       break;
     case PROP_NOTE:
-      //GST_INFO("trigger note %d -> %d",g_value_get_enum (value),src->note);
-      if ((src->note = g_value_get_enum (value)))
-        gst_sim_syn_trigger_note (src);
+      if ((src->note = g_value_get_enum (value))) {
+        GST_DEBUG ("new note -> '%d'", src->note);
+        src->freq =
+            gstbt_tone_conversion_translate_from_number (src->n2f, src->note);
+        gstbt_envelope_setup (src->volenv,
+            ((GstBtAudioSynth *) src)->samplerate, src->decay);
+      }
       break;
     case PROP_WAVE:
       //GST_INFO("change wave %d -> %d",g_value_get_enum (value),src->wave);
@@ -311,10 +309,6 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
 
   /* add a volume envelope generator */
   src->volenv = gstbt_envelope_new ();
-  src->volenv_controller =
-      gst_controller_new (G_OBJECT (src->volenv), "value", NULL);
-  gst_controller_set_interpolation_mode (src->volenv_controller, "value",
-      GST_INTERPOLATE_LINEAR);
 
   src->filter = gstbt_filter_svf_new ();
 }
@@ -338,62 +332,13 @@ gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
   gint16 *d = (gint16 *) GST_BUFFER_DATA (data);
   guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
 
-  if ((src->freq != 0.0) && (src->note_count < src->note_length)) {
+  if ((src->freq != 0.0) && gstbt_envelope_is_running (src->volenv)) {
     src->process (src, d);
     if (src->filter->process)
       src->filter->process (src->filter, ct, d);
   } else {
     gst_sim_syn_create_silence (src, d);
     GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
-  }
-}
-
-static void
-gst_sim_syn_trigger_note (GstBtSimSyn * src)
-{
-  gdouble freq;
-
-  GST_DEBUG ("new note -> '%d'", src->note);
-  freq = gstbt_tone_conversion_translate_from_number (src->n2f, src->note);
-  if (freq >= 0.0) {
-    guint64 attack, decay;
-    GValue val = { 0, };
-    gint samplerate = ((GstBtAudioSynth *) src)->samplerate;
-    GstController *ctrl = src->volenv_controller;
-
-    src->freq = freq;
-    /* trigger volume 'envelope' and reset other states */
-    src->volenv->value = 0.001;
-    src->note_count = 0L;
-    //src->flt_low = src->flt_mid = src->flt_high = 0.0;
-    /* src->samplerate will be one second */
-    attack = samplerate / 1000;
-    decay = samplerate * src->decay;
-    if (attack > decay)
-      attack = decay - 10;
-    src->note_length = decay;
-    g_value_init (&val, G_TYPE_DOUBLE);
-    gst_controller_unset_all (ctrl, "value");
-    g_value_set_double (&val, 0.0);
-    gst_controller_set (ctrl, "value", G_GUINT64_CONSTANT (0), &val);
-    g_value_set_double (&val, 1.0);
-    gst_controller_set (ctrl, "value", attack, &val);
-    g_value_set_double (&val, 0.0);
-    gst_controller_set (ctrl, "value", decay, &val);
-
-    /* TODO(ensonic): more advanced envelope
-       if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
-       gst_controller_set(ctrl,"value",0,0.0);
-       gst_controller_set(ctrl,"value",attack_time,1.0);
-       gst_controller_set(ctrl,"value",attack_time+decay_time,sustain_level);
-       gst_controller_set(ctrl,"value",note_time,sustain_level);
-       gst_controller_set(ctrl,"value",note_time+release_time,0.0);
-     */
-    g_value_unset (&val);
-  } else {
-    src->freq = 0.0;
-    /* stop volume 'envelope' */
-    src->volenv->value = 0.0;
   }
 }
 
@@ -410,10 +355,7 @@ gst_sim_syn_create_sine (GstBtSimSyn * src, gint16 * samples)
   accumulator = src->accumulator;
 
   while (i < ct) {
-    /* the volume envelope */
-    gst_controller_sync_values (src->volenv_controller, src->note_count);
-    amp = src->volenv->value * ampf;
-    src->note_count += INNER_LOOP;
+    amp = gstbt_envelope_get (src->volenv, INNER_LOOP) * ampf;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
       /* TODO(ensonic): move out of inner loop? */
@@ -437,10 +379,7 @@ gst_sim_syn_create_square (GstBtSimSyn * src, gint16 * samples)
   accumulator = src->accumulator;
 
   while (i < ct) {
-    /* the volume envelope */
-    gst_controller_sync_values (src->volenv_controller, src->note_count);
-    amp = src->volenv->value * ampf;
-    src->note_count += INNER_LOOP;
+    amp = gstbt_envelope_get (src->volenv, INNER_LOOP) * ampf;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
       if (G_UNLIKELY (accumulator >= M_PI_M2))
@@ -463,10 +402,7 @@ gst_sim_syn_create_saw (GstBtSimSyn * src, gint16 * samples)
   accumulator = src->accumulator;
 
   while (i < ct) {
-    /* the volume envelope */
-    gst_controller_sync_values (src->volenv_controller, src->note_count);
-    amp = src->volenv->value * ampf;
-    src->note_count += INNER_LOOP;
+    amp = gstbt_envelope_get (src->volenv, INNER_LOOP) * ampf;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
       if (G_UNLIKELY (accumulator >= M_PI_M2))
@@ -493,10 +429,7 @@ gst_sim_syn_create_triangle (GstBtSimSyn * src, gint16 * samples)
   accumulator = src->accumulator;
 
   while (i < ct) {
-    /* the volume envelope */
-    gst_controller_sync_values (src->volenv_controller, src->note_count);
-    amp = src->volenv->value * ampf;
-    src->note_count += INNER_LOOP;
+    amp = gstbt_envelope_get (src->volenv, INNER_LOOP) * ampf;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
       if (G_UNLIKELY (accumulator >= M_PI_M2))
@@ -530,10 +463,7 @@ gst_sim_syn_create_white_noise (GstBtSimSyn * src, gint16 * samples)
   ampf = src->volume * 65535.0;
 
   while (i < ct) {
-    /* the volume envelope */
-    gst_controller_sync_values (src->volenv_controller, src->note_count);
-    amp = src->volenv->value * ampf;
-    src->note_count += INNER_LOOP;
+    amp = gstbt_envelope_get (src->volenv, INNER_LOOP) * ampf;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       samples[i] = (gint16) (32768 - (amp * rand () / (RAND_MAX + 1.0)));
     }
@@ -613,10 +543,7 @@ gst_sim_syn_create_pink_noise (GstBtSimSyn * src, gint16 * samples)
   ampf = src->volume * 32767.0;
 
   while (i < ct) {
-    /* the volume envelope */
-    gst_controller_sync_values (src->volenv_controller, src->note_count);
-    amp = src->volenv->value * ampf;
-    src->note_count += INNER_LOOP;
+    amp = gstbt_envelope_get (src->volenv, INNER_LOOP) * ampf;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       samples[i] =
           (gint16) (gst_sim_syn_generate_pink_noise_value (pink) * amp);
@@ -676,10 +603,7 @@ gst_sim_syn_create_gaussian_white_noise (GstBtSimSyn * src, gint16 * samples)
   ampf = src->volume * 32767.0;
 
   while (i < ct) {
-    /* the volume envelope */
-    gst_controller_sync_values (src->volenv_controller, src->note_count);
-    amp = src->volenv->value * ampf;
-    src->note_count += INNER_LOOP;
+    amp = gstbt_envelope_get (src->volenv, INNER_LOOP) * ampf;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j += 2) {
       gdouble mag = sqrt (-2 * log (1.0 - rand () / (RAND_MAX + 1.0)));
       gdouble phs = M_PI_M2 * rand () / (RAND_MAX + 1.0);
@@ -701,10 +625,7 @@ gst_sim_syn_create_red_noise (GstBtSimSyn * src, gint16 * samples)
   ampf = src->volume * 32767.0;
 
   while (i < ct) {
-    /* the volume envelope */
-    gst_controller_sync_values (src->volenv_controller, src->note_count);
-    amp = src->volenv->value * ampf;
-    src->note_count += INNER_LOOP;
+    amp = gstbt_envelope_get (src->volenv, INNER_LOOP) * ampf;
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       while (TRUE) {
         gdouble r = 1.0 - (2.0 * rand () / (RAND_MAX + 1.0));
@@ -828,8 +749,6 @@ gst_sim_syn_dispose (GObject * object)
 
   if (src->n2f)
     g_object_unref (src->n2f);
-  if (src->volenv_controller)
-    g_object_unref (src->volenv_controller);
   if (src->volenv)
     g_object_unref (src->volenv);
 

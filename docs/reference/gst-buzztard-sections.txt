@@ -211,6 +211,9 @@ gstbt_property_meta_get_type
 <FILE>gstbtenvelope</FILE>
 GstBtEnvelope
 gstbt_envelope_new
+gstbt_envelope_setup
+gstbt_envelope_get
+gstbt_envelope_is_running
 <SUBSECTION Standard>
 GstBtEnvelopeClass
 GSTBT_ENVELOPE

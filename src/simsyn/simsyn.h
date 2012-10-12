@@ -122,9 +122,7 @@ struct _GstBtSimSyn
   GstBtToneConversionTuning tuning;
   GstBtToneConversion *n2f;
   gdouble freq;
-  guint64 note_count, note_length;
   GstBtEnvelope *volenv;        /* volume-envelope */
-  GstController *volenv_controller;     /* volume-envelope controller */
   
   GstBtFilterSVF *filter;
 
