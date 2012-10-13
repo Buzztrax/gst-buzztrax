@@ -184,7 +184,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
         gdouble freq =
             gstbt_tone_conversion_translate_from_number (src->n2f, src->note);
         gstbt_envelope_setup (src->volenv,
-            ((GstBtAudioSynth *) src)->samplerate, src->decay);
+            ((GstBtAudioSynth *) src)->samplerate, src->decay, src->volume);
         g_object_set (src->osc, "frequency", freq, NULL);
       }
       break;
@@ -192,7 +192,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
       g_object_set_property ((GObject *) (src->osc), "wave", value);
       break;
     case PROP_VOLUME:
-      g_object_set_property ((GObject *) (src->osc), "volume", value);
+      src->volume = g_value_get_double (value);
       break;
     case PROP_DECAY:
       src->decay = g_value_get_double (value);
@@ -229,7 +229,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
       g_object_get_property ((GObject *) (src->osc), "wave", value);
       break;
     case PROP_VOLUME:
-      g_object_get_property ((GObject *) (src->osc), "volume", value);
+      g_value_set_double (value, src->volume);
       break;
     case PROP_DECAY:
       g_value_set_double (value, src->decay);

@@ -48,8 +48,7 @@ enum
   PROP_VOLUME_ENVELOPE,
   // dynamic class properties
   PROP_WAVE,
-  PROP_FREQUENCY,
-  PROP_VOLUME
+  PROP_FREQUENCY
 };
 
 //-- the class
@@ -105,21 +104,22 @@ gstbt_osc_synth_new (void)
 //-- private methods
 
 static gdouble
-get_volume (GstBtOscSynth * self)
+get_volume (GstBtOscSynth * self, gdouble ampf)
 {
-  return self->volenv ? gstbt_envelope_get (self->volenv, INNER_LOOP) : 1.0;
+  return self->volenv ?
+      (gstbt_envelope_get (self->volenv, INNER_LOOP) * ampf) : ampf;
 }
 
 static void
 gstbt_osc_synth_create_sine (GstBtOscSynth * self, guint ct, gint16 * samples)
 {
   guint i = 0, j;
-  gdouble amp, ampf = self->volume * 32767.0;
+  gdouble amp;
   gdouble accumulator = self->accumulator;
   gdouble step = M_PI_M2 * self->freq / self->samplerate;
 
   while (i < ct) {
-    amp = get_volume (self) * ampf;     /* the volume envelope */
+    amp = get_volume (self, 32767.0);
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
       /* TODO(ensonic): move out of inner loop? */
@@ -136,12 +136,12 @@ static void
 gstbt_osc_synth_create_square (GstBtOscSynth * self, guint ct, gint16 * samples)
 {
   guint i = 0, j;
-  gdouble amp, ampf = self->volume * 32767.0;
+  gdouble amp;
   gdouble accumulator = self->accumulator;
   gdouble step = M_PI_M2 * self->freq / self->samplerate;
 
   while (i < ct) {
-    amp = get_volume (self) * ampf;     /* the volume envelope */
+    amp = get_volume (self, 32767.0);
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
       if (G_UNLIKELY (accumulator >= M_PI_M2))
@@ -157,12 +157,12 @@ static void
 gstbt_osc_synth_create_saw (GstBtOscSynth * self, guint ct, gint16 * samples)
 {
   guint i = 0, j;
-  gdouble amp, ampf = self->volume * 32767.0 / M_PI;
+  gdouble amp, ampf = 32767.0 / M_PI;
   gdouble accumulator = self->accumulator;
   gdouble step = M_PI_M2 * self->freq / self->samplerate;
 
   while (i < ct) {
-    amp = get_volume (self) * ampf;     /* the volume envelope */
+    amp = get_volume (self, ampf);
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
       if (G_UNLIKELY (accumulator >= M_PI_M2))
@@ -183,12 +183,12 @@ gstbt_osc_synth_create_triangle (GstBtOscSynth * self, guint ct,
     gint16 * samples)
 {
   guint i = 0, j;
-  gdouble amp, ampf = self->volume * 32767.0 / M_PI;
+  gdouble amp, ampf = 32767.0 / M_PI;
   gdouble accumulator = self->accumulator;
   gdouble step = M_PI_M2 * self->freq / self->samplerate;
 
   while (i < ct) {
-    amp = get_volume (self) * ampf;     /* the volume envelope */
+    amp = get_volume (self, ampf);
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       accumulator += step;
       if (G_UNLIKELY (accumulator >= M_PI_M2))
@@ -218,10 +218,10 @@ gstbt_osc_synth_create_white_noise (GstBtOscSynth * self, guint ct,
     gint16 * samples)
 {
   guint i = 0, j;
-  gdouble amp, ampf = self->volume * 65535.0;
+  gdouble amp;
 
   while (i < ct) {
-    amp = get_volume (self) * ampf;     /* the volume envelope */
+    amp = get_volume (self, 65535.0);
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       samples[i] = (gint16) (32768 - (amp * rand () / (RAND_MAX + 1.0)));
     }
@@ -297,10 +297,10 @@ gstbt_osc_synth_create_pink_noise (GstBtOscSynth * self, guint ct,
 {
   guint i = 0, j;
   GstBtPinkNoise *pink = &self->pink;
-  gdouble amp, ampf = self->volume * 32767.0;
+  gdouble amp;
 
   while (i < ct) {
-    amp = get_volume (self) * ampf;     /* the volume envelope */
+    amp = get_volume (self, 32767.0);
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       samples[i] =
           (gint16) (gstbt_osc_synth_generate_pink_noise_value (pink) * amp);
@@ -318,10 +318,10 @@ gstbt_osc_synth_create_gaussian_white_noise (GstBtOscSynth * self, guint ct,
     gint16 * samples)
 {
   gint i = 0, j;
-  gdouble amp, ampf = self->volume * 32767.0;
+  gdouble amp;
 
   while (i < ct) {
-    amp = get_volume (self) * ampf;     /* the volume envelope */
+    amp = get_volume (self, 32767.0);
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j += 2) {
       gdouble mag = sqrt (-2 * log (1.0 - rand () / (RAND_MAX + 1.0)));
       gdouble phs = M_PI_M2 * rand () / (RAND_MAX + 1.0);
@@ -338,11 +338,11 @@ gstbt_osc_synth_create_red_noise (GstBtOscSynth * self, guint ct,
     gint16 * samples)
 {
   gint i = 0, j;
-  gdouble amp, ampf = self->volume * 32767.0;
+  gdouble amp;
   gdouble state = self->red.state;
 
   while (i < ct) {
-    amp = get_volume (self) * ampf;     /* the volume envelope */
+    amp = get_volume (self, 32767.0);
     for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
       while (TRUE) {
         gdouble r = 1.0 - (2.0 * rand () / (RAND_MAX + 1.0));
@@ -469,10 +469,6 @@ gstbt_osc_synth_set_property (GObject * object, guint prop_id,
       //GST_INFO("change frequency %lf -> %lf",g_value_get_double (value),self->freq);
       self->freq = g_value_get_double (value);
       break;
-    case PROP_VOLUME:
-      //GST_INFO("change volume %lf -> %lf",g_value_get_double (value),self->volume);
-      self->volume = g_value_get_double (value);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -498,9 +494,6 @@ gstbt_osc_synth_get_property (GObject * object, guint prop_id,
     case PROP_FREQUENCY:
       g_value_set_double (value, self->freq);
       break;
-    case PROP_VOLUME:
-      g_value_set_double (value, self->volume);
-      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -523,7 +516,6 @@ gstbt_osc_synth_init (GstBtOscSynth * self)
 {
   self->wave = GSTBT_OSC_SYNTH_WAVE_SINE;
   self->freq = 0.0;
-  self->volume = 0.8;
   gstbt_osc_synth_change_wave (self);
   self->flip = 1.0;
   self->samplerate = 44100;
@@ -561,10 +553,4 @@ gstbt_osc_synth_class_init (GstBtOscSynthClass * klass)
       g_param_spec_double ("frequency", "Frequency", "Frequency of tone",
           0.0, G_MAXDOUBLE, 0.0,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_VOLUME,
-      g_param_spec_double ("volume", "Volume", "Volume of tone",
-          0.7, 25.0, 0.8,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-
 }

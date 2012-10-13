@@ -76,11 +76,13 @@ gstbt_envelope_new (void)
  * @self: the envelope
  * @samplerate: the audio sampling rate
  * @decay_time: the decay time in sec
+ * @peak_level: peak volume level (0.0 -> 1.0)
  *
  * Initialize the envelope for a new cycle.
  */
 void
-gstbt_envelope_setup (GstBtEnvelope * self, gint samplerate, gdouble decay_time)
+gstbt_envelope_setup (GstBtEnvelope * self, gint samplerate, gdouble decay_time,
+    gdouble peak_level)
 {
   GValue val = { 0, };
   GstController *ctrl = self->ctrl;
@@ -99,7 +101,7 @@ gstbt_envelope_setup (GstBtEnvelope * self, gint samplerate, gdouble decay_time)
   gst_controller_unset_all (ctrl, "value");
   g_value_set_double (&val, 0.0);
   gst_controller_set (ctrl, "value", G_GUINT64_CONSTANT (0), &val);
-  g_value_set_double (&val, 1.0);
+  g_value_set_double (&val, peak_level);
   gst_controller_set (ctrl, "value", attack, &val);
   g_value_set_double (&val, 0.0);
   gst_controller_set (ctrl, "value", decay, &val);
@@ -108,7 +110,7 @@ gstbt_envelope_setup (GstBtEnvelope * self, gint samplerate, gdouble decay_time)
   /* TODO(ensonic): more advanced envelope
      if(attack_time+decay_time>note_time) note_time=attack_time+decay_time;
      gst_controller_set(ctrl,"value",0,0.0);
-     gst_controller_set(ctrl,"value",attack_time,1.0);
+     gst_controller_set(ctrl,"value",attack_time,peak_level);
      gst_controller_set(ctrl,"value",attack_time+decay_time,sustain_level);
      gst_controller_set(ctrl,"value",note_time,sustain_level);
      gst_controller_set(ctrl,"value",note_time+release_time,0.0);

@@ -109,7 +109,6 @@ struct _GstBtOscSynth {
   GstBtEnvelope *volenv;
   GstBtOscSynthWave wave;
   gdouble freq;
-  gdouble volume;
 
   /* oscillator state */
   gdouble accumulator;          /* phase angle */

@@ -56,8 +56,7 @@ struct _GstBtSimSyn
 
   /* parameters */
   GstBtNote note;
-  gdouble volume;
-  gdouble decay;
+  gdouble decay, volume;
 
   GstBtToneConversionTuning tuning;
   GstBtToneConversion *n2f;

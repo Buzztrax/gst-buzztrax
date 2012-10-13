@@ -63,7 +63,7 @@ struct _GstBtEnvelopeClass {
 GType gstbt_envelope_get_type (void);
 
 GstBtEnvelope *gstbt_envelope_new (void);
-void gstbt_envelope_setup (GstBtEnvelope *self, gint samplerate, gdouble decay_time);
+void gstbt_envelope_setup (GstBtEnvelope *self, gint samplerate, gdouble decay_time, gdouble peak_level);
 gdouble gstbt_envelope_get (GstBtEnvelope *self, guint offset);
 gboolean gstbt_envelope_is_running (GstBtEnvelope *self);
 
