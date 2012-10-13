@@ -22,7 +22,8 @@
 #ifndef __GSTBT_ENVELOPE_H__
 #define __GSTBT_ENVELOPE_H__
 
-#include <glib-object.h>
+#include <gst/gst.h>
+#include <gst/controller/gstcontroller.h>
 
 G_BEGIN_DECLS
 

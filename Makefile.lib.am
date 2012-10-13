@@ -7,10 +7,11 @@ libgstbuzztard_la_SOURCES = \
 	libgstbuzztard/childbin.c \
 	libgstbuzztard/envelope.c \
 	libgstbuzztard/filter-svf.c \
-	libgstbuzztard/musicenums.c \                                                             
+	libgstbuzztard/musicenums.c \
+	libgstbuzztard/osc-synth.c \
 	libgstbuzztard/toneconversion.c \
 	libgstbuzztard/propertymeta.c \
-	libgstbuzztard/tempo.c 
+	libgstbuzztard/tempo.c
 
 libgstbuzztard_la_CFLAGS = \
 	-I$(srcdir) \
@@ -24,6 +25,7 @@ libgstbuzztardinclude_HEADERS = \
 	libgstbuzztard/envelope.h \
 	libgstbuzztard/filter-svf.h \
 	libgstbuzztard/musicenums.h \
+	libgstbuzztard/osc-synth.h \
 	libgstbuzztard/toneconversion.h \
 	libgstbuzztard/propertymeta.h \
 	libgstbuzztard/tempo.h

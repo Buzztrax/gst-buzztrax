@@ -24,10 +24,11 @@
 
 #include <gst/gst.h>
 #include <gst/controller/gstcontroller.h>
-#include <libgstbuzztard/toneconversion.h>
+#include <libgstbuzztard/audiosynth.h>
 #include <libgstbuzztard/envelope.h>
 #include <libgstbuzztard/filter-svf.h>
-#include <libgstbuzztard/audiosynth.h>
+#include <libgstbuzztard/osc-synth.h>
+#include <libgstbuzztard/toneconversion.h>
 
 G_BEGIN_DECLS
 
@@ -37,64 +38,6 @@ G_BEGIN_DECLS
 #define GSTBT_SIM_SYN_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass) ,GSTBT_TYPE_SIM_SYN,GstBtSimSynClass))
 #define GSTBT_IS_SIM_SYN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass) ,GSTBT_TYPE_SIM_SYN))
 #define GSTBT_SIM_SYN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj) ,GSTBT_TYPE_SIM_SYN,GstBtSimSynClass))
-
-/**
- * GstBtSimSynWave:
- * @GSTBT_SIM_SYN_WAVE_SINE: sine wave
- * @GSTBT_SIM_SYN_WAVE_SQUARE: square wave
- * @GSTBT_SIM_SYN_WAVE_SAW: saw wave
- * @GSTBT_SIM_SYN_WAVE_TRIANGLE: triangle wave
- * @GSTBT_SIM_SYN_WAVE_SILENCE: silence
- * @GSTBT_SIM_SYN_WAVE_WHITE_NOISE: white noise
- * @GSTBT_SIM_SYN_WAVE_PINK_NOISE: pink noise
- * @GSTBT_SIM_SYN_WAVE_SINE_TAB: sine wave (precalculated)
- * @GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE: white (zero mean) Gaussian noise;
- *   volume sets the standard deviation of the noise in units of the range of
- *   values of the sample type, e.g. volume=0.1 produces noise with a standard
- *   deviation of 0.1*32767=3277 with 16-bit integer samples, or 0.1*1.0=0.1
- *   with floating-point samples.
- * @GSTBT_SIM_SYN_WAVE_RED_NOISE: red (brownian) noise
- * @GSTBT_SIM_SYN_WAVE_BLUE_NOISE: spectraly inverted pink noise
- * @GSTBT_SIM_SYN_WAVE_VIOLET_NOISE: spectraly inverted red (brownian) noise
- *
- * Oscillator wave forms.
- */
-typedef enum
-{
-  GSTBT_SIM_SYN_WAVE_SINE,
-  GSTBT_SIM_SYN_WAVE_SQUARE,
-  GSTBT_SIM_SYN_WAVE_SAW,
-  GSTBT_SIM_SYN_WAVE_TRIANGLE,
-  GSTBT_SIM_SYN_WAVE_SILENCE,
-  GSTBT_SIM_SYN_WAVE_WHITE_NOISE,
-  GSTBT_SIM_SYN_WAVE_PINK_NOISE,
-  GSTBT_SIM_SYN_WAVE_SINE_TAB,
-  GSTBT_SIM_SYN_WAVE_GAUSSIAN_WHITE_NOISE,
-  GSTBT_SIM_SYN_WAVE_RED_NOISE,
-  GSTBT_SIM_SYN_WAVE_BLUE_NOISE,
-  GSTBT_SIM_SYN_WAVE_VIOLET_NOISE
-} GstBtSimSynWave;
-
-#define PINK_MAX_RANDOM_ROWS   (30)
-#define PINK_RANDOM_BITS       (16)
-#define PINK_RANDOM_SHIFT      ((sizeof(long)*8)-PINK_RANDOM_BITS)
-
-typedef struct
-{
-  glong rows[PINK_MAX_RANDOM_ROWS];
-  glong running_sum;            /* Used to optimize summing of generators. */
-  gint index;                   /* Incremented each sample. */
-  gint index_mask;              /* Index wrapped by ANDing with this mask. */
-  gfloat scalar;                /* Used to scale within range of -1.0 to +1.0 */
-} GstBtPinkNoise;
-
-typedef struct
-{
-  gdouble state;                /* noise state */
-} GstBtRedNoise;
-
-
-#define WAVE_TABLE_SIZE 1024
 
 typedef struct _GstBtSimSyn GstBtSimSyn;
 typedef struct _GstBtSimSynClass GstBtSimSynClass;
@@ -109,29 +52,19 @@ struct _GstBtSimSyn
   GstBtAudioSynth parent;
 
   /* < private > */
-  /* parameters */
   gboolean dispose_has_run;     /* validate if dispose has run */
 
-  GstBtSimSynWave wave;
+  /* parameters */
   GstBtNote note;
   gdouble volume;
   gdouble decay;
 
-  void (*process) (GstBtSimSyn *, gint16 *);
-
   GstBtToneConversionTuning tuning;
   GstBtToneConversion *n2f;
-  gdouble freq;
-  GstBtEnvelope *volenv;        /* volume-envelope */
-  
+
+  GstBtEnvelope *volenv;
+  GstBtOscSynth *osc;  
   GstBtFilterSVF *filter;
-
-  /* waveform specific context data */
-  gdouble accumulator;          /* phase angle */
-  GstBtPinkNoise pink;
-  GstBtRedNoise red;
-  gint16 wave_table[WAVE_TABLE_SIZE];
-
 };
 
 struct _GstBtSimSynClass
