@@ -62,26 +62,29 @@ typedef struct _GstBtFilterSVFClass GstBtFilterSVFClass;
 
 /**
  * GstBtFilterSVF:
- * @value: current envelope value
+ * @type: filter type
+ * @cutoff: filter cutoff frequency
+ * @resonance: filter resonance
  *
  * Class instance data.
  */
 struct _GstBtFilterSVF {
   GObject parent;
+  /* < private > */
+  gboolean dispose_has_run;		/* validate if dispose has run */
 
   /* < public > */
   /* parameters */
   GstBtFilterSVFType type;
   gdouble cutoff, resonance;
 
+  /* < private > */
   /* filter state */
   gdouble flt_low, flt_mid, flt_high;
   gdouble flt_res;
 
   /* < private > */
   void (*process) (GstBtFilterSVF *, guint, gint16 *);
-  
-  gboolean dispose_has_run;		/* validate if dispose has run */
 };
 
 struct _GstBtFilterSVFClass {

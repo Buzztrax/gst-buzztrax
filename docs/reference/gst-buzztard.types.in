@@ -31,10 +31,14 @@ gstbt_tempo_get_type
 % own stuff
 
 #include <libgstbuzztard/envelope.h>
+#include <libgstbuzztard/envelope-d.h>
 #include <libgstbuzztard/filter-svf.h>
+#include <libgstbuzztard/osc-synth.h>
 #include <libgstbuzztard/toneconversion.h>
 
 gstbt_envelope_get_type
+gstbt_envelope_d_get_type
 gstbt_filter_svf_get_type
+gstbt_osc_synth_get_type
 gstbt_tone_conversion_get_type
 

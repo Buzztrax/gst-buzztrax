@@ -23,7 +23,7 @@
 #define __GSTBT_OSC_SYNTH_H__
 
 #include <gst/gst.h>
-#include "envelope.h"
+#include <libgstbuzztard/envelope.h>
 
 G_BEGIN_DECLS
 

@@ -25,7 +25,7 @@
 #include <gst/gst.h>
 #include <gst/controller/gstcontroller.h>
 #include <libgstbuzztard/audiosynth.h>
-#include <libgstbuzztard/envelope.h>
+#include <libgstbuzztard/envelope-d.h>
 #include <libgstbuzztard/filter-svf.h>
 #include <libgstbuzztard/osc-synth.h>
 #include <libgstbuzztard/toneconversion.h>
@@ -61,7 +61,7 @@ struct _GstBtSimSyn
   GstBtToneConversionTuning tuning;
   GstBtToneConversion *n2f;
 
-  GstBtEnvelope *volenv;
+  GstBtEnvelopeD *volenv;
   GstBtOscSynth *osc;  
   GstBtFilterSVF *filter;
 };

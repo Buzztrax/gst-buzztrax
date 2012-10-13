@@ -6,6 +6,7 @@ libgstbuzztard_la_SOURCES = \
 	libgstbuzztard/audiosynth.c \	
 	libgstbuzztard/childbin.c \
 	libgstbuzztard/envelope.c \
+	libgstbuzztard/envelope-d.c \
 	libgstbuzztard/filter-svf.c \
 	libgstbuzztard/musicenums.c \
 	libgstbuzztard/osc-synth.c \
@@ -23,6 +24,7 @@ libgstbuzztardinclude_HEADERS = \
 	libgstbuzztard/audiosynth.h \
 	libgstbuzztard/childbin.h \
 	libgstbuzztard/envelope.h \
+	libgstbuzztard/envelope-d.h \
 	libgstbuzztard/filter-svf.h \
 	libgstbuzztard/musicenums.h \
 	libgstbuzztard/osc-synth.h \

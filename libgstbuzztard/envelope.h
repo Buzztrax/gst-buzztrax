@@ -45,6 +45,8 @@ typedef struct _GstBtEnvelopeClass GstBtEnvelopeClass;
  */
 struct _GstBtEnvelope {
   GObject parent;
+  /* < private > */
+  gboolean dispose_has_run;		/* validate if dispose has run */
 
   /* < public > */
   /* parameters */
@@ -53,7 +55,6 @@ struct _GstBtEnvelope {
   /* < private > */
   GstController *ctrl;
   guint64 offset, length;
-  gboolean dispose_has_run;		/* validate if dispose has run */
 };
 
 struct _GstBtEnvelopeClass {
@@ -62,8 +63,6 @@ struct _GstBtEnvelopeClass {
 
 GType gstbt_envelope_get_type (void);
 
-GstBtEnvelope *gstbt_envelope_new (void);
-void gstbt_envelope_setup (GstBtEnvelope *self, gint samplerate, gdouble decay_time, gdouble peak_level);
 gdouble gstbt_envelope_get (GstBtEnvelope *self, guint offset);
 gboolean gstbt_envelope_is_running (GstBtEnvelope *self);
 

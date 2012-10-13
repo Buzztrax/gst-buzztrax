@@ -183,7 +183,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
         GST_DEBUG ("new note -> '%d'", src->note);
         gdouble freq =
             gstbt_tone_conversion_translate_from_number (src->n2f, src->note);
-        gstbt_envelope_setup (src->volenv,
+        gstbt_envelope_d_setup (src->volenv,
             ((GstBtAudioSynth *) src)->samplerate, src->decay, src->volume);
         g_object_set (src->osc, "frequency", freq, NULL);
       }
@@ -261,8 +261,9 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
 
   /* synth components */
   src->osc = gstbt_osc_synth_new ();
-  src->volenv = gstbt_envelope_new ();
+  src->volenv = gstbt_envelope_d_new ();
   src->filter = gstbt_filter_svf_new ();
+  g_object_set (src->osc, "volume-envelope", src->volenv, NULL);
 }
 
 static gboolean
@@ -285,7 +286,7 @@ gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
   guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
 
   if ((src->note != GSTBT_NOTE_NONE)
-      && gstbt_envelope_is_running (src->volenv)) {
+      && gstbt_envelope_is_running ((GstBtEnvelope *) src->volenv)) {
     src->osc->process (src->osc, ct, d);
     if (src->filter->process)
       src->filter->process (src->filter, ct, d);

@@ -210,8 +210,6 @@ gstbt_property_meta_get_type
 <SECTION>
 <FILE>gstbtenvelope</FILE>
 GstBtEnvelope
-gstbt_envelope_new
-gstbt_envelope_setup
 gstbt_envelope_get
 gstbt_envelope_is_running
 <SUBSECTION Standard>
@@ -226,11 +224,27 @@ gstbt_envelope_get_type
 </SECTION>
 
 <SECTION>
+<FILE>gstbtenveloped</FILE>
+GstBtEnvelopeD
+gstbt_envelope_d_new
+gstbt_envelope_d_setup
+<SUBSECTION Standard>
+GstBtEnvelopeDClass
+GSTBT_ENVELOPE_D
+GSTBT_IS_ENVELOPE_D
+GSTBT_ENVELOPE_D_CLASS
+GSTBT_IS_ENVELOPE_D_CLASS
+GSTBT_ENVELOPE_GET_D_CLASS
+GSTBT_TYPE_ENVELOPE_D
+gstbt_envelope_d_get_type
+</SECTION>
+
+<SECTION>
 <FILE>gstbtfiltersvf</FILE>
 GstBtFilterSVF
 gstbt_filter_svf_new
 <SUBSECTION Standard>
-GstBtEnvelopeClass
+GstBtFilterSVFClass
 GSTBT_FILTER_SVF
 GSTBT_IS_FILTER_SVF
 GSTBT_FILTER_SVF_CLASS
@@ -251,6 +265,23 @@ GSTBT_TYPE_TRIGGER_SWITCH
 gstbt_trigger_switch_get_type
 GSTBT_TYPE_NOTE
 gstbt_note_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstbtoscsynth</FILE>
+GstBtOscSynth
+gstbt_osc_synth_new
+<SUBSECTION Standard>
+GstBtOscSynthClass
+GSTBT_OSC_SYNTH
+GSTBT_IS_OSC_SYNTH
+GSTBT_OSC_SYNTH_CLASS
+GSTBT_IS_OSC_SYNTH_CLASS
+GSTBT_OSC_SYNTH_GET_CLASS
+GSTBT_TYPE_OSC_SYNTH
+GSTBT_TYPE_OSC_SYNTH_WAVE
+gstbt_osc_synth_get_type
+gstbt_osc_synth_wave_get_type
 </SECTION>
 
 <SECTION>
