@@ -285,7 +285,7 @@ gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
   gint16 *d = (gint16 *) GST_BUFFER_DATA (data);
   guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
 
-  if ((src->note != GSTBT_NOTE_NONE)
+  if ((src->note != GSTBT_NOTE_OFF)
       && gstbt_envelope_is_running ((GstBtEnvelope *) src->volenv)) {
     src->osc->process (src->osc, ct, d);
     if (src->filter->process)
