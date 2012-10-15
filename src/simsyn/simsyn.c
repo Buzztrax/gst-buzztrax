@@ -34,21 +34,13 @@
  * </refsect2>
  */
 /* TODO(ensonic): improvements
- * - implement property-meta iface (see gstbml)
+ * - implement property-meta iface (see gstbml) - why actually?
  * - cut-off is now relative to samplerate, needs change
- * - we should do a linear fade down in the last inner_loop block as a anticlick
- *   if(note_count+INNER_LOOP>=note_length) {
- *     ac_f=1.0;
- *     ac_s=1.0/INNER_LOOP;
- *   }
  */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#include <stdlib.h>
-#include <string.h>
 
 #include "libgstbuzztard/propertymeta.h"
 #include "simsyn.h"
@@ -72,97 +64,39 @@ enum
 
 static GstBtAudioSynthClass *parent_class = NULL;
 
-static void gst_sim_syn_base_init (gpointer klass);
-static void gst_sim_syn_class_init (GstBtSimSynClass * klass);
-static void gst_sim_syn_init (GstBtSimSyn * object, GstBtSimSynClass * klass);
+//-- audiosynth vmethods
 
-static void gst_sim_syn_set_property (GObject * object,
-    guint prop_id, const GValue * value, GParamSpec * pspec);
-static void gst_sim_syn_get_property (GObject * object,
-    guint prop_id, GValue * value, GParamSpec * pspec);
-static void gst_sim_syn_dispose (GObject * object);
-static void gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data);
-static gboolean gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad,
-    GstCaps * caps);
-
-//-- simsyn implementation
-
-static void
-gst_sim_syn_base_init (gpointer g_class)
+static gboolean
+gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 {
-  GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
+  GstStructure *structure = gst_caps_get_structure (caps, 0);
 
-  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "simsyn",
-      GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
+  /* set channels to 1 */
+  if (!gst_structure_fixate_field_nearest_int (structure, "channels", 1))
+    return FALSE;
 
-  gst_element_class_set_details_simple (element_class,
-      "Simple Synth",
-      "Source/Audio",
-      "Simple audio synthesizer", "Stefan Kost <ensonic@users.sf.net>");
-#if GST_CHECK_VERSION(0,10,31)
-  gst_element_class_set_documentation_uri (element_class,
-      "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
-      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtSimSyn.html");
-#endif
+  return TRUE;
 }
 
 static void
-gst_sim_syn_class_init (GstBtSimSynClass * klass)
+gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 {
-  GObjectClass *gobject_class = (GObjectClass *) klass;
-  GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
+  GstBtSimSyn *src = ((GstBtSimSyn *) base);
+  gint16 *d = (gint16 *) GST_BUFFER_DATA (data);
+  guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
 
-  parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
-
-  audio_synth_class->process = gst_sim_syn_process;
-  audio_synth_class->setup = gst_sim_syn_setup;
-
-  gobject_class->set_property = gst_sim_syn_set_property;
-  gobject_class->get_property = gst_sim_syn_get_property;
-  gobject_class->dispose = gst_sim_syn_dispose;
-
-  // register own properties
-  g_object_class_install_property (gobject_class, PROP_TUNING,
-      g_param_spec_enum ("tuning", "Tuning",
-          "Harmonic tuning", GSTBT_TYPE_TONE_CONVERSION_TUNING,
-          GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT,
-          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_NOTE,
-      g_param_spec_enum ("note", "Musical note",
-          "Musical note (e.g. 'c-3', 'd#4')", GSTBT_TYPE_NOTE, GSTBT_NOTE_NONE,
-          G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_WAVE,
-      g_param_spec_enum ("wave", "Waveform", "Oscillator waveform",
-          GSTBT_TYPE_OSC_SYNTH_WAVE, GSTBT_OSC_SYNTH_WAVE_SINE,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_VOLUME,
-      g_param_spec_double ("volume", "Volume", "Volume of tone",
-          0.0, 1.0, 0.8,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_DECAY,
-      g_param_spec_double ("decay", "Decay",
-          "Volume decay of the tone in seconds", 0.001, 4.0, 0.5,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_FILTER,
-      g_param_spec_enum ("filter", "Filtertype", "Type of audio filter",
-          GSTBT_TYPE_FILTER_SVF_TYPE, GSTBT_FILTER_SVF_LOWPASS,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_CUTOFF,
-      g_param_spec_double ("cut-off", "Cut-Off",
-          "Audio filter cut-off frequency", 0.0, 1.0, 0.8,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-
-  g_object_class_install_property (gobject_class, PROP_RESONANCE,
-      g_param_spec_double ("resonance", "Resonance", "Audio filter resonance",
-          0.7, 25.0, 0.8,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+  if ((src->note != GSTBT_NOTE_OFF)
+      && gstbt_envelope_is_running ((GstBtEnvelope *) src->volenv)) {
+    src->osc->process (src->osc, ct, d);
+    if (src->filter->process)
+      src->filter->process (src->filter, ct, d);
+  } else {
+    memset (d, 0, ct * sizeof (gint16));
+    GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
+  }
 }
+
+//-- gobject vmethods
 
 static void
 gst_sim_syn_set_property (GObject * object, guint prop_id,
@@ -175,8 +109,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_TUNING:
-      src->tuning = g_value_get_enum (value);
-      g_object_set (src->n2f, "tuning", src->tuning, NULL);
+      g_object_set_property ((GObject *) (src->n2f), "tuning", value);
       break;
     case PROP_NOTE:
       if ((src->note = g_value_get_enum (value))) {
@@ -223,7 +156,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_TUNING:
-      g_value_set_enum (value, src->tuning);
+      g_object_get_property ((GObject *) (src->n2f), "tuning", value);
       break;
     case PROP_WAVE:
       g_object_get_property ((GObject *) (src->osc), "wave", value);
@@ -250,53 +183,6 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
-{
-  /* set base parameters */
-  src->volume = 0.8;
-  src->decay = 0.5;
-
-  src->tuning = GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT;
-  src->n2f = gstbt_tone_conversion_new (src->tuning);
-
-  /* synth components */
-  src->osc = gstbt_osc_synth_new ();
-  src->volenv = gstbt_envelope_d_new ();
-  src->filter = gstbt_filter_svf_new ();
-  g_object_set (src->osc, "volume-envelope", src->volenv, NULL);
-}
-
-static gboolean
-gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
-{
-  GstStructure *structure = gst_caps_get_structure (caps, 0);
-
-  /* set channels to 1 */
-  if (!gst_structure_fixate_field_nearest_int (structure, "channels", 1))
-    return FALSE;
-
-  return TRUE;
-}
-
-static void
-gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
-{
-  GstBtSimSyn *src = ((GstBtSimSyn *) base);
-  gint16 *d = (gint16 *) GST_BUFFER_DATA (data);
-  guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
-
-  if ((src->note != GSTBT_NOTE_OFF)
-      && gstbt_envelope_is_running ((GstBtEnvelope *) src->volenv)) {
-    src->osc->process (src->osc, ct, d);
-    if (src->filter->process)
-      src->filter->process (src->filter, ct, d);
-  } else {
-    memset (d, 0, ct * sizeof (gint16));
-    GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
-  }
-}
-
-static void
 gst_sim_syn_dispose (GObject * object)
 {
   GstBtSimSyn *src = GSTBT_SIM_SYN (object);
@@ -315,6 +201,101 @@ gst_sim_syn_dispose (GObject * object)
     g_object_unref (src->filter);
 
   G_OBJECT_CLASS (parent_class)->dispose (object);
+}
+
+//-- gobject type methods
+
+static void
+gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
+{
+  /* set base parameters */
+  src->volume = 0.8;
+  src->decay = 0.5;
+
+  src->n2f =
+      gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
+
+  /* synth components */
+  src->osc = gstbt_osc_synth_new ();
+  src->volenv = gstbt_envelope_d_new ();
+  src->filter = gstbt_filter_svf_new ();
+  g_object_set (src->osc, "volume-envelope", src->volenv, NULL);
+}
+
+static void
+gst_sim_syn_base_init (gpointer g_class)
+{
+  GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
+
+  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "simsyn",
+      GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
+
+  gst_element_class_set_details_simple (element_class,
+      "Simple Synth",
+      "Source/Audio",
+      "Simple audio synthesizer", "Stefan Kost <ensonic@users.sf.net>");
+#if GST_CHECK_VERSION(0,10,31)
+  gst_element_class_set_documentation_uri (element_class,
+      "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
+      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtSimSyn.html");
+#endif
+}
+
+static void
+gst_sim_syn_class_init (GstBtSimSynClass * klass)
+{
+  GObjectClass *gobject_class = (GObjectClass *) klass;
+  GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
+
+  parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
+
+  audio_synth_class->process = gst_sim_syn_process;
+  audio_synth_class->setup = gst_sim_syn_setup;
+
+  gobject_class->set_property = gst_sim_syn_set_property;
+  gobject_class->get_property = gst_sim_syn_get_property;
+  gobject_class->dispose = gst_sim_syn_dispose;
+
+  // register own properties
+  g_object_class_install_property (gobject_class, PROP_TUNING,
+      g_param_spec_enum ("tuning", "Tuning", "Harmonic tuning",
+          GSTBT_TYPE_TONE_CONVERSION_TUNING,
+          GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_NOTE,
+      g_param_spec_enum ("note", "Musical note",
+          "Musical note (e.g. 'c-3', 'd#4')", GSTBT_TYPE_NOTE, GSTBT_NOTE_NONE,
+          G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_WAVE,
+      g_param_spec_enum ("wave", "Waveform", "Oscillator waveform",
+          GSTBT_TYPE_OSC_SYNTH_WAVE, GSTBT_OSC_SYNTH_WAVE_SINE,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_VOLUME,
+      g_param_spec_double ("volume", "Volume", "Volume of tone", 0.0, 1.0, 0.8,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_DECAY,
+      g_param_spec_double ("decay", "Decay",
+          "Volume decay of the tone in seconds", 0.001, 4.0, 0.5,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_FILTER,
+      g_param_spec_enum ("filter", "Filtertype", "Type of audio filter",
+          GSTBT_TYPE_FILTER_SVF_TYPE, GSTBT_FILTER_SVF_LOWPASS,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_CUTOFF,
+      g_param_spec_double ("cut-off", "Cut-Off",
+          "Audio filter cut-off frequency", 0.0, 1.0, 0.8,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_RESONANCE,
+      g_param_spec_double ("resonance", "Resonance", "Audio filter resonance",
+          0.7, 25.0, 0.8,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 }
 
 GType
