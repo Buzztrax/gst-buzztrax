@@ -23,6 +23,12 @@ c) can we use events?
     - two ADSR envelopes
     - each envelope can modulate volume and filter-cutoff/resonance
   - current simsyn is missing key-tracking for the filter
+    - we could add a boolean to enable key-tracking (false by default)
+    - on cut-off changes we need to base it on the currently played note
+    - current cut-off range is 0.0->1.0 with 1.0 = srat/2.0
+    - v1: we could map 1.0 -> note_freq*32.0 (5 harmonics) instead
+    - v2: we could assume the current cut-off is related to C-4 and rebase
+      accordingly
 
 = FrozenTrackPlayer (MemoryAudioSource) =
 - when playing pre-recorded tracks, one would trigger them at the start with the
@@ -38,12 +44,21 @@ c) can we use events?
     pass the BuzzCallbacks. The element can use them to access the wavetable.
 
 = synth components =
-The libgstbuzztard already has components, such as the envelope and tone-
-conversion helpers. It would be nice to extend on this. Ideally simsyn would be
-a composite object of:
-* oscillator
-* filter
-* envelope
+The libgstbuzztard already has a couple of components; we'd like to extend this
+to make it dead easy writing new synths.
+
+== components ideas ==
+envelope-adsr
+osc-wave (wavetable oscillator)
+
+== design ==
+After adding more components we needs to extract common interfaces. Each
+component would have a couple of properties and vmethods (start, process, stop).
+When using them the element would proxy a few properties and ev. configure
+others manually. We can use GBinding (since glib-2.26) for the proxy properties.
+
+== open questions ==
+Do we need to pass the data fmt? What about mono/stereo.
 
 = debugging =
 G_SLICE=always-malloc G_DEBUG=gc-friendly GLIBCPP_FORCE_NEW=1 GLIBCXX_FORCE_NEW=1 valgrind --tool=memcheck --leak-check=full --leak-resolution=high --trace-children=yes --num-callers=20 --suppressions=$HOME/projects/gstreamer/gstreamer/common/gst.supp gst-launch -q >/dev/null audiotestsrc num-buffers=10 ! bml-EQ-10 ! fakesink
