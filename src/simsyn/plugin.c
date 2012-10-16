@@ -25,9 +25,15 @@
 
 #include "simsyn.h"
 
+#define GST_CAT_DEFAULT sim_syn_debug
+GST_DEBUG_CATEGORY (GST_CAT_DEFAULT);
+
 static gboolean
 plugin_init (GstPlugin * plugin)
 {
+  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "simsyn",
+      GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
+
   /* initialize gst controller library */
   gst_controller_init (NULL, NULL);
 

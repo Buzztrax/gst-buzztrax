@@ -46,7 +46,7 @@
 #include "simsyn.h"
 
 #define GST_CAT_DEFAULT sim_syn_debug
-GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
+GST_DEBUG_CATEGORY_EXTERN (GST_CAT_DEFAULT);
 
 enum
 {
@@ -226,9 +226,6 @@ static void
 gst_sim_syn_base_init (gpointer g_class)
 {
   GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
-
-  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "simsyn",
-      GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
 
   gst_element_class_set_details_simple (element_class,
       "Simple Synth",
