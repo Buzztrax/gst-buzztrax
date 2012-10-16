@@ -35,6 +35,7 @@
  */
 /* TODO(ensonic): improvements
  * - implement property-meta iface (see gstbml) - why actually?
+ *   - we could pretty print filter cut-off
  * - cut-off is now relative to samplerate, needs change
  */
 
@@ -62,12 +63,19 @@ enum
   PROP_RESONANCE
 };
 
-static GstBtAudioSynthClass *parent_class = NULL;
+//-- the class
+
+static void gstbt_sim_syn_property_meta_interface_init (gpointer g_iface,
+    gpointer iface_data);
+
+G_DEFINE_TYPE_WITH_CODE (GstBtSimSyn, gstbt_sim_syn,
+    GSTBT_TYPE_AUDIO_SYNTH, G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
+        gstbt_sim_syn_property_meta_interface_init));
 
 //-- audiosynth vmethods
 
 static gboolean
-gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
+gstbt_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 {
   GstStructure *structure = gst_caps_get_structure (caps, 0);
 
@@ -79,7 +87,7 @@ gst_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 }
 
 static void
-gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
+gstbt_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 {
   GstBtSimSyn *src = ((GstBtSimSyn *) base);
   gint16 *d = (gint16 *) GST_BUFFER_DATA (data);
@@ -96,10 +104,18 @@ gst_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
   }
 }
 
+//-- interfaces
+
+void
+gstbt_sim_syn_property_meta_interface_init (gpointer g_iface,
+    gpointer iface_data)
+{
+}
+
 //-- gobject vmethods
 
 static void
-gst_sim_syn_set_property (GObject * object, guint prop_id,
+gstbt_sim_syn_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
   GstBtSimSyn *src = GSTBT_SIM_SYN (object);
@@ -146,7 +162,7 @@ gst_sim_syn_set_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_sim_syn_get_property (GObject * object, guint prop_id,
+gstbt_sim_syn_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
   GstBtSimSyn *src = GSTBT_SIM_SYN (object);
@@ -183,7 +199,7 @@ gst_sim_syn_get_property (GObject * object, guint prop_id,
 }
 
 static void
-gst_sim_syn_dispose (GObject * object)
+gstbt_sim_syn_dispose (GObject * object)
 {
   GstBtSimSyn *src = GSTBT_SIM_SYN (object);
 
@@ -200,13 +216,13 @@ gst_sim_syn_dispose (GObject * object)
   if (src->filter)
     g_object_unref (src->filter);
 
-  G_OBJECT_CLASS (parent_class)->dispose (object);
+  G_OBJECT_CLASS (gstbt_sim_syn_parent_class)->dispose (object);
 }
 
 //-- gobject type methods
 
 static void
-gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
+gstbt_sim_syn_init (GstBtSimSyn * src)
 {
   /* set base parameters */
   src->volume = 0.8;
@@ -223,10 +239,20 @@ gst_sim_syn_init (GstBtSimSyn * src, GstBtSimSynClass * g_class)
 }
 
 static void
-gst_sim_syn_base_init (gpointer g_class)
+gstbt_sim_syn_class_init (GstBtSimSynClass * klass)
 {
-  GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
+  GObjectClass *gobject_class = (GObjectClass *) klass;
+  GstElementClass *element_class = (GstElementClass *) klass;
+  GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
 
+  audio_synth_class->process = gstbt_sim_syn_process;
+  audio_synth_class->setup = gstbt_sim_syn_setup;
+
+  gobject_class->set_property = gstbt_sim_syn_set_property;
+  gobject_class->get_property = gstbt_sim_syn_get_property;
+  gobject_class->dispose = gstbt_sim_syn_dispose;
+
+  // describe us
   gst_element_class_set_details_simple (element_class,
       "Simple Synth",
       "Source/Audio",
@@ -236,22 +262,6 @@ gst_sim_syn_base_init (gpointer g_class)
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
       G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtSimSyn.html");
 #endif
-}
-
-static void
-gst_sim_syn_class_init (GstBtSimSynClass * klass)
-{
-  GObjectClass *gobject_class = (GObjectClass *) klass;
-  GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
-
-  parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
-
-  audio_synth_class->process = gst_sim_syn_process;
-  audio_synth_class->setup = gst_sim_syn_setup;
-
-  gobject_class->set_property = gst_sim_syn_set_property;
-  gobject_class->get_property = gst_sim_syn_get_property;
-  gobject_class->dispose = gst_sim_syn_dispose;
 
   // register own properties
   g_object_class_install_property (gobject_class, PROP_TUNING,
@@ -293,36 +303,12 @@ gst_sim_syn_class_init (GstBtSimSynClass * klass)
       g_param_spec_double ("resonance", "Resonance", "Audio filter resonance",
           0.7, 25.0, 0.8,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
-}
 
-GType
-gstbt_sim_syn_get_type (void)
-{
-  static GType type = 0;
-
-  if (G_UNLIKELY (!type)) {
-    const GTypeInfo element_type_info = {
-      sizeof (GstBtSimSynClass),
-      (GBaseInitFunc) gst_sim_syn_base_init,
-      NULL,                     /* base_finalize */
-      (GClassInitFunc) gst_sim_syn_class_init,
-      NULL,                     /* class_finalize */
-      NULL,                     /* class_data */
-      sizeof (GstBtSimSyn),
-      0,                        /* n_preallocs */
-      (GInstanceInitFunc) gst_sim_syn_init
-    };
-    const GInterfaceInfo property_meta_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
-
-    type =
-        g_type_register_static (GSTBT_TYPE_AUDIO_SYNTH, "GstBtSimSyn",
-        &element_type_info, (GTypeFlags) 0);
-    g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
-        &property_meta_interface_info);
-  }
-  return type;
+  /* it does not show up :/  
+     GObjectClass * filter_klass = g_type_class_ref (GSTBT_TYPE_FILTER_SVF);
+     g_object_class_install_property (gobject_class, PROP_RESONANCE,
+     g_param_spec_override ("resonance", 
+     g_object_class_find_property (filter_klass, "resonance")));
+     g_type_class_unref (filter_klass);
+   */
 }
