@@ -96,7 +96,6 @@ typedef struct _GstBtOscSynthClass GstBtOscSynthClass;
 
 /**
  * GstBtOscSynth:
- * @samplerate: audio sampling rate
  *
  * Class instance data.
  */

@@ -29,10 +29,10 @@
     <title>Introduction</title>
     <para>
       This module contains experimental code that extends gstreamer.
-      The extensions are required to build a SVN version of buzztard.
+      The extensions are required to build a git version of buzztard.
     </para>
     <para>
-      It also contains some nice audio elements. These could be easily moves to
+      It also contains some nice audio elements. These could be easily moved to
       gst-plugin modules, but only with some of the interfaces.
     </para>
   </preface>
@@ -41,6 +41,7 @@
     <title>GStreamer Buzztard classes</title>
     <xi:include href="xml/gstbtaudiosynth.xml"/>
     <xi:include href="xml/gstbtenvelope.xml"/>
+    <xi:include href="xml/gstbtenvelopeadsr.xml"/>
     <xi:include href="xml/gstbtenveloped.xml"/>
     <xi:include href="xml/gstbtfiltersvf.xml"/>
     <xi:include href="xml/gstbtmusicenums.xml"/>

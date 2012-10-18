@@ -224,6 +224,22 @@ gstbt_envelope_get_type
 </SECTION>
 
 <SECTION>
+<FILE>gstbtenvelopeadsr</FILE>
+GstBtEnvelopeADSR
+gstbt_envelope_adsr_new
+gstbt_envelope_adsr_setup
+<SUBSECTION Standard>
+GstBtEnvelopeADSRClass
+GSTBT_ENVELOPE_ADSR
+GSTBT_IS_ENVELOPE_ADSR
+GSTBT_ENVELOPE_ADSR_CLASS
+GSTBT_IS_ENVELOPE_ADSR_CLASS
+GSTBT_ENVELOPE_GET_ADSR_CLASS
+GSTBT_TYPE_ENVELOPE_ADSR
+gstbt_envelope_adsr_get_type
+</SECTION>
+
+<SECTION>
 <FILE>gstbtenveloped</FILE>
 GstBtEnvelopeD
 gstbt_envelope_d_new
