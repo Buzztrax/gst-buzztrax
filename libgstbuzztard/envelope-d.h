@@ -1,7 +1,7 @@
 /* GStreamer
  * Copyright (C) 2012 Stefan Sauer <ensonic@users.sf.net>
  *
- * envelope-d.h: envelope generator for gstreamer
+ * envelope-d.h: decay envelope generator
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -40,7 +40,6 @@ typedef struct _GstBtEnvelopeDClass GstBtEnvelopeDClass;
 
 /**
  * GstBtEnvelopeD:
- * @value: current envelope value
  *
  * Class instance data.
  */
