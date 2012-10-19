@@ -97,15 +97,12 @@ gstbt_osc_synth_wave_get_type (void)
  *
  * Create a new instance
  *
- * Returns: the new instance or %NULL in case of an error
+ * Returns: the new instance
  */
 GstBtOscSynth *
 gstbt_osc_synth_new (void)
 {
-  GstBtOscSynth *self;
-
-  self = GSTBT_OSC_SYNTH (g_object_new (GSTBT_TYPE_OSC_SYNTH, NULL));
-  return (self);
+  return GSTBT_OSC_SYNTH (g_object_new (GSTBT_TYPE_OSC_SYNTH, NULL));
 }
 
 //-- private methods

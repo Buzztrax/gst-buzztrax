@@ -103,6 +103,7 @@ struct _GstBtOscSynth {
   GObject parent;
 
   /* < private > */
+  gboolean dispose_has_run;		/* validate if dispose has run */
   /* parameters */
   gint samplerate;
   GstBtEnvelope *volenv;
@@ -116,9 +117,7 @@ struct _GstBtOscSynth {
   GstBtRedNoise red;
 
   /* < private > */
-  void (*process) (GstBtOscSynth *, guint, gint16 *);
-  
-  gboolean dispose_has_run;		/* validate if dispose has run */
+  void (*process) (GstBtOscSynth *, guint, gint16 *);  
 };
 
 struct _GstBtOscSynthClass {
