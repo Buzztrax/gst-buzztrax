@@ -3,7 +3,8 @@
 plugin_LTLIBRARIES = \
   libgstaudiodelay.la \
   libgstsidsyn.la \
-  libgstsimsyn.la
+  libgstsimsyn.la \
+  libgstwavereplay.la
 
 noinst_HEADERS = \
   src/audiodelay/audiodelay.h \
@@ -18,7 +19,8 @@ noinst_HEADERS = \
   src/sidsyn/spline.h \
   src/sidsyn/voice.h \
   src/sidsyn/wave.h \
-  src/simsyn/simsyn.h
+  src/simsyn/simsyn.h \
+  src/wavereplay/wavereplay.h
 
 # audiodelay
 libgstaudiodelay_la_SOURCES = src/audiodelay/audiodelay.c
@@ -110,19 +112,6 @@ libgstfluidsynth_la_LIBTOOLFLAGS = --tag=disable-static
 endif
 
 
-libgstsimsyn_la_SOURCES = src/simsyn/plugin.c src/simsyn/simsyn.c
-libgstsimsyn_la_CFLAGS = \
-  -I$(srcdir) -I$(top_srcdir) \
-  -DDATADIR=\"$(datadir)\" \
-	$(GST_PLUGIN_CFLAGS) \
-	$(BASE_DEPS_CFLAGS)
-libgstsimsyn_la_LIBADD = \
-	libgstbuzztard.la \
-	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
-libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
-libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
-
-
 libgstsidsyn_la_SOURCES = \
   src/sidsyn/sidsyn.cc \
   src/sidsyn/sidsynv.cc \
@@ -151,4 +140,30 @@ libgstsidsyn_la_LIBADD = \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
 libgstsidsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstsidsyn_la_LIBTOOLFLAGS = --tag=disable-static
+
+
+libgstsimsyn_la_SOURCES = src/simsyn/plugin.c src/simsyn/simsyn.c
+libgstsimsyn_la_CFLAGS = \
+  -I$(srcdir) -I$(top_srcdir) \
+  -DDATADIR=\"$(datadir)\" \
+	$(GST_PLUGIN_CFLAGS) \
+	$(BASE_DEPS_CFLAGS)
+libgstsimsyn_la_LIBADD = \
+	libgstbuzztard.la \
+	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
+libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
+
+
+libgstwavereplay_la_SOURCES = src/wavereplay/wavereplay.c
+libgstwavereplay_la_CFLAGS = \
+  -I$(srcdir) -I$(top_srcdir) \
+  -DDATADIR=\"$(datadir)\" \
+	$(GST_PLUGIN_CFLAGS) \
+	$(BASE_DEPS_CFLAGS)
+libgstwavereplay_la_LIBADD = \
+	libgstbuzztard.la \
+	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
+libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
 
