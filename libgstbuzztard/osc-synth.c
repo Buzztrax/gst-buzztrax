@@ -22,7 +22,7 @@
  * SECTION:gstbtoscsynth
  * @short_description: synthetic waveform oscillator
  *
- * An audio waveform generator.
+ * An audio generator producing classic oscillator waveforms.
  */
 /* TODO(ensonic): we should do a linear fade down in the last inner_loop block as an
  * anticlick messure

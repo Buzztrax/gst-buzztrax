@@ -22,14 +22,7 @@
  * SECTION:gstbtosc wave
  * @short_description: wavetable oscillator
  *
- * An audio waveform generator.
- */
-/* TODO(ensonic): we should do a linear fade down in the last inner_loop block as an
- * anticlick messure
- *   if(note_count+INNER_LOOP>=note_length) {
- *     ac_f=1.0;
- *     ac_s=1.0/INNER_LOOP;
- *   }
+ * An audio waveform generator that read from the applications wave-table.
  */
 
 #ifdef HAVE_CONFIG_H

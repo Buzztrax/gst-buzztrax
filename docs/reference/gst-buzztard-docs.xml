@@ -33,7 +33,8 @@
     </para>
     <para>
       It also contains some nice audio elements. These could be easily moved to
-      gst-plugin modules, but only with some of the interfaces.
+      gst-plugin modules, but only with some of the interfaces base and utilty
+      classes.
     </para>
   </preface>
 
@@ -46,6 +47,7 @@
     <xi:include href="xml/gstbtfiltersvf.xml"/>
     <xi:include href="xml/gstbtmusicenums.xml"/>
     <xi:include href="xml/gstbtoscsynth.xml"/>
+    <xi:include href="xml/gstbtoscwave.xml"/>
     <xi:include href="xml/gstbttoneconversion.xml"/>
   </chapter>
 
@@ -63,6 +65,7 @@
     <xi:include href="xml/gstfluidsynth.xml"/>
     <xi:include href="xml/gstsidsyn.xml"/>
     <xi:include href="xml/gstsimsyn.xml"/>
+    <xi:include href="xml/gstwavereplay.xml"/>
   </chapter>
   
   <chapter>

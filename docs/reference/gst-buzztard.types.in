@@ -4,12 +4,14 @@
 @FLUIDSYNTH_DOC_TYPES@#include <fluidsynth/gstfluidsynth.h>
 #include <sidsyn/sidsyn.h>
 #include <simsyn/simsyn.h>
+#include <wavereplay/wavereplay.h>
 
 gstbt_audio_delay_get_type
 @FLUIDSYNTH_DOC_TYPES@gstbt_fluid_synth_get_type
 gstbt_sid_syn_get_type
 gstbt_sid_synv_get_type
 gstbt_sim_syn_get_type
+gstbt_wave_replay_get_type
 
 % stuff that we want for gstreamer
 
@@ -35,6 +37,7 @@ gstbt_tempo_get_type
 #include <libgstbuzztard/envelope-d.h>
 #include <libgstbuzztard/filter-svf.h>
 #include <libgstbuzztard/osc-synth.h>
+#include <libgstbuzztard/osc-wave.h>
 #include <libgstbuzztard/toneconversion.h>
 
 gstbt_envelope_get_type
@@ -42,5 +45,6 @@ gstbt_envelope_adsr_get_type
 gstbt_envelope_d_get_type
 gstbt_filter_svf_get_type
 gstbt_osc_synth_get_type
+gstbt_osc_wave_get_type
 gstbt_tone_conversion_get_type
 
