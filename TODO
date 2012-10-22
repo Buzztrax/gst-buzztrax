@@ -12,6 +12,7 @@ c) can we use events?
    - the application would push them on to the sink and they travel up to the
      sources
 
+
 = GstBtChildBin =
 - would be useful for the GstIirEqualizerNBands (num-bands->children)
 
@@ -19,7 +20,7 @@ c) can we use events?
 = GstSimsyn =
 - have more variants in the same plugin (share code, like oszillators and filter)
   - we'd like to have one with
-    - dual-osc
+    - dual-osc (with detune for the 2nd)
     - two ADSR envelopes
     - each envelope can modulate volume and filter-cutoff/resonance
   - current simsyn is missing key-tracking for the filter
@@ -40,16 +41,37 @@ c) can we use events?
   - we should re-work memory audio source for it
   - it can be a local machine (not installed as a separate plugin), but we'd
     need to move it into bt-core (so that it works outside of the ui too)
-  - machine.c currently checks for "host-callbacks" property and uses that to
-    pass the BuzzCallbacks. The element can use them to access the wavetable.
+  - see osc-wave component below
+
+= GrainSynth =
+- a grain synth takes snippets from the one wave-table slot, applies a
+  fft-window function and mixes it into the output
+- using a triangle-window and a grain-ratio=1.0 would replicate the waveform
+  (triangles with 50% overlap)
+- depending on the ration of note-lnegth and wave-length the overlap and the
+  grain-ratio would change. The overlap is implicit.
+  - if note_len>wave_len : add more grains
+  - else                 : skip grains
+- until now it's merely a form of tiemstreching, to make it more interesting we
+  can add:
+  - extra grains at a different volume before and after the actual grain
+    - volume would be a percentage of the original, spread would be in ms
+  - grain size, this determines the width of the window, might be fun to make
+    extra grains smaller too
+  - panning for extra grains
 
 = synth components =
 The libgstbuzztard already has a couple of components; we'd like to extend this
 to make it dead easy writing new synths.
 
 == components ideas ==
-envelope-adsr
-osc-wave (wavetable oscillator)
+=== osc-wave (wavetable oscillator) ===
+- we might need to add some extra caps fields
+  (root-note, loop, loop-start, loop-end)
+- do we want it to play loops?
+- what if samples are for e.g. 44100 but the audio plays at 48000?
+- we could resample all wave-table entries when loading a song (keeping original
+  waves in the files)
 
 == design ==
 After adding more components we needs to extract common interfaces. Each
@@ -59,6 +81,7 @@ others manually. We can use GBinding (since glib-2.26) for the proxy properties.
 
 == open questions ==
 Do we need to pass the data fmt? What about mono/stereo.
+
 
 = debugging =
 G_SLICE=always-malloc G_DEBUG=gc-friendly GLIBCPP_FORCE_NEW=1 GLIBCXX_FORCE_NEW=1 valgrind --tool=memcheck --leak-check=full --leak-resolution=high --trace-children=yes --num-callers=20 --suppressions=$HOME/projects/gstreamer/gstreamer/common/gst.supp gst-launch -q >/dev/null audiotestsrc num-buffers=10 ! bml-EQ-10 ! fakesink
