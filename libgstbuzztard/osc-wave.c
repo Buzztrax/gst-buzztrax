@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:gstbtosc wave
+ * SECTION:gstbtoscwave
  * @short_description: wavetable oscillator
  *
  * An audio waveform generator that read from the applications wave-table.

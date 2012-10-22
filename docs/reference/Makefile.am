@@ -98,7 +98,8 @@ GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
 	$(BML_LA) \
 	$(FLUIDSYNTH_LA) \
 	$(top_builddir)/libgstsidsyn.la \
-	$(top_builddir)/libgstsimsyn.la
+	$(top_builddir)/libgstsimsyn.la \
+	$(top_builddir)/libgstwavereplay.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make
