@@ -9,7 +9,7 @@ DOC_MODULE=gst-buzztard
 BUILT_SOURCES=$(DOC_MODULE).types
 
 # The top-level SGML file. You can change this if you want to.
-DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.sgml
+DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.xml
 
 # Some parts are dynamic
 if FLUIDSYNTH_SUPPORT
