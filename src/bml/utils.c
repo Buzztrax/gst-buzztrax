@@ -58,22 +58,11 @@ gboolean
 bml (gstbml_is_polyphonic (gpointer bmh))
 {
   int track_params = 0;
-  //int min_voices=0,max_voices=0;
 
   if (bml (get_machine_info (bmh, BM_PROP_NUM_TRACK_PARAMS,
               (void *) &track_params))) {
     if (track_params > 0)
       return (TRUE);
-#if 0
-    if (bml (get_machine_info (bmh, BM_PROP_MIN_TRACKS, (void *) &min_voices))
-        && bml (get_machine_info (bmh, BM_PROP_MAX_TRACKS,
-                (void *) &max_voices))
-        ) {
-      GST_INFO ("min/max-voices=%d/%d", min_voices, max_voices);
-      if ((min_voices <= max_voices) && (max_voices > 0))
-        return (TRUE);
-    }
-#endif
   }
   return (FALSE);
 }
@@ -570,7 +559,19 @@ bml (gstbml_class_prepare_properties (GObjectClass * klass,
           "Buzz host callback structure", G_PARAM_WRITABLE));
 
   if (bml (gstbml_is_polyphonic (bmh))) {
-    g_object_class_override_property (klass, prop_id, "children");
+    gboolean res = TRUE;
+    gint minv = 0, maxv = 0;
+
+    res &= bml (get_machine_info (bmh, BM_PROP_MIN_TRACKS, (void *) &minv));
+    res &= bml (get_machine_info (bmh, BM_PROP_MAX_TRACKS, (void *) &maxv));
+    if (res) {
+      g_object_class_install_property (klass, prop_id,
+          g_param_spec_ulong ("children", "children count property",
+              "the number of children this element uses", minv, maxv, minv,
+              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    } else {
+      g_object_class_override_property (klass, prop_id, "children");
+    }
     prop_id++;
   }
 
@@ -1193,8 +1194,8 @@ bml (gstbml_reset_triggers (GstBML * bml, GstBMLClass * bml_class))
     }
   }
   for (i = 0; i < bml_class->numtrackparams; i++) {
-    if (g_atomic_int_compare_and_exchange (&bml->triggers_changed[bml_class->
-                numglobalparams + i], 2, 0)) {
+    if (g_atomic_int_compare_and_exchange (&bml->
+            triggers_changed[bml_class->numglobalparams + i], 2, 0)) {
       pspec = bml_class->track_property[i];
       addr = bml (get_track_parameter_location (bm, 0, i));
       reset_triggers (pspec, addr);

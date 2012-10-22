@@ -204,7 +204,11 @@ gst_sid_syn_class_init (GstBtSidSynClass * klass)
   gobject_class->get_property = gst_sid_syn_get_property;
   gobject_class->dispose = gst_sid_syn_dispose;
   
-  g_object_class_override_property (gobject_class, PROP_CHILDREN, "children");
+  // override iface properties
+
+  g_object_class_install_property (gobject_class, PROP_CHILDREN,
+      g_param_spec_ulong ("children","children count property",
+          "the number of children this element uses", 3, 3, 3, pflags2));
 
   // register own properties
 
