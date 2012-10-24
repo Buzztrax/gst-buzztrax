@@ -59,6 +59,28 @@ c) can we use events?
   - grain size, this determines the width of the window, might be fun to make
     extra grains smaller too
   - panning for extra grains
+- one possible way to implement is to have n-'voices' as below
+  - for this little overlap and spread we already need 7 voices though
+  - the wider a voice spreads and the smaller the overlap is, the more voices we
+    need (voices = 1 + (spread_range_ms / overlap_ms)
+       /\
+0 /\  /  \  /\
+         /\
+1   /\  /  \  /\
+           /\
+2     /\  /  \  /\
+             /\
+3       /\  /  \  /\
+               /\
+4         /\  /  \  /\
+                 /\
+5           /\  /  \  /\
+                   /\
+6             /\  /  \  /\
+
+spread_range_ms = 12
+overlap_ms = 2
+voices = 1 + (12 / 2) = 7
 
 = synth components =
 The libgstbuzztard already has a couple of components; we'd like to extend this
