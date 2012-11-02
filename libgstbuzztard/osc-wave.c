@@ -86,7 +86,7 @@ gstbt_osc_wave_create_mono (GstBtOscWave * self, guint64 off, guint ct,
   }
 
   if ((off + ct) * s >= size) {
-    guint ct2 = size - off;
+    guint ct2 = (size / s) - off;
     // clear end of buffer
     memset (&dst[ct2], 0, (ct - ct2) * s);
     ct = ct2;
@@ -115,7 +115,7 @@ gstbt_osc_wave_create_stereo (GstBtOscWave * self, guint64 off, guint ct,
   }
 
   if ((off + ct) * s >= size) {
-    guint ct2 = size - off;
+    guint ct2 = (size / s) - off;
     // clear end of buffer
     memset (&dst[ct2 * 2], 0, (ct - ct2) * s);
     ct = ct2;
