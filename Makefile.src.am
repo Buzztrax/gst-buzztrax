@@ -164,6 +164,6 @@ libgstwavereplay_la_CFLAGS = \
 libgstwavereplay_la_LIBADD = \
 	libgstbuzztard.la \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
-libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
-libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
+libgstwavereplay_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstwavereplay_la_LIBTOOLFLAGS = --tag=disable-static
 
