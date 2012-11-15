@@ -1,9 +1,9 @@
-noinst_HEADERS = libgstbuzztard/compat.h
+noinst_HEADERS += libgstbuzztard/compat.h
 
 lib_LTLIBRARIES = libgstbuzztard.la
 
 libgstbuzztard_la_SOURCES = \
-	libgstbuzztard/audiosynth.c \	
+	libgstbuzztard/audiosynth.c \
 	libgstbuzztard/childbin.c \
 	libgstbuzztard/envelope.c \
 	libgstbuzztard/envelope-adsr.c \

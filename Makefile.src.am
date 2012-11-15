@@ -4,9 +4,10 @@ plugin_LTLIBRARIES = \
   libgstaudiodelay.la \
   libgstsidsyn.la \
   libgstsimsyn.la \
-  libgstwavereplay.la
+  libgstwavereplay.la \
+  libgstwavetabsyn.la
 
-noinst_HEADERS = \
+noinst_HEADERS += \
   src/audiodelay/audiodelay.h \
   src/sidsyn/sidsyn.h \
   src/sidsyn/sidsynv.h \
@@ -20,7 +21,8 @@ noinst_HEADERS = \
   src/sidsyn/voice.h \
   src/sidsyn/wave.h \
   src/simsyn/simsyn.h \
-  src/wavereplay/wavereplay.h
+  src/wavereplay/wavereplay.h \
+  src/wavetabsyn/wavetabsyn.h
 
 # audiodelay
 libgstaudiodelay_la_SOURCES = src/audiodelay/audiodelay.c
@@ -166,4 +168,17 @@ libgstwavereplay_la_LIBADD = \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
 libgstwavereplay_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstwavereplay_la_LIBTOOLFLAGS = --tag=disable-static
+
+
+libgstwavetabsyn_la_SOURCES = src/wavetabsyn/wavetabsyn.c
+libgstwavetabsyn_la_CFLAGS = \
+  -I$(srcdir) -I$(top_srcdir) \
+  -DDATADIR=\"$(datadir)\" \
+	$(GST_PLUGIN_CFLAGS) \
+	$(BASE_DEPS_CFLAGS)
+libgstwavetabsyn_la_LIBADD = \
+	libgstbuzztard.la \
+	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
+libgstwavetabsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
+libgstwavetabsyn_la_LIBTOOLFLAGS = --tag=disable-static
 
