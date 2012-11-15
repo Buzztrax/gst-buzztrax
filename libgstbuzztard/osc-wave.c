@@ -44,7 +44,10 @@ enum
   PROP_WAVE_CALLBACKS = 1,
   // dynamic class properties
   PROP_WAVE,
-  PROP_WAVE_LEVEL
+  PROP_WAVE_LEVEL,
+  PROP_FREQUENCY,
+  // readable class properties
+  PROP_DURATION
 };
 
 //-- the class
@@ -76,23 +79,23 @@ gstbt_osc_wave_create_mono (GstBtOscWave * self, guint64 off, guint ct,
     GST_DEBUG ("no wave buffer");
     return FALSE;
   }
-  const guint s = sizeof (gint16);
+  const guint ss = sizeof (gint16);
   guint size = GST_BUFFER_SIZE (self->data);
-  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
-
-  if (off * s >= size) {
+  if (off * ss >= size) {
     GST_DEBUG ("beyond size");
     return FALSE;
   }
 
-  if ((off + ct) * s >= size) {
-    guint ct2 = (size / s) - off;
+  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
+
+  if ((off + ct) * ss >= size) {
+    guint ct2 = (size / ss) - off;
     // clear end of buffer
-    memset (&dst[ct2], 0, (ct - ct2) * s);
+    memset (&dst[ct2], 0, (ct - ct2) * ss);
     ct = ct2;
   }
   // copy from data[off] ... data[off+ct]
-  memcpy (dst, &src[off], ct * s);
+  memcpy (dst, &src[off], ct * ss);
 
   return TRUE;
 }
@@ -105,23 +108,83 @@ gstbt_osc_wave_create_stereo (GstBtOscWave * self, guint64 off, guint ct,
     GST_DEBUG ("no wave buffer");
     return FALSE;
   }
-  const guint s = 2 * sizeof (gint16);
+  const guint ss = 2 * sizeof (gint16);
   guint size = GST_BUFFER_SIZE (self->data);
-  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
-
-  if (off * s >= size) {
+  if (off * ss >= size) {
     GST_DEBUG ("beyond size");
     return FALSE;
   }
 
-  if ((off + ct) * s >= size) {
-    guint ct2 = (size / s) - off;
+  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
+
+  if ((off + ct) * ss >= size) {
+    guint ct2 = (size / ss) - off;
     // clear end of buffer
-    memset (&dst[ct2 * 2], 0, (ct - ct2) * s);
+    memset (&dst[ct2 * 2], 0, (ct - ct2) * ss);
     ct = ct2;
   }
   // copy from data[off] ... data[off+ct]
-  memcpy (dst, &src[off * 2], ct * s);
+  memcpy (dst, &src[off * 2], ct * ss);
+
+  return TRUE;
+}
+
+static gboolean
+gstbt_osc_wave_create_mono_resampled (GstBtOscWave * self, guint64 off,
+    guint ct, gint16 * dst)
+{
+  if (!self->data) {
+    GST_DEBUG ("no wave buffer");
+    return FALSE;
+  }
+  const guint ss = sizeof (gint16);
+  guint size = GST_BUFFER_SIZE (self->data);
+  if (off * ss >= size) {
+    GST_DEBUG ("beyond size");
+    return FALSE;
+  }
+
+  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
+  gdouble rate = self->rate;
+  guint64 s, d;
+
+  for (d = 0; d < ct; d++) {
+    s = (off + d) * rate;
+    dst[d] = (s * ss < size) ? src[s] : 0;
+  }
+
+  return TRUE;
+}
+
+static gboolean
+gstbt_osc_wave_create_stereo_resampled (GstBtOscWave * self, guint64 off,
+    guint ct, gint16 * dst)
+{
+  if (!self->data) {
+    GST_DEBUG ("no wave buffer");
+    return FALSE;
+  }
+  const guint ss = 2 * sizeof (gint16);
+  guint size = GST_BUFFER_SIZE (self->data);
+  if (off * ss >= size) {
+    GST_DEBUG ("beyond size");
+    return FALSE;
+  }
+
+  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
+  gdouble rate = self->rate;
+  guint64 s, d;
+
+  for (d = 0; d < ct; d++) {
+    s = (off + d) * rate;
+    if (s * ss < size) {
+      dst[d << 1] = src[(s << 1)];
+      dst[(d << 1) + 1] = src[(s << 1) + 1];
+    } else {
+      dst[d << 1] = 0;
+      dst[(d << 1) + 1] = 0;
+    }
+  }
 
   return TRUE;
 }
@@ -137,6 +200,7 @@ gstbt_osc_wave_setup (GstBtOscWave * self)
   GstBuffer *(*get_wave_buffer) (gpointer, guint, guint);
   GstCaps *caps;
   GstStructure *s;
+  GstBtNote root_note;
 
   if (!cb) {
     return;
@@ -153,21 +217,45 @@ gstbt_osc_wave_setup (GstBtOscWave * self)
 
   caps = GST_BUFFER_CAPS (self->data);
   s = gst_caps_get_structure (caps, 0);
-  gst_structure_get (s, "channels", G_TYPE_INT, &self->channels, NULL);
+  gst_structure_get (s,
+      "channels", G_TYPE_INT, &self->channels,
+      "root-note", GSTBT_TYPE_NOTE, &root_note, NULL);
 
-  GST_WARNING ("got wave with %d  channels", self->channels);
+  if (self->freq > 0.0) {
+    gdouble freq =
+        gstbt_tone_conversion_translate_from_number (self->n2f, root_note);
+    self->rate = freq / self->freq;
+  } else {
+    self->rate = 1.0;
+  }
+
+  GST_WARNING ("got wave with %d channels", self->channels);
+
+  self->duration = GST_BUFFER_SIZE (self->data) * self->rate / sizeof (gint16);
 
   switch (self->channels) {
     case 1:
-      self->process = gstbt_osc_wave_create_mono;
+      if (self->rate == 1.0) {
+        self->process = gstbt_osc_wave_create_mono;
+      } else {
+        self->process = gstbt_osc_wave_create_mono_resampled;
+      }
       break;
     case 2:
-      self->process = gstbt_osc_wave_create_stereo;
+      self->duration >>= 1;
+      if (self->rate == 1.0) {
+        self->process = gstbt_osc_wave_create_stereo;
+      } else {
+        self->process = gstbt_osc_wave_create_stereo_resampled;
+      }
       break;
     default:
       GST_ERROR ("unsupported number of channels: %d", self->channels);
       break;
   }
+
+  GST_WARNING ("duration at rate %lf is %" G_GUINT64_FORMAT, self->rate,
+      self->duration);
 }
 
 //-- public methods
@@ -195,6 +283,11 @@ gstbt_osc_wave_set_property (GObject * object, guint prop_id,
       self->wave_level = g_value_get_uint (value);
       gstbt_osc_wave_setup (self);
       break;
+    case PROP_FREQUENCY:
+      //GST_INFO("change frequency %lf -> %lf",g_value_get_double (value),self->freq);
+      self->freq = g_value_get_double (value);
+      gstbt_osc_wave_setup (self);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -217,6 +310,12 @@ gstbt_osc_wave_get_property (GObject * object, guint prop_id,
     case PROP_WAVE_LEVEL:
       g_value_set_uint (value, self->wave_level);
       break;
+    case PROP_FREQUENCY:
+      g_value_set_double (value, self->freq);
+      break;
+    case PROP_DURATION:
+      g_value_set_uint64 (value, self->duration);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -232,6 +331,8 @@ gstbt_osc_wave_dispose (GObject * object)
     return;
   self->dispose_has_run = TRUE;
 
+  if (self->n2f)
+    g_object_unref (self->n2f);
   if (self->data)
     gst_buffer_unref (self->data);
 
@@ -242,6 +343,10 @@ static void
 gstbt_osc_wave_init (GstBtOscWave * self)
 {
   self->wave = 1;
+  self->freq = 0.0;
+  self->rate = 1.0;
+  self->n2f =
+      gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
 }
 
 static void
@@ -270,4 +375,14 @@ gstbt_osc_wave_class_init (GstBtOscWaveClass * klass)
       g_param_spec_uint ("wave-level", "Wavelevel", "Wave level index",
           0, 100, 0,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_FREQUENCY,
+      g_param_spec_double ("frequency", "Frequency",
+          "Frequency of tone (0.0 for original)", 0.0, G_MAXDOUBLE, 0.0,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_DURATION,
+      g_param_spec_uint64 ("duration", "Duration",
+          "Duration in samples at the given rate", 0, G_MAXUINT64, 0,
+          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 }

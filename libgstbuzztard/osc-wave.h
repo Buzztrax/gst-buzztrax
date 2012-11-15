@@ -23,6 +23,7 @@
 #define __GSTBT_OSC_WAVE_H__
 
 #include <gst/gst.h>
+#include <libgstbuzztard/toneconversion.h>
 
 G_BEGIN_DECLS
 
@@ -49,10 +50,14 @@ struct _GstBtOscWave {
   /* parameters */
   gpointer *wave_callbacks;
   guint wave, wave_level;
+  gdouble freq;
 
   /* oscillator state */
+  GstBtToneConversion *n2f;
   GstBuffer *data;
   gint channels;
+  gdouble rate;
+  guint64 duration;
 
   /* < private > */
   gboolean (*process) (GstBtOscWave *, guint64, guint, gint16 *);  
