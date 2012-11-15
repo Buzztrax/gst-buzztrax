@@ -231,7 +231,8 @@ gstbt_osc_wave_setup (GstBtOscWave * self)
 
   GST_WARNING ("got wave with %d channels", self->channels);
 
-  self->duration = GST_BUFFER_SIZE (self->data) * self->rate / sizeof (gint16);
+  self->duration = GST_BUFFER_SIZE (self->data) /
+      (self->rate * sizeof (gint16));
 
   switch (self->channels) {
     case 1:

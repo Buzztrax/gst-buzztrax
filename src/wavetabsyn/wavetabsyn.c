@@ -80,7 +80,7 @@ gstbt_wave_tab_syn_process (GstBtAudioSynth * base, GstBuffer * data)
   guint sz = src->cycle_size;
   guint pos = src->cycle_pos;
   guint p = 0;
-  guint64 off = src->offset * 0xFFFF / (src->duration - src->cycle_size);
+  guint64 off = src->offset * (src->duration - src->cycle_size) / 0xFFFF;
 
   if (src->osc->process) {
     // do we have a unfinished cycle?
