@@ -71,7 +71,7 @@ builddirs:
 # make coverage        -- run all checks and generate html coverage report (only availble when built using --enable-coverage)
 if USE_LCOV
 coverage::
-	mkdir -p ./coverage
+	$(MKDIR_P) ./coverage
 	lcov --compat-libtool --directory . --zerocounters
 	-$(MAKE) check
 	lcov --compat-libtool --directory ./src --capture --output-file ./coverage/$(PACKAGE)_tmp.info
