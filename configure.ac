@@ -60,6 +60,7 @@ AM_PROG_CC_C_O
 AM_PROG_MKDIR_P
 PKG_PROG_PKG_CONFIG
 
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 dnl common switches for all buzztard modules
 
