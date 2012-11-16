@@ -31,17 +31,9 @@ c) can we use events?
     - v2: we could assume the current cut-off is related to C-4 and rebase
       accordingly
 
-= FrozenTrackPlayer (MemoryAudioSource) =
-- when playing pre-recorded tracks, one would trigger them at the start with the
-  root note
-- one problem here is that we can't start playback in the middle of the song or
-  loop parts
-- we want a special machine that only has a wave-table parameter and plays the
-  sample.
-  - we should re-work memory audio source for it
-  - it can be a local machine (not installed as a separate plugin), but we'd
-    need to move it into bt-core (so that it works outside of the ui too)
-  - see osc-wave component below
+= WaveTabSynth =
+- slightly modulating the wave-offset could be interesting
+  - we could e.g. let it progress during the tone or have an envelope for it
 
 = GrainSynth =
 - a grain synth takes snippets from the one wave-table slot, applies a

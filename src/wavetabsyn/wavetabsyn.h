@@ -24,6 +24,7 @@
 
 #include <gst/gst.h>
 #include <libgstbuzztard/audiosynth.h>
+#include <libgstbuzztard/envelope-adsr.h>
 #include <libgstbuzztard/osc-wave.h>
 #include <libgstbuzztard/toneconversion.h>
 
@@ -53,11 +54,13 @@ struct _GstBtWaveTabSyn
 
   /* parameters */
   GstBtNote note;
-  guint offset;
+  guint note_length, offset;
+  gdouble attack, decay, release, peak_volume, sustain_volume;
 
   guint cycle_pos, cycle_size;
   guint64 duration;
   GstBtToneConversion *n2f;
+  GstBtEnvelopeADSR *volenv;
   GstBtOscWave *osc;
 };
 

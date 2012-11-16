@@ -44,9 +44,17 @@ enum
   PROP_TUNING,
   // dynamic class properties
   PROP_NOTE,
+  PROP_NOTE_LENGTH,
   PROP_WAVE,
-  PROP_OFFSET
+  PROP_OFFSET,
+  PROP_ATTACK,
+  PROP_PEAK_VOLUME,
+  PROP_DECAY,
+  PROP_SUSTAIN_VOLUME,
+  PROP_RELEASE
 };
+
+#define INNER_LOOP 64
 
 //-- the class
 
@@ -109,8 +117,34 @@ gstbt_wave_tab_syn_process (GstBtAudioSynth * base, GstBuffer * data)
       pos += ct;
     }
     src->cycle_pos = pos;
+    // apply volume envelope
+    ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
+    if (ch == 1) {
+      gdouble amp;
+      guint i = 0, j;
+      while (i < ct) {
+        j = ct - i;
+        amp = gstbt_envelope_get ((GstBtEnvelope *) src->volenv,
+            MIN (INNER_LOOP, j));
+        for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
+          d[i] *= amp;
+        }
+      }
+    } else if (ch == 2) {
+      gdouble amp;
+      guint i = 0, j;
+      while (i < ct) {
+        j = ct - i;
+        amp = gstbt_envelope_get ((GstBtEnvelope *) src->volenv,
+            MIN (INNER_LOOP, j));
+        for (j = 0; ((j < INNER_LOOP) && (i < ct)); j++, i++) {
+          d[(i << 1)] *= amp;
+          d[(i << 1) + 1] *= amp;
+        }
+      }
+    }
   } else {
-    memset (d, 0, ct * sizeof (gint16));
+    memset (d, 0, ct * ch * sizeof (gint16));
     GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
 }
@@ -138,19 +172,45 @@ gstbt_wave_tab_syn_set_property (GObject * object, guint prop_id,
         GST_DEBUG ("new note -> '%d'", src->note);
         gdouble freq =
             gstbt_tone_conversion_translate_from_number (src->n2f, src->note);
+        gdouble note_time =
+            (gdouble) (src->note_length * ((GstBtAudioSynth *) src)->ticktime) /
+            (gdouble) GST_SECOND;
+
         g_object_set (src->osc, "frequency", freq, NULL);
         g_object_get (src->osc, "duration", &src->duration, NULL);
 
         // this is the chunk that we need to repeat for the selected tone
         src->cycle_size = ((GstBtAudioSynth *) src)->samplerate / freq;
         src->cycle_pos = 0;
+
+        gstbt_envelope_adsr_setup (src->volenv,
+            ((GstBtAudioSynth *) src)->samplerate, src->attack, src->decay,
+            note_time, src->release, src->peak_volume, src->sustain_volume);
       }
+      break;
+    case PROP_NOTE_LENGTH:
+      src->note_length = g_value_get_uint (value);
       break;
     case PROP_WAVE:
       g_object_set_property ((GObject *) (src->osc), "wave", value);
       break;
     case PROP_OFFSET:
       src->offset = g_value_get_uint (value);
+      break;
+    case PROP_ATTACK:
+      src->attack = g_value_get_double (value);
+      break;
+    case PROP_PEAK_VOLUME:
+      src->peak_volume = g_value_get_double (value);
+      break;
+    case PROP_DECAY:
+      src->decay = g_value_get_double (value);
+      break;
+    case PROP_SUSTAIN_VOLUME:
+      src->sustain_volume = g_value_get_double (value);
+      break;
+    case PROP_RELEASE:
+      src->release = g_value_get_double (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -174,11 +234,29 @@ gstbt_wave_tab_syn_get_property (GObject * object, guint prop_id,
     case PROP_TUNING:
       g_object_get_property ((GObject *) (src->n2f), "tuning", value);
       break;
+    case PROP_NOTE_LENGTH:
+      g_value_set_uint (value, src->note_length);
+      break;
     case PROP_WAVE:
       g_object_get_property ((GObject *) (src->osc), "wave", value);
       break;
     case PROP_OFFSET:
       g_value_set_uint (value, src->offset);
+      break;
+    case PROP_ATTACK:
+      g_value_set_double (value, src->attack);
+      break;
+    case PROP_PEAK_VOLUME:
+      g_value_set_double (value, src->peak_volume);
+      break;
+    case PROP_DECAY:
+      g_value_set_double (value, src->decay);
+      break;
+    case PROP_SUSTAIN_VOLUME:
+      g_value_set_double (value, src->sustain_volume);
+      break;
+    case PROP_RELEASE:
+      g_value_set_double (value, src->release);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -199,6 +277,8 @@ gstbt_wave_tab_syn_dispose (GObject * object)
     g_object_unref (src->n2f);
   if (src->osc)
     g_object_unref (src->osc);
+  if (src->volenv)
+    g_object_unref (src->volenv);
 
   G_OBJECT_CLASS (gstbt_wave_tab_syn_parent_class)->dispose (object);
 }
@@ -208,11 +288,20 @@ gstbt_wave_tab_syn_dispose (GObject * object)
 static void
 gstbt_wave_tab_syn_init (GstBtWaveTabSyn * src)
 {
+  /* set base parameters */
+  src->note_length = 1;
+  src->attack = 0.1;
+  src->peak_volume = 0.8;
+  src->decay = 0.5;
+  src->sustain_volume = 0.4;
+  src->release = 0.5;
+
   src->n2f =
       gstbt_tone_conversion_new (GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT);
 
   /* synth components */
   src->osc = gstbt_osc_wave_new ();
+  src->volenv = gstbt_envelope_adsr_new ();
 }
 
 static void
@@ -257,12 +346,42 @@ gstbt_wave_tab_syn_class_init (GstBtWaveTabSynClass * klass)
           "Musical note (e.g. 'c-3', 'd#4')", GSTBT_TYPE_NOTE, GSTBT_NOTE_NONE,
           G_PARAM_WRITABLE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
+  g_object_class_install_property (gobject_class, PROP_NOTE_LENGTH,
+      g_param_spec_uint ("length", "Note length", "Note length in ticks",
+          1, 255, 1,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
   g_object_class_install_property (gobject_class, PROP_WAVE,
       g_param_spec_uint ("wave", "Wave", "Wave index", 1, 200, 1,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (gobject_class, PROP_OFFSET,
       g_param_spec_uint ("offset", "Offset", "Wave table offset", 0, 0xFFFF, 0,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_ATTACK,
+      g_param_spec_double ("attack", "Attack",
+          "Volume attack of the tone in seconds", 0.001, 4.0, 0.1,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_PEAK_VOLUME,
+      g_param_spec_double ("peak-volume", "Peak Volume", "Peak volume of tone",
+          0.0, 1.0, 0.8,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_DECAY,
+      g_param_spec_double ("decay", "Decay",
+          "Volume decay of the tone in seconds", 0.001, 4.0, 0.5,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_SUSTAIN_VOLUME,
+      g_param_spec_double ("sustain-volume", "Sustain Volume",
+          "Sustain volume of tone", 0.0, 1.0, 0.4,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_RELEASE,
+      g_param_spec_double ("release", "RELEASE",
+          "Volume release of the tone in seconds", 0.001, 4.0, 0.5,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 }
 
