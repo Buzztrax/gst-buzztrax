@@ -77,7 +77,8 @@ gstbt_envelope_adsr_new (void)
  * @sustain_level: sustain volume level (0.0 -> 1.0)
  *
  * Initialize the envelope for a new cycle. @note_time is the length of the
- * note. @attack_time + @decay_time must be < @note_time.
+ * note. @attack_time + @decay_time must be < @note_time otherwise they get
+ * scaled down.
  */
 void
 gstbt_envelope_adsr_setup (GstBtEnvelopeADSR * self, gint samplerate,
