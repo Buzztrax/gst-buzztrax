@@ -78,7 +78,9 @@ gstbt_wave_replay_process (GstBtAudioSynth * base, GstBuffer * data)
       base->samplerate, GST_SECOND);
 
   if (!src->osc->process || !src->osc->process (src->osc, off, ct, d)) {
-    memset (d, 0, ct * sizeof (gint16));
+    gint ch = ((GstBtAudioSynth *) src)->channels;
+
+    memset (d, 0, ct * ch * sizeof (gint16));
     GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
 }
