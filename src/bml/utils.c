@@ -368,29 +368,32 @@ bml (gstbml_class_set_details (GstElementClass * klass, GstBMLClass * bml_class,
 
 static GType
 gst_bml_register_global_enum_type (GObjectClass * klass, gpointer bmh, gint i,
-    gchar * name, gint min_val, gint max_val, gint no_val)
+    gchar * name, gint min_val, gint max_val, gint no_val, gint def_val)
 {
   GType enum_type = G_TYPE_INVALID;
   const gchar *desc;
-
-  desc = bml (describe_global_value (bmh, i, min_val));
-  GST_INFO ("check enum, description='%s', (entries=(%d-%d)=%d), no_val=%d",
-      desc, max_val, min_val, ((max_val + 1) - min_val), no_val);
-
-  //if(desc && g_ascii_isalpha(desc[0])) {
   gchar *type_name;
+  gint extra = 1;
 
+  GST_INFO ("check enum, (entries=(%d-%d)=%d), no_val=%d, def_val=%d",
+      max_val, min_val, ((max_val + 1) - min_val), no_val, def_val);
+
+  if ((def_val < min_val) || (def_val > max_val)) {
+    extra++;
+  }
+  if ((no_val < min_val) || (no_val > max_val)) {
+    extra++;
+  }
   // build type name
   type_name =
       g_strdup_printf ("%s%s", g_type_name (G_TYPE_FROM_CLASS (klass)), name);
   if (!(enum_type = g_type_from_name (type_name))) {
-    gint j, k, total = (max_val + 1) - min_val, vcount = 0, tcount = 0;
+    gint j, total = (max_val + 1) - min_val, vcount = 0, tcount = 0;
     GEnumValue *enums;
 
     // count entries that start with a character
     for (j = 0; j < total; j++) {
       desc = bml (describe_global_value (bmh, i, min_val + j));
-      //if((j==no_val) && !desc) desc=" ";
       if (desc) {
         vcount++;
         if (g_ascii_isalpha (desc[0])) {
@@ -411,10 +414,21 @@ gst_bml_register_global_enum_type (GObjectClass * klass, gpointer bmh, gint i,
     // don't make an enum for those
     //if(total-tcount<=2) {
     if (tcount >= (total >> 1)) {
+      gint k = 0;
       // this we can never free :(
-      enums = g_new (GEnumValue, vcount + 2);
+      enums = g_new (GEnumValue, vcount + extra);
+      if (def_val < min_val) {
+        enums[k].value = def_val;
+        enums[k].value_name = enums[k].value_nick = "";
+        k++;
+      }
+      if (no_val < min_val) {
+        enums[k].value = no_val;
+        enums[k].value_name = enums[k].value_nick = "";
+        k++;
+      }
       // create an enum type
-      for (j = k = 0; j < total; j++) {
+      for (j = 0; j < total; j++) {
         desc = bml (describe_global_value (bmh, i, min_val + j));
         //if((j==no_val) && !desc) desc=" ";
         //if(desc && g_ascii_isalpha(desc[0])) {
@@ -427,10 +441,16 @@ gst_bml_register_global_enum_type (GObjectClass * klass, gpointer bmh, gint i,
           k++;
         }
       }
-      enums[k].value = no_val;
-      enums[k].value_name = "";
-      enums[k].value_nick = "";
-      k++;
+      if (def_val > max_val) {
+        enums[k].value = def_val;
+        enums[k].value_name = enums[k].value_nick = "";
+        k++;
+      }
+      if (no_val > max_val) {
+        enums[k].value = no_val;
+        enums[k].value_name = enums[k].value_nick = "";
+        k++;
+      }
       // terminator
       enums[k].value = 0;
       enums[k].value_name = NULL;
@@ -446,7 +466,6 @@ gst_bml_register_global_enum_type (GObjectClass * klass, gpointer bmh, gint i,
     GST_INFO ("existing enum '%s'", type_name);
   }
   g_free (type_name);
-  //}
   return (enum_type);
 }
 
@@ -632,7 +651,7 @@ bml (gstbml_class_prepare_properties (GObjectClass * klass,
         if (type == PT_BYTE) {
           if ((enum_type =
                   gst_bml_register_global_enum_type (klass, bmh, i, name,
-                      min_val, max_val, no_val))) {
+                      min_val, max_val, no_val, def_val))) {
             type = PT_ENUM;
           }
         }

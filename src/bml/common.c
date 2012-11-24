@@ -886,6 +886,8 @@ gstbml_register_param (GObjectClass * klass, gint prop_id,
         GINT_TO_POINTER (type));
     g_object_class_install_property (klass, prop_id, paramspec);
     GST_DEBUG ("registered paramspec=%p", paramspec);
+  } else {
+    GST_WARNING ("failed to create paramspec");
   }
   return (paramspec);
 }
