@@ -6,14 +6,14 @@ AUTOMAKE_OPTIONS = 1.6
 # The name of the module, e.g. 'glib'.
 DOC_MODULE=gst-buzztard
 
-BUILT_SOURCES=gst-buzztard.types
+BUILT_SOURCES=$(DOC_MODULE).types
 
 # The top-level SGML file. You can change this if you want to.
-DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.sgml
+DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.xml
 
 # Some parts are dynamic
 if FLUIDSYNTH_SUPPORT
-FLUIDSYNTH_LA = $(top_builddir)/src/fluidsynth/libgstfluidsynth.la
+FLUIDSYNTH_LA = $(top_builddir)/libgstfluidsynth.la
 FLUIDSYNTH_IGNORE_H =
 else
 FLUIDSYNTH_LA =
@@ -21,7 +21,7 @@ FLUIDSYNTH_IGNORE_H = gstfluidsynth.h
 endif
 if BML_SUPPORT
 BML_CF = -DBML_NATIVE $(BML_CFLAGS)
-BML_LA = $(top_builddir)/src/bml/libgstbml.la
+BML_LA = $(top_builddir)/libgstbml.la
 BML_IGNORE_H =
 else
 BML_CF =
@@ -44,7 +44,7 @@ SCAN_OPTIONS=
 
 # Extra options to supply to gtkdoc-mkdb.
 # e.g. MKDB_OPTIONS=--sgml-mode --output-format=xml
-MKDB_OPTIONS=--sgml-mode --name-space=gstbt
+MKDB_OPTIONS=--sgml-mode --name-space=gstbt --source-suffixes=c,cc,h
 
 # Extra options to supply to gtkdoc-mktmpl
 # e.g. MKTMPL_OPTIONS=--only-section-tmpl
@@ -56,14 +56,20 @@ FIXXREF_OPTIONS=--extra-dir=$(glib_prefix)/share/gtk-doc/html/ \
 	--extra-dir=$(gst_prefix)/share/gtk-doc/html/
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
-HFILE_GLOB=$(top_srcdir)/libgstbuzztard/*.h $(top_srcdir)/src/*/*.c
-CFILE_GLOB=$(top_srcdir)/libgstbuzztard/*.c $(top_srcdir)/src/*/*.h
+HFILE_GLOB= \
+  $(top_srcdir)/libgstbuzztard/*.h \
+  $(top_srcdir)/src/*/*.h
+CFILE_GLOB= \
+  $(top_srcdir)/libgstbuzztard/*.c \
+  $(top_srcdir)/src/*/*.c $(top_srcdir)/src/sidsyn/sidsyn*.cc
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
+# FIXME: this does not support path and thus is ambigous
 IGNORE_HFILES=config.h \
 	m-gst-buzztard.h \
 	$(BML_IGNORE_H) gstbmlorc.h gstbmlorc-dist.h \
+	$(top_srcdir)/src/sidsyn/envelope.h extfilt.h filter.h pot.h siddefs.h sidemu.h spline.h voice.h wave.h \
 	$(FLUIDSYNTH_IGNORE_H)
 
 # Images to copy into HTML directory.
@@ -83,12 +89,17 @@ expand_content_files=
 # CFLAGS and LDFLAGS for compiling gtkdoc-scangobj with your library.
 # Only needed if you are using gtkdoc-scangobj to dynamically query widget
 # signals and properties.
-GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/src $(BASE_DEPS_CFLAGS)
+GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/src \
+  $(BASE_DEPS_CFLAGS) \
+  -D__GTK_DOC_IGNORE__
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
-	$(top_builddir)/libgstbuzztard/libgstbuzztard.la \
-	$(top_builddir)/src/audiodelay/libgstaudiodelay.la \
+	$(top_builddir)/libgstbuzztard.la \
+	$(top_builddir)/libgstaudiodelay.la \
+	$(BML_LA) \
 	$(FLUIDSYNTH_LA) \
-	$(top_builddir)/src/simsyn/libgstsimsyn.la
+	$(top_builddir)/libgstsidsyn.la \
+	$(top_builddir)/libgstsimsyn.la \
+	$(top_builddir)/libgstwavereplay.la
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make

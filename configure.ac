@@ -48,16 +48,19 @@ AC_SUBST(GSTBT_VERSION_NUMBER)
 
 VERSION=${GSTBT_VERSION}
 
+
 dnl Checks for programs.
-AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LN_S
+AC_PROG_MKDIR_P
 AC_PROG_SED
-AC_ISC_POSIX
 AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
+
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 dnl common switches for all buzztard modules
 
@@ -294,18 +297,8 @@ AC_SUBST(BASE_DEPS_CFLAGS)
 
 AC_CONFIG_FILES(Makefile \
 	libgstbuzztard.pc \
-	docs/Makefile \
 	docs/reference/Makefile \
-	docs/reference/gst-buzztard.types \
-	libgstbuzztard/Makefile \
-	src/Makefile \
-	src/audiodelay/Makefile \
-	src/bml/Makefile \
-	src/bml/native/Makefile \
-	src/bml/wrapped/Makefile \
-	src/fluidsynth/Makefile \
-	src/simsyn/Makefile \
-	tests/Makefile
+	docs/reference/gst-buzztard.types
 )
 AC_OUTPUT
 

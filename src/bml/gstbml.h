@@ -23,7 +23,8 @@
 #ifndef __GST_BML_H__
 #define __GST_BML_H__
 
-#include "plugin.h"
+#include <glib.h>
+#include <gst/gst.h>
 
 G_BEGIN_DECLS
 
@@ -35,7 +36,6 @@ typedef enum {
   ARG_STPT,
   ARG_HOST_CALLBACKS, // buzztard host callbacks
   //ARG_VOICES,  // child bin iface
-  //ARG_DOCU_URI,// help iface
   ARG_LAST
 } GstBMLPropertyIDs;
 
@@ -126,6 +126,8 @@ struct _GstBMLClass {
   // param specs
   GParamSpec **global_property,**track_property;
 };
+
+extern gboolean bml(describe_plugin(gchar *pathname, gpointer bmh));
 
 G_END_DECLS
 

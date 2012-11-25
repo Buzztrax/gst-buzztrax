@@ -23,17 +23,20 @@
 #ifndef __GST_BML_UTILS_H__
 #define __GST_BML_UTILS_H__
 
-#include "plugin.h"
+#include <glib.h>
+#include <gst/gst.h>
 
 G_BEGIN_DECLS
 
 //-- helper
 
+extern gboolean bml(gstbml_inspect(gchar *file_name));
+
 extern gboolean bml(gstbml_is_polyphonic(gpointer bmh));
 
 //-- common iface functions
 
-extern gchar *bml(gstbml_property_meta_describe_property(gpointer bmh, glong index, GValue *event));
+extern gchar *bml(gstbml_property_meta_describe_property(GstBMLClass *bml_class, GstBML *bml, guint prop_id, const GValue *event));
 extern void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick));
 
 //-- common class functions

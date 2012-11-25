@@ -44,12 +44,12 @@ struct _GstBtPropertyMetaInterface
 {
   GTypeInterface parent;
 
-  gchar *(*describe_property) (GstBtPropertyMeta *self, glong index, GValue *value);
+  gchar *(*describe_property) (GstBtPropertyMeta *self, guint property_id, const GValue *value);
 };
 
 GType gstbt_property_meta_get_type(void);
 
-gchar *gstbt_property_meta_describe_property (GstBtPropertyMeta *self, glong index, GValue *value);
+gchar *gstbt_property_meta_describe_property (GstBtPropertyMeta *self, guint property_id, const GValue *value);
 
 extern GQuark gstbt_property_meta_quark;
 extern GQuark gstbt_property_meta_quark_min_val;

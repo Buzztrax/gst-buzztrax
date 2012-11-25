@@ -25,31 +25,52 @@ gstbt_audio_delay_get_type
 
 <SECTION>
 <FILE>gstfluidsynth</FILE>
-GstBtFluidsynth
+GstBtFluidSynth
+GstBtFluidSynthInterpolationMode
+GstBtFluidSynthChorusWaveform
 <SUBSECTION Standard>
-GstBtFluidsynthClass
-GSTBT_FLUIDSYNTH
-GSTBT_IS_FLUIDSYNTH
-GSTBT_FLUIDSYNTH_CLASS
-GSTBT_IS_FLUIDSYNTH_CLASS
-GSTBT_FLUIDSYNTH_GET_CLASS
-GSTBT_TYPE_FLUIDSYNTH
-gstbt_fluidsynth_get_type
+GstBtFluidSynthClass
+GSTBT_FLUID_SYNTH
+GSTBT_IS_FLUID_SYNTH
+GSTBT_FLUID_SYNTH_CLASS
+GSTBT_IS_FLUID_SYNTH_CLASS
+GSTBT_FLUID_SYNTH_GET_CLASS
+GSTBT_TYPE_FLUID_SYNTH
+gstbt_fluid_synth_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstsidsyn</FILE>
+GstBtSidSyn
+GstBtSidSynV
+GstBtSidSynEffect
+GstBtSidSynWave
+<SUBSECTION Private>
+NUM_VOICES
+<SUBSECTION Standard>
+GstBtSidSynClass
+GstBtSidSynVClass
+GSTBT_SID_SYN
+GSTBT_IS_SID_SYN
+GSTBT_SID_SYN_CLASS
+GSTBT_IS_SID_SYN_CLASS
+GSTBT_SID_SYN_GET_CLASS
+GSTBT_TYPE_SID_SYN
+GSTBT_SID_SYNV
+GSTBT_IS_SID_SYNV
+GSTBT_SID_SYNV_CLASS
+GSTBT_IS_SID_SYNV_CLASS
+GSTBT_SID_SYNV_GET_CLASS
+GSTBT_TYPE_SID_SYNV
+gstbt_sid_syn_get_type
+gstbt_sid_synv_get_type
 </SECTION>
 
 <SECTION>
 <FILE>gstsimsyn</FILE>
 GstBtSimSyn
-GstBtSimSynFilter
-GstBtSimSynWave
 <SUBSECTION Standard>
 GstBtSimSynClass
-GstBtRedNoise
-GstBtPinkNoise
-PINK_MAX_RANDOM_ROWS
-PINK_RANDOM_BITS
-PINK_RANDOM_SHIFT
-WAVE_TABLE_SIZE
 GSTBT_SIM_SYN
 GSTBT_IS_SIM_SYN
 GSTBT_SIM_SYN_CLASS
@@ -57,6 +78,20 @@ GSTBT_IS_SIM_SYN_CLASS
 GSTBT_SIM_SYN_GET_CLASS
 GSTBT_TYPE_SIM_SYN
 gstbt_sim_syn_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstwavereplay</FILE>
+GstBtWaveReplay
+<SUBSECTION Standard>
+GstBtWaveReplayClass
+GSTBT_WAVE_REPLAY
+GSTBT_IS_WAVE_REPLAY
+GSTBT_WAVE_REPLAY_CLASS
+GSTBT_IS_WAVE_REPLAY_CLASS
+GSTBT_WAVE_REPLAY_GET_CLASS
+GSTBT_TYPE_WAVE_REPLAY
+gstbt_wave_replay_get_type
 </SECTION>
 
 <SECTION>
@@ -114,6 +149,20 @@ gstbml_preset_set_meta
 # stuff that we want for gstreamer
 
 <SECTION>
+<FILE>gstbtaudiosynth</FILE>
+GstBtAudioSynth
+<SUBSECTION Standard>
+GstBtAudioSynthClass
+GSTBT_AUDIO_SYNTH
+GSTBT_IS_AUDIO_SYNTH
+GSTBT_AUDIO_SYNTH_CLASS
+GSTBT_IS_AUDIO_SYNTH_CLASS
+GSTBT_AUDIO_SYNTH_GET_CLASS
+GSTBT_TYPE_AUDIO_SYNTH
+gstbt_audio_synth_get_type
+</SECTION>
+
+<SECTION>
 <FILE>gstbtchildbin</FILE>
 GstBtChildBin
 gstbt_child_bin_add_child
@@ -125,18 +174,6 @@ GSTBT_IS_CHILD_BIN
 GSTBT_TYPE_CHILD_BIN
 GSTBT_CHILD_BIN_GET_INTERFACE
 gstbt_child_bin_get_type
-</SECTION>
-
-<SECTION>
-<FILE>gstbthelp</FILE>
-GstBtHelp
-<SUBSECTION Standard>
-GstBtHelpInterface
-GSTBT_HELP
-GSTBT_IS_HELP
-GSTBT_TYPE_HELP
-GSTBT_HELP_GET_INTERFACE
-gstbt_help_get_type
 </SECTION>
 
 <SECTION>
@@ -180,7 +217,8 @@ gstbt_property_meta_get_type
 <SECTION>
 <FILE>gstbtenvelope</FILE>
 GstBtEnvelope
-gstbt_envelope_new
+gstbt_envelope_get
+gstbt_envelope_is_running
 <SUBSECTION Standard>
 GstBtEnvelopeClass
 GSTBT_ENVELOPE
@@ -190,6 +228,55 @@ GSTBT_IS_ENVELOPE_CLASS
 GSTBT_ENVELOPE_GET_CLASS
 GSTBT_TYPE_ENVELOPE
 gstbt_envelope_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstbtenvelopeadsr</FILE>
+GstBtEnvelopeADSR
+gstbt_envelope_adsr_new
+gstbt_envelope_adsr_setup
+<SUBSECTION Standard>
+GstBtEnvelopeADSRClass
+GSTBT_ENVELOPE_ADSR
+GSTBT_IS_ENVELOPE_ADSR
+GSTBT_ENVELOPE_ADSR_CLASS
+GSTBT_IS_ENVELOPE_ADSR_CLASS
+GSTBT_ENVELOPE_GET_ADSR_CLASS
+GSTBT_TYPE_ENVELOPE_ADSR
+gstbt_envelope_adsr_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstbtenveloped</FILE>
+GstBtEnvelopeD
+gstbt_envelope_d_new
+gstbt_envelope_d_setup
+<SUBSECTION Standard>
+GstBtEnvelopeDClass
+GSTBT_ENVELOPE_D
+GSTBT_IS_ENVELOPE_D
+GSTBT_ENVELOPE_D_CLASS
+GSTBT_IS_ENVELOPE_D_CLASS
+GSTBT_ENVELOPE_GET_D_CLASS
+GSTBT_TYPE_ENVELOPE_D
+gstbt_envelope_d_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstbtfiltersvf</FILE>
+GstBtFilterSVF
+gstbt_filter_svf_new
+<SUBSECTION Standard>
+GstBtFilterSVFClass
+GSTBT_FILTER_SVF
+GSTBT_IS_FILTER_SVF
+GSTBT_FILTER_SVF_CLASS
+GSTBT_IS_FILTER_SVF_CLASS
+GSTBT_FILTER_SVF_GET_CLASS
+GSTBT_TYPE_FILTER_SVF
+GSTBT_TYPE_FILTER_SVF_TYPE
+gstbt_filter_svf_get_type
+gstbt_filter_svf_type_get_type
 </SECTION>
 
 <SECTION>
@@ -204,6 +291,38 @@ gstbt_note_get_type
 </SECTION>
 
 <SECTION>
+<FILE>gstbtoscsynth</FILE>
+GstBtOscSynth
+gstbt_osc_synth_new
+<SUBSECTION Standard>
+GstBtOscSynthClass
+GSTBT_OSC_SYNTH
+GSTBT_IS_OSC_SYNTH
+GSTBT_OSC_SYNTH_CLASS
+GSTBT_IS_OSC_SYNTH_CLASS
+GSTBT_OSC_SYNTH_GET_CLASS
+GSTBT_TYPE_OSC_SYNTH
+GSTBT_TYPE_OSC_SYNTH_WAVE
+gstbt_osc_synth_get_type
+gstbt_osc_synth_wave_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstbtoscwave</FILE>
+GstBtOscWave
+gstbt_osc_wave_new
+<SUBSECTION Standard>
+GstBtOscWaveClass
+GSTBT_OSC_WAVE
+GSTBT_IS_OSC_WAVE
+GSTBT_OSC_WAVE_CLASS
+GSTBT_IS_OSC_WAVE_CLASS
+GSTBT_OSC_WAVE_GET_CLASS
+GSTBT_TYPE_OSC_WAVE
+gstbt_osc_wave_get_type
+</SECTION>
+
+<SECTION>
 <FILE>gstbttoneconversion</FILE>
 GstBtToneConversion
 GstBtToneConversionTuning
@@ -212,6 +331,7 @@ gstbt_tone_conversion_translate_from_string
 gstbt_tone_conversion_translate_from_number
 gstbt_tone_conversion_note_string_2_number
 gstbt_tone_conversion_note_number_2_string
+gstbt_tone_conversion_note_number_offset
 <SUBSECTION Standard>
 GstBtToneConversionClass
 GSTBT_TONE_CONVERSION

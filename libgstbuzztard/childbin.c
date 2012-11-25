@@ -48,7 +48,7 @@ G_DEFINE_INTERFACE (GstBtChildBin, gstbt_child_bin, GST_TYPE_CHILD_PROXY);
  * Returns: %TRUE for success
  */
 gboolean
-gstbt_child_bin_add_child (GstBtChildBin * self, GstObject *child)
+gstbt_child_bin_add_child (GstBtChildBin * self, GstObject * child)
 {
   g_return_val_if_fail (GSTBT_IS_CHILD_BIN (self), FALSE);
 
@@ -65,7 +65,7 @@ gstbt_child_bin_add_child (GstBtChildBin * self, GstObject *child)
  * Returns: %TRUE for success
  */
 gboolean
-gstbt_child_bin_remove_child (GstBtChildBin * self, GstObject *child)
+gstbt_child_bin_remove_child (GstBtChildBin * self, GstObject * child)
 {
   g_return_val_if_fail (GSTBT_IS_CHILD_BIN (self), FALSE);
 
@@ -73,15 +73,11 @@ gstbt_child_bin_remove_child (GstBtChildBin * self, GstObject *child)
 }
 
 static void
-gstbt_child_bin_default_init(GstBtChildBinInterface *iface)
+gstbt_child_bin_default_init (GstBtChildBinInterface * iface)
 {
   g_object_interface_install_property (iface,
-    g_param_spec_ulong ("children",
-      "children count property",
-      "the number of children this element uses",
-      0,
-      G_MAXULONG,
-      1,
-      G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
+      g_param_spec_ulong ("children",
+          "children count property",
+          "the number of children this element uses",
+          1, G_MAXULONG, 1, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
-

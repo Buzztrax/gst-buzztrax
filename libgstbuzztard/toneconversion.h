@@ -34,15 +34,38 @@ G_BEGIN_DECLS
 
 /**
  * GstBtToneConversionTuning:
- * @GSTBT_TONE_CONVERSION_CROMATIC: 12 tones with equal distance (equal temperament)
+ * @GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT: 12 tones with equal distance
+ * @GSTBT_TONE_CONVERSION_JUST_INTONATION: 12 tones with just intonation
+ * @GSTBT_TONE_CONVERSION_PYTHAGOREAN_TUNING: 12 tones with pythagorean tuning
+ * @GSTBT_TONE_CONVERSION_COUNT: number of tunings
  *
  * Supported tuning types.
  * see http://en.wikipedia.org/wiki/Musical_tuning
  */
 typedef enum {
-  /* 12 tones with equal distance (equal temperament) */
-  GSTBT_TONE_CONVERSION_CROMATIC=0,
-  /* TODO(ensonic): add more */
+  GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT=0,
+  GSTBT_TONE_CONVERSION_JUST_INTONATION,
+  GSTBT_TONE_CONVERSION_PYTHAGOREAN_TUNING,
+  /* TODO(ensonic): add more tunings
+   * PYTHAGOREAN_TUNING
+   * MEANTONE_TEMPERAMENT
+   * WELL_TEMPERAMENT
+   * SYNTONIC_TEMPERAMENT
+   * has variants for the tempered perfect fifth (P5):
+   * - EQUAL_TEMPERAMENT  P5 is 700 cents wide
+   * - 1/4 COMMA_MEANTONE P5 is 696.6 cents wide
+   * - PYTHAGOREAN_TUNING P5 is 702 cents wide
+   * - 5-equal            P5 is 720 cents wide
+   * - 7-equal            P5 is 686 cents wide
+   *
+   * diatonic-scale : only white keys (C-Dur, A-Moll)
+   * chromatic-scale: all 12 semitones
+   * major-scale    : Dur
+   * minor-scale    : Moll
+   *
+   * there are also tonal systems using 19, 24 and 31 keys per octave
+   */
+   GSTBT_TONE_CONVERSION_COUNT
 } GstBtToneConversionTuning;
 
 #define GSTBT_TYPE_TONE_CONVERSION            (gstbt_tone_conversion_get_type ())
@@ -85,6 +108,8 @@ gdouble gstbt_tone_conversion_translate_from_number(GstBtToneConversion *self,gu
 
 guint gstbt_tone_conversion_note_string_2_number(const gchar *note);
 const gchar *gstbt_tone_conversion_note_number_2_string(guint note);
+
+guint gstbt_tone_conversion_note_number_offset(guint note, guint semitones);
 
 G_END_DECLS
 

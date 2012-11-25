@@ -24,58 +24,46 @@
 #include "plugin.h"
 
 #define GST_CAT_DEFAULT bml_debug
-GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
+GST_DEBUG_CATEGORY_EXTERN (GST_CAT_DEFAULT);
 
 static GstStaticPadTemplate bml_pad_caps_mono_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
-  GST_PAD_SRC,
-  GST_PAD_ALWAYS,
-  GST_STATIC_CAPS (
-    "audio/x-raw-float, "
-    "width = (int) 32, "
-    "rate = (int) [ 1, MAX ], "
-    "channels = (int) 1, "
-    "endianness = (int) BYTE_ORDER"
-  )
-);
+    GST_PAD_SRC,
+    GST_PAD_ALWAYS,
+    GST_STATIC_CAPS ("audio/x-raw-float, "
+        "width = (int) 32, "
+        "rate = (int) [ 1, MAX ], "
+        "channels = (int) 1, " "endianness = (int) BYTE_ORDER")
+    );
 
 static GstStaticPadTemplate bml_pad_caps_stereo_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
-  GST_PAD_SRC,
-  GST_PAD_ALWAYS,
-  GST_STATIC_CAPS (
-    "audio/x-raw-float, "
-    "width = (int) 32, "
-    "rate = (int) [ 1, MAX ], "
-    "channels = (int) 2, "
-    "endianness = (int) BYTE_ORDER"
-  )
-);
+    GST_PAD_SRC,
+    GST_PAD_ALWAYS,
+    GST_STATIC_CAPS ("audio/x-raw-float, "
+        "width = (int) 32, "
+        "rate = (int) [ 1, MAX ], "
+        "channels = (int) 2, " "endianness = (int) BYTE_ORDER")
+    );
 
 static GstStaticPadTemplate bml_pad_caps_mono_sink_template =
 GST_STATIC_PAD_TEMPLATE ("sink",
-  GST_PAD_SINK,
-  GST_PAD_ALWAYS,
-  GST_STATIC_CAPS (
-    "audio/x-raw-float, "
-    "width = (int) 32, "
-    "rate = (int) [ 1, MAX ], "
-    "channels = (int) 1, "
-    "endianness = (int) BYTE_ORDER"
-  )
-);
+    GST_PAD_SINK,
+    GST_PAD_ALWAYS,
+    GST_STATIC_CAPS ("audio/x-raw-float, "
+        "width = (int) 32, "
+        "rate = (int) [ 1, MAX ], "
+        "channels = (int) 1, " "endianness = (int) BYTE_ORDER")
+    );
 static GstStaticPadTemplate bml_pad_caps_stereo_sink_template =
 GST_STATIC_PAD_TEMPLATE ("sink",
-  GST_PAD_SINK,
-  GST_PAD_ALWAYS,
-  GST_STATIC_CAPS (
-    "audio/x-raw-float, "
-    "width = (int) 32, "
-    "rate = (int) [ 1, MAX ], "
-    "channels = (int) 2, "
-    "endianness = (int) BYTE_ORDER"
-  )
-);
+    GST_PAD_SINK,
+    GST_PAD_ALWAYS,
+    GST_STATIC_CAPS ("audio/x-raw-float, "
+        "width = (int) 32, "
+        "rate = (int) [ 1, MAX ], "
+        "channels = (int) 2, " "endianness = (int) BYTE_ORDER")
+    );
 
 static GstBaseTransformClass *parent_class = NULL;
 
@@ -84,27 +72,34 @@ static GstBaseTransformClass *parent_class = NULL;
 
 //-- child proxy interface implementations
 
-static GstObject *gst_bml_child_proxy_get_child_by_index (GstChildProxy *child_proxy, guint index) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(child_proxy);
-  GstBML *bml=GST_BML(bml_transform);
+static GstObject *
+gst_bml_child_proxy_get_child_by_index (GstChildProxy * child_proxy,
+    guint index)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (child_proxy);
+  GstBML *bml = GST_BML (bml_transform);
 
-  g_return_val_if_fail(index<bml->num_voices,NULL);
+  g_return_val_if_fail (index < bml->num_voices, NULL);
 
-  return(g_object_ref(g_list_nth_data(bml->voices,index)));
+  return (gst_object_ref (g_list_nth_data (bml->voices, index)));
 }
 
-static guint gst_bml_child_proxy_get_children_count (GstChildProxy *child_proxy) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(child_proxy);
-  GstBML *bml=GST_BML(bml_transform);
+static guint
+gst_bml_child_proxy_get_children_count (GstChildProxy * child_proxy)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (child_proxy);
+  GstBML *bml = GST_BML (bml_transform);
 
-  return(bml->num_voices);
+  return (bml->num_voices);
 }
 
 
-static void gst_bml_child_proxy_interface_init(gpointer g_iface, gpointer iface_data) {
+static void
+gst_bml_child_proxy_interface_init (gpointer g_iface, gpointer iface_data)
+{
   GstChildProxyInterface *iface = g_iface;
 
-  GST_INFO("initializing iface");
+  GST_INFO ("initializing iface");
 
   iface->get_child_by_index = gst_bml_child_proxy_get_child_by_index;
   iface->get_children_count = gst_bml_child_proxy_get_children_count;
@@ -112,104 +107,138 @@ static void gst_bml_child_proxy_interface_init(gpointer g_iface, gpointer iface_
 
 //-- property meta interface implementations
 
-static gchar *gst_bml_property_meta_describe_property(GstBtPropertyMeta *property_meta, glong index, GValue *event) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(property_meta);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static gchar *
+gst_bml_property_meta_describe_property (GstBtPropertyMeta * property_meta,
+    guint prop_id, const GValue * value)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (property_meta);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return(bml(gstbml_property_meta_describe_property(bml_class->bmh,index,event)));
+  return (bml (gstbml_property_meta_describe_property (bml_class, bml,
+              prop_id, value)));
 }
 
-static void gst_bml_property_meta_interface_init(gpointer g_iface, gpointer iface_data) {
+static void
+gst_bml_property_meta_interface_init (gpointer g_iface, gpointer iface_data)
+{
   GstBtPropertyMetaInterface *iface = g_iface;
 
-  GST_INFO("initializing iface");
+  GST_INFO ("initializing iface");
 
   iface->describe_property = gst_bml_property_meta_describe_property;
 }
 
 //-- tempo interface implementations
 
-static void gst_bml_tempo_change_tempo(GstBtTempo *tempo, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(tempo);
-  GstBML *bml=GST_BML(bml_transform);
+static void
+gst_bml_tempo_change_tempo (GstBtTempo * tempo, glong beats_per_minute,
+    glong ticks_per_beat, glong subticks_per_tick)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (tempo);
+  GstBML *bml = GST_BML (bml_transform);
 
-  bml(gstbml_tempo_change_tempo(G_OBJECT(bml_transform),bml,beats_per_minute,ticks_per_beat,subticks_per_tick));
+  bml (gstbml_tempo_change_tempo (G_OBJECT (bml_transform), bml,
+          beats_per_minute, ticks_per_beat, subticks_per_tick));
 }
 
-static void gst_bml_tempo_interface_init(gpointer g_iface, gpointer iface_data) {
+static void
+gst_bml_tempo_interface_init (gpointer g_iface, gpointer iface_data)
+{
   GstBtTempoInterface *iface = g_iface;
 
-  GST_INFO("initializing iface");
+  GST_INFO ("initializing iface");
 
   iface->change_tempo = gst_bml_tempo_change_tempo;
 }
 
 //-- preset interface implementations
 
-static gchar** gst_bml_preset_get_preset_names(GstPreset *preset) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static gchar **
+gst_bml_preset_get_preset_names (GstPreset * preset)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (preset);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return(gstbml_preset_get_preset_names(bml,bml_class));
+  return (gstbml_preset_get_preset_names (bml, bml_class));
 }
 
-static gboolean gst_bml_preset_load_preset(GstPreset *preset, const gchar *name) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static gboolean
+gst_bml_preset_load_preset (GstPreset * preset, const gchar * name)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (preset);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return(gstbml_preset_load_preset(GST_OBJECT(preset),bml,bml_class,name));
+  return (gstbml_preset_load_preset (GST_OBJECT (preset), bml, bml_class,
+          name));
 }
 
-static gboolean gst_bml_preset_save_preset(GstPreset *preset, const gchar *name) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static gboolean
+gst_bml_preset_save_preset (GstPreset * preset, const gchar * name)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (preset);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return(gstbml_preset_save_preset(GST_OBJECT(preset),bml,bml_class,name));
+  return (gstbml_preset_save_preset (GST_OBJECT (preset), bml, bml_class,
+          name));
 }
 
-static gboolean gst_bml_preset_rename_preset(GstPreset *preset, const gchar *old_name, const gchar *new_name) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static gboolean
+gst_bml_preset_rename_preset (GstPreset * preset, const gchar * old_name,
+    const gchar * new_name)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (preset);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return(gstbml_preset_rename_preset(bml_class,old_name,new_name));
+  return (gstbml_preset_rename_preset (bml_class, old_name, new_name));
 }
 
-static gboolean gst_bml_preset_delete_preset(GstPreset *preset, const gchar *name) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static gboolean
+gst_bml_preset_delete_preset (GstPreset * preset, const gchar * name)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (preset);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return(gstbml_preset_delete_preset(bml_class,name));
+  return (gstbml_preset_delete_preset (bml_class, name));
 }
 
-static gboolean gst_bml_set_meta(GstPreset *preset,const gchar *name, const gchar *tag, const gchar *value) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static gboolean
+gst_bml_set_meta (GstPreset * preset, const gchar * name, const gchar * tag,
+    const gchar * value)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (preset);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return(gstbml_preset_set_meta(bml_class,name,tag,value));
+  return (gstbml_preset_set_meta (bml_class, name, tag, value));
 }
 
-static gboolean gst_bml_get_meta(GstPreset *preset,const gchar *name, const gchar *tag, gchar **value) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(preset);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static gboolean
+gst_bml_get_meta (GstPreset * preset, const gchar * name, const gchar * tag,
+    gchar ** value)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (preset);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  return(gstbml_preset_get_meta(bml_class,name,tag,value));
+  return (gstbml_preset_get_meta (bml_class, name, tag, value));
 }
 
-static void gst_bml_preset_interface_init(gpointer g_iface, gpointer iface_data) {
+static void
+gst_bml_preset_interface_init (gpointer g_iface, gpointer iface_data)
+{
   GstPresetInterface *iface = g_iface;
 
-  GST_INFO("initializing iface");
+  GST_INFO ("initializing iface");
 
   iface->get_preset_names = gst_bml_preset_get_preset_names;
   iface->load_preset = gst_bml_preset_load_preset;
@@ -223,18 +252,24 @@ static void gst_bml_preset_interface_init(gpointer g_iface, gpointer iface_data)
 //-- gstbmltransform class implementation
 
 /* get notified of caps and reject unsupported ones */
-static gboolean gst_bml_transform_set_caps(GstBaseTransform * base, GstCaps * incaps, GstCaps * outcaps) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
-  GstBML *bml=GST_BML(bml_transform);
+static gboolean
+gst_bml_transform_set_caps (GstBaseTransform * base, GstCaps * incaps,
+    GstCaps * outcaps)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
+  GstBML *bml = GST_BML (bml_transform);
   GstStructure *structure;
   gboolean ret;
-  gint samplerate=bml->samplerate;
+  gint samplerate = bml->samplerate;
 
-  GST_DEBUG("set_caps: in %"GST_PTR_FORMAT"  out %"GST_PTR_FORMAT, incaps, outcaps);
-  structure=gst_caps_get_structure(incaps,0);
+  GST_DEBUG ("set_caps: in %" GST_PTR_FORMAT "  out %" GST_PTR_FORMAT, incaps,
+      outcaps);
+  structure = gst_caps_get_structure (incaps, 0);
 
-  if((ret = gst_structure_get_int(structure, "rate", &bml->samplerate)) && (samplerate!=bml->samplerate)) {
-    bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
+  if ((ret = gst_structure_get_int (structure, "rate", &bml->samplerate))
+      && (samplerate != bml->samplerate)) {
+    bml (set_master_info (bml->beats_per_minute, bml->ticks_per_beat,
+            bml->samplerate));
     // TODO(ensonic): irks, this resets all parameter to their default
     //bml(init(bml->bm,0,NULL));
   }
@@ -242,31 +277,35 @@ static gboolean gst_bml_transform_set_caps(GstBaseTransform * base, GstCaps * in
   return ret;
 }
 
-static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base, GstBuffer *outbuf) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-  BMLData *data,*seg_data;
-  gpointer bm=bml->bm;
-  guint todo,seg_size,samples_per_buffer;
+static GstFlowReturn
+gst_bml_transform_transform_ip_mono (GstBaseTransform * base,
+    GstBuffer * outbuf)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
+  BMLData *data, *seg_data;
+  gpointer bm = bml->bm;
+  guint todo, seg_size, samples_per_buffer;
   gboolean has_data;
-  guint mode=3; /*WM_READWRITE*/
+  guint mode = 3;               /*WM_READWRITE */
 
-  bml->running_time=gst_segment_to_stream_time(&base->segment,GST_FORMAT_TIME,GST_BUFFER_TIMESTAMP(outbuf));
-  
-  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_DISCONT)) {
-    bml->subtick_count=(!bml->reverse)?bml->subticks_per_tick:1;
+  bml->running_time =
+      gst_segment_to_stream_time (&base->segment, GST_FORMAT_TIME,
+      GST_BUFFER_TIMESTAMP (outbuf));
+
+  if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_DISCONT)) {
+    bml->subtick_count = (!bml->reverse) ? bml->subticks_per_tick : 1;
   }
 
   /* TODO(ensonic): sync on subticks ? */
-  if(bml->subtick_count>=bml->subticks_per_tick) {
-    bml(gstbml_reset_triggers(bml,bml_class));
-    bml(gstbml_sync_values(bml,bml_class,GST_BUFFER_TIMESTAMP(outbuf)));
-    bml(tick(bm));
-    bml->subtick_count=1;
-  }
-  else {
+  if (bml->subtick_count >= bml->subticks_per_tick) {
+    bml (gstbml_reset_triggers (bml, bml_class));
+    bml (gstbml_sync_values (bml, bml_class, GST_BUFFER_TIMESTAMP (outbuf)));
+    bml (tick (bm));
+    bml->subtick_count = 1;
+  } else {
     bml->subtick_count++;
   }
 
@@ -274,60 +313,64 @@ static GstFlowReturn gst_bml_transform_transform_ip_mono(GstBaseTransform *base,
   if (gst_base_transform_is_passthrough (base))
     return GST_FLOW_OK;
 
-  data=(BMLData *)GST_BUFFER_DATA(outbuf);
-  samples_per_buffer=GST_BUFFER_SIZE(outbuf)/sizeof(BMLData);
+  data = (BMLData *) GST_BUFFER_DATA (outbuf);
+  samples_per_buffer = GST_BUFFER_SIZE (outbuf) / sizeof (BMLData);
 
   /* if buffer has only silence process with different mode */
-  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_GAP)) {
-    mode=2; /* WM_WRITE */
-  }
-  else {
+  if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_GAP)) {
+    mode = 2;                   /* WM_WRITE */
+  } else {
     // buzz generates loud output
-    gfloat fc=32768.0;
+    gfloat fc = 32768.0;
     orc_scalarmultiply_f32_ns (data, data, fc, samples_per_buffer);
   }
 
-  GST_DEBUG_OBJECT(bml_transform,"  calling work(%d,%d)",samples_per_buffer,mode);
+  GST_DEBUG_OBJECT (bml_transform, "  calling work(%d,%d)", samples_per_buffer,
+      mode);
   todo = samples_per_buffer;
   seg_data = data;
-  has_data=FALSE;
+  has_data = FALSE;
   while (todo) {
     // 256 is MachineInterface.h::MAX_BUFFER_LENGTH
-    seg_size = (todo>256) ? 256 : todo;
-    has_data |= bml(work(bm,seg_data,(int)seg_size,mode));
+    seg_size = (todo > 256) ? 256 : todo;
+    has_data |= bml (work (bm, seg_data, (int) seg_size, mode));
     seg_data = &seg_data[seg_size];
     todo -= seg_size;
   }
-  gstbml_fix_data((GstElement*)bml_transform,outbuf,has_data);
+  gstbml_fix_data ((GstElement *) bml_transform, outbuf, has_data);
 
-  return(GST_FLOW_OK);
+  return (GST_FLOW_OK);
 }
 
-static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *base, GstBuffer *outbuf) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-  BMLData *data,*seg_data;
-  gpointer bm=bml->bm;
-  guint todo,seg_size,samples_per_buffer;
+static GstFlowReturn
+gst_bml_transform_transform_ip_stereo (GstBaseTransform * base,
+    GstBuffer * outbuf)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
+  BMLData *data, *seg_data;
+  gpointer bm = bml->bm;
+  guint todo, seg_size, samples_per_buffer;
   gboolean has_data;
-  guint mode=3; /*WM_READWRITE*/
+  guint mode = 3;               /*WM_READWRITE */
 
-  bml->running_time=gst_segment_to_stream_time(&base->segment,GST_FORMAT_TIME,GST_BUFFER_TIMESTAMP(outbuf));
+  bml->running_time =
+      gst_segment_to_stream_time (&base->segment, GST_FORMAT_TIME,
+      GST_BUFFER_TIMESTAMP (outbuf));
 
-  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_DISCONT)) {
-    bml->subtick_count=(!bml->reverse)?bml->subticks_per_tick:1;
+  if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_DISCONT)) {
+    bml->subtick_count = (!bml->reverse) ? bml->subticks_per_tick : 1;
   }
 
   /* TODO(ensonic): sync on subticks ? */
-  if(bml->subtick_count>=bml->subticks_per_tick) {
-    bml(gstbml_reset_triggers(bml,bml_class));
-    bml(gstbml_sync_values(bml,bml_class,GST_BUFFER_TIMESTAMP(outbuf)));
-    bml(tick(bm));
-    bml->subtick_count=1;
-  }
-  else {
+  if (bml->subtick_count >= bml->subticks_per_tick) {
+    bml (gstbml_reset_triggers (bml, bml_class));
+    bml (gstbml_sync_values (bml, bml_class, GST_BUFFER_TIMESTAMP (outbuf)));
+    bml (tick (bm));
+    bml->subtick_count = 1;
+  } else {
     bml->subtick_count++;
   }
 
@@ -335,59 +378,63 @@ static GstFlowReturn gst_bml_transform_transform_ip_stereo(GstBaseTransform *bas
   if (gst_base_transform_is_passthrough (base))
     return GST_FLOW_OK;
 
-  data=(BMLData *)GST_BUFFER_DATA(outbuf);
-  samples_per_buffer=GST_BUFFER_SIZE(outbuf)/(sizeof(BMLData)*2);
+  data = (BMLData *) GST_BUFFER_DATA (outbuf);
+  samples_per_buffer = GST_BUFFER_SIZE (outbuf) / (sizeof (BMLData) * 2);
 
   /* if buffer has only silence process with different mode */
-  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_GAP)) {
-    mode=2; /* WM_WRITE */
-  }
-  else {
-    gfloat fc=32768.0;
-    orc_scalarmultiply_f32_ns (data, data, fc, samples_per_buffer*2);
+  if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_GAP)) {
+    mode = 2;                   /* WM_WRITE */
+  } else {
+    gfloat fc = 32768.0;
+    orc_scalarmultiply_f32_ns (data, data, fc, samples_per_buffer * 2);
   }
 
-  GST_DEBUG_OBJECT(bml_transform,"  calling work_m2s(%d,%d)",samples_per_buffer,mode);
+  GST_DEBUG_OBJECT (bml_transform, "  calling work_m2s(%d,%d)",
+      samples_per_buffer, mode);
   todo = samples_per_buffer;
   seg_data = data;
-  has_data=FALSE;
+  has_data = FALSE;
   while (todo) {
     // 256 is MachineInterface.h::MAX_BUFFER_LENGTH
-    seg_size = (todo>256) ? 256 : todo;
+    seg_size = (todo > 256) ? 256 : todo;
     // first seg_data can be NULL, its ignored
-    has_data |= bml(work_m2s(bm,seg_data,seg_data,(int)seg_size,mode));
-    seg_data = &seg_data[seg_size*2];
+    has_data |= bml (work_m2s (bm, seg_data, seg_data, (int) seg_size, mode));
+    seg_data = &seg_data[seg_size * 2];
     todo -= seg_size;
   }
-  gstbml_fix_data((GstElement*)bml_transform,outbuf,has_data);
+  gstbml_fix_data ((GstElement *) bml_transform, outbuf, has_data);
 
-  return(GST_FLOW_OK);
+  return (GST_FLOW_OK);
 }
 
-static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform *base, GstBuffer *inbuf, GstBuffer *outbuf) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-  BMLData *datai,*datao,*seg_datai,*seg_datao;
-  gpointer bm=bml->bm;
-  guint todo,seg_size,samples_per_buffer;
+static GstFlowReturn
+gst_bml_transform_transform_mono_to_stereo (GstBaseTransform * base,
+    GstBuffer * inbuf, GstBuffer * outbuf)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
+  BMLData *datai, *datao, *seg_datai, *seg_datao;
+  gpointer bm = bml->bm;
+  guint todo, seg_size, samples_per_buffer;
   gboolean has_data;
-  guint mode=3; /*WM_READWRITE*/
+  guint mode = 3;               /*WM_READWRITE */
 
-  bml->running_time=gst_segment_to_stream_time(&base->segment,GST_FORMAT_TIME,GST_BUFFER_TIMESTAMP(inbuf));
+  bml->running_time =
+      gst_segment_to_stream_time (&base->segment, GST_FORMAT_TIME,
+      GST_BUFFER_TIMESTAMP (inbuf));
 
-  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_DISCONT)) {
-    bml->subtick_count=(!bml->reverse)?bml->subticks_per_tick:1;
+  if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_DISCONT)) {
+    bml->subtick_count = (!bml->reverse) ? bml->subticks_per_tick : 1;
   }
 
-  if(bml->subtick_count>=bml->subticks_per_tick) {
-    bml(gstbml_reset_triggers(bml,bml_class));
-    bml(gstbml_sync_values(bml,bml_class,GST_BUFFER_TIMESTAMP(outbuf)));
-    bml(tick(bm));
-    bml->subtick_count=1;
-  }
-  else {
+  if (bml->subtick_count >= bml->subticks_per_tick) {
+    bml (gstbml_reset_triggers (bml, bml_class));
+    bml (gstbml_sync_values (bml, bml_class, GST_BUFFER_TIMESTAMP (outbuf)));
+    bml (tick (bm));
+    bml->subtick_count = 1;
+  } else {
     bml->subtick_count++;
   }
 
@@ -395,52 +442,55 @@ static GstFlowReturn gst_bml_transform_transform_mono_to_stereo(GstBaseTransform
   if (gst_base_transform_is_passthrough (base)) {
     // we would actually need to convert mono to stereo here
     // but this is not even called
-    GST_WARNING_OBJECT(bml_transform,"m2s in passthrough mode");
+    GST_WARNING_OBJECT (bml_transform, "m2s in passthrough mode");
     //return GST_FLOW_OK;
   }
 
-  datai=(BMLData *)GST_BUFFER_DATA (inbuf);
-  datao=(BMLData *)GST_BUFFER_DATA (outbuf);
-  samples_per_buffer=GST_BUFFER_SIZE(inbuf)/sizeof(BMLData);
+  datai = (BMLData *) GST_BUFFER_DATA (inbuf);
+  datao = (BMLData *) GST_BUFFER_DATA (outbuf);
+  samples_per_buffer = GST_BUFFER_SIZE (inbuf) / sizeof (BMLData);
 
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer*2;i++) datao[i]=0.0f;
-  memset(datao,0,samples_per_buffer*2*sizeof(BMLData));
+  memset (datao, 0, samples_per_buffer * 2 * sizeof (BMLData));
 
   /* if buffer has only silence process with different mode */
-  if (GST_BUFFER_FLAG_IS_SET(outbuf,GST_BUFFER_FLAG_GAP)) {
-    mode=2; /* WM_WRITE */
-  }
-  else {
-    gfloat fc=32768.0;
+  if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_GAP)) {
+    mode = 2;                   /* WM_WRITE */
+  } else {
+    gfloat fc = 32768.0;
     orc_scalarmultiply_f32_ns (datai, datai, fc, samples_per_buffer);
   }
 
-  GST_DEBUG_OBJECT(bml_transform,"  calling work_m2s(%d,%d)",samples_per_buffer,mode);
+  GST_DEBUG_OBJECT (bml_transform, "  calling work_m2s(%d,%d)",
+      samples_per_buffer, mode);
   todo = samples_per_buffer;
   seg_datai = datai;
   seg_datao = datao;
   has_data = FALSE;
   while (todo) {
     // 256 is MachineInterface.h::MAX_BUFFER_LENGTH
-    seg_size = (todo>256) ? 256 : todo;
-    has_data |= bml(work_m2s(bm,seg_datai,seg_datao,(int)seg_size,mode));
+    seg_size = (todo > 256) ? 256 : todo;
+    has_data |= bml (work_m2s (bm, seg_datai, seg_datao, (int) seg_size, mode));
     seg_datai = &seg_datai[seg_size];
-    seg_datao = &seg_datao[seg_size*2];
+    seg_datao = &seg_datao[seg_size * 2];
     todo -= seg_size;
   }
-  gstbml_fix_data((GstElement*)bml_transform,outbuf,has_data);
+  gstbml_fix_data ((GstElement *) bml_transform, outbuf, has_data);
 
-  return(GST_FLOW_OK);
+  return (GST_FLOW_OK);
 }
 
-static gboolean gst_bml_transform_get_unit_size(GstBaseTransform *base, GstCaps *caps, guint *size) {
+static gboolean
+gst_bml_transform_get_unit_size (GstBaseTransform * base, GstCaps * caps,
+    guint * size)
+{
   gint width, channels;
   GstStructure *structure;
   gboolean ret;
 
   g_assert (size);
-  GST_INFO("get_unit_size: for %"GST_PTR_FORMAT, caps);
+  GST_INFO ("get_unit_size: for %" GST_PTR_FORMAT, caps);
 
   /* this works for both float and int */
   structure = gst_caps_get_structure (caps, 0);
@@ -452,9 +502,12 @@ static gboolean gst_bml_transform_get_unit_size(GstBaseTransform *base, GstCaps 
   return ret;
 }
 
-static GstCaps *gst_bml_transform_transform_caps(GstBaseTransform * base, GstPadDirection direction, GstCaps * caps) {
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(base);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static GstCaps *
+gst_bml_transform_transform_caps (GstBaseTransform * base,
+    GstPadDirection direction, GstCaps * caps)
+{
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (base);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
   GstCaps *res;
   GstStructure *structure;
 
@@ -466,228 +519,267 @@ static GstCaps *gst_bml_transform_transform_caps(GstBaseTransform * base, GstPad
   if (direction == GST_PAD_SRC) {
     GST_INFO_OBJECT (base, "allow %d input channel", bml_class->input_channels);
     gst_structure_set (structure,
-      "channels", G_TYPE_INT, bml_class->input_channels,
-      NULL);
+        "channels", G_TYPE_INT, bml_class->input_channels, NULL);
   } else {
-    GST_INFO_OBJECT (base, "allow %d output channels", bml_class->output_channels);
-    gst_structure_set (structure,
-      "channels", G_TYPE_INT, bml_class->output_channels,
-      NULL);
+    GST_INFO_OBJECT (base, "allow %d output channels",
+        bml_class->output_channels);
+    gst_structure_set (structure, "channels", G_TYPE_INT,
+        bml_class->output_channels, NULL);
   }
 
   return res;
 }
 
 #if 0
-static gboolean gst_bml_transform_start(GstBaseTransform * base) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-  gpointer bm=bml->bm;
+static gboolean
+gst_bml_transform_start (GstBaseTransform * base)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
+  gpointer bm = bml->bm;
   gint i;
   gpointer addr;
   gint type;
   gchar *pname;
 
-  GST_WARNING_OBJECT(base,"dump params");
+  GST_WARNING_OBJECT (base, "dump params");
   // dump global parameters
-  for(i=0;i<bml_class->numglobalparams;i++) {
-    bml(get_track_parameter_info(bm,i,BM_PARA_TYPE,(void *)&type));
-    bml(get_global_parameter_info(bm,i,BM_PARA_NAME,(void *)&pname));
-    addr=bml(get_global_parameter_location(bm,i));
-    switch(type) {
+  for (i = 0; i < bml_class->numglobalparams; i++) {
+    bml (get_track_parameter_info (bm, i, BM_PARA_TYPE, (void *) &type));
+    bml (get_global_parameter_info (bm, i, BM_PARA_NAME, (void *) &pname));
+    addr = bml (get_global_parameter_location (bm, i));
+    switch (type) {
       case PT_NOTE:
-        GST_WARNING("global note   param %2d:%p:%s = %s",
-          i,addr,pname, gstbt_tone_conversion_note_number_2_string ((guint)(*(guint8 *)addr)));
+        GST_WARNING ("global note   param %2d:%p:%s = %s",
+            i, addr, pname,
+            gstbt_tone_conversion_note_number_2_string ((guint) (*(guint8 *)
+                    addr)));
         break;
       case PT_SWITCH:
-        GST_WARNING("global switch param %2d:%p:%s = %u",
-          i,addr,pname, (guint)(*(guint8 *)addr));
+        GST_WARNING ("global switch param %2d:%p:%s = %u",
+            i, addr, pname, (guint) (*(guint8 *) addr));
         break;
       case PT_BYTE:
-        GST_WARNING("global byte   param %2d:%p:%s = %u",
-          i,addr,pname, (guint)(*(guint8 *)addr));
+        GST_WARNING ("global byte   param %2d:%p:%s = %u",
+            i, addr, pname, (guint) (*(guint8 *) addr));
         break;
       case PT_WORD:
-        GST_WARNING("global word   param %2d:%p:%s = %u",
-          i,addr,pname, (guint)(*(guint16 *)addr));
+        GST_WARNING ("global word   param %2d:%p:%s = %u",
+            i, addr, pname, (guint) (*(guint16 *) addr));
         break;
       case PT_ENUM:
-        GST_WARNING("global enum   param %2d:%p:%s = %u",
-          i,addr,pname, (guint)(*(guint8 *)addr));
+        GST_WARNING ("global enum   param %2d:%p:%s = %u",
+            i, addr, pname, (guint) (*(guint8 *) addr));
         break;
       default:
-        GST_WARNING("unhandled type : %d",type);
+        GST_WARNING ("unhandled type : %d", type);
     }
   }
-  
+
   return TRUE;
 }
 #endif
 
-static gboolean gst_bml_transform_stop(GstBaseTransform * base) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(base);
-  GstBML *bml=GST_BML(bml_transform);
-  gpointer bm=bml->bm;
+static gboolean
+gst_bml_transform_stop (GstBaseTransform * base)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
+  GstBML *bml = GST_BML (bml_transform);
+  gpointer bm = bml->bm;
 
-  bml(stop(bm));
+  bml (stop (bm));
   return TRUE;
 }
 
-static void gst_bml_transform_set_property(GObject * object, guint prop_id, const GValue * value, GParamSpec * pspec) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(object);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static void
+gst_bml_transform_set_property (GObject * object, guint prop_id,
+    const GValue * value, GParamSpec * pspec)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (object);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  bml(gstbml_set_property(bml,bml_class,prop_id,value,pspec));
+  bml (gstbml_set_property (bml, bml_class, prop_id, value, pspec));
 }
 
-static void gst_bml_transform_get_property(GObject * object, guint prop_id, GValue * value, GParamSpec * pspec) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(object);
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBML *bml=GST_BML(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static void
+gst_bml_transform_get_property (GObject * object, guint prop_id, GValue * value,
+    GParamSpec * pspec)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (object);
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBML *bml = GST_BML (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  bml(gstbml_get_property(bml,bml_class,prop_id,value,pspec));
+  bml (gstbml_get_property (bml, bml_class, prop_id, value, pspec));
 }
 
-static void gst_bml_transform_dispose(GObject *object) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(object);
-  GstBML *bml=GST_BML(bml_transform);
+static void
+gst_bml_transform_dispose (GObject * object)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (object);
+  GstBML *bml = GST_BML (bml_transform);
 
-  gstbml_dispose(bml);
+  gstbml_dispose (bml);
 
-  G_OBJECT_CLASS(parent_class)->dispose(object);
+  G_OBJECT_CLASS (parent_class)->dispose (object);
 }
 
-static void gst_bml_transform_finalize(GObject *object) {
-  GstBMLTransform *bml_transform=GST_BML_TRANSFORM(object);
-  GstBML *bml=GST_BML(bml_transform);
+static void
+gst_bml_transform_finalize (GObject * object)
+{
+  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (object);
+  GstBML *bml = GST_BML (bml_transform);
 
-  bml(gstbml_finalize(bml));
+  bml (gstbml_finalize (bml));
 
-  G_OBJECT_CLASS(parent_class)->finalize(object);
+  G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
-static void gst_bml_transform_base_finalize(GstBMLTransformClass *klass) {
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
+static void
+gst_bml_transform_base_finalize (GstBMLTransformClass * klass)
+{
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
 
-  gstbml_preset_finalize(bml_class);
-  bml(gstbml_base_finalize(bml_class));
+  gstbml_preset_finalize (bml_class);
+  bml (gstbml_base_finalize (bml_class));
 }
 
-static void gst_bml_transform_init(GstBMLTransform *bml_transform) {
-  GstBMLTransformClass *klass=GST_BML_TRANSFORM_GET_CLASS(bml_transform);
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-  GstBML *bml=GST_BML(bml_transform);
+static void
+gst_bml_transform_init (GstBMLTransform * bml_transform)
+{
+  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
+  GstBML *bml = GST_BML (bml_transform);
 
-  GST_INFO("initializing instance: elem=%p, bml=%p, bml_class=%p",bml_transform,bml,bml_class);
-  GST_INFO("bmh=0x%p, src=%d, sink=%d",bml_class->bmh,bml_class->numsrcpads,bml_class->numsinkpads);
+  GST_INFO ("initializing instance: elem=%p, bml=%p, bml_class=%p",
+      bml_transform, bml, bml_class);
+  GST_INFO ("bmh=0x%p, src=%d, sink=%d", bml_class->bmh, bml_class->numsrcpads,
+      bml_class->numsinkpads);
 
-  bml(gstbml_init(bml,bml_class,GST_ELEMENT(bml_transform)));
+  bml (gstbml_init (bml, bml_class, GST_ELEMENT (bml_transform)));
   /* this is not nedded when using the base class
-  bml(gstbml_init_pads(GST_ELEMENT(bml_transform),bml,gst_bml_transform_link));
+     bml(gstbml_init_pads(GST_ELEMENT(bml_transform),bml,gst_bml_transform_link));
 
-  if (sinkcount == 1) {
-    // with one sink (input ports) we can use the chain function
-    // effects
-    GST_DEBUG_OBJECT(bml, "chain mode");
-    gst_pad_set_chain_function(bml->sinkpads[0], gst_bml_transform_chain);
-  }
-  else if (sinkcount > 1) {
-    // more than one sink (input ports) pad needs loop mode
-    // auxbus based effects
-    GST_DEBUG_OBJECT(bml, "loop mode with %d sink pads and %d src pads", sinkcount, srccount);
-    gst_element_set_loop_function(GST_ELEMENT(bml_transform), gst_bml_transform_loop);
-  }
-  */
+     if (sinkcount == 1) {
+     // with one sink (input ports) we can use the chain function
+     // effects
+     GST_DEBUG_OBJECT(bml, "chain mode");
+     gst_pad_set_chain_function(bml->sinkpads[0], gst_bml_transform_chain);
+     }
+     else if (sinkcount > 1) {
+     // more than one sink (input ports) pad needs loop mode
+     // auxbus based effects
+     GST_DEBUG_OBJECT(bml, "loop mode with %d sink pads and %d src pads", sinkcount, srccount);
+     gst_element_set_loop_function(GST_ELEMENT(bml_transform), gst_bml_transform_loop);
+     }
+   */
 
   gst_base_transform_set_gap_aware (GST_BASE_TRANSFORM (bml_transform), TRUE);
 
-  GST_DEBUG("  done");
+  GST_DEBUG ("  done");
 }
 
-static void gst_bml_transform_class_init(GstBMLTransformClass *klass) {
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-  GObjectClass *gobject_class=G_OBJECT_CLASS(klass);
-  GstBaseTransformClass *gstbasetransform_class=GST_BASE_TRANSFORM_CLASS(klass);
+static void
+gst_bml_transform_class_init (GstBMLTransformClass * klass)
+{
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
+  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+  GstBaseTransformClass *gstbasetransform_class =
+      GST_BASE_TRANSFORM_CLASS (klass);
 
-  GST_INFO("initializing class");
-  parent_class=g_type_class_peek_parent(klass);
+  GST_INFO ("initializing class");
+  parent_class = g_type_class_peek_parent (klass);
 
   // override methods
-  gobject_class->set_property          = GST_DEBUG_FUNCPTR(gst_bml_transform_set_property);
-  gobject_class->get_property          = GST_DEBUG_FUNCPTR(gst_bml_transform_get_property);
-  gobject_class->dispose               = GST_DEBUG_FUNCPTR(gst_bml_transform_dispose);
-  gobject_class->finalize              = GST_DEBUG_FUNCPTR(gst_bml_transform_finalize);
-  gstbasetransform_class->set_caps     = GST_DEBUG_FUNCPTR(gst_bml_transform_set_caps);
+  gobject_class->set_property =
+      GST_DEBUG_FUNCPTR (gst_bml_transform_set_property);
+  gobject_class->get_property =
+      GST_DEBUG_FUNCPTR (gst_bml_transform_get_property);
+  gobject_class->dispose = GST_DEBUG_FUNCPTR (gst_bml_transform_dispose);
+  gobject_class->finalize = GST_DEBUG_FUNCPTR (gst_bml_transform_finalize);
+  gstbasetransform_class->set_caps =
+      GST_DEBUG_FUNCPTR (gst_bml_transform_set_caps);
   // only used here for debugging
   //gstbasetransform_class->start        = GST_DEBUG_FUNCPTR(gst_bml_transform_start);
-  gstbasetransform_class->stop         = GST_DEBUG_FUNCPTR(gst_bml_transform_stop);
-  if(bml_class->output_channels==1) {
-    gstbasetransform_class->transform_ip = GST_DEBUG_FUNCPTR(gst_bml_transform_transform_ip_mono);
-  }
-  else {
-    if(bml_class->input_channels==1) {
-      gstbasetransform_class->transform = GST_DEBUG_FUNCPTR(gst_bml_transform_transform_mono_to_stereo);
-      gstbasetransform_class->get_unit_size = GST_DEBUG_FUNCPTR(gst_bml_transform_get_unit_size);
-      gstbasetransform_class->transform_caps = GST_DEBUG_FUNCPTR (gst_bml_transform_transform_caps);
-    }
-    else {
-      gstbasetransform_class->transform_ip = GST_DEBUG_FUNCPTR(gst_bml_transform_transform_ip_stereo);
+  gstbasetransform_class->stop = GST_DEBUG_FUNCPTR (gst_bml_transform_stop);
+  if (bml_class->output_channels == 1) {
+    gstbasetransform_class->transform_ip =
+        GST_DEBUG_FUNCPTR (gst_bml_transform_transform_ip_mono);
+  } else {
+    if (bml_class->input_channels == 1) {
+      gstbasetransform_class->transform =
+          GST_DEBUG_FUNCPTR (gst_bml_transform_transform_mono_to_stereo);
+      gstbasetransform_class->get_unit_size =
+          GST_DEBUG_FUNCPTR (gst_bml_transform_get_unit_size);
+      gstbasetransform_class->transform_caps =
+          GST_DEBUG_FUNCPTR (gst_bml_transform_transform_caps);
+    } else {
+      gstbasetransform_class->transform_ip =
+          GST_DEBUG_FUNCPTR (gst_bml_transform_transform_ip_stereo);
     }
   }
 
   // override interface properties and register parameters as gobject properties
-  bml(gstbml_class_prepare_properties(gobject_class,bml_class));
+  bml (gstbml_class_prepare_properties (gobject_class, bml_class));
 }
 
-static void gst_bml_transform_base_init(GstBMLTransformClass *klass) {
-  GstBMLClass *bml_class=GST_BML_CLASS(klass);
-  GstElementClass *element_class=GST_ELEMENT_CLASS(klass);
+static void
+gst_bml_transform_base_init (GstBMLTransformClass * klass)
+{
+  GstBMLClass *bml_class = GST_BML_CLASS (klass);
+  GstElementClass *element_class = GST_ELEMENT_CLASS (klass);
   //GstPadTemplate *templ;
   gpointer bmh;
-  static GstPadTemplate *mono_src_pad_template=NULL;
-  static GstPadTemplate *stereo_src_pad_template=NULL;
-  static GstPadTemplate *mono_sink_pad_template=NULL;
-  static GstPadTemplate *stereo_sink_pad_template=NULL;
+  static GstPadTemplate *mono_src_pad_template = NULL;
+  static GstPadTemplate *stereo_src_pad_template = NULL;
+  static GstPadTemplate *mono_sink_pad_template = NULL;
+  static GstPadTemplate *stereo_sink_pad_template = NULL;
 
-  GST_INFO("initializing base");
+  GST_INFO ("initializing base");
 
-  bmh=bml(gstbml_class_base_init(bml_class,G_TYPE_FROM_CLASS(klass),1,1));
+  bmh =
+      bml (gstbml_class_base_init (bml_class, G_TYPE_FROM_CLASS (klass), 1, 1));
 
-  if(bml_class->output_channels==1) {
-    if(G_UNLIKELY(!mono_src_pad_template))
-      mono_src_pad_template=gst_static_pad_template_get(&bml_pad_caps_mono_src_template);
-    gst_element_class_add_pad_template(element_class,mono_src_pad_template);
-    GST_INFO("  added mono src pad template");
+  if (bml_class->output_channels == 1) {
+    if (G_UNLIKELY (!mono_src_pad_template))
+      mono_src_pad_template =
+          gst_static_pad_template_get (&bml_pad_caps_mono_src_template);
+    gst_element_class_add_pad_template (element_class, mono_src_pad_template);
+    GST_INFO ("  added mono src pad template");
+  } else {
+    if (G_UNLIKELY (!stereo_src_pad_template))
+      stereo_src_pad_template =
+          gst_static_pad_template_get (&bml_pad_caps_stereo_src_template);
+    gst_element_class_add_pad_template (element_class, stereo_src_pad_template);
+    GST_INFO ("  added stereo src pad template");
   }
-  else {
-    if(G_UNLIKELY(!stereo_src_pad_template))
-      stereo_src_pad_template=gst_static_pad_template_get(&bml_pad_caps_stereo_src_template);
-    gst_element_class_add_pad_template(element_class,stereo_src_pad_template);
-    GST_INFO("  added stereo src pad template");
-  }
-  if(bml_class->input_channels==1) {
-    if(G_UNLIKELY(!mono_sink_pad_template))
-      mono_sink_pad_template=gst_static_pad_template_get(&bml_pad_caps_mono_sink_template);
-    gst_element_class_add_pad_template(element_class,mono_sink_pad_template);
-    GST_INFO("  added mono sink pad template");
-  }
-  else {
-    if(G_UNLIKELY(!stereo_sink_pad_template))
-      stereo_sink_pad_template=gst_static_pad_template_get(&bml_pad_caps_stereo_sink_template);
-    gst_element_class_add_pad_template(element_class,stereo_sink_pad_template);
-    GST_INFO("  added stereo sink pad template");
+  if (bml_class->input_channels == 1) {
+    if (G_UNLIKELY (!mono_sink_pad_template))
+      mono_sink_pad_template =
+          gst_static_pad_template_get (&bml_pad_caps_mono_sink_template);
+    gst_element_class_add_pad_template (element_class, mono_sink_pad_template);
+    GST_INFO ("  added mono sink pad template");
+  } else {
+    if (G_UNLIKELY (!stereo_sink_pad_template))
+      stereo_sink_pad_template =
+          gst_static_pad_template_get (&bml_pad_caps_stereo_sink_template);
+    gst_element_class_add_pad_template (element_class,
+        stereo_sink_pad_template);
+    GST_INFO ("  added stereo sink pad template");
   }
 
-  bml(gstbml_class_set_details(element_class,bml_class,bmh,"Filter/Effect/Audio/BML"));
+  bml (gstbml_class_set_details (element_class, bml_class, bmh,
+          "Filter/Effect/Audio/BML"));
 }
 
 
-GType bml(transform_get_type(const char *element_type_name, gboolean is_polyphonic, gboolean has_help)) {
+GType
+bml (transform_get_type (const char *element_type_name, gboolean is_polyphonic))
+{
   const GTypeInfo element_type_info = {
     sizeof (GstBMLTransformClass),
     (GBaseInitFunc) gst_bml_transform_base_init,
@@ -701,61 +793,55 @@ GType bml(transform_get_type(const char *element_type_name, gboolean is_polyphon
   };
   const GInterfaceInfo child_proxy_interface_info = {
     (GInterfaceInitFunc) gst_bml_child_proxy_interface_init,    /* interface_init */
-    NULL,               /* interface_finalize */
-    NULL                /* interface_data */
+    NULL,                       /* interface_finalize */
+    NULL                        /* interface_data */
   };
   const GInterfaceInfo child_bin_interface_info = {
-    NULL,               /* interface_init */
-    NULL,               /* interface_finalize */
-    NULL                /* interface_data */
+    NULL,                       /* interface_init */
+    NULL,                       /* interface_finalize */
+    NULL                        /* interface_data */
   };
   const GInterfaceInfo property_meta_interface_info = {
     (GInterfaceInitFunc) gst_bml_property_meta_interface_init,  /* interface_init */
-    NULL,               /* interface_finalize */
-    NULL                /* interface_data */
+    NULL,                       /* interface_finalize */
+    NULL                        /* interface_data */
   };
   const GInterfaceInfo tempo_interface_info = {
-    (GInterfaceInitFunc) gst_bml_tempo_interface_init,          /* interface_init */
-    NULL,               /* interface_finalize */
-    NULL                /* interface_data */
+    (GInterfaceInitFunc) gst_bml_tempo_interface_init,  /* interface_init */
+    NULL,                       /* interface_finalize */
+    NULL                        /* interface_data */
   };
-#if !GST_CHECK_VERSION(0,10,31)
-  const GInterfaceInfo help_interface_info = {
-    NULL,               /* interface_init */
-    NULL,               /* interface_finalize */
-    NULL                /* interface_data */
-  };
-#endif
   const GInterfaceInfo preset_interface_info = {
-    (GInterfaceInitFunc) gst_bml_preset_interface_init,        /* interface_init */
-    NULL,               /* interface_finalize */
-    NULL                /* interface_data */
+    (GInterfaceInitFunc) gst_bml_preset_interface_init, /* interface_init */
+    NULL,                       /* interface_finalize */
+    NULL                        /* interface_data */
   };
   GType element_type;
 
-  GST_INFO("registering transform-plugin: \"%s\"",element_type_name);
+  GST_INFO ("registering transform-plugin: \"%s\"", element_type_name);
 
   // create the element type now
-  element_type = g_type_register_static(GST_TYPE_BASE_TRANSFORM, element_type_name, &element_type_info, 0);
-  GST_INFO("succefully registered new type : \"%s\"", element_type_name);
-  g_type_add_interface_static(element_type, GSTBT_TYPE_PROPERTY_META, &property_meta_interface_info);
-  g_type_add_interface_static(element_type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
+  element_type =
+      g_type_register_static (GST_TYPE_BASE_TRANSFORM, element_type_name,
+      &element_type_info, 0);
+  GST_INFO ("succefully registered new type : \"%s\"", element_type_name);
+  g_type_add_interface_static (element_type, GSTBT_TYPE_PROPERTY_META,
+      &property_meta_interface_info);
+  g_type_add_interface_static (element_type, GSTBT_TYPE_TEMPO,
+      &tempo_interface_info);
 
   // check if this plugin can do multiple voices
-  if(is_polyphonic) {
-    g_type_add_interface_static(element_type, GST_TYPE_CHILD_PROXY, &child_proxy_interface_info);
-    g_type_add_interface_static(element_type, GSTBT_TYPE_CHILD_BIN, &child_bin_interface_info);
+  if (is_polyphonic) {
+    g_type_add_interface_static (element_type, GST_TYPE_CHILD_PROXY,
+        &child_proxy_interface_info);
+    g_type_add_interface_static (element_type, GSTBT_TYPE_CHILD_BIN,
+        &child_bin_interface_info);
   }
-#if !GST_CHECK_VERSION(0,10,31)
-  // check if this plugin has user docs
-  if(has_help) {
-    g_type_add_interface_static(element_type, GSTBT_TYPE_HELP, &help_interface_info);
-  }
-#endif
   // add presets iface
-  g_type_add_interface_static(element_type, GST_TYPE_PRESET, &preset_interface_info);
+  g_type_add_interface_static (element_type, GST_TYPE_PRESET,
+      &preset_interface_info);
 
-  GST_INFO("succefully registered type interfaces");
+  GST_INFO ("successfully registered type interfaces");
 
-  return(element_type);
+  return (element_type);
 }

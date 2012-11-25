@@ -32,4 +32,11 @@ coverage
 *.la
 *.pc
 *.tar.gz
+*.o
+*.lo
+*.la
+*.loT
 .libs
+.deps
+gst_buzztard
+tmp-orc.c

@@ -49,8 +49,6 @@
 #include <libgstbuzztard/toneconversion.h>
 #include <libgstbuzztard/propertymeta.h>
 #include <libgstbuzztard/tempo.h>
-//-- orc
-#include "gstbmlorc.h"
 
 //-- libbml
 #include <libbml/bml.h>

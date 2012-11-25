@@ -23,7 +23,7 @@
 #ifndef __GST_BML_SRC_H__
 #define __GST_BML_SRC_H__
 
-#include "plugin.h"
+#include "gstbml.h"
 
 G_BEGIN_DECLS
 
@@ -50,7 +50,7 @@ struct _GstBMLSrcClass {
   GstBMLClass bml_class;
 };
 
-extern GType bml(src_get_type(const char *name, gboolean is_polyphonic, gboolean has_help));
+extern GType bml(src_get_type(const char *name, gboolean is_polyphonic));
 
 G_END_DECLS
 

@@ -21,10 +21,10 @@
 #
 
 
-EXTRA_DIST = $(ORC_SOURCE).orc
+EXTRA_DIST += $(ORC_SOURCE).orc
 
 ORC_NODIST_SOURCES = tmp-orc.c $(ORC_SOURCE).h
-BUILT_SOURCES = tmp-orc.c $(ORC_SOURCE).h
+BUILT_SOURCES += tmp-orc.c $(ORC_SOURCE).h
 
 
 orc-update: tmp-orc.c $(ORC_SOURCE).h
@@ -46,10 +46,10 @@ tmp-orc.c: $(srcdir)/$(ORC_SOURCE).orc
 $(ORC_SOURCE).h: $(srcdir)/$(ORC_SOURCE).orc
 	$(orcc_v_gen)$(ORCC) $(ORCC_FLAGS) --header --include glib.h -o $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE).orc
 else
-tmp-orc.c: $(srcdir)/$(ORC_SOURCE).orc
+tmp-orc.c: $(srcdir)/$(ORC_SOURCE).orc $(srcdir)/$(ORC_SOURCE)-dist.c
 	$(cp_v_gen)cp $(srcdir)/$(ORC_SOURCE)-dist.c tmp-orc.c
 
-$(ORC_SOURCE).h: $(srcdir)/$(ORC_SOURCE).orc
+$(ORC_SOURCE).h: $(srcdir)/$(ORC_SOURCE).orc $(srcdir)/$(ORC_SOURCE)-dist.c
 	$(cp_v_gen)cp $(srcdir)/$(ORC_SOURCE)-dist.h $(ORC_SOURCE).h
 endif
 
@@ -60,14 +60,15 @@ clean-orc:
 
 dist-hook: dist-hook-orc
 .PHONY: dist-hook-orc
+
+# we try and copy updated orc -dist files below, but don't fail if it
+# doesn't work as the srcdir might not be writable
 dist-hook-orc: tmp-orc.c $(ORC_SOURCE).h
 	rm -f tmp-orc.c~
-	if test $(abs_srcdir) == $(abs_builddir) ; then \
-	  cmp -s tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c || \
-	    cp tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c; \
-	  cmp -s $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h || \
-	    cp $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h; \
-	fi
-	cp -p $(srcdir)/$(ORC_SOURCE)-dist.c $(distdir)/
-	cp -p $(srcdir)/$(ORC_SOURCE)-dist.h $(distdir)/
+	cmp -s tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c || \
+	  cp tmp-orc.c $(srcdir)/$(ORC_SOURCE)-dist.c || true
+	cmp -s $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h || \
+	  cp $(ORC_SOURCE).h $(srcdir)/$(ORC_SOURCE)-dist.h || true
+	cp -p tmp-orc.c $(distdir)/$(ORC_SOURCE)-dist.c
+	cp -p $(ORC_SOURCE).h $(distdir)/$(ORC_SOURCE)-dist.h
 

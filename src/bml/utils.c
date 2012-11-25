@@ -22,13 +22,30 @@
 #include "plugin.h"
 
 #define GST_CAT_DEFAULT bml_debug
-GST_DEBUG_CATEGORY_EXTERN(GST_CAT_DEFAULT);
+GST_DEBUG_CATEGORY_EXTERN (GST_CAT_DEFAULT);
 
 extern GstStructure *bml_meta_all;
 /* needed in gstbmlv.c */
 gpointer voice_class_bmh;
 
 //-- helper
+
+gboolean
+bml (gstbml_inspect (gchar * file_name))
+{
+  gpointer bmh;
+  gboolean res = FALSE;
+
+  if ((bmh = bml (open (file_name)))) {
+    if (bml (describe_plugin (file_name, bmh))) {
+      res = TRUE;
+    }
+    bml (close (bmh));
+  } else {
+    GST_WARNING ("machine %s could not be loaded", file_name);
+  }
+  return res;
+}
 
 /*
  * bml_is_polyphonic:
@@ -37,101 +54,119 @@ gpointer voice_class_bmh;
  *
  * Returns: %TRUE if the machine is polyphonic
  */
-gboolean bml(gstbml_is_polyphonic(gpointer bmh)) {
-  int track_params=0;
-  //int min_voices=0,max_voices=0;
+gboolean
+bml (gstbml_is_polyphonic (gpointer bmh))
+{
+  int track_params = 0;
 
-  if(bml(get_machine_info(bmh,BM_PROP_NUM_TRACK_PARAMS,(void *)&track_params))) {
-    if(track_params>0) return(TRUE);
-#if 0
-  if(bml(bml_get_machine_info(bmh,BM_PROP_MIN_TRACKS,(void *)&min_voices)) &&
-    bml(bml_get_machine_info(bmh,BM_PROP_MAX_TRACKS,(void *)&max_voices))
-  ) {
-    GST_INFO("min/max-voices=%d/%d",min_voices,max_voices);
-    if((min_voices<=max_voices) && (max_voices>0)) return(TRUE);
+  if (bml (get_machine_info (bmh, BM_PROP_NUM_TRACK_PARAMS,
+              (void *) &track_params))) {
+    if (track_params > 0)
+      return (TRUE);
   }
-#endif
-  }
-  return(FALSE);
+  return (FALSE);
 }
 
 
 //-- common iface functions
 
-gchar *bml(gstbml_property_meta_describe_property(gpointer bmh, glong index, GValue *event)) {
-  const gchar *str=NULL;
+gchar *
+bml (gstbml_property_meta_describe_property (GstBMLClass * bml_class,
+        GstBML * bml, guint prop_id, const GValue * value))
+{
+  const gchar *str = NULL;
+  gpointer bmh = bml_class->bmh;
+  gpointer bm = bml->bm;
   gchar *res;
   gchar def[20];
-  GType base,type=G_VALUE_TYPE(event);
+  GType base, type = G_VALUE_TYPE (value);
+  guint props_skip = ARG_LAST - 1;
 
-  while((base=g_type_parent(type))) type=base;
+  if (bml (gstbml_is_polyphonic (bm))) {
+    props_skip++;
+  }
+  // property ids have an offset of 1
+  prop_id -= (props_skip + bml_class->numattributes + 1);
 
-  switch(type) {
+  while ((base = g_type_parent (type)))
+    type = base;
+
+  switch (type) {
     case G_TYPE_INT:
-      if(!(str=bml(describe_global_value(bmh, index, g_value_get_int(event)))) || !*str) {
-        sprintf(def,"%d",g_value_get_int(event));
-        str=def;
+      if (!(str =
+              bml (describe_global_value (bmh, prop_id,
+                      g_value_get_int (value)))) || !*str) {
+        sprintf (def, "%d", g_value_get_int (value));
+        str = def;
       }
       break;
     case G_TYPE_UINT:
-      if(!(str=bml(describe_global_value(bmh, index, (gint)g_value_get_uint(event)))) || !*str) {
-        sprintf(def,"%u",g_value_get_uint(event));
-        str=def;
+      if (!(str =
+              bml (describe_global_value (bmh, prop_id,
+                      (gint) g_value_get_uint (value)))) || !*str) {
+        sprintf (def, "%u", g_value_get_uint (value));
+        str = def;
       }
       break;
     case G_TYPE_ENUM:
-      if(!(str=bml(describe_global_value(bmh, index, g_value_get_enum(event)))) || !*str) {
+      if (!(str =
+              bml (describe_global_value (bmh, prop_id,
+                      g_value_get_enum (value)))) || !*str) {
         // TODO(ensonic): get blurb for enum value
-        sprintf(def,"%d",g_value_get_enum(event));
-        str=def;
+        sprintf (def, "%d", g_value_get_enum (value));
+        str = def;
       }
       break;
     case G_TYPE_STRING:
-      return(g_strdup_value_contents(event));
+      return (g_strdup_value_contents (value));
       break;
     default:
-      GST_ERROR("unsupported GType='%s'",G_VALUE_TYPE_NAME(event));
-      return(g_strdup_value_contents(event));
+      GST_ERROR ("unsupported GType='%s'", G_VALUE_TYPE_NAME (value));
+      return (g_strdup_value_contents (value));
   }
-  if(str==def) {
-    res=g_strdup(str);
+  if (str == def) {
+    res = g_strdup (str);
+  } else {
+    res = g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
   }
-  else {
-    res=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-  }
-  GST_INFO("formatted global parameter : '%s'",res);
-  return(res);
+  GST_INFO ("formatted global parameter : '%s'", res);
+  return (res);
 }
 
-void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick)) {
-  gboolean changed=FALSE;
+void
+bml (gstbml_tempo_change_tempo (GObject * gstbml, GstBML * bml,
+        glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick))
+{
+  gboolean changed = FALSE;
 
-  if(beats_per_minute>=0) {
-    if(bml->beats_per_minute!=beats_per_minute) {
-      bml->beats_per_minute=(gulong)beats_per_minute;
-      g_object_notify(gstbml,"beats-per-minute");
-      changed=TRUE;
+  if (beats_per_minute >= 0) {
+    if (bml->beats_per_minute != beats_per_minute) {
+      bml->beats_per_minute = (gulong) beats_per_minute;
+      g_object_notify (gstbml, "beats-per-minute");
+      changed = TRUE;
     }
   }
-  if(ticks_per_beat>=0) {
-    if(bml->ticks_per_beat!=ticks_per_beat) {
-      bml->ticks_per_beat=(gulong)ticks_per_beat;
-      g_object_notify(gstbml,"ticks-per-beat");
-      changed=TRUE;
+  if (ticks_per_beat >= 0) {
+    if (bml->ticks_per_beat != ticks_per_beat) {
+      bml->ticks_per_beat = (gulong) ticks_per_beat;
+      g_object_notify (gstbml, "ticks-per-beat");
+      changed = TRUE;
     }
   }
-  if(subticks_per_tick>=0) {
-    if(bml->subticks_per_tick!=subticks_per_tick) {
-      bml->subticks_per_tick=(gulong)subticks_per_tick;
-      g_object_notify(gstbml,"subticks-per-tick");
-      changed=TRUE;
+  if (subticks_per_tick >= 0) {
+    if (bml->subticks_per_tick != subticks_per_tick) {
+      bml->subticks_per_tick = (gulong) subticks_per_tick;
+      g_object_notify (gstbml, "subticks-per-tick");
+      changed = TRUE;
     }
   }
-  if(changed) {
-    GST_INFO("changing tempo to %lu BPM  %lu TPB  %lu STPT",bml->beats_per_minute,bml->ticks_per_beat,bml->subticks_per_tick);
-    gstbml_calculate_buffer_frames(bml);
+  if (changed) {
+    GST_INFO ("changing tempo to %lu BPM  %lu TPB  %lu STPT",
+        bml->beats_per_minute, bml->ticks_per_beat, bml->subticks_per_tick);
+    gstbml_calculate_buffer_frames (bml);
     // update timevalues in buzzmachine
-    bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
+    bml (set_master_info (bml->beats_per_minute, bml->ticks_per_beat,
+            bml->samplerate));
     // if we call init here, it resets all parameter to deaults
     // including the voices to zero
     // TODO(ensonic): we need to do a test in EnsonicBCT to see what buzz calls when a machine
@@ -142,46 +177,54 @@ void bml(gstbml_tempo_change_tempo(GObject *gstbml, GstBML *bml, glong beats_per
 
 //-- common class functions
 
-gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta)) {
-  const gchar *element_type_name=gst_structure_get_string(bml_meta,"element-type-name");
-  const gchar *voice_type_name=gst_structure_get_string(bml_meta,"voice-type-name");
-  const gchar *help_filename=gst_structure_get_string(bml_meta,"help-filename");
+gboolean
+bml (gstbml_register_element (GstPlugin * plugin, GstStructure * bml_meta))
+{
+  const gchar *element_type_name =
+      gst_structure_get_string (bml_meta, "element-type-name");
+  const gchar *voice_type_name =
+      gst_structure_get_string (bml_meta, "voice-type-name");
   gint type;
-  GType element_type=G_TYPE_INVALID,voice_type=G_TYPE_INVALID;
-  gboolean res=FALSE;
+  GType element_type = G_TYPE_INVALID, voice_type = G_TYPE_INVALID;
+  gboolean res = FALSE;
 
-  gst_structure_get_int(bml_meta,"machine-type",&type);
+  gst_structure_get_int (bml_meta, "machine-type", &type);
 
   // create the voice type, if needed
-  if(voice_type_name) {
+  if (voice_type_name) {
     // create the voice type now
-    voice_type = bml(v_get_type(voice_type_name));
-    GST_INFO("  voice type \"%s\" is 0x%lu", voice_type_name,(gulong)voice_type);
+    voice_type = bml (v_get_type (voice_type_name));
+    GST_INFO ("  voice type \"%s\" is 0x%lu", voice_type_name,
+        (gulong) voice_type);
   }
-
   // create the element type
-  switch(type) {
-    case MT_MASTER: // (Sink)
+  switch (type) {
+    case MT_MASTER:            // (Sink)
       //element_type = bml(sink_get_type(element_type_name));
-      GST_WARNING("  unimplemented plugin type %d for '%s'",type,element_type_name);
+      GST_WARNING ("  unimplemented plugin type %d for '%s'", type,
+          element_type_name);
       break;
-    case MT_GENERATOR: // (Source)
-      element_type = bml(src_get_type(element_type_name,(voice_type_name!=NULL),(help_filename!=NULL)));
+    case MT_GENERATOR:         // (Source)
+      element_type =
+          bml (src_get_type (element_type_name, (voice_type_name != NULL)));
       break;
-    case MT_EFFECT: // (Processor)
+    case MT_EFFECT:            // (Processor)
       // base transform only supports elements with one source and one sink pad
-      element_type = bml(transform_get_type(element_type_name,(voice_type_name!=NULL),(help_filename!=NULL)));
+      element_type =
+          bml (transform_get_type (element_type_name,
+              (voice_type_name != NULL)));
       break;
     default:
-      GST_WARNING("  invalid plugin type %d for '%s'",type,element_type_name);
+      GST_WARNING ("  invalid plugin type %d for '%s'", type,
+          element_type_name);
   }
-  if(element_type) {
-    if(!gst_element_register(plugin, element_type_name, GST_RANK_NONE, element_type)) {
-      GST_ERROR("error registering new type : \"%s\"", element_type_name);
-    }
-    else {
-      GST_INFO("succefully registered new plugin : \"%s\"", element_type_name);
-      res=TRUE;
+  if (element_type) {
+    if (!gst_element_register (plugin, element_type_name, GST_RANK_NONE,
+            element_type)) {
+      GST_ERROR ("error registering new type : \"%s\"", element_type_name);
+    } else {
+      GST_INFO ("succefully registered new plugin : \"%s\"", element_type_name);
+      res = TRUE;
     }
   }
   return res;
@@ -192,59 +235,72 @@ gboolean bml(gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta))
  *
  * store common class params
  */
-gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcpads, gint numsinkpads)) {
+gpointer
+bml (gstbml_class_base_init (GstBMLClass * klass, GType type, gint numsrcpads,
+        gint numsinkpads))
+{
   gpointer bmh;
-  GType voice_type=G_TYPE_INVALID;
-  const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
-  GstStructure *bml_meta=g_value_get_boxed(value);
-  const gchar *voice_type_name=gst_structure_get_string(bml_meta,"voice-type-name");
+  GType voice_type = G_TYPE_INVALID;
+  const GValue *value =
+      gst_structure_get_value (bml_meta_all, g_type_name (type));
+  GstStructure *bml_meta = g_value_get_boxed (value);
+  const gchar *voice_type_name =
+      gst_structure_get_string (bml_meta, "voice-type-name");
   const gchar *dll_name;
 
-  GST_INFO("initializing base: type=0x%lu",(gulong)type);
+  GST_INFO ("initializing base: type=0x%lu", (gulong) type);
 
-  dll_name=(gchar*)gst_structure_get_string(bml_meta,"plugin-filename");
+  dll_name = (gchar *) gst_structure_get_string (bml_meta, "plugin-filename");
 
-  klass->dll_name=g_filename_from_utf8(dll_name,-1,NULL,NULL,NULL);
-  klass->help_uri=(gchar*)gst_structure_get_string(bml_meta,"help-filename");
-  klass->preset_path=(gchar*)gst_structure_get_string(bml_meta,"preset-filename");
-  GST_INFO("initializing base: type_name=%s, file_name=%s",g_type_name(type),klass->dll_name);
+  klass->dll_name = g_filename_from_utf8 (dll_name, -1, NULL, NULL, NULL);
+  klass->help_uri =
+      (gchar *) gst_structure_get_string (bml_meta, "help-filename");
+  klass->preset_path =
+      (gchar *) gst_structure_get_string (bml_meta, "preset-filename");
+  GST_INFO ("initializing base: type_name=%s, file_name=%s", g_type_name (type),
+      klass->dll_name);
 
-  bmh=bml(open(klass->dll_name));
-  g_assert(bmh);
+  bmh = bml (open (klass->dll_name));
+  g_assert (bmh);
 
-  GST_INFO("  bmh=0x%p",bmh);
+  GST_INFO ("  bmh=0x%p", bmh);
 
   /* we now need to ensure that gst_bmlv_class_init() get bmh */
-  if(voice_type_name) {
-    GST_INFO("prepare voice-type %s",voice_type_name);
+  if (voice_type_name) {
+    GST_INFO ("prepare voice-type %s", voice_type_name);
 
-    voice_type=g_type_from_name(voice_type_name);
-    voice_class_bmh=bmh;
+    voice_type = g_type_from_name (voice_type_name);
+    voice_class_bmh = bmh;
     //g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bmh);
-    g_type_class_ref(voice_type);
+    g_type_class_ref (voice_type);
   }
 
-  GST_INFO("initializing base: bmh=0x%p, dll_name=%s, voice_type=0x%lu",bmh,((klass->dll_name)?klass->dll_name:"?"),(gulong)voice_type);
+  GST_INFO ("initializing base: bmh=0x%p, dll_name=%s, voice_type=0x%lu", bmh,
+      ((klass->dll_name) ? klass->dll_name : "?"), (gulong) voice_type);
 
-  klass->bmh=bmh;
-  klass->voice_type=voice_type;
-  klass->numsrcpads=numsrcpads;
-  klass->numsinkpads=numsinkpads;
+  klass->bmh = bmh;
+  klass->voice_type = voice_type;
+  klass->numsrcpads = numsrcpads;
+  klass->numsinkpads = numsinkpads;
 
-  GST_INFO("initializing base: docs='%s', presets='%s'",klass->help_uri,klass->preset_path);
+  GST_INFO ("initializing base: docs='%s', presets='%s'", klass->help_uri,
+      klass->preset_path);
 
-  if(!bml(get_machine_info(bmh,BM_PROP_NUM_INPUT_CHANNELS,(void *)&klass->input_channels)) ||
-    !bml(get_machine_info(bmh,BM_PROP_NUM_OUTPUT_CHANNELS,(void *)&klass->output_channels))) {
+  if (!bml (get_machine_info (bmh, BM_PROP_NUM_INPUT_CHANNELS,
+              (void *) &klass->input_channels))
+      || !bml (get_machine_info (bmh, BM_PROP_NUM_OUTPUT_CHANNELS,
+              (void *) &klass->output_channels))) {
 
     gint flags;
 
-    bml(get_machine_info(bmh,BM_PROP_FLAGS,(void *)&flags));
-    klass->input_channels=klass->output_channels=1;
+    bml (get_machine_info (bmh, BM_PROP_FLAGS, (void *) &flags));
+    klass->input_channels = klass->output_channels = 1;
     // MIF_MONO_TO_STEREO
-    if(flags&1) klass->output_channels=2;
+    if (flags & 1)
+      klass->output_channels = 2;
   }
 
-  return(bmh);
+  return (bmh);
 }
 
 /* it seems that this is never called :/
@@ -254,10 +310,12 @@ gpointer bml(gstbml_class_base_init(GstBMLClass *klass, GType type, gint numsrcp
  * - might not work as base_init won't be called again, we'd need to init the
  *   klass variables lazily from _init
  */
-void bml(gstbml_base_finalize(GstBMLClass *klass)) {
-  GST_INFO("!!!! klass=%p",klass);
-  bml(close(klass->bmh));
-  g_free(klass->dll_name);
+void
+bml (gstbml_base_finalize (GstBMLClass * klass))
+{
+  GST_INFO ("!!!! klass=%p", klass);
+  bml (close (klass->bmh));
+  g_free (klass->dll_name);
 }
 
 /*
@@ -265,195 +323,231 @@ void bml(gstbml_base_finalize(GstBMLClass *klass)) {
  *
  * Get metadata from buzz-machine and set as element details
  */
-void bml(gstbml_class_set_details(GstElementClass *klass, GstBMLClass *bml_class, gpointer bmh, const gchar *category)) {
+void
+bml (gstbml_class_set_details (GstElementClass * klass, GstBMLClass * bml_class,
+        gpointer bmh, const gchar * category))
+{
   GstElementDetails details;
   gchar *str;
-  GType type=G_TYPE_FROM_CLASS(klass);
-  const GValue *value=gst_structure_get_value(bml_meta_all,g_type_name(type));
-  GstStructure *bml_meta=g_value_get_boxed(value);
-  const gchar *extra_categories=gst_structure_get_string(bml_meta,"categories");
+  GType type = G_TYPE_FROM_CLASS (klass);
+  const GValue *value =
+      gst_structure_get_value (bml_meta_all, g_type_name (type));
+  GstStructure *bml_meta = g_value_get_boxed (value);
+  const gchar *extra_categories =
+      gst_structure_get_string (bml_meta, "categories");
 
   /* construct the element details struct */
   // TODO(ensonic): do we want different charsets for BML_WRAPPED/BML_NATIVE?
-  bml(get_machine_info(bmh,BM_PROP_SHORT_NAME,(void *)&str));
-  details.longname=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-  bml(get_machine_info(bmh,BM_PROP_NAME,(void *)&str));
-  details.description=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-  bml(get_machine_info(bmh,BM_PROP_AUTHOR,(void *)&str));
-  details.author=g_convert(str,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-  if(extra_categories) {
-    GST_DEBUG(" -> %s",extra_categories);
-    details.klass = g_strconcat(category,extra_categories,NULL);
+  bml (get_machine_info (bmh, BM_PROP_SHORT_NAME, (void *) &str));
+  details.longname =
+      g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
+  bml (get_machine_info (bmh, BM_PROP_NAME, (void *) &str));
+  details.description =
+      g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
+  bml (get_machine_info (bmh, BM_PROP_AUTHOR, (void *) &str));
+  details.author =
+      g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
+  if (extra_categories) {
+    GST_DEBUG (" -> %s", extra_categories);
+    details.klass = g_strconcat (category, extra_categories, NULL);
+  } else {
+    details.klass = g_strdup ((gchar *) category);
   }
-  else {
-    details.klass = g_strdup((gchar *)category);
-  }
-  gst_element_class_set_details(klass, &details);
-  g_free(details.longname);
-  g_free(details.description);
-  g_free(details.author);
-  g_free(details.klass);
+  gst_element_class_set_details (klass, &details);
+  g_free (details.longname);
+  g_free (details.description);
+  g_free (details.author);
+  g_free (details.klass);
 #if GST_CHECK_VERSION(0,10,31)
-  if(bml_class->help_uri) {
+  if (bml_class->help_uri) {
     gst_element_class_set_documentation_uri (klass, bml_class->help_uri);
   }
 #endif
-  GST_DEBUG("  element_class details have been set");
+  GST_DEBUG ("  element_class details have been set");
 }
 
-static GType gst_bml_register_global_enum_type(GObjectClass *klass, gpointer bmh, gint i, gchar *name, gint min_val, gint max_val, gint no_val) {
-  GType enum_type=G_TYPE_INVALID;
+static GType
+gst_bml_register_global_enum_type (GObjectClass * klass, gpointer bmh, gint i,
+    gchar * name, gint min_val, gint max_val, gint no_val, gint def_val)
+{
+  GType enum_type = G_TYPE_INVALID;
   const gchar *desc;
+  gchar *type_name;
+  gint extra = 1;
 
-  desc=bml(describe_global_value(bmh, i, min_val));
-  GST_INFO("check enum, description='%s', (entries=(%d-%d)=%d), no_val=%d",desc,max_val,min_val,((max_val+1)-min_val),no_val);
+  GST_INFO ("check enum, (entries=(%d-%d)=%d), no_val=%d, def_val=%d",
+      max_val, min_val, ((max_val + 1) - min_val), no_val, def_val);
 
-  //if(desc && g_ascii_isalpha(desc[0])) {
-    gchar *type_name;
+  if ((def_val < min_val) || (def_val > max_val)) {
+    extra++;
+  }
+  if ((no_val < min_val) || (no_val > max_val)) {
+    extra++;
+  }
+  // build type name
+  type_name =
+      g_strdup_printf ("%s%s", g_type_name (G_TYPE_FROM_CLASS (klass)), name);
+  if (!(enum_type = g_type_from_name (type_name))) {
+    gint j, total = (max_val + 1) - min_val, vcount = 0, tcount = 0;
+    GEnumValue *enums;
 
-    // build type name
-    type_name=g_strdup_printf("%s%s",g_type_name(G_TYPE_FROM_CLASS(klass)),name);
-    if(!(enum_type=g_type_from_name(type_name))) {
-      gint j,k,total=(max_val+1)-min_val,vcount=0,tcount=0;
-      GEnumValue *enums;
+    // count entries that start with a character
+    for (j = 0; j < total; j++) {
+      desc = bml (describe_global_value (bmh, i, min_val + j));
+      if (desc) {
+        vcount++;
+        if (g_ascii_isalpha (desc[0])) {
+          tcount++;
+          GST_DEBUG ("check enum, description[%2d]='%s'", j, desc);
+        }
+      }
+    }
 
-      // count entries that start with a character
-      for(j=0;j<total;j++) {
-        desc=bml(describe_global_value(bmh, i, min_val+j));
+    // DEBUG
+    //if(count>50) {
+    //  GST_WARNING("lots of entries (%d-%d)=%d)?",max_val,min_val,(max_val-min_val));
+    //  count=50;
+    //}
+    // DEBUG
+
+    // some plugins just have text for only val=min/max
+    // don't make an enum for those
+    //if(total-tcount<=2) {
+    if (tcount >= (total >> 1)) {
+      gint k = 0;
+      // this we can never free :(
+      enums = g_new (GEnumValue, vcount + extra);
+      if (def_val < min_val) {
+        enums[k].value = def_val;
+        enums[k].value_name = enums[k].value_nick = "";
+        k++;
+      }
+      if (no_val < min_val) {
+        enums[k].value = no_val;
+        enums[k].value_name = enums[k].value_nick = "";
+        k++;
+      }
+      // create an enum type
+      for (j = 0; j < total; j++) {
+        desc = bml (describe_global_value (bmh, i, min_val + j));
         //if((j==no_val) && !desc) desc=" ";
-        if(desc) {
-          vcount++;
-          if(g_ascii_isalpha(desc[0])) {
-            tcount++;
-            GST_DEBUG("check enum, description[%2d]='%s'",j,desc);
-          }
+        //if(desc && g_ascii_isalpha(desc[0])) {
+        if (desc) {
+          enums[k].value = min_val + j;
+          // we have to copy these as buzzmachines can reuse the memory we get from describe()
+          enums[k].value_nick = enums[k].value_name =
+              g_convert ((gchar *) desc, -1, "UTF-8", "WINDOWS-1252", NULL,
+              NULL, NULL);
+          k++;
         }
       }
-
-      // DEBUG
-      //if(count>50) {
-      //  GST_WARNING("lots of entries (%d-%d)=%d)?",max_val,min_val,(max_val-min_val));
-      //  count=50;
-      //}
-      // DEBUG
-
-      // some plugins just have text for only val=min/max
-      // don't make an enum for those
-      //if(total-tcount<=2) {
-      if(tcount>=(total>>1)) {
-        // this we can never free :(
-        enums=g_new(GEnumValue, vcount+2);
-        // create an enum type
-        for(j=k=0;j<total;j++) {
-          desc=bml(describe_global_value(bmh, i, min_val+j));
-          //if((j==no_val) && !desc) desc=" ";
-          //if(desc && g_ascii_isalpha(desc[0])) {
-          if(desc) {
-            enums[k].value=min_val+j;
-            // we have to copy these as buzzmachines can reuse the memory we get from describe()
-            enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-            k++;
-          }
-        }
-        enums[k].value=no_val;
-        enums[k].value_name="";
-        enums[k].value_nick="";
+      if (def_val > max_val) {
+        enums[k].value = def_val;
+        enums[k].value_name = enums[k].value_nick = "";
         k++;
-        // terminator
-        enums[k].value=0;
-        enums[k].value_name=NULL;
-        enums[k].value_nick=NULL;
+      }
+      if (no_val > max_val) {
+        enums[k].value = no_val;
+        enums[k].value_name = enums[k].value_nick = "";
+        k++;
+      }
+      // terminator
+      enums[k].value = 0;
+      enums[k].value_name = NULL;
+      enums[k].value_nick = NULL;
 
-        enum_type = g_enum_register_static (type_name, enums);
-        GST_INFO("register enum '%s' with %d values",type_name,vcount);
-      }
-      else {
-        GST_INFO("not making enum '%s' with %d text of %d total values",type_name,tcount,total);
-      }
+      enum_type = g_enum_register_static (type_name, enums);
+      GST_INFO ("register enum '%s' with %d values", type_name, vcount);
+    } else {
+      GST_INFO ("not making enum '%s' with %d text of %d total values",
+          type_name, tcount, total);
     }
-    else {
-      GST_INFO("existing enum '%s'",type_name);
-    }
-    g_free(type_name);
-  //}
-  return(enum_type);
+  } else {
+    GST_INFO ("existing enum '%s'", type_name);
+  }
+  g_free (type_name);
+  return (enum_type);
 }
 
-GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bmh, gint i, gchar *name, gint min_val, gint max_val, gint no_val)) {
-  GType enum_type=G_TYPE_INVALID;
+GType
+bml (gstbml_register_track_enum_type (GObjectClass * klass, gpointer bmh,
+        gint i, gchar * name, gint min_val, gint max_val, gint no_val))
+{
+  GType enum_type = G_TYPE_INVALID;
   const gchar *desc;
 
-  desc=bml(describe_track_value(bmh, i, min_val));
-  GST_INFO("check enum, description= '%s', (entries=(%d-%d)=%d), no_val=%d",desc,max_val,min_val,((max_val+1)-min_val),no_val);
+  desc = bml (describe_track_value (bmh, i, min_val));
+  GST_INFO ("check enum, description= '%s', (entries=(%d-%d)=%d), no_val=%d",
+      desc, max_val, min_val, ((max_val + 1) - min_val), no_val);
 
   //if(desc && g_ascii_isalpha(desc[0])) {
-    gchar *type_name;
-    const gchar *class_type_name;
+  gchar *type_name;
+  const gchar *class_type_name;
 
-    // build type name
-    // we need to avoid creating this for GstBML and GstBMLV
-    // TODO(ensonic): if we have done it for GstBML, can't we look it up and return it ?
-    class_type_name=g_type_name(G_TYPE_FROM_CLASS(klass));
-    if(strncmp(class_type_name,"bmlv-",5)) {
-      type_name=g_strdup_printf("%s%s",class_type_name,name);
-    }
-    else {
-      type_name=g_strdup_printf("bmlv-%s%s",&class_type_name[5],name);
-    }
-    if(!(enum_type=g_type_from_name(type_name))) {
-      gint j,k,total=(max_val+1)-min_val,vcount=0,tcount=0;
-      GEnumValue *enums;
+  // build type name
+  // we need to avoid creating this for GstBML and GstBMLV
+  // TODO(ensonic): if we have done it for GstBML, can't we look it up and return it ?
+  class_type_name = g_type_name (G_TYPE_FROM_CLASS (klass));
+  if (strncmp (class_type_name, "bmlv-", 5)) {
+    type_name = g_strdup_printf ("%s%s", class_type_name, name);
+  } else {
+    type_name = g_strdup_printf ("bmlv-%s%s", &class_type_name[5], name);
+  }
+  if (!(enum_type = g_type_from_name (type_name))) {
+    gint j, k, total = (max_val + 1) - min_val, vcount = 0, tcount = 0;
+    GEnumValue *enums;
 
-      // count entries that start with a character
-      for(j=0;j<total;j++) {
-        desc=bml(describe_track_value(bmh, i, min_val+j));
-        if(desc) {
-          vcount++;
-          if(g_ascii_isalpha(desc[0])) {
-            tcount++;
-            GST_DEBUG("check enum, description[%2d]='%s'",j,desc);
-          }
+    // count entries that start with a character
+    for (j = 0; j < total; j++) {
+      desc = bml (describe_track_value (bmh, i, min_val + j));
+      if (desc) {
+        vcount++;
+        if (g_ascii_isalpha (desc[0])) {
+          tcount++;
+          GST_DEBUG ("check enum, description[%2d]='%s'", j, desc);
         }
       }
+    }
 
-      // some plugins just have text for only val=min/max
-      // don't make an enum for those
-      if(tcount>=(total>>1)) {
-        // this we can never free :(
-        enums=g_new(GEnumValue, vcount+2);
-        // create an enum type
-        for(j=k=0;j<total;j++) {
-          desc=bml(describe_track_value(bmh, i, min_val+j));
-          //if(desc && g_ascii_isalpha(desc[0])) {
-          if(desc) {
-            enums[k].value=min_val+j;
-            // we have to copy these as buzzmachines can reuse the memory we get from describe()
-            enums[k].value_nick=enums[k].value_name=g_convert((gchar *)desc,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL);
-            k++;
-          }
+    // some plugins just have text for only val=min/max
+    // don't make an enum for those
+    if (tcount >= (total >> 1)) {
+      // this we can never free :(
+      enums = g_new (GEnumValue, vcount + 2);
+      // create an enum type
+      for (j = k = 0; j < total; j++) {
+        desc = bml (describe_track_value (bmh, i, min_val + j));
+        //if(desc && g_ascii_isalpha(desc[0])) {
+        if (desc) {
+          enums[k].value = min_val + j;
+          // we have to copy these as buzzmachines can reuse the memory we get from describe()
+          enums[k].value_nick = enums[k].value_name =
+              g_convert ((gchar *) desc, -1, "UTF-8", "WINDOWS-1252", NULL,
+              NULL, NULL);
+          k++;
         }
-        enums[k].value=no_val;
-        enums[k].value_name="";
-        enums[k].value_nick="";
-        k++;
-        // terminator
-        enums[k].value=0;
-        enums[k].value_name=NULL;
-        enums[k].value_nick=NULL;
+      }
+      enums[k].value = no_val;
+      enums[k].value_name = "";
+      enums[k].value_nick = "";
+      k++;
+      // terminator
+      enums[k].value = 0;
+      enums[k].value_name = NULL;
+      enums[k].value_nick = NULL;
 
-        enum_type = g_enum_register_static (type_name, enums);
-        GST_INFO("register enum '%s' with %d values",type_name,vcount);
-      }
-      else {
-        GST_INFO("not making enum '%s' with %d text of %d total values",type_name,tcount,total);
-      }
+      enum_type = g_enum_register_static (type_name, enums);
+      GST_INFO ("register enum '%s' with %d values", type_name, vcount);
+    } else {
+      GST_INFO ("not making enum '%s' with %d text of %d total values",
+          type_name, tcount, total);
     }
-    else {
-      GST_INFO("existing enum '%s'",type_name);
-    }
-    g_free(type_name);
+  } else {
+    GST_INFO ("existing enum '%s'", type_name);
+  }
+  g_free (type_name);
   //}
-  return(enum_type);
+  return (enum_type);
 }
 
 /*
@@ -461,36 +555,44 @@ GType bml(gstbml_register_track_enum_type(GObjectClass *klass, gpointer bmh, gin
  *
  * override interface properties and register class properties
  */
-void bml(gstbml_class_prepare_properties(GObjectClass *klass, GstBMLClass *bml_class)) {
-  gpointer bmh=bml_class->bmh;
+void
+bml (gstbml_class_prepare_properties (GObjectClass * klass,
+        GstBMLClass * bml_class))
+{
+  gpointer bmh = bml_class->bmh;
   GType enum_type = 0;
   gint i, flags, type;
-  gint num,min_val,max_val,def_val,no_val;
-  gchar *tmp_name,*tmp_desc;
-  gchar *name,*nick,*desc;
-  gint prop_id=ARG_LAST;
+  gint num, min_val, max_val, def_val, no_val;
+  gchar *tmp_name, *tmp_desc;
+  gchar *name, *nick, *desc;
+  gint prop_id = ARG_LAST;
 
   // override interface properties
-  g_object_class_override_property(klass, ARG_BPM, "beats-per-minute");
-  g_object_class_override_property(klass, ARG_TPB, "ticks-per-beat");
-  g_object_class_override_property(klass, ARG_STPT, "subticks-per-tick");
+  g_object_class_override_property (klass, ARG_BPM, "beats-per-minute");
+  g_object_class_override_property (klass, ARG_TPB, "ticks-per-beat");
+  g_object_class_override_property (klass, ARG_STPT, "subticks-per-tick");
 
   g_object_class_install_property (klass, ARG_HOST_CALLBACKS,
-    g_param_spec_pointer ("host-callbacks",
-    "host-callbacks property",
-    "Buzz host callback structure",
-    G_PARAM_WRITABLE));
+      g_param_spec_pointer ("host-callbacks",
+          "host-callbacks property",
+          "Buzz host callback structure", G_PARAM_WRITABLE));
 
-  if(bml(gstbml_is_polyphonic(bmh))) {
-    g_object_class_override_property(klass, prop_id, "children");
+  if (bml (gstbml_is_polyphonic (bmh))) {
+    gboolean res = TRUE;
+    gint minv = 0, maxv = 0;
+
+    res &= bml (get_machine_info (bmh, BM_PROP_MIN_TRACKS, (void *) &minv));
+    res &= bml (get_machine_info (bmh, BM_PROP_MAX_TRACKS, (void *) &maxv));
+    if (res) {
+      g_object_class_install_property (klass, prop_id,
+          g_param_spec_ulong ("children", "children count property",
+              "the number of children this element uses", minv, maxv, minv,
+              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+    } else {
+      g_object_class_override_property (klass, prop_id, "children");
+    }
     prop_id++;
   }
-#if !GST_CHECK_VERSION(0,10,31)
-  if(bml_class->help_uri) {
-    g_object_class_override_property(klass, prop_id, "documentation-uri");
-    prop_id++;
-  }
-#endif
 
   /* TODO(ensonic): CMachineDataInput/Output, see FSM/Infector for usage
    * - try using a properties (blob-data, blob-size) to emulate the
@@ -500,93 +602,119 @@ void bml(gstbml_class_prepare_properties(GObjectClass *klass, GstBMLClass *bml_c
    */
 
   // register attributes as gobject properties
-  if(bml(get_machine_info(bmh,BM_PROP_NUM_ATTRIBUTES,(void *)&num))) {
-    GST_INFO("  machine has %d attributes ",num);
-    for(i=0;i<num;i++,prop_id++) {
-      GST_DEBUG("      attribute=%02i",i);
-      bml(get_attribute_info(bmh,i,BM_ATTR_NAME,(void *)&tmp_name));
-      bml(get_attribute_info(bmh,i,BM_ATTR_MIN_VALUE,(void *)&min_val));
-      bml(get_attribute_info(bmh,i,BM_ATTR_MAX_VALUE,(void *)&max_val));
-      bml(get_attribute_info(bmh,i,BM_ATTR_DEF_VALUE,(void *)&def_val));
-      gstbml_convert_names(klass, tmp_name, tmp_name, &name, &nick, &desc);
-      if(gstbml_register_param(klass, prop_id, PT_ATTR, 0, name, nick, desc, 0, min_val, max_val, 0, def_val)) {
+  if (bml (get_machine_info (bmh, BM_PROP_NUM_ATTRIBUTES, (void *) &num))) {
+    GST_INFO ("  machine has %d attributes ", num);
+    for (i = 0; i < num; i++, prop_id++) {
+      GST_DEBUG ("      attribute=%02i", i);
+      bml (get_attribute_info (bmh, i, BM_ATTR_NAME, (void *) &tmp_name));
+      bml (get_attribute_info (bmh, i, BM_ATTR_MIN_VALUE, (void *) &min_val));
+      bml (get_attribute_info (bmh, i, BM_ATTR_MAX_VALUE, (void *) &max_val));
+      bml (get_attribute_info (bmh, i, BM_ATTR_DEF_VALUE, (void *) &def_val));
+      gstbml_convert_names (klass, tmp_name, tmp_name, &name, &nick, &desc);
+      if (gstbml_register_param (klass, prop_id, PT_ATTR, 0, name, nick, desc,
+              0, min_val, max_val, 0, def_val)) {
         bml_class->numattributes++;
+      } else {
+        GST_WARNING ("registering attribute failed!");
       }
-      else {
-        GST_WARNING("registering attribute failed!");
-      }
-      g_free(name);g_free(nick);g_free(desc);
+      g_free (name);
+      g_free (nick);
+      g_free (desc);
     }
   }
-  GST_INFO("  %d attribute installed",bml_class->numattributes);
+  GST_INFO ("  %d attribute installed", bml_class->numattributes);
 
   // register global params as gobject properties
-  if(bml(get_machine_info(bmh,BM_PROP_NUM_GLOBAL_PARAMS,(void *)&num))) {
-    GST_INFO("  machine has %d global params ",num);
-    bml_class->global_property=g_new(GParamSpec*,num);
-    for(i=0;i<num;i++,prop_id++) {
-      GST_DEBUG("      global_param=%02i",i);
-      if(bml(get_global_parameter_info(bmh,i,BM_PARA_TYPE,(void *)&type)) &&
-        bml(get_global_parameter_info(bmh,i,BM_PARA_NAME,(void *)&tmp_name)) &&
-        bml(get_global_parameter_info(bmh,i,BM_PARA_DESCRIPTION,(void *)&tmp_desc)) &&
-        bml(get_global_parameter_info(bmh,i,BM_PARA_FLAGS,(void *)&flags)) &&
-        bml(get_global_parameter_info(bmh,i,BM_PARA_MIN_VALUE,(void *)&min_val)) &&
-        bml(get_global_parameter_info(bmh,i,BM_PARA_MAX_VALUE,(void *)&max_val)) &&
-        bml(get_global_parameter_info(bmh,i,BM_PARA_NO_VALUE,(void *)&no_val)) &&
-        bml(get_global_parameter_info(bmh,i,BM_PARA_DEF_VALUE,(void *)&def_val))
-      ) {
-        gstbml_convert_names(klass, tmp_name, tmp_desc, &name, &nick, &desc);
+  if (bml (get_machine_info (bmh, BM_PROP_NUM_GLOBAL_PARAMS, (void *) &num))) {
+    GST_INFO ("  machine has %d global params ", num);
+    bml_class->global_property = g_new (GParamSpec *, num);
+    for (i = 0; i < num; i++, prop_id++) {
+      GST_DEBUG ("      global_param=%02i", i);
+      if (bml (get_global_parameter_info (bmh, i, BM_PARA_TYPE, (void *) &type))
+          && bml (get_global_parameter_info (bmh, i, BM_PARA_NAME,
+                  (void *) &tmp_name))
+          && bml (get_global_parameter_info (bmh, i, BM_PARA_DESCRIPTION,
+                  (void *) &tmp_desc))
+          && bml (get_global_parameter_info (bmh, i, BM_PARA_FLAGS,
+                  (void *) &flags))
+          && bml (get_global_parameter_info (bmh, i, BM_PARA_MIN_VALUE,
+                  (void *) &min_val))
+          && bml (get_global_parameter_info (bmh, i, BM_PARA_MAX_VALUE,
+                  (void *) &max_val))
+          && bml (get_global_parameter_info (bmh, i, BM_PARA_NO_VALUE,
+                  (void *) &no_val))
+          && bml (get_global_parameter_info (bmh, i, BM_PARA_DEF_VALUE,
+                  (void *) &def_val))
+          ) {
+        gstbml_convert_names (klass, tmp_name, tmp_desc, &name, &nick, &desc);
         // create an enum on the fly
-        if(type==PT_BYTE) {
-          if((enum_type = gst_bml_register_global_enum_type(klass, bmh, i, name, min_val, max_val, no_val))) {
+        if (type == PT_BYTE) {
+          if ((enum_type =
+                  gst_bml_register_global_enum_type (klass, bmh, i, name,
+                      min_val, max_val, no_val, def_val))) {
             type = PT_ENUM;
           }
         }
-        if((bml_class->global_property[bml_class->numglobalparams]=gstbml_register_param(klass, prop_id, type, enum_type, name, nick, desc, flags, min_val, max_val, no_val, def_val))) {
+        if ((bml_class->global_property[bml_class->numglobalparams] =
+                gstbml_register_param (klass, prop_id, type, enum_type, name,
+                    nick, desc, flags, min_val, max_val, no_val, def_val))) {
           bml_class->numglobalparams++;
+        } else {
+          GST_WARNING ("registering global_param failed!");
         }
-        else {
-          GST_WARNING("registering global_param failed!");
-        }
-        g_free(name);g_free(nick);g_free(desc);
+        g_free (name);
+        g_free (nick);
+        g_free (desc);
       }
     }
   }
-  GST_INFO("  %d global params installed",bml_class->numglobalparams);
+  GST_INFO ("  %d global params installed", bml_class->numglobalparams);
 
   // register track params as gobject properties
-  if(bml(get_machine_info(bmh,BM_PROP_NUM_TRACK_PARAMS,(void *)&num))) {
-    GST_INFO("  machine has %d track params ",num);
-    bml_class->track_property=g_new(GParamSpec*,num);
-    for(i=0;i<num;i++,prop_id++) {
-      GST_DEBUG("      track_param=%02i",i);
-      if(bml(get_track_parameter_info(bmh,i,BM_PARA_TYPE,(void *)&type)) &&
-        bml(get_track_parameter_info(bmh,i,BM_PARA_NAME,(void *)&tmp_name)) &&
-        bml(get_track_parameter_info(bmh,i,BM_PARA_DESCRIPTION,(void *)&tmp_desc)) &&
-        bml(get_track_parameter_info(bmh,i,BM_PARA_FLAGS,(void *)&flags)) &&
-        bml(get_track_parameter_info(bmh,i,BM_PARA_MIN_VALUE,(void *)&min_val)) &&
-        bml(get_track_parameter_info(bmh,i,BM_PARA_MAX_VALUE,(void *)&max_val)) &&
-        bml(get_track_parameter_info(bmh,i,BM_PARA_NO_VALUE,(void *)&no_val)) &&
-        bml(get_track_parameter_info(bmh,i,BM_PARA_DEF_VALUE,(void *)&def_val))
-      ) {
-        gstbml_convert_names(klass, tmp_name, tmp_desc, &name, &nick, &desc);
+  if (bml (get_machine_info (bmh, BM_PROP_NUM_TRACK_PARAMS, (void *) &num))) {
+    GST_INFO ("  machine has %d track params ", num);
+    bml_class->track_property = g_new (GParamSpec *, num);
+    for (i = 0; i < num; i++, prop_id++) {
+      GST_DEBUG ("      track_param=%02i", i);
+      if (bml (get_track_parameter_info (bmh, i, BM_PARA_TYPE, (void *) &type))
+          && bml (get_track_parameter_info (bmh, i, BM_PARA_NAME,
+                  (void *) &tmp_name))
+          && bml (get_track_parameter_info (bmh, i, BM_PARA_DESCRIPTION,
+                  (void *) &tmp_desc))
+          && bml (get_track_parameter_info (bmh, i, BM_PARA_FLAGS,
+                  (void *) &flags))
+          && bml (get_track_parameter_info (bmh, i, BM_PARA_MIN_VALUE,
+                  (void *) &min_val))
+          && bml (get_track_parameter_info (bmh, i, BM_PARA_MAX_VALUE,
+                  (void *) &max_val))
+          && bml (get_track_parameter_info (bmh, i, BM_PARA_NO_VALUE,
+                  (void *) &no_val))
+          && bml (get_track_parameter_info (bmh, i, BM_PARA_DEF_VALUE,
+                  (void *) &def_val))
+          ) {
+        gstbml_convert_names (klass, tmp_name, tmp_desc, &name, &nick, &desc);
         // create an enum on the fly
-        if(type==PT_BYTE) {
-          if((enum_type = bml(gstbml_register_track_enum_type(klass, bmh, i, name, min_val, max_val, no_val)))) {
+        if (type == PT_BYTE) {
+          if ((enum_type =
+                  bml (gstbml_register_track_enum_type (klass, bmh, i, name,
+                          min_val, max_val, no_val)))) {
             type = PT_ENUM;
           }
         }
-        if((bml_class->track_property[bml_class->numtrackparams]=gstbml_register_param(klass, prop_id, type, enum_type, name, nick, desc, flags, min_val, max_val, no_val, def_val))) {
+        if ((bml_class->track_property[bml_class->numtrackparams] =
+                gstbml_register_param (klass, prop_id, type, enum_type, name,
+                    nick, desc, flags, min_val, max_val, no_val, def_val))) {
           bml_class->numtrackparams++;
+        } else {
+          GST_WARNING ("registering global_param (pseudo track param) failed!");
         }
-        else {
-          GST_WARNING("registering global_param (pseudo track param) failed!");
-        }
-        g_free(name);g_free(nick);g_free(desc);
+        g_free (name);
+        g_free (nick);
+        g_free (desc);
       }
     }
   }
-  GST_INFO("  %d track params installed",bml_class->numtrackparams);
+  GST_INFO ("  %d track params installed", bml_class->numtrackparams);
 }
 
 //-- common element functions
@@ -597,29 +725,33 @@ void bml(gstbml_class_prepare_properties(GObjectClass *klass, GstBMLClass *bml_c
  *
  * create a new voice and add it to the list of voices
  */
-static GstBMLV *gst_bml_add_voice(GstBML *bml,GType voice_type) {
+static GstBMLV *
+gst_bml_add_voice (GstBML * bml, GType voice_type)
+{
   GstBMLV *bmlv;
   gchar *name;
 
-  GST_DEBUG_OBJECT(bml->self,"adding a new voice to %p, current nr of voices is %lu",bml->self,bml->num_voices);
+  GST_DEBUG_OBJECT (bml->self,
+      "adding a new voice to %p, current nr of voices is %lu", bml->self,
+      bml->num_voices);
 
-  bmlv=g_object_new(voice_type,NULL);
+  bmlv = g_object_new (voice_type, NULL);
   //bmlv->parent=bml;
-  bmlv->bm=bml->bm;
-  bmlv->voice=bml->num_voices;
+  bmlv->bm = bml->bm;
+  bmlv->voice = bml->num_voices;
 
-  name=g_strdup_printf("voice%02d",bmlv->voice);
+  name = g_strdup_printf ("voice%02d", bmlv->voice);
   // set name based on track number
-  gst_object_set_name(GST_OBJECT(bmlv),name);
-  g_free(name);
+  gst_object_set_name (GST_OBJECT (bmlv), name);
+  g_free (name);
   // this refs the bmlv instance
-  gst_object_set_parent(GST_OBJECT(bmlv),GST_OBJECT(bml->self));
+  gst_object_set_parent (GST_OBJECT (bmlv), GST_OBJECT (bml->self));
 
-  bml->voices=g_list_append(bml->voices,bmlv);
+  bml->voices = g_list_append (bml->voices, bmlv);
   bml->num_voices++;
 
-  GST_DEBUG_OBJECT(bml->self,"added a new voice");
-  return(bmlv);
+  GST_DEBUG_OBJECT (bml->self, "added a new voice");
+  return (bmlv);
 }
 
 // not wrapper/native specific
@@ -628,23 +760,28 @@ static GstBMLV *gst_bml_add_voice(GstBML *bml,GType voice_type) {
  *
  * delete last voice and remove it from the list of voices
  */
-static void gst_bml_del_voice(GstBML *bml,GType voice_type) {
+static void
+gst_bml_del_voice (GstBML * bml, GType voice_type)
+{
   GList *node;
   GstObject *obj;
 
-  GST_DEBUG_OBJECT(bml->self,"removing last voice to %p, current nr of voices is %lu",bml->self,bml->num_voices);
+  GST_DEBUG_OBJECT (bml->self,
+      "removing last voice to %p, current nr of voices is %lu", bml->self,
+      bml->num_voices);
 
-  node=g_list_last(bml->voices);
-  obj=node->data;
-  GST_DEBUG_OBJECT(bml->self,"  free voice : %p (%d)",obj,G_OBJECT(obj)->ref_count);
-  gst_object_unparent(obj);
+  node = g_list_last (bml->voices);
+  obj = node->data;
+  GST_DEBUG_OBJECT (bml->self, "  free voice : %p (%d)", obj,
+      G_OBJECT (obj)->ref_count);
+  gst_object_unparent (obj);
   // no need to unref, the unparent does that
   //g_object_unref(node->data);
 
-  bml->voices=g_list_delete_link(bml->voices,node);
+  bml->voices = g_list_delete_link (bml->voices, node);
   bml->num_voices--;
 
-  GST_DEBUG_OBJECT(bml->self,"removed last voice");
+  GST_DEBUG_OBJECT (bml->self, "removed last voice");
 }
 
 /*
@@ -652,27 +789,29 @@ static void gst_bml_del_voice(GstBML *bml,GType voice_type) {
  *
  * initialize voice of a new instance
  */
-static void gst_bml_init_voices(GstBML *bml,GstBMLClass *klass) {
-  gpointer bmh=klass->bmh;
+static void
+gst_bml_init_voices (GstBML * bml, GstBMLClass * klass)
+{
+  gpointer bmh = klass->bmh;
 
-  GST_INFO_OBJECT(bml->self,"initializing voices: bml=%p, bml_class=%p",bml,klass);
+  GST_INFO_OBJECT (bml->self, "initializing voices: bml=%p, bml_class=%p", bml,
+      klass);
 
-  bml->num_voices=0;
-  bml->voices=NULL;
-  if(bml(gstbml_is_polyphonic(bmh))) {
-    gint i,min_voices;
+  bml->num_voices = 0;
+  bml->voices = NULL;
+  if (bml (gstbml_is_polyphonic (bmh))) {
+    gint i, min_voices;
 
-    GST_DEBUG_OBJECT(bml->self,"instantiating default voices");
+    GST_DEBUG_OBJECT (bml->self, "instantiating default voices");
 
     // add voice instances
-    if(bml(get_machine_info(bmh,BM_PROP_MIN_TRACKS,(void *)&min_voices))) {
-      GST_DEBUG_OBJECT(bml->self,"adding %d voices",min_voices);
-      for(i=0;i<min_voices;i++) {
-        gst_bml_add_voice(bml,klass->voice_type);
+    if (bml (get_machine_info (bmh, BM_PROP_MIN_TRACKS, (void *) &min_voices))) {
+      GST_DEBUG_OBJECT (bml->self, "adding %d voices", min_voices);
+      for (i = 0; i < min_voices; i++) {
+        gst_bml_add_voice (bml, klass->voice_type);
       }
-    }
-    else {
-      GST_WARNING_OBJECT(bml->self,"failed to get min voices");
+    } else {
+      GST_WARNING_OBJECT (bml->self, "failed to get min voices");
     }
   }
 }
@@ -682,31 +821,36 @@ static void gst_bml_init_voices(GstBML *bml,GstBMLClass *klass) {
  *
  * initialize the new instance
  */
-void bml(gstbml_init(GstBML *bml,GstBMLClass *klass,GstElement *element)) {
-  GST_DEBUG_OBJECT(element,"init: element=%p, bml=%p, bml_class=%p",element,bml,klass);
+void
+bml (gstbml_init (GstBML * bml, GstBMLClass * klass, GstElement * element))
+{
+  GST_DEBUG_OBJECT (element, "init: element=%p, bml=%p, bml_class=%p", element,
+      bml, klass);
 
-  bml->self=element;
+  bml->self = element;
 
-  bml->bm=bml(new(klass->bmh));
-  g_assert(bml->bm);
-  bml(init(bml->bm,0,NULL));
+  bml->bm = bml (new (klass->bmh));
+  g_assert (bml->bm);
+  bml (init (bml->bm, 0, NULL));
 
-  gst_bml_init_voices(bml,klass);
+  gst_bml_init_voices (bml, klass);
 
   // allocate the various arrays
-  bml->srcpads=g_new0(GstPad *,klass->numsrcpads);
-  bml->sinkpads=g_new0(GstPad *,klass->numsinkpads);
+  bml->srcpads = g_new0 (GstPad *, klass->numsrcpads);
+  bml->sinkpads = g_new0 (GstPad *, klass->numsinkpads);
 
-  bml->triggers_changed=g_new0(gint,klass->numglobalparams+klass->numtrackparams);
+  bml->triggers_changed =
+      g_new0 (gint, klass->numglobalparams + klass->numtrackparams);
 
   // nonzero default needed to instantiate() some plugins
-  bml->samplerate=GST_AUDIO_DEF_RATE;
-  bml->beats_per_minute=120;
-  bml->ticks_per_beat=4;
-  bml->subticks_per_tick=1;
-  gstbml_calculate_buffer_frames(bml);
-  bml(set_master_info(bml->beats_per_minute,bml->ticks_per_beat,bml->samplerate));
-  GST_DEBUG_OBJECT(element,"activating %lu voice(s)",bml->num_voices);
+  bml->samplerate = GST_AUDIO_DEF_RATE;
+  bml->beats_per_minute = 120;
+  bml->ticks_per_beat = 4;
+  bml->subticks_per_tick = 1;
+  gstbml_calculate_buffer_frames (bml);
+  bml (set_master_info (bml->beats_per_minute, bml->ticks_per_beat,
+          bml->samplerate));
+  GST_DEBUG_OBJECT (element, "activating %lu voice(s)", bml->num_voices);
   //bml(set_num_tracks(bml,bml->num_voices));
 }
 
@@ -715,154 +859,159 @@ void bml(gstbml_init(GstBML *bml,GstBMLClass *klass,GstElement *element)) {
  *
  * add pads
  */
-void bml(gstbml_init_pads(GstElement *element, GstBML *bml, GstPadLinkFunction *gst_bml_link)) {
-  GstElementClass *klass=GST_ELEMENT_GET_CLASS(element);
+void
+bml (gstbml_init_pads (GstElement * element, GstBML * bml,
+        GstPadLinkFunction * gst_bml_link))
+{
+  GstElementClass *klass = GST_ELEMENT_GET_CLASS (element);
   GstPad *pad;
   GList *l;
-  gint sinkcount=0,srccount=0;
+  gint sinkcount = 0, srccount = 0;
 
-  for(l=klass->padtemplates;l;l=l->next) {
-    pad=gst_pad_new_from_template(GST_PAD_TEMPLATE(l->data),GST_PAD_TEMPLATE_NAME_TEMPLATE(l->data));
+  for (l = klass->padtemplates; l; l = l->next) {
+    pad =
+        gst_pad_new_from_template (GST_PAD_TEMPLATE (l->data),
+        GST_PAD_TEMPLATE_NAME_TEMPLATE (l->data));
 
     //gst_pad_set_link_function(pad,gst_bml_link);
-    gst_element_add_pad(element,pad);
+    gst_element_add_pad (element, pad);
 
-    if(GST_PAD_DIRECTION(pad)==GST_PAD_SINK) {
-      bml->sinkpads[sinkcount++]=pad;
-      GST_INFO_OBJECT(element,"  added sinkpad");
-    }
-    else {
-      bml->srcpads[srccount++]=pad;
-      GST_INFO_OBJECT(element,"  added srcpad");
+    if (GST_PAD_DIRECTION (pad) == GST_PAD_SINK) {
+      bml->sinkpads[sinkcount++] = pad;
+      GST_INFO_OBJECT (element, "  added sinkpad");
+    } else {
+      bml->srcpads[srccount++] = pad;
+      GST_INFO_OBJECT (element, "  added srcpad");
     }
   }
-  GST_INFO_OBJECT(element,"  src_ct=%d, sink_ct=%d",srccount,sinkcount);
+  GST_INFO_OBJECT (element, "  src_ct=%d, sink_ct=%d", srccount, sinkcount);
 }
 
-void bml(gstbml_finalize(GstBML *bml)) {
-  GST_DEBUG_OBJECT(bml->self,"!!!! bml=%p",bml);
+void
+bml (gstbml_finalize (GstBML * bml))
+{
+  GST_DEBUG_OBJECT (bml->self, "!!!! bml=%p", bml);
 
   // free list of voices
-  if(bml->voices) {
-    g_list_free(bml->voices);
-    bml->voices=NULL;
+  if (bml->voices) {
+    g_list_free (bml->voices);
+    bml->voices = NULL;
   }
 
-  g_free(bml->srcpads);
-  g_free(bml->sinkpads);
+  g_free (bml->srcpads);
+  g_free (bml->sinkpads);
 
-  g_free(bml->triggers_changed);
+  g_free (bml->triggers_changed);
 
-  bml(free(bml->bm));
-  bml->bm=NULL;
+  bml (free (bml->bm));
+  bml->bm = NULL;
 }
 
-void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id, const GValue *value, GParamSpec * pspec)) {
-  gboolean handled=FALSE;
-  gpointer bm=bml->bm;
-  guint props_skip=ARG_LAST-1;
+void
+bml (gstbml_set_property (GstBML * bml, GstBMLClass * bml_class, guint prop_id,
+        const GValue * value, GParamSpec * pspec))
+{
+  gboolean handled = FALSE;
+  gpointer bm = bml->bm;
+  guint props_skip = ARG_LAST - 1;
 
-  GST_DEBUG_OBJECT(bml->self,"prop-id %d",prop_id);
+  GST_DEBUG_OBJECT (bml->self, "prop-id %d", prop_id);
 
-  switch(prop_id) {
-    // handle properties <ARG_LAST first
+  switch (prop_id) {
+      // handle properties <ARG_LAST first
     case ARG_BPM:
     case ARG_TPB:
     case ARG_STPT:
-      GST_WARNING_OBJECT(bml->self,"use gst_bml_tempo_change_tempo()");
-      handled=TRUE;
+      GST_WARNING_OBJECT (bml->self, "use gst_bml_tempo_change_tempo()");
+      handled = TRUE;
       break;
     case ARG_HOST_CALLBACKS:
       // supply the callbacks to bml
-      GST_DEBUG_OBJECT(bml->self,"passing callbacks to bml");
-      bml(set_callbacks(bm,g_value_get_pointer(value)));
-      handled=TRUE;
+      GST_DEBUG_OBJECT (bml->self, "passing callbacks to bml");
+      bml (set_callbacks (bm, g_value_get_pointer (value)));
+      handled = TRUE;
       break;
     default:
-      if(bml(gstbml_is_polyphonic(bm))) {
-        if(prop_id==(props_skip+1)) {
+      if (bml (gstbml_is_polyphonic (bm))) {
+        if (prop_id == (props_skip + 1)) {
           gulong i;
-          gulong old_num_voices=bml->num_voices;
-          gulong new_num_voices = g_value_get_ulong(value);
-          GST_DEBUG_OBJECT(bml->self,"change number of voices from %lu to %lu", old_num_voices,new_num_voices);
+          gulong old_num_voices = bml->num_voices;
+          gulong new_num_voices = g_value_get_ulong (value);
+          GST_DEBUG_OBJECT (bml->self,
+              "change number of voices from %lu to %lu", old_num_voices,
+              new_num_voices);
           // add or free voices
-          if(old_num_voices<new_num_voices) {
-            for(i=old_num_voices;i<new_num_voices;i++) {
+          if (old_num_voices < new_num_voices) {
+            for (i = old_num_voices; i < new_num_voices; i++) {
               // this increments bml->num_voices
-              gst_bml_add_voice(bml,bml_class->voice_type);
+              gst_bml_add_voice (bml, bml_class->voice_type);
             }
-          }
-          else {
-            for(i=new_num_voices;i<old_num_voices;i++) {
+          } else {
+            for (i = new_num_voices; i < old_num_voices; i++) {
               // this decrements bml->num_voices
-              gst_bml_del_voice(bml,bml_class->voice_type);
+              gst_bml_del_voice (bml, bml_class->voice_type);
             }
           }
-          if(old_num_voices!=new_num_voices) {
-            bml(set_num_tracks(bm,bml->num_voices));
+          if (old_num_voices != new_num_voices) {
+            bml (set_num_tracks (bm, bml->num_voices));
           }
-          handled=TRUE;
+          handled = TRUE;
         }
         props_skip++;
       }
-#if !GST_CHECK_VERSION(0,10,31)
-      if(bml_class->help_uri) {
-        if(prop_id==(props_skip+1)) {
-          GST_WARNING_OBJECT(bml->self,"documentation-uri property is read only");
-          handled=TRUE;
-        }
-        props_skip++;
-      }
-#endif
       break;
   }
-  prop_id-=props_skip;
+  prop_id -= props_skip;
 
   // pass remaining props to wrapped plugin
-  if(!handled) {
+  if (!handled) {
     gpointer addr;
     gint type;
     // DEBUG
     //gchar *valstr;
     // DEBUG
 
-    g_assert(prop_id>0);
+    g_assert (prop_id > 0);
 
-    type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
+    type =
+        GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
+            gst_bml_property_meta_quark_type));
 
     prop_id--;
-    GST_LOG_OBJECT(bml->self,"id: %d, attr: %d, global: %d, voice: %d",prop_id,bml_class->numattributes,bml_class->numglobalparams,bml_class->numtrackparams);
-     // is it an attribute ?
-    if(prop_id<bml_class->numattributes) {
-      bml(set_attribute_value(bm,prop_id,g_value_get_int(value)));
+    GST_LOG_OBJECT (bml->self, "id: %d, attr: %d, global: %d, voice: %d",
+        prop_id, bml_class->numattributes, bml_class->numglobalparams,
+        bml_class->numtrackparams);
+    // is it an attribute ?
+    if (prop_id < bml_class->numattributes) {
+      bml (set_attribute_value (bm, prop_id, g_value_get_int (value)));
       //GST_DEBUG("set attribute %d to %d", prop_id, g_value_get_int(value));
-    }
-    else {
-      guint flags=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gstbt_property_meta_quark_flags));
-      prop_id-=bml_class->numattributes;
+    } else {
+      guint flags = GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
+              gstbt_property_meta_quark_flags));
+      prop_id -= bml_class->numattributes;
 
-      if(!(flags&GSTBT_PROPERTY_META_STATE) && !g_param_value_defaults(pspec,(GValue*)value)) {
+      if (!(flags & GSTBT_PROPERTY_META_STATE)
+          && !g_param_value_defaults (pspec, (GValue *) value)) {
         // flag triggered triggers
-        g_atomic_int_set(&bml->triggers_changed[prop_id],1);
+        g_atomic_int_set (&bml->triggers_changed[prop_id], 1);
       }
       // is it a global param
-      if(prop_id<bml_class->numglobalparams) {
+      if (prop_id < bml_class->numglobalparams) {
         // TODO(ensonic): cache this info
-        addr=bml(get_global_parameter_location(bm,prop_id));
-        gstbml_set_param(type,addr,value);
+        addr = bml (get_global_parameter_location (bm, prop_id));
+        gstbml_set_param (type, addr, value);
         // DEBUG
         //valstr=g_strdup_value_contents(value);
         //GST_DEBUG("set global param %d to %s (%p)", prop_id, valstr,addr);
         //g_free(valstr);
         // DEBUG
-      }
-      else {
-        prop_id-=bml_class->numglobalparams;
+      } else {
+        prop_id -= bml_class->numglobalparams;
         // is it a voice00 param
-        if(prop_id<bml_class->numtrackparams) {
+        if (prop_id < bml_class->numtrackparams) {
           // TODO(ensonic): cache this info
-          addr=bml(get_track_parameter_location(bm,0,prop_id));
-          gstbml_set_param(type,addr,value);
+          addr = bml (get_track_parameter_location (bm, 0, prop_id));
+          gstbml_set_param (type, addr, value);
           // DEBUG
           //valstr=g_strdup_value_contents(value);
           //GST_DEBUG("set track param %d:0 to %s (%p)", prop_id, valstr,addr);
@@ -873,94 +1022,93 @@ void bml(gstbml_set_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
   }
 }
 
-void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id, GValue *value, GParamSpec * pspec)) {
-  gboolean handled=FALSE;
-  gpointer bm=bml->bm;
-  guint props_skip=ARG_LAST-1;
+void
+bml (gstbml_get_property (GstBML * bml, GstBMLClass * bml_class, guint prop_id,
+        GValue * value, GParamSpec * pspec))
+{
+  gboolean handled = FALSE;
+  gpointer bm = bml->bm;
+  guint props_skip = ARG_LAST - 1;
 
-  GST_DEBUG_OBJECT(bml->self,"prop-id %d",prop_id);
+  GST_DEBUG_OBJECT (bml->self, "prop-id %d", prop_id);
 
-  switch(prop_id) {
-    // handle properties <ARG_LAST first
+  switch (prop_id) {
+      // handle properties <ARG_LAST first
     case ARG_BPM:
-      g_value_set_ulong(value, bml->beats_per_minute);
-      GST_DEBUG_OBJECT(bml->self,"requested BPM = %lu", bml->beats_per_minute);
-      handled=TRUE;
+      g_value_set_ulong (value, bml->beats_per_minute);
+      GST_DEBUG_OBJECT (bml->self, "requested BPM = %lu",
+          bml->beats_per_minute);
+      handled = TRUE;
       break;
     case ARG_TPB:
-      g_value_set_ulong(value, bml->ticks_per_beat);
-      GST_DEBUG_OBJECT(bml->self,"requested TPB = %lu", bml->ticks_per_beat);
-      handled=TRUE;
+      g_value_set_ulong (value, bml->ticks_per_beat);
+      GST_DEBUG_OBJECT (bml->self, "requested TPB = %lu", bml->ticks_per_beat);
+      handled = TRUE;
       break;
     case ARG_STPT:
-      g_value_set_ulong(value, bml->subticks_per_tick);
-      GST_DEBUG_OBJECT(bml->self,"requested STPB = %lu", bml->subticks_per_tick);
-      handled=TRUE;
+      g_value_set_ulong (value, bml->subticks_per_tick);
+      GST_DEBUG_OBJECT (bml->self, "requested STPB = %lu",
+          bml->subticks_per_tick);
+      handled = TRUE;
       break;
-    /*case ARG_HOST_CALLBACKS:
-      GST_WARNING ("callbacks property is write only");
-      handled=TRUE;
-      break;*/
+      /*case ARG_HOST_CALLBACKS:
+         GST_WARNING ("callbacks property is write only");
+         handled=TRUE;
+         break; */
     default:
-      if(bml(gstbml_is_polyphonic(bm))) {
-        if(prop_id==(props_skip+1)) {
-          g_value_set_ulong(value, bml->num_voices);
-          GST_DEBUG_OBJECT(bml->self,"requested number of voices = %lu", bml->num_voices);
-          handled=TRUE;
+      if (bml (gstbml_is_polyphonic (bm))) {
+        if (prop_id == (props_skip + 1)) {
+          g_value_set_ulong (value, bml->num_voices);
+          GST_DEBUG_OBJECT (bml->self, "requested number of voices = %lu",
+              bml->num_voices);
+          handled = TRUE;
         }
         props_skip++;
       }
-#if !GST_CHECK_VERSION(0,10,31)
-      if(bml_class->help_uri) {
-        if(prop_id==(props_skip+1)) {
-          g_value_set_string(value,bml_class->help_uri);
-          handled=TRUE;
-        }
-        props_skip++;
-      }
-#endif
       break;
   }
-  prop_id-=props_skip;
+  prop_id -= props_skip;
 
   // pass remaining props to wrapped plugin
-  if(!handled) {
+  if (!handled) {
     gpointer addr;
     gint type;
     // DEBUG
     //gchar *valstr;
     // DEBUG
 
-    g_assert(prop_id>0);
+    g_assert (prop_id > 0);
 
-    type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
+    type =
+        GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
+            gst_bml_property_meta_quark_type));
     prop_id--;
-    GST_DEBUG_OBJECT(bml->self,"id: %d, attr: %d, global: %d, voice: %d",prop_id,bml_class->numattributes,bml_class->numglobalparams,bml_class->numtrackparams);
-     // is it an attribute ?
-    if(prop_id<bml_class->numattributes) {
-      g_value_set_int(value,bml(get_attribute_value(bm,prop_id)));
+    GST_DEBUG_OBJECT (bml->self, "id: %d, attr: %d, global: %d, voice: %d",
+        prop_id, bml_class->numattributes, bml_class->numglobalparams,
+        bml_class->numtrackparams);
+    // is it an attribute ?
+    if (prop_id < bml_class->numattributes) {
+      g_value_set_int (value, bml (get_attribute_value (bm, prop_id)));
       //GST_DEBUG("got attribute as %d", g_value_get_int(value));
-    }
-    else {
-      prop_id-=bml_class->numattributes;
+    } else {
+      prop_id -= bml_class->numattributes;
       // is it a global param
-      if(prop_id<bml_class->numglobalparams) {
+      if (prop_id < bml_class->numglobalparams) {
         // TODO(ensonic): cache this info
-        addr=bml(get_global_parameter_location(bm,prop_id));
-        gstbml_get_param(type,addr,value);
+        addr = bml (get_global_parameter_location (bm, prop_id));
+        gstbml_get_param (type, addr, value);
         // DEBUG
         //valstr=g_strdup_value_contents(value);
         //GST_DEBUG ("got global param as %s (%p)", valstr,addr);
         //g_free(valstr);
         // DEBUG
-      }
-      else {
-        prop_id-=bml_class->numglobalparams;
+      } else {
+        prop_id -= bml_class->numglobalparams;
         // is it a voice00 param
-        if(prop_id<bml_class->numtrackparams) {
+        if (prop_id < bml_class->numtrackparams) {
           // TODO(ensonic): cache this info
-          addr=bml(get_track_parameter_location(bm,0,prop_id));
-          gstbml_get_param(type,addr,value);
+          addr = bml (get_track_parameter_location (bm, 0, prop_id));
+          gstbml_get_param (type, addr, value);
           // DEBUG
           //valstr=g_strdup_value_contents(value);
           //GST_DEBUG ("got track param as %s (%p)", valstr,addr);
@@ -978,54 +1126,66 @@ void bml(gstbml_get_property(GstBML *bml, GstBMLClass *bml_class, guint prop_id,
  *
  * updates the global and voice params
  */
-void bml(gstbml_sync_values(GstBML *bml, GstBMLClass *bml_class, GstClockTime ts)) {
+void
+bml (gstbml_sync_values (GstBML * bml, GstBMLClass * bml_class,
+        GstClockTime ts))
+{
   GList *node;
   gulong i;
   GstBMLV *bmlv;
   GstBMLVClass *bmlv_class;
   //gboolean res;
 
-  GST_DEBUG_OBJECT(bml->self,"  sync_values(%p), voices=%lu,%p",bml->self,bml->num_voices,bml->voices);
+  GST_DEBUG_OBJECT (bml->self, "  sync_values(%p), voices=%lu,%p", bml->self,
+      bml->num_voices, bml->voices);
 
-  for(i=0;i<bml_class->numglobalparams+bml_class->numtrackparams;i++) {
-    g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],1,2);
+  for (i = 0; i < bml_class->numglobalparams + bml_class->numtrackparams; i++) {
+    g_atomic_int_compare_and_exchange (&bml->triggers_changed[i], 1, 2);
   }
-  /*res=*/gst_object_sync_values(G_OBJECT(bml->self),ts);
-  for(i=0;i<bml_class->numglobalparams+bml_class->numtrackparams;i++) {
-    g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],1,0);
+  /*res= */ gst_object_sync_values (G_OBJECT (bml->self), ts);
+  for (i = 0; i < bml_class->numglobalparams + bml_class->numtrackparams; i++) {
+    g_atomic_int_compare_and_exchange (&bml->triggers_changed[i], 1, 0);
   }
   //if(G_UNLIKELY(!res)) { GST_WARNING("global sync failed"); }
-  for(node=bml->voices;node;node=g_list_next(node)) {
-    bmlv=node->data;
-    bmlv_class=GST_BMLV_GET_CLASS(bmlv);
-    for(i=0;i<bmlv_class->numtrackparams;i++) {
-      g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],1,2);
+  for (node = bml->voices; node; node = g_list_next (node)) {
+    bmlv = node->data;
+    bmlv_class = GST_BMLV_GET_CLASS (bmlv);
+    for (i = 0; i < bmlv_class->numtrackparams; i++) {
+      g_atomic_int_compare_and_exchange (&bmlv->triggers_changed[i], 1, 2);
     }
-    /*res=*/gst_object_sync_values(G_OBJECT(bmlv),ts);
+    /*res= */ gst_object_sync_values (G_OBJECT (bmlv), ts);
     //if(G_UNLIKELY(!res)) { GST_WARNING("voice sync failed"); }
-    for(i=0;i<bmlv_class->numtrackparams;i++) {
-      g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],1,0);
+    for (i = 0; i < bmlv_class->numtrackparams; i++) {
+      g_atomic_int_compare_and_exchange (&bmlv->triggers_changed[i], 1, 0);
     }
   }
 }
 
-static void reset_triggers(GParamSpec *pspec,gpointer addr) {
-  gint no_val,type;
+static void
+reset_triggers (GParamSpec * pspec, gpointer addr)
+{
+  gint no_val, type;
 
-  type=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gst_bml_property_meta_quark_type));
-  no_val=GPOINTER_TO_INT(g_param_spec_get_qdata(pspec,gstbt_property_meta_quark_no_val));
-  switch(type) {
+  type =
+      GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
+          gst_bml_property_meta_quark_type));
+  no_val =
+      GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
+          gstbt_property_meta_quark_no_val));
+  switch (type) {
     case PT_NOTE:
     case PT_SWITCH:
     case PT_BYTE:
     case PT_ENUM:
-      *(guint8 *)addr=(guint8)no_val;break;
+      *(guint8 *) addr = (guint8) no_val;
+      break;
       break;
     case PT_WORD:
-      *(guint16 *)addr=(guint16)no_val;break;
+      *(guint16 *) addr = (guint16) no_val;
+      break;
       break;
     default:
-      GST_WARNING("unhandled type : %d",type);
+      GST_WARNING ("unhandled type : %d", type);
   }
 }
 
@@ -1034,39 +1194,41 @@ static void reset_triggers(GParamSpec *pspec,gpointer addr) {
  *
  * set trigger parameter back to no-value
  */
-void bml(gstbml_reset_triggers(GstBML *bml, GstBMLClass *bml_class)) {
+void
+bml (gstbml_reset_triggers (GstBML * bml, GstBMLClass * bml_class))
+{
   GList *node;
-  gpointer bm=bml->bm;
+  gpointer bm = bml->bm;
   GstBMLV *bmlv;
   GstBMLVClass *bmlv_class;
   GParamSpec *pspec;
-  gulong i,v;
+  gulong i, v;
   gpointer addr;
 
-  for(i=0;i<bml_class->numglobalparams;i++) {
-    if(g_atomic_int_compare_and_exchange(&bml->triggers_changed[i],2,0)) {
-      pspec=bml_class->global_property[i];
-      addr=bml(get_global_parameter_location(bm,i));
-      reset_triggers(pspec,addr);
+  for (i = 0; i < bml_class->numglobalparams; i++) {
+    if (g_atomic_int_compare_and_exchange (&bml->triggers_changed[i], 2, 0)) {
+      pspec = bml_class->global_property[i];
+      addr = bml (get_global_parameter_location (bm, i));
+      reset_triggers (pspec, addr);
     }
   }
-  for(i=0;i<bml_class->numtrackparams;i++) {
-    if(g_atomic_int_compare_and_exchange(&bml->triggers_changed[bml_class->numglobalparams+i],2,0)) {
-      pspec=bml_class->track_property[i];
-      addr=bml(get_track_parameter_location(bm,0,i));
-      reset_triggers(pspec,addr);
+  for (i = 0; i < bml_class->numtrackparams; i++) {
+    if (g_atomic_int_compare_and_exchange (&bml->
+            triggers_changed[bml_class->numglobalparams + i], 2, 0)) {
+      pspec = bml_class->track_property[i];
+      addr = bml (get_track_parameter_location (bm, 0, i));
+      reset_triggers (pspec, addr);
     }
   }
-  for(v=0,node=bml->voices;node;node=g_list_next(node),v++) {
-    bmlv=node->data;
-    bmlv_class=GST_BMLV_GET_CLASS(bmlv);
-    for(i=0;i<bmlv_class->numtrackparams;i++) {
-      if(g_atomic_int_compare_and_exchange(&bmlv->triggers_changed[i],2,0)) {
-        pspec=bmlv_class->track_property[i];
-        addr=bml(get_track_parameter_location(bm,v,i));
-        reset_triggers(pspec,addr);
+  for (v = 0, node = bml->voices; node; node = g_list_next (node), v++) {
+    bmlv = node->data;
+    bmlv_class = GST_BMLV_GET_CLASS (bmlv);
+    for (i = 0; i < bmlv_class->numtrackparams; i++) {
+      if (g_atomic_int_compare_and_exchange (&bmlv->triggers_changed[i], 2, 0)) {
+        pspec = bmlv_class->track_property[i];
+        addr = bml (get_track_parameter_location (bm, v, i));
+        reset_triggers (pspec, addr);
       }
     }
   }
 }
-

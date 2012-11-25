@@ -23,6 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#if HAVE_BMLW
+#include <sys/wait.h>
+#endif
 
 #define GST_CAT_DEFAULT bml_debug
 GST_DEBUG_CATEGORY(GST_CAT_DEFAULT);
@@ -34,12 +37,14 @@ GHashTable *bml_category_by_machine_name;
 
 GQuark gst_bml_property_meta_quark_type;
 
+// we need to do this as this is compiled globally without bml/BML macros defined
 #if HAVE_BMLW
-extern gboolean bmlw_describe_plugin(gchar *pathname, gpointer bmh);
+extern gboolean bmlw_gstbml_inspect(gchar *file_name);
 extern gboolean bmlw_gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta);
 #endif
-extern gboolean bmln_describe_plugin(gchar *pathname, gpointer bmh);
+extern gboolean bmln_gstbml_inspect(gchar *file_name);
 extern gboolean bmln_gstbml_register_element(GstPlugin *plugin, GstStructure *bml_meta);
+
 
 typedef int (*bsearchcomparefunc)(const void *,const void *);
 
@@ -166,6 +171,50 @@ static const gchar *get_bml_path(void) {
 #endif
 }
 
+#if HAVE_BMLW
+#if 0
+static struct sigaction oldaction;
+static gboolean fault_handler_active = FALSE;
+
+static void fault_handler_restore(void) {
+  if (!fault_handler_active)
+    return;
+
+  fault_handler_active = FALSE;
+
+  sigaction (SIGSEGV, &oldaction, NULL);
+}
+
+static void fault_handler_sighandler(int signum) {
+  /* We need to restore the fault handler or we'll keep getting it */
+  fault_handler_restore();
+
+  switch (signum) {
+    case SIGSEGV:
+      g_print ("Caught a segmentation fault while loading plugin file:\n");
+      exit (-1);
+      break;
+    default:
+      g_print ("Caught unhandled signal on plugin loading\n");
+      break;
+  }
+}
+
+static void fault_handler_setup(void) {
+  struct sigaction action;
+
+  if (fault_handler_active)
+    return;
+
+  fault_handler_active = TRUE;
+
+  memset (&action, 0, sizeof (action));
+  action.sa_handler = fault_handler_sighandler;
+  sigaction (SIGSEGV, &action, &oldaction);
+}
+#endif
+#endif
+
 /*
  * dir_scan:
  *
@@ -176,7 +225,6 @@ static gboolean dir_scan(const gchar *dir_name) {
   GDir *dir;
   gchar *file_name,*ext,*conv_entry_name,*cur_entry_name;
   const gchar *entry_name;
-  gpointer bmh;
   gboolean res=FALSE;
 
   /* @TODO: find a way to sync this with bml's testmachine report
@@ -205,6 +253,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     /* this is part of normal buzz installs these days, even its not a plugin */
     "CYANPHASE BUZZ OVERLOADER.DLL",
     "CYANPHASE DMO EFFECT ADAPTER.DLL",
+    "CYANPHASE DX EFFECT ADAPTER.DLL",
     "CYANPHASE SEA CUCUMBER.DLL",
     "CYANPHASE SONGINFO.DLL",
     "CYANPHASE UNNATIVE EFFECTS.DLL",
@@ -215,6 +264,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     "DEX RINGMOD.DLL",
     "DT_BLOCKFX (STEREO).DLL",
     "DT_BLOCKFX.DLL",
+    "EAX2OUTPUT.DLL",
     "FIRESLEDGE ANTIOPE-1.DLL",
     "FREQUENCY UNKNOWN FREQ IN.DLL",
     "FREQUENCY UNKNOWN FREQ OUT.DLL",
@@ -265,6 +315,7 @@ static gboolean dir_scan(const gchar *dir_name) {
     "NINEREEDS DISCRETIZE.DLL",
     "NINEREEDS DISCRITIZE.DLL",
     "NINEREEDS FADE.DLL",
+    "NINEREEDS LFO.DLL",
     "NINEREEDS LFO FADE.DLL",
     "NINEREEDS NRS04.DLL",
     "NINEREEDS NRS05.DLL",
@@ -278,7 +329,9 @@ static gboolean dir_scan(const gchar *dir_name) {
     "REBIRTH MIDI 2.DLL",
     "REBIRTH MIDI.DLL",
     "REPEATER.DLL",
+    "RNZNANF VST EFFECT ADAPTER.DLL",
     "RNZNANF VST INSTRUMENT ADAPTER.DLL",
+    "RNZNANFNCNR VST EFFECT ADAPTER.DLL",
     "RNZNANFNCNR VST INSTRUMENT ADAPTER.DLL",
     "RNZNANFNR VST INSTRUMENT ADAPTER.DLL",
     "ROUT VST PLUGIN LOADER.DLL",
@@ -312,7 +365,9 @@ static gboolean dir_scan(const gchar *dir_name) {
     "ZNT WAVEEDIT.DLL",
     "ZU ?TAPS.DLL",
     "ZU MORPHIN FINAL DOSE.DLL",
+    "ZU MORPHIN.DLL",
     "ZU PARAMETRIC EQ.DLL",
+    "ZU SLICER.DLL",
     "ZU µTAPS.DLL",
     "ZU �TAPS.DLL",
     "Zu æTaps.dll"
@@ -329,8 +384,10 @@ static gboolean dir_scan(const gchar *dir_name) {
       GST_WARNING("file %s is not a valid file-name",entry_name);
       if((conv_entry_name=g_convert(entry_name,-1,"UTF-8","WINDOWS-1252",NULL,NULL,NULL))) {
         cur_entry_name=conv_entry_name;
+      } else {
+        GST_WARNING("can't convert encoding for %s",entry_name);
+	    continue;
       }
-      //continue;
     }
 
     ext=strrchr(entry_name,'.');
@@ -341,29 +398,46 @@ static gboolean dir_scan(const gchar *dir_name) {
         GST_INFO("trying plugin '%s','%s'",cur_entry_name,file_name);
         if(!strcasecmp(ext,".dll")) {
 #if HAVE_BMLW
-          if((bmh=bmlw_open(file_name))) {
-            if(bmlw_describe_plugin(file_name,bmh)) {
-              res=TRUE;
+#if 0
+          pid_t pid;
+          int status;
+
+          /* Do a fork and try to open() the plugin there to avoid crashing on
+           * bad ones. This is not perfect, plugins can still crash later on.
+           * Also it seems that this causes troubles in the wine emulation
+           * state as some plugins that otherwise work, now fail later on :/
+           */
+          fault_handler_setup();
+          if((pid=fork())==0) {
+            // child
+            gpointer bmh;
+            if((bmh=bmlw_open(file_name))) {
+              bmlw_close(bmh);
+              exit(0);
             }
-            bmlw_close(bmh);
+            exit(1);
           }
-          else {
-            GST_WARNING("machine %s could not be loaded",file_name);
+          fault_handler_restore();
+          waitpid(pid, &status, 0);
+          if(WIFEXITED(status)) {
+            if(WEXITSTATUS(status)==0) {
+              GST_WARNING("loading %s worked okay",file_name);
+#endif
+              res=bmlw_gstbml_inspect(file_name);
+#if 0
+            } else {
+              GST_WARNING("try loading %s failed with exit code %d",file_name,WEXITSTATUS(status));
+            }
+          } else if(WIFSIGNALED(status)) {
+            GST_WARNING("try loading %s failed with signal %d",file_name,WTERMSIG(status));
           }
+#endif
 #else
           GST_WARNING("no dll emulation on non x86 platforms");
 #endif
         }
         else {
-          if((bmh=bmln_open(file_name))) {
-            if(bmln_describe_plugin(file_name,bmh)) {
-              res=TRUE;
-            }
-            bmln_close(bmh);
-          }
-          else {
-            GST_WARNING("machine %s could not be loaded",file_name);
-          }
+          res=bmln_gstbml_inspect(file_name);
         }
         g_free(file_name);
       }
@@ -388,7 +462,6 @@ static gboolean dir_scan(const gchar *dir_name) {
  * After loading each library, the callback function is called to process it.
  * This function leaves items passed to the callback function open.
  */
-
 static gboolean bml_scan(void) {
   const gchar *bml_path;
   gchar **paths;

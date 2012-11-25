@@ -22,7 +22,8 @@
 #ifndef __GSTBT_ENVELOPE_H__
 #define __GSTBT_ENVELOPE_H__
 
-#include <glib-object.h>
+#include <gst/gst.h>
+#include <gst/controller/gstcontroller.h>
 
 G_BEGIN_DECLS
 
@@ -44,22 +45,26 @@ typedef struct _GstBtEnvelopeClass GstBtEnvelopeClass;
  */
 struct _GstBtEnvelope {
   GObject parent;
+  /* < private > */
+  gboolean dispose_has_run;		/* validate if dispose has run */
 
   /* < public > */
   /* parameters */
   gdouble value;
 
   /* < private > */
-  gboolean dispose_has_run;		/* validate if dispose has run */
+  GstController *ctrl;
+  guint64 offset, length;
 };
 
 struct _GstBtEnvelopeClass {
   GObjectClass parent_class;
 };
 
-GType gstbt_envelope_get_type(void);
+GType gstbt_envelope_get_type (void);
 
-GstBtEnvelope *gstbt_envelope_new(void);
+gdouble gstbt_envelope_get (GstBtEnvelope *self, guint offset);
+gboolean gstbt_envelope_is_running (GstBtEnvelope *self);
 
 G_END_DECLS
 
