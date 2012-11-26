@@ -189,9 +189,12 @@ gstbt_osc_wave_create_stereo_resampled (GstBtOscWave * self, guint64 off,
   return TRUE;
 }
 
-/*
+/**
  * gstbt_osc_wave_setup:
- * Assign function pointer of wave genrator.
+ * @self: the oscillator
+ *
+ * Prepare the oscillator. Should be called before first use to ensure it is
+ * configured for the default parameters.
  */
 void
 gstbt_osc_wave_setup (GstBtOscWave * self)

@@ -66,6 +66,7 @@
     <xi:include href="xml/gstsidsyn.xml"/>
     <xi:include href="xml/gstsimsyn.xml"/>
     <xi:include href="xml/gstwavereplay.xml"/>
+    <xi:include href="xml/gstwavetabsyn.xml"/>
   </chapter>
   
   <chapter>

@@ -47,6 +47,7 @@ GstBtSidSynEffect
 GstBtSidSynWave
 <SUBSECTION Private>
 NUM_VOICES
+NUM_REGS
 <SUBSECTION Standard>
 GstBtSidSynClass
 GstBtSidSynVClass
@@ -92,6 +93,20 @@ GSTBT_IS_WAVE_REPLAY_CLASS
 GSTBT_WAVE_REPLAY_GET_CLASS
 GSTBT_TYPE_WAVE_REPLAY
 gstbt_wave_replay_get_type
+</SECTION>
+
+<SECTION>
+<FILE>gstwavetabsyn</FILE>
+GstBtWaveTabSyn
+<SUBSECTION Standard>
+GstBtWaveTabSynClass
+GSTBT_WAVE_TAB_SYN
+GSTBT_IS_WAVE_TAB_SYN
+GSTBT_WAVE_TAB_SYN_CLASS
+GSTBT_IS_WAVE_TAB_SYN_CLASS
+GSTBT_WAVE_TAB_SYN_GET_CLASS
+GSTBT_TYPE_WAVE_TAB_SYN
+gstbt_wave_tab_syn_get_type
 </SECTION>
 
 <SECTION>
@@ -241,7 +256,7 @@ GSTBT_ENVELOPE_ADSR
 GSTBT_IS_ENVELOPE_ADSR
 GSTBT_ENVELOPE_ADSR_CLASS
 GSTBT_IS_ENVELOPE_ADSR_CLASS
-GSTBT_ENVELOPE_GET_ADSR_CLASS
+GSTBT_ENVELOPE_ADSR_GET_CLASS
 GSTBT_TYPE_ENVELOPE_ADSR
 gstbt_envelope_adsr_get_type
 </SECTION>
@@ -257,7 +272,7 @@ GSTBT_ENVELOPE_D
 GSTBT_IS_ENVELOPE_D
 GSTBT_ENVELOPE_D_CLASS
 GSTBT_IS_ENVELOPE_D_CLASS
-GSTBT_ENVELOPE_GET_D_CLASS
+GSTBT_ENVELOPE_D_GET_CLASS
 GSTBT_TYPE_ENVELOPE_D
 gstbt_envelope_d_get_type
 </SECTION>
@@ -265,6 +280,7 @@ gstbt_envelope_d_get_type
 <SECTION>
 <FILE>gstbtfiltersvf</FILE>
 GstBtFilterSVF
+GstBtFilterSVFType
 gstbt_filter_svf_new
 <SUBSECTION Standard>
 GstBtFilterSVFClass
@@ -293,7 +309,12 @@ gstbt_note_get_type
 <SECTION>
 <FILE>gstbtoscsynth</FILE>
 GstBtOscSynth
+GstBtOscSynthWave
 gstbt_osc_synth_new
+<SUBSECTION Private>
+PINK_MAX_RANDOM_ROWS
+PINK_RANDOM_BITS
+PINK_RANDOM_SHIFT
 <SUBSECTION Standard>
 GstBtOscSynthClass
 GSTBT_OSC_SYNTH
@@ -311,6 +332,7 @@ gstbt_osc_synth_wave_get_type
 <FILE>gstbtoscwave</FILE>
 GstBtOscWave
 gstbt_osc_wave_new
+gstbt_osc_wave_setup
 <SUBSECTION Standard>
 GstBtOscWaveClass
 GSTBT_OSC_WAVE

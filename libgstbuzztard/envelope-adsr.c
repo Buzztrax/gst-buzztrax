@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 /**
- * SECTION:gstbtenveloped
+ * SECTION:gstbtenvelopeadsr
  * @short_description: attack-decay-sustain-release envelope generator
  *
  * Classic attack-decay-sustain-release envelope.
