@@ -25,6 +25,7 @@
 #include <gst/gst.h>
 #include <libgstbuzztard/audiosynth.h>
 #include <libgstbuzztard/osc-wave.h>
+#include <libgstbuzztard/propertymeta.h>
 
 G_BEGIN_DECLS
 

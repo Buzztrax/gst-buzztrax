@@ -48,7 +48,12 @@ enum
 
 //-- the class
 
-G_DEFINE_TYPE (GstBtWaveReplay, gstbt_wave_replay, GSTBT_TYPE_AUDIO_SYNTH);
+static void gstbt_wave_replay_property_meta_interface_init (gpointer g_iface,
+    gpointer iface_data);
+
+G_DEFINE_TYPE_WITH_CODE (GstBtWaveReplay, gstbt_wave_replay,
+    GSTBT_TYPE_AUDIO_SYNTH, G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
+        gstbt_wave_replay_property_meta_interface_init));
 
 //-- audiosynth vmethods
 
@@ -83,6 +88,14 @@ gstbt_wave_replay_process (GstBtAudioSynth * base, GstBuffer * data)
     memset (d, 0, ct * ch * sizeof (gint16));
     GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
+}
+
+//-- interfaces
+
+void
+gstbt_wave_replay_property_meta_interface_init (gpointer g_iface,
+    gpointer iface_data)
+{
 }
 
 //-- gobject vmethods
@@ -167,6 +180,7 @@ gstbt_wave_replay_class_init (GstBtWaveReplayClass * klass)
   GObjectClass *gobject_class = (GObjectClass *) klass;
   GstElementClass *element_class = (GstElementClass *) klass;
   GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
+  GParamSpec *pspec;
 
   audio_synth_class->process = gstbt_wave_replay_process;
   audio_synth_class->setup = gstbt_wave_replay_setup;
@@ -192,9 +206,13 @@ gstbt_wave_replay_class_init (GstBtWaveReplayClass * klass)
           "The wave-table access callbacks",
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_WAVE,
-      g_param_spec_uint ("wave", "Wave", "Wave index", 1, 200, 1,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+  pspec = g_param_spec_uint ("wave", "Wave", "Wave index", 1, 200, 1,
+      G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS);
+  g_param_spec_set_qdata (pspec, gstbt_property_meta_quark,
+      GUINT_TO_POINTER (1));
+  g_param_spec_set_qdata (pspec, gstbt_property_meta_quark_flags,
+      GUINT_TO_POINTER (GSTBT_PROPERTY_META_WAVE));
+  g_object_class_install_property (gobject_class, PROP_WAVE, pspec);
 
   g_object_class_install_property (gobject_class, PROP_WAVE_LEVEL,
       g_param_spec_uint ("wave-level", "Wavelevel", "Wave level index",

@@ -58,7 +58,12 @@ enum
 
 //-- the class
 
-G_DEFINE_TYPE (GstBtWaveTabSyn, gstbt_wave_tab_syn, GSTBT_TYPE_AUDIO_SYNTH);
+static void gstbt_wave_tab_syn_property_meta_interface_init (gpointer g_iface,
+    gpointer iface_data);
+
+G_DEFINE_TYPE_WITH_CODE (GstBtWaveTabSyn, gstbt_wave_tab_syn,
+    GSTBT_TYPE_AUDIO_SYNTH, G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
+        gstbt_wave_tab_syn_property_meta_interface_init));
 
 //-- audiosynth vmethods
 
@@ -147,6 +152,14 @@ gstbt_wave_tab_syn_process (GstBtAudioSynth * base, GstBuffer * data)
     memset (d, 0, ct * ch * sizeof (gint16));
     GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
+}
+
+//-- interfaces
+
+void
+gstbt_wave_tab_syn_property_meta_interface_init (gpointer g_iface,
+    gpointer iface_data)
+{
 }
 
 //-- gobject vmethods
@@ -310,6 +323,7 @@ gstbt_wave_tab_syn_class_init (GstBtWaveTabSynClass * klass)
   GObjectClass *gobject_class = (GObjectClass *) klass;
   GstElementClass *element_class = (GstElementClass *) klass;
   GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
+  GParamSpec *pspec;
 
   audio_synth_class->process = gstbt_wave_tab_syn_process;
   audio_synth_class->setup = gstbt_wave_tab_syn_setup;
@@ -351,9 +365,13 @@ gstbt_wave_tab_syn_class_init (GstBtWaveTabSynClass * klass)
           1, 255, 1,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
-  g_object_class_install_property (gobject_class, PROP_WAVE,
-      g_param_spec_uint ("wave", "Wave", "Wave index", 1, 200, 1,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
+  pspec = g_param_spec_uint ("wave", "Wave", "Wave index", 1, 200, 1,
+      G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS);
+  g_param_spec_set_qdata (pspec, gstbt_property_meta_quark,
+      GUINT_TO_POINTER (1));
+  g_param_spec_set_qdata (pspec, gstbt_property_meta_quark_flags,
+      GUINT_TO_POINTER (GSTBT_PROPERTY_META_WAVE));
+  g_object_class_install_property (gobject_class, PROP_WAVE, pspec);
 
   g_object_class_install_property (gobject_class, PROP_OFFSET,
       g_param_spec_uint ("offset", "Offset", "Wave table offset", 0, 0xFFFF, 0,
