@@ -14,9 +14,7 @@
  * Library General Public License for more details.
  *
  * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * SECTION:gstbttempo
@@ -60,40 +58,32 @@ G_DEFINE_INTERFACE (GstBtTempo, gstbt_tempo, 0);
  * Set all tempo properties at once. Pass -1 to leave a value unchanged.
  */
 void
-gstbt_tempo_change_tempo (GstBtTempo *self, glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick)
+gstbt_tempo_change_tempo (GstBtTempo * self, glong beats_per_minute,
+    glong ticks_per_beat, glong subticks_per_tick)
 {
   g_return_if_fail (GSTBT_IS_TEMPO (self));
 
-  GSTBT_TEMPO_GET_INTERFACE (self)->change_tempo (self, beats_per_minute, ticks_per_beat, subticks_per_tick);
+  GSTBT_TEMPO_GET_INTERFACE (self)->change_tempo (self, beats_per_minute,
+      ticks_per_beat, subticks_per_tick);
 }
 
 static void
-gstbt_tempo_default_init (GstBtTempoInterface *iface)
+gstbt_tempo_default_init (GstBtTempoInterface * iface)
 {
   /* create interface signals and properties here. */
   g_object_interface_install_property (iface,
-    g_param_spec_ulong ("beats-per-minute",
-    "beat-per-minute tempo property",
-    "the number of beats per minute the top level pipeline uses",
-    1,
-    G_MAXULONG,
-    120,
-    G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
+      g_param_spec_ulong ("beats-per-minute",
+          "beat-per-minute tempo property",
+          "the number of beats per minute the top level pipeline uses",
+          1, G_MAXULONG, 120, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
   g_object_interface_install_property (iface,
-    g_param_spec_ulong ("ticks-per-beat",
-    "ticks-per-beat tempo property",
-    "the number of ticks (events) per beat the top level pipeline uses",
-    1,
-    G_MAXULONG,
-    4,
-    G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
+      g_param_spec_ulong ("ticks-per-beat",
+          "ticks-per-beat tempo property",
+          "the number of ticks (events) per beat the top level pipeline uses",
+          1, G_MAXULONG, 4, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
   g_object_interface_install_property (iface,
-    g_param_spec_ulong ("subticks-per-tick",
-    "subticks-per-tick tempo property",
-    "the number of subticks (for smoothing) per tick the top level pipeline uses",
-    1,
-    G_MAXULONG,
-    1,
-    G_PARAM_READWRITE|G_PARAM_STATIC_STRINGS));
+      g_param_spec_ulong ("subticks-per-tick",
+          "subticks-per-tick tempo property",
+          "the number of subticks (for smoothing) per tick the top level pipeline uses",
+          1, G_MAXULONG, 1, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
-
