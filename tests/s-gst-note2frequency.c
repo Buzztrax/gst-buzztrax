@@ -12,20 +12,20 @@
  * Library General Public License for more details.
  *
  * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 #include "m-gst-buzztard.h"
 
-extern TCase *gst_buzztard_note2frequency_test_case(void);
-extern TCase *gst_buzztard_note2frequency_example_case(void);
+extern TCase *gst_buzztard_note2frequency_test_case (void);
+extern TCase *gst_buzztard_note2frequency_example_case (void);
 
-Suite *gst_buzztard_note2frequency_suite(void) { 
-  Suite *s=suite_create("GstBtToneConversion"); 
+Suite *
+gst_buzztard_note2frequency_suite (void)
+{
+  Suite *s = suite_create ("GstBtToneConversion");
 
-  suite_add_tcase(s,gst_buzztard_note2frequency_test_case());
-  suite_add_tcase(s,gst_buzztard_note2frequency_example_case());
-  return(s);
+  suite_add_tcase (s, gst_buzztard_note2frequency_test_case ());
+  suite_add_tcase (s, gst_buzztard_note2frequency_example_case ());
+  return (s);
 }
