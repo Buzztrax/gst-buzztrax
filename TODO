@@ -74,6 +74,25 @@ spread_range_ms = 12
 overlap_ms = 2
 voices = 1 + (12 / 2) = 7
 
+= EBeatz =
+- a versatile percussion sound generator
+- dual osc
+  - peak-vol is trigger
+  1) tonal
+     - osc with sin, saw, sqr, tri
+       - start and stop frequency
+       - linear fade?
+     - adsr-envelope
+       - peak-vol relative to main-peak-vol
+     - filter?
+  2) noise
+     - osc with various nose flavours
+     - ad-envelope
+       - peak-vol relative to main-peak-vol
+     - filter
+       - ad-envelope for cut-off?
+- have presets for kick, snare, {open,closed}-hihat, claps, cymbal
+
 = synth components =
 The libgstbuzztard already has a couple of components; we'd like to extend this
 to make it dead easy writing new synths.
