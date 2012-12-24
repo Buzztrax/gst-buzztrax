@@ -24,7 +24,7 @@ GST_DEBUG_CATEGORY_EXTERN (GST_CAT_DEFAULT);
 
 extern GstStructure *bml_meta_all;
 /* needed in gstbmlv.c */
-gpointer voice_class_bmh;
+gpointer bml (voice_class_bmh);
 
 //-- helper
 
@@ -268,7 +268,7 @@ bml (gstbml_class_base_init (GstBMLClass * klass, GType type, gint numsrcpads,
     GST_INFO ("prepare voice-type %s", voice_type_name);
 
     voice_type = g_type_from_name (voice_type_name);
-    voice_class_bmh = bmh;
+    bml (voice_class_bmh) = bmh;
     //g_hash_table_insert(bml_descriptors_by_voice_type,GINT_TO_POINTER(voice_type),(gpointer)bmh);
     g_type_class_ref (voice_type);
   }

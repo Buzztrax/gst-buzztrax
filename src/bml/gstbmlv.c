@@ -23,7 +23,7 @@ GST_DEBUG_CATEGORY_EXTERN (GST_CAT_DEFAULT);
 static GstElementClass *parent_class = NULL;
 
 /* set by utils.c */
-extern gpointer voice_class_bmh;
+extern gpointer bml (voice_class_bmh);
 
 //-- local helper
 
@@ -224,7 +224,7 @@ gst_bmlv_class_init (GstBMLVClass * klass)
   gint num;
 
   GST_INFO ("initializing class");
-  bmh = voice_class_bmh;
+  bmh = bml (voice_class_bmh);
   g_assert (bmh);
 
   GST_INFO ("  bmh=0x%p", bmh);
