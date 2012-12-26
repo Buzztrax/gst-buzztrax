@@ -355,6 +355,7 @@ gstbt_audio_synth_query (GstBaseSrc * basesrc, GstQuery * query)
       break;
     }
     default:
+      res = GST_BASE_SRC_CLASS (parent_class)->query (basesrc, query);
       break;
   }
 
