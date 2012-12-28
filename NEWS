@@ -1,3 +1,9 @@
+0.7.0 victory, not venegance (XX.XXX.2012)
+================================================================================
+Compatibility improvements for buzzmachines. Modularization of synth components
+(audiosynth base class, filters, oscillators and envelope generators). New
+elements (sidsyn, wavereplay, wavtabsynth).
+
 0.6.0 black beats blue (25.Dec.2011)
 ================================================================================
 Lots of code cleanups. Get rid of the temporary help interface. Switch from
