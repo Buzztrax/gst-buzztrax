@@ -1,4 +1,4 @@
-0.7.0 victory, not venegance (XX.XXX.2012)
+0.7.0 victory, not venegance (19.Jan.2013)
 ================================================================================
 Compatibility improvements for buzzmachines. Modularization of synth components
 (audiosynth base class, filters, oscillators and envelope generators). New
