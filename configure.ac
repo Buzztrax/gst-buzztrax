@@ -1,6 +1,6 @@
 dnl Initialise autoconf/automake/libtool
 AC_PREREQ(2.61)
-AC_INIT([gst-buzztard],[0.7.0],[buzztard-devel@lists.sourceforge.net])
+AC_INIT([gst-buzztard],[0.8.0],[buzztard-devel@lists.sourceforge.net])
 AM_INIT_AUTOMAKE([-Wall check-news std-options])
 AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS(config.h)
@@ -28,7 +28,7 @@ dnl 2: when the interface has changed (adding functions) : MINOR++, MICRO=0
 dnl 3: when the interface has changed (removing functions) : MAJOR++, MINOR=0, MICRO=0
 dnl
 GSTBT_MAJOR_VERSION=0
-GSTBT_MINOR_VERSION=7
+GSTBT_MINOR_VERSION=8
 GSTBT_MICRO_VERSION=0
 GSTBT_VERSION=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION.$GSTBT_MICRO_VERSION
 GSTBT_VERSION_INFO=`expr $GSTBT_MAJOR_VERSION + $GSTBT_MINOR_VERSION`:$GSTBT_MICRO_VERSION:$GSTBT_MINOR_VERSION
@@ -205,7 +205,7 @@ AC_SUBST(HELP_DOC_TYPES)
 
 
 dnl - Check for buzzmachineloader (bml)
-PKG_CHECK_MODULES(BML, libbml >= 0.7.0, have_bml=yes, have_bml=no)
+PKG_CHECK_MODULES(BML, libbml >= 0.8.0, have_bml=yes, have_bml=no)
 AC_SUBST(BML_CFLAGS)
 AC_SUBST(BML_LIBS)
 AM_CONDITIONAL(BML_SUPPORT, test "x$have_bml" = "xyes")
