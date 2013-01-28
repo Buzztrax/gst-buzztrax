@@ -192,11 +192,9 @@ gstbt_wave_replay_class_init (GstBtWaveReplayClass * klass)
       "Wave Replay",
       "Source/Audio",
       "Wavetable player", "Stefan Sauer <ensonic@users.sf.net>");
-#if GST_CHECK_VERSION(0,10,31)
   gst_element_class_set_documentation_uri (element_class,
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
       G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtWaveReplay.html");
-#endif
 
   // register own properties
   g_object_class_install_property (gobject_class, PROP_WAVE_CALLBACKS,

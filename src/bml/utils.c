@@ -356,11 +356,9 @@ bml (gstbml_class_set_details (GstElementClass * klass, GstBMLClass * bml_class,
   g_free (details.description);
   g_free (details.author);
   g_free (details.klass);
-#if GST_CHECK_VERSION(0,10,31)
   if (bml_class->help_uri) {
     gst_element_class_set_documentation_uri (klass, bml_class->help_uri);
   }
-#endif
   GST_DEBUG ("  element_class details have been set");
 }
 

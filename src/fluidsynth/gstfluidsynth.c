@@ -219,11 +219,9 @@ gst_fluid_synth_base_init (gpointer g_class)
       "FluidSynth",
       "Source/Audio",
       "FluidSynth wavetable synthesizer", "Josh Green <josh@users.sf.net>");
-#if GST_CHECK_VERSION(0,10,31)
   gst_element_class_set_documentation_uri (element_class,
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
       G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtFluidSynth.html");
-#endif
 }
 
 /* used for passing multiple values to FluidSynth foreach function */

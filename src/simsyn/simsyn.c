@@ -255,11 +255,9 @@ gstbt_sim_syn_class_init (GstBtSimSynClass * klass)
       "Simple Synth",
       "Source/Audio",
       "Simple audio synthesizer", "Stefan Kost <ensonic@users.sf.net>");
-#if GST_CHECK_VERSION(0,10,31)
   gst_element_class_set_documentation_uri (element_class,
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
       G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtSimSyn.html");
-#endif
 
   // register own properties
   g_object_class_install_property (gobject_class, PROP_TUNING,
