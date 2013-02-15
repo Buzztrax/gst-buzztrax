@@ -325,7 +325,6 @@ void
 bml (gstbml_class_set_details (GstElementClass * klass, GstBMLClass * bml_class,
         gpointer bmh, const gchar * category))
 {
-  GstElementDetails details;
   gchar *str;
   GType type = G_TYPE_FROM_CLASS (klass);
   const GValue *value =
@@ -333,31 +332,30 @@ bml (gstbml_class_set_details (GstElementClass * klass, GstBMLClass * bml_class,
   GstStructure *bml_meta = g_value_get_boxed (value);
   const gchar *extra_categories =
       gst_structure_get_string (bml_meta, "categories");
+  gchar *longname, *categories, *desc, *author;
 
   /* construct the element details struct */
   // TODO(ensonic): do we want different charsets for BML_WRAPPED/BML_NATIVE?
   bml (get_machine_info (bmh, BM_PROP_SHORT_NAME, (void *) &str));
-  details.longname =
-      g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
+  longname = g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
   bml (get_machine_info (bmh, BM_PROP_NAME, (void *) &str));
-  details.description =
-      g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
+  desc = g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
   bml (get_machine_info (bmh, BM_PROP_AUTHOR, (void *) &str));
-  details.author =
-      g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
+  author = g_convert (str, -1, "UTF-8", "WINDOWS-1252", NULL, NULL, NULL);
   if (extra_categories) {
     GST_DEBUG (" -> %s", extra_categories);
-    details.klass = g_strconcat (category, extra_categories, NULL);
+    categories = g_strconcat (category, extra_categories, NULL);
   } else {
-    details.klass = g_strdup ((gchar *) category);
+    categories = g_strdup ((gchar *) category);
   }
-  gst_element_class_set_details (klass, &details);
-  g_free (details.longname);
-  g_free (details.description);
-  g_free (details.author);
-  g_free (details.klass);
+  gst_element_class_set_metadata (klass, longname, categories, desc, author);
+  g_free (longname);
+  g_free (desc);
+  g_free (author);
+  g_free (categories);
   if (bml_class->help_uri) {
-    gst_element_class_set_documentation_uri (klass, bml_class->help_uri);
+    gst_element_class_add_metadata (klass, GST_ELEMENT_METADATA_DOC_URI,
+        bml_class->help_uri);
   }
   GST_DEBUG ("  element_class details have been set");
 }
@@ -1138,7 +1136,7 @@ bml (gstbml_sync_values (GstBML * bml, GstBMLClass * bml_class,
   for (i = 0; i < bml_class->numglobalparams + bml_class->numtrackparams; i++) {
     g_atomic_int_compare_and_exchange (&bml->triggers_changed[i], 1, 2);
   }
-  /*res= */ gst_object_sync_values (G_OBJECT (bml->self), ts);
+  /*res= */ gst_object_sync_values (GST_OBJECT (bml->self), ts);
   for (i = 0; i < bml_class->numglobalparams + bml_class->numtrackparams; i++) {
     g_atomic_int_compare_and_exchange (&bml->triggers_changed[i], 1, 0);
   }
@@ -1149,7 +1147,7 @@ bml (gstbml_sync_values (GstBML * bml, GstBMLClass * bml_class,
     for (i = 0; i < bmlv_class->numtrackparams; i++) {
       g_atomic_int_compare_and_exchange (&bmlv->triggers_changed[i], 1, 2);
     }
-    /*res= */ gst_object_sync_values (G_OBJECT (bmlv), ts);
+    /*res= */ gst_object_sync_values (GST_OBJECT (bmlv), ts);
     //if(G_UNLIKELY(!res)) { GST_WARNING("voice sync failed"); }
     for (i = 0; i < bmlv_class->numtrackparams; i++) {
       g_atomic_int_compare_and_exchange (&bmlv->triggers_changed[i], 1, 0);
@@ -1209,8 +1207,8 @@ bml (gstbml_reset_triggers (GstBML * bml, GstBMLClass * bml_class))
     }
   }
   for (i = 0; i < bml_class->numtrackparams; i++) {
-    if (g_atomic_int_compare_and_exchange (&bml->
-            triggers_changed[bml_class->numglobalparams + i], 2, 0)) {
+    if (g_atomic_int_compare_and_exchange (&bml->triggers_changed[bml_class->
+                numglobalparams + i], 2, 0)) {
       pspec = bml_class->track_property[i];
       addr = bml (get_track_parameter_location (bm, 0, i));
       reset_triggers (pspec, addr);

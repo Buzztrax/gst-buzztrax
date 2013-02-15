@@ -36,7 +36,6 @@
 #include <gst/gstchildproxy.h>
 #include <gst/base/gstbasesrc.h>
 #include <gst/base/gstbasetransform.h>
-#include <gst/controller/gstcontroller.h>
 #include <gst/audio/audio.h>
 //-- gstbuzztard
 #include <libgstbuzztard/childbin.h>

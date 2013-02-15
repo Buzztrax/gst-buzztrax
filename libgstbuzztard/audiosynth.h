@@ -19,7 +19,6 @@
 
 #include <gst/gst.h>
 #include <gst/base/gstbasesrc.h>
-#include <gst/controller/gstcontroller.h>
 
 G_BEGIN_DECLS
 #define GSTBT_TYPE_AUDIO_SYNTH			        (gstbt_audio_synth_get_type())

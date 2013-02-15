@@ -41,6 +41,8 @@
 #include "config.h"
 #endif
 
+#include <string.h>
+
 #include "libgstbuzztard/propertymeta.h"
 #include "simsyn.h"
 
@@ -63,24 +65,22 @@ enum
 
 //-- the class
 
-static void gstbt_sim_syn_property_meta_interface_init (gpointer g_iface,
-    gpointer iface_data);
-
 G_DEFINE_TYPE_WITH_CODE (GstBtSimSyn, gstbt_sim_syn,
     GSTBT_TYPE_AUDIO_SYNTH, G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
-        gstbt_sim_syn_property_meta_interface_init));
+        NULL));
 
 //-- audiosynth vmethods
 
 static gboolean
 gstbt_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 {
-  GstStructure *structure = gst_caps_get_structure (caps, 0);
+  GstStructure *structure;
+  gint i, n = gst_caps_get_size (caps);
 
-  /* set channels to 1 */
-  if (!gst_structure_fixate_field_nearest_int (structure, "channels", 1))
-    return FALSE;
-
+  for (i = 0; i < n; i++) {
+    structure = gst_caps_get_structure (caps, i);
+    gst_structure_fixate_field_nearest_int (structure, "channels", 1);
+  }
   return TRUE;
 }
 
@@ -88,8 +88,15 @@ static void
 gstbt_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 {
   GstBtSimSyn *src = ((GstBtSimSyn *) base);
-  gint16 *d = (gint16 *) GST_BUFFER_DATA (data);
+  GstMapInfo info;
+  gint16 *d;
   guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
+
+  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map buffer for write");
+    return;
+  }
+  d = (gint16 *) info.data;
 
   if ((src->note != GSTBT_NOTE_OFF)
       && gstbt_envelope_is_running ((GstBtEnvelope *) src->volenv)) {
@@ -100,15 +107,11 @@ gstbt_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
     memset (d, 0, ct * sizeof (gint16));
     GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
+
+  gst_buffer_unmap (data, &info);
 }
 
 //-- interfaces
-
-void
-gstbt_sim_syn_property_meta_interface_init (gpointer g_iface,
-    gpointer iface_data)
-{
-}
 
 //-- gobject vmethods
 
@@ -251,11 +254,11 @@ gstbt_sim_syn_class_init (GstBtSimSynClass * klass)
   gobject_class->dispose = gstbt_sim_syn_dispose;
 
   // describe us
-  gst_element_class_set_details_simple (element_class,
+  gst_element_class_set_static_metadata (element_class,
       "Simple Synth",
       "Source/Audio",
       "Simple audio synthesizer", "Stefan Kost <ensonic@users.sf.net>");
-  gst_element_class_set_documentation_uri (element_class,
+  gst_element_class_add_metadata (element_class, GST_ELEMENT_METADATA_DOC_URI,
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
       G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtSimSyn.html");
 

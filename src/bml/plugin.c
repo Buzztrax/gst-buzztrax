@@ -556,9 +556,6 @@ plugin_init (GstPlugin * plugin)
 #endif
   bmln_set_master_info (120, 4, 44100);
 
-  /* initialize gst controller library */
-  gst_controller_init (NULL, NULL);
-
   gst_bml_property_meta_quark_type =
       g_quark_from_string ("GstBMLPropertyMeta::type");
 
@@ -569,7 +566,7 @@ plugin_init (GstPlugin * plugin)
   }
   GST_INFO ("%d entries in cache", n);
   if (!n) {
-    bml_meta_all = gst_structure_empty_new ("bml");
+    bml_meta_all = gst_structure_new_empty ("bml");
     res = bml_scan ();
     if (res) {
       n = gst_structure_n_fields (bml_meta_all);
@@ -618,6 +615,6 @@ plugin_init (GstPlugin * plugin)
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
-    "bml",
+    bml,
     "buzz machine loader - all buzz machines",
     plugin_init, VERSION, "LGPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN)

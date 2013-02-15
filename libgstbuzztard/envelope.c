@@ -30,7 +30,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gst/controller/gstcontroller.h>
 
 #include "envelope.h"
 
@@ -65,7 +64,8 @@ G_DEFINE_ABSTRACT_TYPE (GstBtEnvelope, gstbt_envelope, G_TYPE_OBJECT);
 gdouble
 gstbt_envelope_get (GstBtEnvelope * self, guint offset)
 {
-  gst_controller_sync_values (self->ctrl, self->offset);
+  gst_control_source_get_value ((GstControlSource *) self->cs, self->offset,
+      &self->value);
   self->offset += offset;
   return self->value;
 }
@@ -117,7 +117,7 @@ gstbt_envelope_get_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_VALUE:
-      // TODO(ensonic): gst_object_sync_values (G_OBJECT (env), self->running_time);
+      // TODO(ensonic): gst_object_sync_values (GST_OBJECT (env), self->running_time);
       g_value_set_double (value, self->value);
       break;
     default:
@@ -135,8 +135,8 @@ gstbt_envelope_dispose (GObject * object)
     return;
   self->dispose_has_run = TRUE;
 
-  if (self->ctrl)
-    g_object_unref (self->ctrl);
+  if (self->cs)
+    g_object_unref (self->cs);
 
   G_OBJECT_CLASS (gstbt_envelope_parent_class)->dispose (object);
 }
@@ -145,9 +145,9 @@ static void
 gstbt_envelope_init (GstBtEnvelope * self)
 {
   self->value = 0.0;
-  self->ctrl = gst_controller_new (G_OBJECT (self), "value", NULL);
-  gst_controller_set_interpolation_mode (self->ctrl, "value",
-      GST_INTERPOLATE_LINEAR);
+  self->cs =
+      (GstTimedValueControlSource *) gst_interpolation_control_source_new ();
+  g_object_set (self->cs, "mode", GST_INTERPOLATION_MODE_LINEAR, NULL);
 
 }
 

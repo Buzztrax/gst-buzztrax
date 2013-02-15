@@ -25,9 +25,6 @@ static GstElementClass *parent_class = NULL;
 /* set by utils.c */
 extern gpointer bml (voice_class_bmh);
 
-//-- local helper
-
-
 //-- property meta interface implementations
 
 static gchar *

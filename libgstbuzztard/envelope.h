@@ -21,7 +21,7 @@
 #define __GSTBT_ENVELOPE_H__
 
 #include <gst/gst.h>
-#include <gst/controller/gstcontroller.h>
+#include <gst/controller/gstinterpolationcontrolsource.h>
 
 G_BEGIN_DECLS
 
@@ -51,7 +51,7 @@ struct _GstBtEnvelope {
   gdouble value;
 
   /* < private > */
-  GstController *ctrl;
+  GstTimedValueControlSource *cs;
   guint64 offset, length;
 };
 

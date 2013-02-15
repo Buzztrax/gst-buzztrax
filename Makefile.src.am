@@ -33,7 +33,7 @@ libgstaudiodelay_la_CFLAGS = \
 	$(BASE_DEPS_CFLAGS)
 libgstaudiodelay_la_LIBADD = \
 	libgstbuzztard.la \
-	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
+	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)  -lgstaudio-1.0 
 libgstaudiodelay_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstaudiodelay_la_LIBTOOLFLAGS = --tag=disable-static
 
@@ -88,7 +88,8 @@ libgstbml_la_CFLAGS = \
 libgstbml_la_LIBADD = \
 	libgstbuzztard.la \
 	libgstbmln.la $(BMLW_LA) \
-	$(BASE_DEPS_LIBS) $(ORC_LIBS) $(BML_LIBS) $(GST_PLUGIN_LIBS) $(LIBM) 
+	$(BASE_DEPS_LIBS) $(ORC_LIBS) $(BML_LIBS) \
+	$(GST_PLUGIN_LIBS) -lgstaudio-1.0 $(LIBM) 
 libgstbml_la_LDFLAGS =  $(GST_PLUGIN_LDFLAGS)
 libgstbml_la_LIBTOOLFLAGS = --tag=disable-static
 

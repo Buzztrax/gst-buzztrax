@@ -49,7 +49,7 @@ extern void gstbml_calculate_buffer_frames(GstBML *bml);
 
 extern void gstbml_dispose(GstBML *bml);
 
-extern void gstbml_fix_data(GstElement *elem,GstBuffer *buf,gboolean has_data);
+extern gboolean gstbml_fix_data(GstElement *elem,GstMapInfo *info,gboolean has_data);
 
 G_END_DECLS
 

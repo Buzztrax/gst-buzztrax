@@ -30,6 +30,8 @@
 #include "config.h"
 #endif
 
+#include <string.h>
+
 #include "wavetabsyn.h"
 
 #define GST_CAT_DEFAULT wave_tab_syn_debug
@@ -56,12 +58,9 @@ enum
 
 //-- the class
 
-static void gstbt_wave_tab_syn_property_meta_interface_init (gpointer g_iface,
-    gpointer iface_data);
-
 G_DEFINE_TYPE_WITH_CODE (GstBtWaveTabSyn, gstbt_wave_tab_syn,
     GSTBT_TYPE_AUDIO_SYNTH, G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
-        gstbt_wave_tab_syn_property_meta_interface_init));
+        NULL));
 
 //-- audiosynth vmethods
 
@@ -69,15 +68,15 @@ static gboolean
 gstbt_wave_tab_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 {
   GstBtWaveTabSyn *src = ((GstBtWaveTabSyn *) base);
-  GstStructure *structure = gst_caps_get_structure (caps, 0);
+  GstStructure *structure;
+  gint i, n = gst_caps_get_size (caps), c = src->osc->channels;
 
   gstbt_osc_wave_setup (src->osc);
 
-  /* set channels to 1 */
-  if (!gst_structure_fixate_field_nearest_int (structure, "channels",
-          src->osc->channels))
-    return FALSE;
-
+  for (i = 0; i < n; i++) {
+    structure = gst_caps_get_structure (caps, i);
+    gst_structure_fixate_field_nearest_int (structure, "channels", c);
+  }
   return TRUE;
 }
 
@@ -85,13 +84,20 @@ static void
 gstbt_wave_tab_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 {
   GstBtWaveTabSyn *src = ((GstBtWaveTabSyn *) base);
-  gint16 *d = (gint16 *) GST_BUFFER_DATA (data);
+  GstMapInfo info;
+  gint16 *d;
   guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
   gint ch = ((GstBtAudioSynth *) src)->channels;
   guint sz = src->cycle_size;
   guint pos = src->cycle_pos;
   guint p = 0;
   guint64 off = src->offset * (src->duration - src->cycle_size) / 0xFFFF;
+
+  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map buffer for write");
+    return;
+  }
+  d = (gint16 *) info.data;
 
   if (src->osc->process) {
     // do we have a unfinished cycle?
@@ -150,15 +156,11 @@ gstbt_wave_tab_syn_process (GstBtAudioSynth * base, GstBuffer * data)
     memset (d, 0, ct * ch * sizeof (gint16));
     GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
   }
+
+  gst_buffer_unmap (data, &info);
 }
 
 //-- interfaces
-
-void
-gstbt_wave_tab_syn_property_meta_interface_init (gpointer g_iface,
-    gpointer iface_data)
-{
-}
 
 //-- gobject vmethods
 
@@ -331,11 +333,11 @@ gstbt_wave_tab_syn_class_init (GstBtWaveTabSynClass * klass)
   gobject_class->dispose = gstbt_wave_tab_syn_dispose;
 
   // describe us
-  gst_element_class_set_details_simple (element_class,
+  gst_element_class_set_static_metadata (element_class,
       "WaveTabSyn",
       "Source/Audio",
       "Wavetable synthesizer", "Stefan Sauer <ensonic@users.sf.net>");
-  gst_element_class_set_documentation_uri (element_class,
+  gst_element_class_add_metadata (element_class, GST_ELEMENT_METADATA_DOC_URI,
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
       G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtWaveTabSyn.html");
 
@@ -413,6 +415,6 @@ plugin_init (GstPlugin * plugin)
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
-    "wavetabsyn",
+    wavetabsyn,
     "Wavetable synthesizer",
     plugin_init, VERSION, "LGPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN);

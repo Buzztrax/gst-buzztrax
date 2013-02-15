@@ -21,7 +21,6 @@
 #define __GSTBT_SID_SYN_H__
 
 #include <gst/gst.h>
-#include <gst/controller/gstcontroller.h>
 #include <libgstbuzztard/audiosynth.h>
 #include <libgstbuzztard/toneconversion.h>
 

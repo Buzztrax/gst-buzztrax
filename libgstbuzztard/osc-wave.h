@@ -53,6 +53,7 @@ struct _GstBtOscWave {
   /* oscillator state */
   GstBtToneConversion *n2f;
   GstBuffer *data;
+  GstMapInfo map_info;
   gint channels;
   gdouble rate;
   guint64 duration;

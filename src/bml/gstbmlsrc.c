@@ -26,20 +26,20 @@ static GstStaticPadTemplate bml_pad_caps_mono_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("audio/x-raw-float, "
-        "width = (int) 32, "
-        "rate = (int) [ 1, MAX ], "
-        "channels = (int) 1, " "endianness = (int) BYTE_ORDER")
+    GST_STATIC_CAPS ("audio/x-raw, "
+        "format = (string) " GST_AUDIO_NE (F32) ", "
+        "layout = (string) interleaved, "
+        "rate = (int) [ 1, MAX ], " "channels = (int) 1")
     );
 
 static GstStaticPadTemplate bml_pad_caps_stereo_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("audio/x-raw-float, "
-        "width = (int) 32, "
-        "rate = (int) [ 1, MAX ], "
-        "channels = (int) 2, " "endianness = (int) BYTE_ORDER")
+    GST_STATIC_CAPS ("audio/x-raw, "
+        "format = (string) " GST_AUDIO_NE (F32) ", "
+        "layout = (string) interleaved, "
+        "rate = (int) [ 1, MAX ], " "channels = (int) 2")
     );
 
 static GstBaseSrcClass *parent_class = NULL;
@@ -49,7 +49,7 @@ static GstBaseSrcClass *parent_class = NULL;
 
 //-- child proxy interface implementations
 
-static GstObject *
+static GObject *
 gst_bml_child_proxy_get_child_by_index (GstChildProxy * child_proxy,
     guint index)
 {
@@ -228,17 +228,23 @@ gst_bml_preset_interface_init (gpointer g_iface, gpointer iface_data)
 
 //-- gstbmlsrc class implementation
 
-static void
-gst_bml_src_src_fixate (GstPad * pad, GstCaps * caps)
+static GstCaps *
+gst_bml_src_fixate (GstBaseSrc * base, GstCaps * caps)
 {
-  GstBMLSrc *bml_src = GST_BML_SRC (GST_PAD_PARENT (pad));
+  GstBMLSrc *bml_src = GST_BML_SRC (base);
   GstBML *bml = GST_BML (bml_src);
+  GstCaps *res = gst_caps_copy (caps);
   GstStructure *structure;
+  gint i, n = gst_caps_get_size (res);
 
   GST_INFO_OBJECT (bml_src, "setting sample rate to %d", bml->samplerate);
 
-  structure = gst_caps_get_structure (caps, 0);
-  gst_structure_fixate_field_nearest_int (structure, "rate", bml->samplerate);
+  for (i = 0; i < n; i++) {
+    structure = gst_caps_get_structure (res, i);
+    gst_structure_fixate_field_nearest_int (structure, "rate", bml->samplerate);
+  }
+
+  return GST_BASE_SRC_CLASS (parent_class)->fixate (base, res);
 }
 
 static gboolean
@@ -352,7 +358,7 @@ gst_bml_src_do_seek (GstBaseSrc * base, GstSegment * segment)
   GstBML *bml = GST_BML (bml_src);
   GstClockTime time;
 
-  time = segment->last_stop;
+  time = segment->position;
   bml->reverse = (segment->rate < 0.0);
   bml->running_time = time;
   bml->ticktime_err_accum = 0.0;
@@ -393,7 +399,7 @@ gst_bml_src_do_seek (GstBaseSrc * base, GstSegment * segment)
   GST_DEBUG_OBJECT (bml_src,
       "seek from %" GST_TIME_FORMAT " to %" GST_TIME_FORMAT " cur %"
       GST_TIME_FORMAT " rate %lf", GST_TIME_ARGS (segment->start),
-      GST_TIME_ARGS (segment->stop), GST_TIME_ARGS (segment->last_stop),
+      GST_TIME_ARGS (segment->stop), GST_TIME_ARGS (segment->position),
       segment->rate);
 
   return TRUE;
@@ -411,7 +417,7 @@ gst_bml_src_create_mono (GstBaseSrc * base, GstClockTime offset, guint length,
     GstBuffer ** buffer)
 {
   GstFlowReturn res;
-  GstPad *srcpad = GST_BASE_SRC_PAD (base);
+  GstMapInfo info;
   GstBMLSrc *bml_src = GST_BML_SRC (base);
   GstBMLSrcClass *klass = GST_BML_SRC_GET_CLASS (bml_src);
   GstBML *bml = GST_BML (bml_src);
@@ -428,7 +434,7 @@ gst_bml_src_create_mono (GstBaseSrc * base, GstClockTime offset, guint length,
 
   if (G_UNLIKELY (bml->eos_reached)) {
     GST_DEBUG_OBJECT (bml_src, "EOS reached");
-    return GST_FLOW_UNEXPECTED;
+    return GST_FLOW_EOS;
   }
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   samples_done =
@@ -464,7 +470,7 @@ gst_bml_src_create_mono (GstBaseSrc * base, GstClockTime offset, guint length,
     if (G_UNLIKELY (!samples_per_buffer)) {
       GST_WARNING_OBJECT (bml_src, "0 samples left -> EOS reached");
       bml->eos_reached = TRUE;
-      return GST_FLOW_UNEXPECTED;
+      return GST_FLOW_EOS;
     }
     n_samples = bml->n_samples_stop;
     bml->eos_reached = TRUE;
@@ -480,10 +486,9 @@ gst_bml_src_create_mono (GstBaseSrc * base, GstClockTime offset, guint length,
       bml->ticktime_err_accum +
       (bml->reverse ? (-bml->ticktime_err) : bml->ticktime_err);
 
-  /* allocate a new buffer suitable for this pad */
-  res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
-      samples_per_buffer * sizeof (BMLData), GST_PAD_CAPS (srcpad), &buf);
-  if (res != GST_FLOW_OK) {
+  res = GST_BASE_SRC_GET_CLASS (base)->alloc (base, bml->n_samples,
+      samples_per_buffer * sizeof (BMLData), &buf);
+  if (G_UNLIKELY (res != GST_FLOW_OK)) {
     return res;
   }
 
@@ -515,7 +520,11 @@ gst_bml_src_create_mono (GstBaseSrc * base, GstClockTime offset, guint length,
   bml->n_samples = n_samples;
 
   GST_DEBUG_OBJECT (bml_src, "  calling work(%d)", samples_per_buffer);
-  data = (BMLData *) GST_BUFFER_DATA (buf);
+  if (!gst_buffer_map (buf, &info, GST_MAP_READ | GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map buffer for read & write");
+    return GST_FLOW_ERROR;
+  }
+  data = (BMLData *) info.data;
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer;i++) data[i]=0.0f;
   memset (data, 0, samples_per_buffer * sizeof (BMLData));
@@ -531,9 +540,14 @@ gst_bml_src_create_mono (GstBaseSrc * base, GstClockTime offset, guint length,
     seg_data = &seg_data[seg_size];
     todo -= seg_size;
   }
-  gstbml_fix_data ((GstElement *) bml_src, buf, has_data);
+  if (gstbml_fix_data ((GstElement *) bml_src, &info, has_data)) {
+    GST_BUFFER_FLAG_SET (buffer, GST_BUFFER_FLAG_GAP);
+  } else {
+    GST_BUFFER_FLAG_UNSET (buffer, GST_BUFFER_FLAG_GAP);
+  }
 
   // return results
+  gst_buffer_unmap (buf, &info);
   *buffer = buf;
 
   return (GST_FLOW_OK);
@@ -544,6 +558,7 @@ gst_bml_src_create_stereo (GstBaseSrc * base, GstClockTime offset, guint length,
     GstBuffer ** buffer)
 {
   GstFlowReturn res;
+  GstMapInfo info;
   GstBMLSrc *bml_src = GST_BML_SRC (base);
   GstBMLSrcClass *klass = GST_BML_SRC_GET_CLASS (bml_src);
   GstBML *bml = GST_BML (bml_src);
@@ -552,7 +567,6 @@ gst_bml_src_create_stereo (GstBaseSrc * base, GstClockTime offset, guint length,
   GstClockTime next_running_time;
   gint64 n_samples;
   gdouble samples_done;
-  GstPad *srcpad = GST_BASE_SRC_PAD (base);
   BMLData *data, *seg_data;
   gpointer bm = bml->bm;
   guint todo, seg_size, samples_per_buffer;
@@ -561,7 +575,7 @@ gst_bml_src_create_stereo (GstBaseSrc * base, GstClockTime offset, guint length,
 
   if (G_UNLIKELY (bml->eos_reached)) {
     GST_WARNING_OBJECT (bml_src, "EOS reached");
-    return GST_FLOW_UNEXPECTED;
+    return GST_FLOW_EOS;
   }
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   samples_done =
@@ -597,7 +611,7 @@ gst_bml_src_create_stereo (GstBaseSrc * base, GstClockTime offset, guint length,
     if (G_UNLIKELY (!samples_per_buffer)) {
       GST_WARNING_OBJECT (bml_src, "0 samples left -> EOS reached");
       bml->eos_reached = TRUE;
-      return GST_FLOW_UNEXPECTED;
+      return GST_FLOW_EOS;
     }
     n_samples = bml->n_samples_stop;
     bml->eos_reached = TRUE;
@@ -614,9 +628,9 @@ gst_bml_src_create_stereo (GstBaseSrc * base, GstClockTime offset, guint length,
       (bml->reverse ? (-bml->ticktime_err) : bml->ticktime_err);
 
   /* allocate a new buffer suitable for this pad */
-  res = gst_pad_alloc_buffer_and_set_caps (srcpad, bml->n_samples,
-      samples_per_buffer * 2 * sizeof (BMLData), GST_PAD_CAPS (srcpad), &buf);
-  if (res != GST_FLOW_OK) {
+  res = GST_BASE_SRC_GET_CLASS (base)->alloc (base, bml->n_samples,
+      samples_per_buffer * 2 * sizeof (BMLData), &buf);
+  if (G_UNLIKELY (res != GST_FLOW_OK)) {
     return res;
   }
 
@@ -648,7 +662,11 @@ gst_bml_src_create_stereo (GstBaseSrc * base, GstClockTime offset, guint length,
   bml->n_samples = n_samples;
 
   GST_DEBUG_OBJECT (bml_src, "  calling work_m2s(%d)", samples_per_buffer);
-  data = (BMLData *) GST_BUFFER_DATA (buf);
+  if (!gst_buffer_map (buf, &info, GST_MAP_READ | GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map buffer for read & write");
+    return GST_FLOW_ERROR;
+  }
+  data = (BMLData *) info.data;
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer*2;i++) data[i]=0.0;
   memset (data, 0, samples_per_buffer * 2 * sizeof (BMLData));
@@ -665,9 +683,14 @@ gst_bml_src_create_stereo (GstBaseSrc * base, GstClockTime offset, guint length,
     seg_data = &seg_data[seg_size * 2];
     todo -= seg_size;
   }
-  gstbml_fix_data ((GstElement *) bml_src, buf, has_data);
+  if (gstbml_fix_data ((GstElement *) bml_src, &info, has_data)) {
+    GST_BUFFER_FLAG_SET (buffer, GST_BUFFER_FLAG_GAP);
+  } else {
+    GST_BUFFER_FLAG_UNSET (buffer, GST_BUFFER_FLAG_GAP);
+  }
 
   // return results
+  gst_buffer_unmap (buf, &info);
   *buffer = buf;
 
   return (GST_FLOW_OK);
@@ -734,7 +757,6 @@ gst_bml_src_init (GstBMLSrc * bml_src)
   GstBMLSrcClass *klass = GST_BML_SRC_GET_CLASS (bml_src);
   GstBMLClass *bml_class = GST_BML_CLASS (klass);
   GstBML *bml = GST_BML (bml_src);
-  GstPad *srcpad;
 
   GST_INFO ("initializing instance: elem=%p, bml=%p, bml_class=%p", bml_src,
       bml, bml_class);
@@ -747,9 +769,6 @@ gst_bml_src_init (GstBMLSrc * bml_src)
   gst_base_src_set_live (GST_BASE_SRC (bml_src), FALSE);
 
   //bml(gstbml_pads(GST_ELEMENT(bml_src),bml,gst_bml_src_link));
-  srcpad = GST_BASE_SRC_PAD (bml_src);
-  gst_pad_set_fixatecaps_function (srcpad, gst_bml_src_src_fixate);
-
   GST_DEBUG ("  done");
 }
 
@@ -769,6 +788,7 @@ gst_bml_src_class_init (GstBMLSrcClass * klass)
   gobject_class->dispose = GST_DEBUG_FUNCPTR (gst_bml_src_dispose);
   gobject_class->finalize = GST_DEBUG_FUNCPTR (gst_bml_src_finalize);
   gstbasesrc_class->set_caps = GST_DEBUG_FUNCPTR (gst_bml_src_set_caps);
+  gstbasesrc_class->fixate = GST_DEBUG_FUNCPTR (gst_bml_src_fixate);
   gstbasesrc_class->is_seekable = GST_DEBUG_FUNCPTR (gst_bml_src_is_seekable);
   gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gst_bml_src_do_seek);
   gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gst_bml_src_query);

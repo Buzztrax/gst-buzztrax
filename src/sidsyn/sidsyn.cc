@@ -43,6 +43,7 @@
 #endif
 
 #include <math.h>
+#include <stdio.h>
 
 #include <libgstbuzztard/childbin.h>
 #include "libgstbuzztard/propertymeta.h"
@@ -76,24 +77,26 @@ enum
   PROP_VOICE_3_OFF
 };
 
-static GstBtAudioSynthClass *parent_class = NULL;
 
-static void gst_sid_syn_base_init (gpointer klass);
-static void gst_sid_syn_class_init (GstBtSidSynClass * klass);
-static void gst_sid_syn_init (GstBtSidSyn * object, GstBtSidSynClass * klass);
+//-- the class
 
-static void gst_sid_syn_set_property (GObject * object,
-    guint prop_id, const GValue * value, GParamSpec * pspec);
-static void gst_sid_syn_get_property (GObject * object,
-    guint prop_id, GValue * value, GParamSpec * pspec);
-static void gst_sid_syn_dispose (GObject * object);
-static void gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data);
-static gboolean gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps);
+static void gstbt_sid_syn_child_proxy_interface_init (gpointer g_iface,
+    gpointer iface_data);
+static void gstbt_sid_syn_property_meta_interface_init (gpointer g_iface,
+    gpointer iface_data);
 
+G_DEFINE_TYPE_WITH_CODE (GstBtSidSyn, gstbt_sid_syn, GSTBT_TYPE_AUDIO_SYNTH, 
+    G_IMPLEMENT_INTERFACE (GST_TYPE_CHILD_PROXY, 
+        gstbt_sid_syn_child_proxy_interface_init)
+    G_IMPLEMENT_INTERFACE (GSTBT_TYPE_CHILD_BIN, NULL)
+    G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META, 
+        gstbt_sid_syn_property_meta_interface_init));
 
-#define GSTBT_TYPE_SID_SYN_CHIP (gst_sid_syn_chip_get_type())
+//-- the enums
+
+#define GSTBT_TYPE_SID_SYN_CHIP (gstbt_sid_syn_chip_get_type())
 static GType
-gst_sid_syn_chip_get_type (void)
+gstbt_sid_syn_chip_get_type (void)
 {
   static GType type = 0;
   static const GEnumValue enums[] = {
@@ -108,261 +111,7 @@ gst_sid_syn_chip_get_type (void)
   return type;
 }
 
-
-//-- child proxy interface implementations
-
-static GstObject *gst_sid_syn_child_proxy_get_child_by_index(GstChildProxy *child_proxy, guint index) {
-  GstBtSidSyn *src = GSTBT_SID_SYN(child_proxy);
-
-  g_return_val_if_fail (index < NUM_VOICES,NULL);
-
-  return (GstObject *)gst_object_ref(src->voices[index]);
-}
-
-static guint gst_sid_syn_child_proxy_get_children_count(GstChildProxy *child_proxy) {
-  return NUM_VOICES;
-}
-
-static void gst_sid_syn_child_proxy_interface_init(gpointer g_iface, gpointer iface_data) {
-  GstChildProxyInterface *iface = (GstChildProxyInterface *)g_iface;
-
-  GST_INFO("initializing iface");
-
-  iface->get_child_by_index = gst_sid_syn_child_proxy_get_child_by_index;
-  iface->get_children_count = gst_sid_syn_child_proxy_get_children_count;
-}
-
-//-- property meta interface implementations
-
-static gchar *
-gst_sid_syn_property_meta_describe_property (GstBtPropertyMeta * property_meta,
-    guint prop_id, const GValue * value)
-{
-  //GstBtSidSyn *src = GSTBT_SID_SYN (property_meta);
-  gchar *res = NULL;
-
-  switch (prop_id) {
-    case PROP_CUTOFF:
-      res = g_strdup_printf ("%7.1lf Hz",
-          30.0 + (gfloat) g_value_get_uint (value) * 10000.0/2047.0);
-      break;
-    default:
-      break;
-  }
-  return res;
-}
-
-static void
-gst_sid_syn_property_meta_interface_init (gpointer const g_iface,
-    gpointer const iface_data)
-{
-  GstBtPropertyMetaInterface *const iface =
-      (GstBtPropertyMetaInterface * const) g_iface;
-
-  GST_INFO ("initializing iface");
-
-  iface->describe_property = gst_sid_syn_property_meta_describe_property;
-
-}
-
 //-- sidsyn implementation
-
-static void
-gst_sid_syn_base_init (gpointer g_class)
-{
-  GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
-
-  gst_element_class_set_details_simple (element_class,
-      "C64 SID Synth",
-      "Source/Audio",
-      "c64 sid synthesizer", "Stefan Sauer <ensonic@users.sf.net>");
-#if GST_CHECK_VERSION(0,10,31)
-  gst_element_class_set_documentation_uri (element_class,
-      "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
-      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtSidSyn.html");
-#endif
-}
-
-static void
-gst_sid_syn_class_init (GstBtSidSynClass * klass)
-{
-  GObjectClass *gobject_class = (GObjectClass *) klass;
-  GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
-  const GParamFlags pflags1 = (GParamFlags) 
-      (G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS);
-  const GParamFlags pflags2 = (GParamFlags) 
-      (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-      
-  parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
-
-  audio_synth_class->process = gst_sid_syn_process;
-  audio_synth_class->setup = gst_sid_syn_setup;
-
-  gobject_class->set_property = gst_sid_syn_set_property;
-  gobject_class->get_property = gst_sid_syn_get_property;
-  gobject_class->dispose = gst_sid_syn_dispose;
-  
-  // override iface properties
-
-  g_object_class_install_property (gobject_class, PROP_CHILDREN,
-      g_param_spec_ulong ("children","children count property",
-          "the number of children this element uses", 3, 3, 3, pflags2));
-
-  // register own properties
-
-  g_object_class_install_property (gobject_class, PROP_CHIP,
-      g_param_spec_enum ("chip", "Chip model", "Chip model to emulate",
-          GSTBT_TYPE_SID_SYN_CHIP, MOS6581, pflags2));
-
-  g_object_class_install_property (gobject_class, PROP_TUNING,
-      g_param_spec_enum ("tuning", "Tuning",
-          "Harmonic tuning", GSTBT_TYPE_TONE_CONVERSION_TUNING,
-          GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT, pflags2));
-
-  g_object_class_install_property (gobject_class, PROP_CUTOFF,
-      g_param_spec_uint ("cut-off", "Cut-Off",
-          "Audio filter cut-off frequency", 0, 2047, 1024, pflags1));
-
-  g_object_class_install_property (gobject_class, PROP_RESONANCE,
-      g_param_spec_uint ("resonance", "Resonance", "Audio filter resonance",
-          0, 15, 2, pflags1));
-
-  g_object_class_install_property (gobject_class, PROP_VOLUME,
-      g_param_spec_uint ("volume", "Volume", "Volume of tone",
-          0, 15, 15, pflags1));
-  
-  g_object_class_install_property (gobject_class, PROP_FILTER_LOW_PASS,
-      g_param_spec_boolean ("low-pass", "LowPass", "Enable LowPass Filter",
-          FALSE, pflags1));
-
-  g_object_class_install_property (gobject_class, PROP_FILTER_BAND_PASS,
-      g_param_spec_boolean ("band-pass", "BandPass", "Enable BandPass Filter",
-          FALSE, pflags1));
-
-  g_object_class_install_property (gobject_class, PROP_FILTER_HI_PASS,
-      g_param_spec_boolean ("hi-pass", "HiPass", "Enable HiPass Filter",
-          FALSE, pflags1));
-
-  g_object_class_install_property (gobject_class, PROP_VOICE_3_OFF,
-      g_param_spec_boolean ("voice3-off", "Voice3Off", 
-          "Detach voice 3 from mixer",  FALSE, pflags1));
-}
-
-static void
-gst_sid_syn_set_property (GObject * object, guint prop_id,
-    const GValue * value, GParamSpec * pspec)
-{
-  GstBtSidSyn *src = GSTBT_SID_SYN (object);
-
-  if (src->dispose_has_run)
-    return;
-
-  switch (prop_id) {
-    case PROP_CHILDREN:
-      break;
-    case PROP_CHIP:
-      src->chip = (chip_model) g_value_get_enum (value);
-      break;
-    case PROP_TUNING:
-      src->tuning = (GstBtToneConversionTuning) g_value_get_enum (value);
-      g_object_set (src->n2f, "tuning", src->tuning, NULL);
-      break;
-    case PROP_CUTOFF:
-      src->cutoff = g_value_get_uint (value);
-      break;
-    case PROP_RESONANCE:
-      src->resonance = g_value_get_uint (value);
-      break;
-    case PROP_VOLUME:
-      src->volume = g_value_get_uint (value);
-      break;
-    case PROP_FILTER_LOW_PASS:
-      src->filter_low_pass = g_value_get_boolean (value);
-      break;
-    case PROP_FILTER_BAND_PASS:
-      src->filter_band_pass = g_value_get_boolean (value);
-      break;
-    case PROP_FILTER_HI_PASS:
-      src->filter_hi_pass = g_value_get_boolean (value);
-      break;
-    case PROP_VOICE_3_OFF:
-      src->voice_3_off = g_value_get_boolean (value);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-}
-
-static void
-gst_sid_syn_get_property (GObject * object, guint prop_id,
-    GValue * value, GParamSpec * pspec)
-{
-  GstBtSidSyn *src = GSTBT_SID_SYN (object);
-
-  if (src->dispose_has_run)
-    return;
-
-  switch (prop_id) {
-    case PROP_CHILDREN:
-      g_value_set_ulong (value, NUM_VOICES);
-      break;
-    case PROP_CHIP:
-      g_value_set_enum (value, src->chip);
-      break;
-    case PROP_TUNING:
-      g_value_set_enum (value, src->tuning);
-      break;
-    case PROP_CUTOFF:
-      g_value_set_uint (value, src->cutoff);
-      break;
-    case PROP_RESONANCE:
-      g_value_set_uint (value, src->resonance);
-      break;
-    case PROP_VOLUME:
-      g_value_set_uint (value, src->volume);
-      break;
-    case PROP_FILTER_LOW_PASS:
-      g_value_set_boolean (value, src->filter_low_pass);
-      break;
-    case PROP_FILTER_BAND_PASS:
-      g_value_set_boolean (value, src->filter_band_pass);
-      break;
-    case PROP_FILTER_HI_PASS:
-      g_value_set_boolean (value, src->filter_hi_pass);
-      break;
-    case PROP_VOICE_3_OFF:
-      g_value_set_boolean (value, src->voice_3_off);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-}
-
-static void
-gst_sid_syn_init (GstBtSidSyn * src, GstBtSidSynClass * g_class)
-{
-  gint i;
-  gchar name[7];
-
-  src->clockrate = PALCLOCKRATE;
-  src->emu = new SID;
-  src->chip = MOS6581;
-  src->tuning = GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT;
-	src->n2f = gstbt_tone_conversion_new (src->tuning);
-	
-	for (i = 0; i < NUM_VOICES; i++) {
-	  src->voices[i] = (GstBtSidSynV *) g_object_new (GSTBT_TYPE_SID_SYNV, NULL);
-	  sprintf (name, "voice%1d",i);
-	  gst_object_set_name ((GstObject *)src->voices[i],name);
-	  gst_object_set_parent ((GstObject *)src->voices[i], (GstObject *)src);
-	  GST_WARNING_OBJECT (src->voices[i], "created %p", src->voices[i]);
-	}
-	src->cutoff = 1024;
-	src->resonance = 2;
-	src->volume = 15;
-}
 
 // we only want to write registers if the values have changed
 #define WRITE_REG(reg) G_STMT_START { \
@@ -374,7 +123,7 @@ gst_sid_syn_init (GstBtSidSyn * src, GstBtSidSynClass * g_class)
 } G_STMT_END
 
 static void
-gst_sid_syn_update_regs (GstBtSidSyn *src)
+gstbt_sid_syn_update_regs (GstBtSidSyn *src)
 {
   gint i;
   gint *pregs = src->regs;
@@ -585,16 +334,20 @@ gst_sid_syn_update_regs (GstBtSidSyn *src)
   
 }
 
+//-- audiosynth vmethods
+
 static gboolean
-gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
+gstbt_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 {
   GstBtSidSyn *src = ((GstBtSidSyn *) base);
-  GstStructure *structure = gst_caps_get_structure (caps, 0);
-  gint i;
+  GstStructure *structure;
+  gint i, n = gst_caps_get_size (caps);
 
   /* set channels to 1 */
-  if (!gst_structure_fixate_field_nearest_int (structure, "channels", 1))
-    return FALSE;
+  for (i = 0; i < n; i++) {
+    structure = gst_caps_get_structure (caps, i);
+    gst_structure_fixate_field_nearest_int (structure, "channels", 1);
+  }
   
   src->emu->reset ();
 	src->emu->set_chip_model (src->chip);
@@ -614,19 +367,26 @@ gst_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 
 // TODO(ensonic): silence detection (gate off + release time is over)
 static void
-gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
+gstbt_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 {
   GstBtSidSyn *src = ((GstBtSidSyn *) base);
-  gint16 *out = (gint16 *) GST_BUFFER_DATA (data);
+  GstMapInfo info;
+  gint16 *out;
   gint i, n, m, samples;
   gdouble scale = (gdouble)src->clockrate / (gdouble)base->samplerate;
   gint step = NUM_STEPS * (base->subtick_count - 1);
   gint step_mod = base->subticks_per_tick;
   gint fx_ticks_remain = 0;
 
+  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map buffer for write");
+    return;
+  }
+  out = (gint16 *)info.data;
+
   for (i = 0; i < NUM_VOICES; i++) {
     GstBtSidSynV *v = src->voices[i];
-    gst_object_sync_values ((GObject *)v, GST_BUFFER_TIMESTAMP (data));
+    gst_object_sync_values ((GstObject *)v, GST_BUFFER_TIMESTAMP (data));
     fx_ticks_remain += v->fx_ticks_remain; 
   }
   
@@ -639,7 +399,7 @@ gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
     samples = m;
     
     GST_LOG_OBJECT (src, "subtick: %2d -- -- sync", step/6);
-    gst_sid_syn_update_regs (src);
+    gstbt_sid_syn_update_regs (src);
 
     while (samples > 0) {
       gint tdelta = (gint)(scale * samples) + 4;
@@ -658,7 +418,7 @@ gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
     for (i = 0; i < NUM_STEPS; i++, step++) {
       if ((step % step_mod) == 0) {
         GST_LOG_OBJECT (src, "subtick: %2d %2d %2d sync", step/6, i, (step % step_mod));
-        gst_sid_syn_update_regs (src);
+        gstbt_sid_syn_update_regs (src);
       } else {
         GST_LOG_OBJECT (src, "subtick: %2d %2d %2d", step/6, i, (step % step_mod));
       }
@@ -671,10 +431,162 @@ gst_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
       samples = n;
     }
   }
+
+  gst_buffer_unmap (data, &info);
+}
+
+//-- child proxy interface
+
+static GObject *gstbt_sid_syn_child_proxy_get_child_by_index (GstChildProxy *child_proxy, guint index) {
+  GstBtSidSyn *src = GSTBT_SID_SYN(child_proxy);
+
+  g_return_val_if_fail (index < NUM_VOICES,NULL);
+
+  return (GObject *)gst_object_ref(src->voices[index]);
+}
+
+static guint gstbt_sid_syn_child_proxy_get_children_count (GstChildProxy *child_proxy) {
+  return NUM_VOICES;
+}
+
+static void gstbt_sid_syn_child_proxy_interface_init (gpointer g_iface, gpointer iface_data) {
+  GstChildProxyInterface *iface = (GstChildProxyInterface *)g_iface;
+
+  GST_INFO("initializing iface");
+
+  iface->get_child_by_index = gstbt_sid_syn_child_proxy_get_child_by_index;
+  iface->get_children_count = gstbt_sid_syn_child_proxy_get_children_count;
+}
+
+//-- property meta interface
+
+static gchar *
+gstbt_sid_syn_property_meta_describe_property (GstBtPropertyMeta * property_meta,
+    guint prop_id, const GValue * value)
+{
+  //GstBtSidSyn *src = GSTBT_SID_SYN (property_meta);
+  gchar *res = NULL;
+
+  switch (prop_id) {
+    case PROP_CUTOFF:
+      res = g_strdup_printf ("%7.1lf Hz",
+          30.0 + (gfloat) g_value_get_uint (value) * 10000.0/2047.0);
+      break;
+    default:
+      break;
+  }
+  return res;
 }
 
 static void
-gst_sid_syn_dispose (GObject * object)
+gstbt_sid_syn_property_meta_interface_init (gpointer const g_iface,
+    gpointer const iface_data)
+{
+  GstBtPropertyMetaInterface *const iface =
+      (GstBtPropertyMetaInterface * const) g_iface;
+
+  GST_INFO ("initializing iface");
+
+  iface->describe_property = gstbt_sid_syn_property_meta_describe_property;
+
+}
+
+//-- gobject vmethods
+
+static void
+gstbt_sid_syn_set_property (GObject * object, guint prop_id,
+    const GValue * value, GParamSpec * pspec)
+{
+  GstBtSidSyn *src = GSTBT_SID_SYN (object);
+
+  if (src->dispose_has_run)
+    return;
+
+  switch (prop_id) {
+    case PROP_CHILDREN:
+      break;
+    case PROP_CHIP:
+      src->chip = (chip_model) g_value_get_enum (value);
+      break;
+    case PROP_TUNING:
+      src->tuning = (GstBtToneConversionTuning) g_value_get_enum (value);
+      g_object_set (src->n2f, "tuning", src->tuning, NULL);
+      break;
+    case PROP_CUTOFF:
+      src->cutoff = g_value_get_uint (value);
+      break;
+    case PROP_RESONANCE:
+      src->resonance = g_value_get_uint (value);
+      break;
+    case PROP_VOLUME:
+      src->volume = g_value_get_uint (value);
+      break;
+    case PROP_FILTER_LOW_PASS:
+      src->filter_low_pass = g_value_get_boolean (value);
+      break;
+    case PROP_FILTER_BAND_PASS:
+      src->filter_band_pass = g_value_get_boolean (value);
+      break;
+    case PROP_FILTER_HI_PASS:
+      src->filter_hi_pass = g_value_get_boolean (value);
+      break;
+    case PROP_VOICE_3_OFF:
+      src->voice_3_off = g_value_get_boolean (value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+gstbt_sid_syn_get_property (GObject * object, guint prop_id,
+    GValue * value, GParamSpec * pspec)
+{
+  GstBtSidSyn *src = GSTBT_SID_SYN (object);
+
+  if (src->dispose_has_run)
+    return;
+
+  switch (prop_id) {
+    case PROP_CHILDREN:
+      g_value_set_ulong (value, NUM_VOICES);
+      break;
+    case PROP_CHIP:
+      g_value_set_enum (value, src->chip);
+      break;
+    case PROP_TUNING:
+      g_value_set_enum (value, src->tuning);
+      break;
+    case PROP_CUTOFF:
+      g_value_set_uint (value, src->cutoff);
+      break;
+    case PROP_RESONANCE:
+      g_value_set_uint (value, src->resonance);
+      break;
+    case PROP_VOLUME:
+      g_value_set_uint (value, src->volume);
+      break;
+    case PROP_FILTER_LOW_PASS:
+      g_value_set_boolean (value, src->filter_low_pass);
+      break;
+    case PROP_FILTER_BAND_PASS:
+      g_value_set_boolean (value, src->filter_band_pass);
+      break;
+    case PROP_FILTER_HI_PASS:
+      g_value_set_boolean (value, src->filter_hi_pass);
+      break;
+    case PROP_VOICE_3_OFF:
+      g_value_set_boolean (value, src->voice_3_off);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+gstbt_sid_syn_dispose (GObject * object)
 {
   GstBtSidSyn *src = GSTBT_SID_SYN (object);
   gint i;
@@ -691,54 +603,108 @@ gst_sid_syn_dispose (GObject * object)
 	
 	delete src->emu;
 
-  G_OBJECT_CLASS (parent_class)->dispose (object);
+  G_OBJECT_CLASS (gstbt_sid_syn_parent_class)->dispose (object);
 }
 
-GType
-gstbt_sid_syn_get_type (void)
+//-- gobject type methods
+
+static void
+gstbt_sid_syn_init (GstBtSidSyn * src)
 {
-  static GType type = 0;
+  gint i;
+  gchar name[7];
 
-  if (G_UNLIKELY (!type)) {
-    const GTypeInfo element_type_info = {
-      sizeof (GstBtSidSynClass),
-      (GBaseInitFunc) gst_sid_syn_base_init,
-      NULL,                     /* base_finalize */
-      (GClassInitFunc) gst_sid_syn_class_init,
-      NULL,                     /* class_finalize */
-      NULL,                     /* class_data */
-      sizeof (GstBtSidSyn),
-      0,                        /* n_preallocs */
-      (GInstanceInitFunc) gst_sid_syn_init
-    };
-    const GInterfaceInfo child_proxy_interface_info = {
-      (GInterfaceInitFunc) gst_sid_syn_child_proxy_interface_init,
-      NULL,                    /* interface_finalize */
-      NULL                     /* interface_data */
-    };
-    const GInterfaceInfo child_bin_interface_info = {
-      NULL,                    /* interface_init */
-      NULL,                    /* interface_finalize */
-      NULL                     /* interface_data */
-    };
-    const GInterfaceInfo property_meta_interface_info = {
-      (GInterfaceInitFunc) gst_sid_syn_property_meta_interface_init,
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
-
-    type =
-        g_type_register_static (GSTBT_TYPE_AUDIO_SYNTH, "GstBtSidSyn",
-        &element_type_info, (GTypeFlags) 0);
-    g_type_add_interface_static (type, GST_TYPE_CHILD_PROXY,
-        &child_proxy_interface_info);
-    g_type_add_interface_static (type, GSTBT_TYPE_CHILD_BIN,
-        &child_bin_interface_info);
-    g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
-        &property_meta_interface_info);
-  }
-  return type;
+  src->clockrate = PALCLOCKRATE;
+  src->emu = new SID;
+  src->chip = MOS6581;
+  src->tuning = GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT;
+	src->n2f = gstbt_tone_conversion_new (src->tuning);
+	
+	for (i = 0; i < NUM_VOICES; i++) {
+	  src->voices[i] = (GstBtSidSynV *) g_object_new (GSTBT_TYPE_SID_SYNV, NULL);
+	  sprintf (name, "voice%1d",i);
+	  gst_object_set_name ((GstObject *)src->voices[i],name);
+	  gst_object_set_parent ((GstObject *)src->voices[i], (GstObject *)src);
+	  GST_WARNING_OBJECT (src->voices[i], "created %p", src->voices[i]);
+	}
+	src->cutoff = 1024;
+	src->resonance = 2;
+	src->volume = 15;
 }
+
+static void
+gstbt_sid_syn_class_init (GstBtSidSynClass * klass)
+{
+  GObjectClass *gobject_class = (GObjectClass *) klass;
+  GstElementClass *element_class = (GstElementClass *) klass;
+  GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
+  const GParamFlags pflags1 = (GParamFlags) 
+      (G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS);
+  const GParamFlags pflags2 = (GParamFlags) 
+      (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+      
+  audio_synth_class->process = gstbt_sid_syn_process;
+  audio_synth_class->setup = gstbt_sid_syn_setup;
+
+  gobject_class->set_property = gstbt_sid_syn_set_property;
+  gobject_class->get_property = gstbt_sid_syn_get_property;
+  gobject_class->dispose = gstbt_sid_syn_dispose;
+  
+  // override iface properties
+
+  g_object_class_install_property (gobject_class, PROP_CHILDREN,
+      g_param_spec_ulong ("children","children count property",
+          "the number of children this element uses", 3, 3, 3, pflags2));
+
+  // register own properties
+
+  g_object_class_install_property (gobject_class, PROP_CHIP,
+      g_param_spec_enum ("chip", "Chip model", "Chip model to emulate",
+          GSTBT_TYPE_SID_SYN_CHIP, MOS6581, pflags2));
+
+  g_object_class_install_property (gobject_class, PROP_TUNING,
+      g_param_spec_enum ("tuning", "Tuning",
+          "Harmonic tuning", GSTBT_TYPE_TONE_CONVERSION_TUNING,
+          GSTBT_TONE_CONVERSION_EQUAL_TEMPERAMENT, pflags2));
+
+  g_object_class_install_property (gobject_class, PROP_CUTOFF,
+      g_param_spec_uint ("cut-off", "Cut-Off",
+          "Audio filter cut-off frequency", 0, 2047, 1024, pflags1));
+
+  g_object_class_install_property (gobject_class, PROP_RESONANCE,
+      g_param_spec_uint ("resonance", "Resonance", "Audio filter resonance",
+          0, 15, 2, pflags1));
+
+  g_object_class_install_property (gobject_class, PROP_VOLUME,
+      g_param_spec_uint ("volume", "Volume", "Volume of tone",
+          0, 15, 15, pflags1));
+  
+  g_object_class_install_property (gobject_class, PROP_FILTER_LOW_PASS,
+      g_param_spec_boolean ("low-pass", "LowPass", "Enable LowPass Filter",
+          FALSE, pflags1));
+
+  g_object_class_install_property (gobject_class, PROP_FILTER_BAND_PASS,
+      g_param_spec_boolean ("band-pass", "BandPass", "Enable BandPass Filter",
+          FALSE, pflags1));
+
+  g_object_class_install_property (gobject_class, PROP_FILTER_HI_PASS,
+      g_param_spec_boolean ("hi-pass", "HiPass", "Enable HiPass Filter",
+          FALSE, pflags1));
+
+  g_object_class_install_property (gobject_class, PROP_VOICE_3_OFF,
+      g_param_spec_boolean ("voice3-off", "Voice3Off", 
+          "Detach voice 3 from mixer",  FALSE, pflags1));
+
+  gst_element_class_set_static_metadata (element_class,
+      "C64 SID Synth",
+      "Source/Audio",
+      "c64 sid synthesizer", "Stefan Sauer <ensonic@users.sf.net>");
+  gst_element_class_add_metadata (element_class, GST_ELEMENT_METADATA_DOC_URI,
+      "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
+      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtSidSyn.html");
+}
+
+//-- plugin
 
 static gboolean
 plugin_init (GstPlugin * plugin)
@@ -746,15 +712,12 @@ plugin_init (GstPlugin * plugin)
   GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "sidsyn",
       GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "c64 sid synthesizer");
 
-  /* initialize gst controller library */
-  gst_controller_init (NULL, NULL);
-
   return gst_element_register (plugin, "sidsyn", GST_RANK_NONE,
       GSTBT_TYPE_SID_SYN);
 }
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
-    "sidsyn",
+    sidsyn,
     "c64 sid synthesizer",
     plugin_init, VERSION, "GPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN);

@@ -1021,19 +1021,18 @@ gstbml_dispose (GstBML * bml)
 /**
  * gstbml_fix_data:
  * @elem: the element instance
- * @buf: the data buffer
+ * @info: the GstMapInfo for the data buffer
  * @has_data: indication wheter the buffer has values != 0.0
  *
- * Fixes elements that output denormalized values (sets them to 0.0). Also
- * adjust gap-flags. unfortunately this is quite expensive, although extra gap
- * flags help.
+ * Fixes elements that output denormalized values (sets them to 0.0).
+ *
+ * Returns: TRUE if the gap flag could be set
  */
-void
-gstbml_fix_data (GstElement * elem, GstBuffer * buf, gboolean has_data)
+gboolean
+gstbml_fix_data (GstElement * elem, GstMapInfo * info, gboolean has_data)
 {
-  BMLData *data = (BMLData *) GST_BUFFER_DATA (buf);
-  guint num_samples = GST_BUFFER_SIZE (buf) / sizeof (BMLData);
-  guint i;
+  BMLData *data = (BMLData *) info->data;
+  guint i, num_samples = info->size / sizeof (BMLData);
 
   if (has_data) {
     has_data = FALSE;
@@ -1074,11 +1073,11 @@ gstbml_fix_data (GstElement * elem, GstBuffer * buf, gboolean has_data)
   }
   if (!has_data) {
     GST_LOG_OBJECT (elem, "silent buffer");
-    GST_BUFFER_FLAG_SET (buf, GST_BUFFER_FLAG_GAP);
+    return TRUE;
   } else {
     // buzz generates relative loud output
     gfloat fc = 1.0 / 32768.0;
     orc_scalarmultiply_f32_ns (data, data, fc, num_samples);
-    GST_BUFFER_FLAG_UNSET (buf, GST_BUFFER_FLAG_GAP);
+    return FALSE;
   }
 }

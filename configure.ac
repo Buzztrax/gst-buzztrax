@@ -14,8 +14,8 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 
 dnl dependencies
-REQ_GLIB=2.24.0
-REQ_GST=0.10.32
+REQ_GLIB=2.32.0
+REQ_GST=1.1.0
 
 
 dnl
@@ -27,26 +27,20 @@ dnl 1: when releasing a changed version : MICRO++
 dnl 2: when the interface has changed (adding functions) : MINOR++, MICRO=0
 dnl 3: when the interface has changed (removing functions) : MAJOR++, MINOR=0, MICRO=0
 dnl
-GSTBT_MAJOR_VERSION=0
-GSTBT_MINOR_VERSION=8
+GSTBT_MAJOR_VERSION=1
+GSTBT_MINOR_VERSION=0
 GSTBT_MICRO_VERSION=0
-GSTBT_VERSION=$GSTBT_MAJOR_VERSION.$GSTBT_MINOR_VERSION.$GSTBT_MICRO_VERSION
 GSTBT_VERSION_INFO=`expr $GSTBT_MAJOR_VERSION + $GSTBT_MINOR_VERSION`:$GSTBT_MICRO_VERSION:$GSTBT_MINOR_VERSION
-GSTBT_VERSION_NUMBER=`expr $GSTBT_MAJOR_VERSION \* 10000 + $GSTBT_MINOR_VERSION \* 100 + $GSTBT_MICRO_VERSION`
 
 dnl that is needed to figure the directory name, where the plugin goes to
-GST_MAJORMINOR=0.10
+GST_MAJORMINOR=1.0
 AC_DEFINE_UNQUOTED(GST_MAJORMINOR, "$GST_MAJORMINOR", [gstreamer series])
 AC_SUBST(GST_MAJORMINOR)
 
 AC_SUBST(GSTBT_MAJOR_VERSION)
 AC_SUBST(GSTBT_MINOR_VERSION)
 AC_SUBST(GSTBT_MICRO_VERSION)
-AC_SUBST(GSTBT_VERSION)
 AC_SUBST(GSTBT_VERSION_INFO)
-AC_SUBST(GSTBT_VERSION_NUMBER)
-
-VERSION=${GSTBT_VERSION}
 
 
 dnl Checks for programs.
@@ -156,9 +150,10 @@ dnl Checks for libraries.
 PKG_CHECK_MODULES(BASE_DEPS, \
   glib-2.0 >= $REQ_GLIB gobject-2.0  >= $REQ_GLIB gthread-2.0 >= $REQ_GLIB \
   gmodule-2.0 >= $REQ_GLIB \
-  gstreamer-0.10 >= $REQ_GST gstreamer-base-0.10 >= $REQ_GST \
-  gstreamer-controller-0.10 >= $REQ_GST \
-  gstreamer-plugins-base-0.10 >= $REQ_GST \
+  gstreamer-1.0 >= $REQ_GST gstreamer-base-1.0 >= $REQ_GST \
+  gstreamer-controller-1.0 >= $REQ_GST \
+  gstreamer-plugins-base-1.0 >= $REQ_GST \
+  gstreamer-audio-1.0 >= $REQ_GST \
 )
 GST_LIB_CFLAGS="$DEBUG_CFLAGS $COVERAGE_CFLAGS"
 AC_SUBST(GST_LIB_CFLAGS)
@@ -188,20 +183,6 @@ AC_SUBST(GST_PLUGIN_LIBS)
 #CFLAGS="$ac_cflags_save"
 #CPPFLAGS="$ac_cppflags_save"
 #LDFLAGS="$ac_ldflags_save"
-
-
-AC_MSG_CHECKING([gstreamer version >= 0.10.31])
-if pkg-config --atleast-version=0.10.31 gstreamer-0.10; then
-  HAVE_GST_DOC_URI=1
-  HELP_DOC_TYPES="%"
-  AC_MSG_RESULT(yes)
-else
-  HAVE_GST_DOC_URI=0
-  HELP_DOC_TYPES=
-  AC_MSG_RESULT(no)
-fi
-AM_CONDITIONAL(BUILD_HELP_IFACE, test "$HAVE_GST_DOC_URI" = "0")
-AC_SUBST(HELP_DOC_TYPES)
 
 
 dnl - Check for buzzmachineloader (bml)
@@ -260,7 +241,7 @@ AC_SUBST(GST_PACKAGE_NAME)
 
 dnl variable from gtkdoc-fixxref
 glib_prefix="`pkg-config --variable=prefix glib-2.0`"
-gst_prefix="`pkg-config --variable=prefix gstreamer-0.10`"
+gst_prefix="`pkg-config --variable=prefix gstreamer-1.0`"
 AC_SUBST(glib_prefix)
 AC_SUBST(gst_prefix)
 
@@ -304,7 +285,7 @@ AC_OUTPUT
 
 echo "
 Configuration
-	Version                    : ${VERSION}
+	Version                    : ${PACKAGE_VERSION}
 	Source code location       : ${srcdir}
 	Prefix                     : ${prefix}
 	Compiler                   : ${CC}
@@ -336,7 +317,7 @@ work with all features please register the location (see README for details):
 export LD_LIBRARY_PATH=$prefix/lib:\$LD_LIBRARY_PATH
 export DEVHELP_SEARCH_PATH="\$DEVHELP_SEARCH_PATH:$prefix/share/gtk-doc/html"
 export PKG_CONFIG_PATH="\$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"
-export GST_PLUGIN_PATH="\$GST_PLUGIN_PATH:$prefix/lib/gstreamer-0.10"
+export GST_PLUGIN_PATH_1_0="\$GST_PLUGIN_PATH:$prefix/lib/gstreamer-1.0"
 "
 fi
 

@@ -21,7 +21,6 @@
 #define __GSTBT_ENVELOPE_ADSR_H__
 
 #include <gst/gst.h>
-#include <gst/controller/gstcontroller.h>
 #include <libgstbuzztard/envelope.h>
 
 G_BEGIN_DECLS

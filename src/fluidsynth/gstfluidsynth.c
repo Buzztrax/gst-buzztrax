@@ -108,32 +108,6 @@ enum
 
 /* number to use for first dynamic (FluidSynth settings) property */
 #define FIRST_DYNAMIC_PROP  256
-
-#define INTERPOLATION_MODE_TYPE interpolation_mode_get_type ()
-#define CHORUS_WAVEFORM_TYPE chorus_waveform_get_type ()
-
-static GstBtAudioSynthClass *parent_class = NULL;
-
-static GType interpolation_mode_get_type (void);
-static GType chorus_waveform_get_type (void);
-
-static void gst_fluid_synth_base_init (gpointer klass);
-static void gst_fluid_synth_class_init (GstBtFluidSynthClass * klass);
-static void gst_fluid_synth_init (GstBtFluidSynth * object,
-    GstBtFluidSynthClass * klass);
-
-static void gst_fluid_synth_set_property (GObject * object,
-    guint prop_id, const GValue * value, GParamSpec * pspec);
-static void gst_fluid_synth_get_property (GObject * object,
-    guint prop_id, GValue * value, GParamSpec * pspec);
-static void gst_fluid_synth_dispose (GObject * object);
-static void gst_fluid_synth_process (GstBtAudioSynth * base, GstBuffer * data);
-static gboolean gst_fluid_synth_setup (GstBtAudioSynth * base, GstPad * pad,
-    GstCaps * caps);
-
-static void gst_fluid_synth_update_reverb (GstBtFluidSynth * gstsynth);
-static void gst_fluid_synth_update_chorus (GstBtFluidSynth * gstsynth);
-
 /* last dynamic property ID (incremented for each dynamically installed prop) */
 static int last_property_id = FIRST_DYNAMIC_PROP;
 
@@ -141,31 +115,42 @@ static int last_property_id = FIRST_DYNAMIC_PROP;
    ID and FluidSynth setting */
 static char **dynamic_prop_names;
 
-/* fluid_synth log handler */
+//-- the class
+
+G_DEFINE_TYPE_WITH_CODE (GstBtFluidSynth, gstbt_fluid_synth,
+    GSTBT_TYPE_AUDIO_SYNTH, G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
+        NULL));
+
+
+//-- fluid_synth log handler
+
 static void
-gst_fluid_synth_error_log_function (int level, char *message, void *data)
+gstbt_fluid_synth_error_log_function (int level, char *message, void *data)
 {
   GST_ERROR ("%s", message);
 }
 
 static void
-gst_fluid_synth_warning_log_function (int level, char *message, void *data)
+gstbt_fluid_synth_warning_log_function (int level, char *message, void *data)
 {
   GST_WARNING ("%s", message);
 }
 
 static void
-gst_fluid_synth_info_log_function (int level, char *message, void *data)
+gstbt_fluid_synth_info_log_function (int level, char *message, void *data)
 {
   GST_INFO ("%s", message);
 }
 
 static void
-gst_fluid_synth_debug_log_function (int level, char *message, void *data)
+gstbt_fluid_synth_debug_log_function (int level, char *message, void *data)
 {
   GST_DEBUG ("%s", message);
 }
 
+//-- the enums
+
+#define INTERPOLATION_MODE_TYPE interpolation_mode_get_type ()
 static GType
 interpolation_mode_get_type (void)
 {
@@ -188,6 +173,7 @@ interpolation_mode_get_type (void)
   return (type);
 }
 
+#define CHORUS_WAVEFORM_TYPE chorus_waveform_get_type ()
 static GType
 chorus_waveform_get_type (void)
 {
@@ -207,22 +193,7 @@ chorus_waveform_get_type (void)
   return (type);
 }
 
-
 //-- fluid_synth implementation
-
-static void
-gst_fluid_synth_base_init (gpointer g_class)
-{
-  GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
-
-  gst_element_class_set_details_simple (element_class,
-      "FluidSynth",
-      "Source/Audio",
-      "FluidSynth wavetable synthesizer", "Josh Green <josh@users.sf.net>");
-  gst_element_class_set_documentation_uri (element_class,
-      "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
-      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtFluidSynth.html");
-}
 
 /* used for passing multiple values to FluidSynth foreach function */
 typedef struct
@@ -284,32 +255,456 @@ settings_foreach_func (void *data, char *name, int type)
 }
 
 static void
-gst_fluid_synth_class_init (GstBtFluidSynthClass * klass)
+gstbt_fluid_synth_update_reverb (GstBtFluidSynth * gstsynth)
+{
+  if (!gstsynth->reverb_update)
+    return;
+
+  if (gstsynth->reverb_enable)
+    fluid_synth_set_reverb (gstsynth->fluid, gstsynth->reverb_room_size,
+        gstsynth->reverb_damp, gstsynth->reverb_width, gstsynth->reverb_level);
+
+  fluid_synth_set_reverb_on (gstsynth->fluid, gstsynth->reverb_enable);
+  gstsynth->reverb_update = FALSE;
+}
+
+static void
+gstbt_fluid_synth_update_chorus (GstBtFluidSynth * gstsynth)
+{
+  if (!gstsynth->chorus_update)
+    return;
+
+  if (gstsynth->chorus_enable)
+    fluid_synth_set_chorus (gstsynth->fluid, gstsynth->chorus_count,
+        gstsynth->chorus_level, gstsynth->chorus_freq,
+        gstsynth->chorus_depth, gstsynth->chorus_waveform);
+
+  fluid_synth_set_chorus_on (gstsynth->fluid, TRUE);
+  gstsynth->chorus_update = FALSE;
+}
+
+//-- audiosynth vmethods
+
+static gboolean
+gstbt_fluid_synth_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
+{
+  GstStructure *structure;
+  gint i, n = gst_caps_get_size (caps);
+
+  for (i = 0; i < n; i++) {
+    structure = gst_caps_get_structure (caps, i);
+    gst_structure_fixate_field_nearest_int (structure, "channels", 2);
+  }
+  return TRUE;
+}
+
+static void
+gstbt_fluid_synth_process (GstBtAudioSynth * base, GstBuffer * data)
+{
+  GstBtFluidSynth *src = ((GstBtFluidSynth *) base);
+  GstMapInfo info;
+
+  if (src->cur_note_length) {
+    src->cur_note_length--;
+    if (!src->cur_note_length) {
+      fluid_synth_noteoff (src->fluid, /*chan */ 0, src->key);
+      GST_INFO ("note-off: %d", src->key);
+    }
+  }
+
+  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map buffer fro write");
+    return;
+  }
+  fluid_synth_write_s16 (src->fluid,
+      ((GstBtAudioSynth *) src)->generate_samples_per_buffer,
+      info.data, 0, 2, info.data, 1, 2);
+  gst_buffer_unmap (data, &info);
+}
+
+//-- interfaces
+
+//-- gobject vmethods
+
+static void
+gstbt_fluid_synth_set_property (GObject * object, guint prop_id,
+    const GValue * value, GParamSpec * pspec)
+{
+  GstBtFluidSynth *src = GSTBT_FLUID_SYNTH (object);
+
+  if (src->dispose_has_run)
+    return;
+
+  /* is it one of the dynamically installed properties? */
+  if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id) {
+    gint retval;
+    gchar *name = dynamic_prop_names[prop_id - FIRST_DYNAMIC_PROP];
+
+    switch (G_PARAM_SPEC_VALUE_TYPE (pspec)) {
+      case G_TYPE_INT:
+        retval = fluid_settings_setint (src->settings, name,
+            g_value_get_int (value));
+        break;
+      case G_TYPE_DOUBLE:
+        retval = fluid_settings_setnum (src->settings, name,
+            g_value_get_double (value));
+        break;
+      case G_TYPE_STRING:
+        retval = fluid_settings_setstr (src->settings, name,
+            (char *) g_value_get_string (value));
+        break;
+      default:
+        g_critical ("Unexpected FluidSynth dynamic property type");
+        return;
+    }
+
+    if (!retval)
+      g_critical ("FluidSynth failure while setting FluidSynth property '%s'",
+          name);
+
+    return;
+  }
+
+  switch (prop_id) {
+    case PROP_NOTE:
+      src->note = g_value_get_enum (value);
+      if (src->note) {
+        if (src->note == GSTBT_NOTE_OFF) {
+          fluid_synth_noteoff (src->fluid, /*chan */ 0, src->key);
+          src->cur_note_length = 0;
+        } else {
+          // start note-off counter
+          src->cur_note_length = src->note_length;
+          src->key = src->note - GSTBT_NOTE_C_0;
+          fluid_synth_noteon (src->fluid, /*chan */ 0, src->key, src->velocity);
+        }
+      }
+      break;
+    case PROP_NOTE_LENGTH:
+      src->note_length = g_value_get_int (value);
+      break;
+    case PROP_NOTE_VELOCITY:
+      src->velocity = g_value_get_int (value);
+      break;
+    case PROP_PROGRAM:
+      src->program = g_value_get_int (value);
+      GST_INFO ("Switch to program: %d, %d", src->program >> 7,
+          src->program & 0x7F);
+      fluid_synth_program_select (src->fluid, /*chan */ 0,
+          src->instrument_patch, src->program >> 7, src->program & 0x7F);
+      break;
+      // not yet GST_PARAM_CONTROLLABLE
+    case PROP_INSTRUMENT_PATCH:
+      // unload old patch
+      g_free (src->instrument_patch_path);
+      fluid_synth_sfunload (src->fluid, src->instrument_patch, TRUE);
+      // load new patch
+      src->instrument_patch_path = g_value_dup_string (value);
+      GST_INFO ("Trying to load load soundfont: '%s'",
+          src->instrument_patch_path);
+      if ((src->instrument_patch =
+              fluid_synth_sfload (src->fluid, src->instrument_patch_path,
+                  TRUE)) == -1) {
+        GST_WARNING ("Couldn't load soundfont: '%s'",
+            src->instrument_patch_path);
+      } else {
+        GST_INFO ("soundfont loaded as %d", src->instrument_patch);
+        //fluid_synth_program_reset(src->fluid);
+        fluid_synth_program_select (src->fluid, /*chan */ 0,
+            src->instrument_patch, src->program >> 7, src->program & 0x7F);
+      }
+      break;
+    case PROP_INTERPOLATION:
+      src->interp = g_value_get_enum (value);
+      fluid_synth_set_interp_method (src->fluid, -1, src->interp);
+      break;
+    case PROP_REVERB_ENABLE:
+      src->reverb_enable = g_value_get_boolean (value);
+      fluid_synth_set_reverb_on (src->fluid, src->reverb_enable);
+      break;
+    case PROP_REVERB_ROOM_SIZE:
+      src->reverb_room_size = g_value_get_double (value);
+      src->reverb_update = TRUE;
+      gstbt_fluid_synth_update_reverb (src);
+      break;
+    case PROP_REVERB_DAMP:
+      src->reverb_damp = g_value_get_double (value);
+      src->reverb_update = TRUE;
+      gstbt_fluid_synth_update_reverb (src);
+      break;
+    case PROP_REVERB_WIDTH:
+      src->reverb_width = g_value_get_double (value);
+      src->reverb_update = TRUE;
+      gstbt_fluid_synth_update_reverb (src);
+      break;
+    case PROP_REVERB_LEVEL:
+      src->reverb_level = g_value_get_double (value);
+      src->reverb_update = TRUE;
+      gstbt_fluid_synth_update_reverb (src);
+      break;
+    case PROP_CHORUS_ENABLE:
+      src->chorus_enable = g_value_get_boolean (value);
+      fluid_synth_set_chorus_on (src->fluid, src->chorus_enable);
+      break;
+    case PROP_CHORUS_COUNT:
+      src->chorus_count = g_value_get_int (value);
+      src->chorus_update = TRUE;
+      gstbt_fluid_synth_update_chorus (src);
+      break;
+    case PROP_CHORUS_LEVEL:
+      src->chorus_level = g_value_get_double (value);
+      src->chorus_update = TRUE;
+      gstbt_fluid_synth_update_chorus (src);
+      break;
+    case PROP_CHORUS_FREQ:
+      src->chorus_freq = g_value_get_double (value);
+      src->chorus_update = TRUE;
+      gstbt_fluid_synth_update_chorus (src);
+      break;
+    case PROP_CHORUS_DEPTH:
+      src->chorus_depth = g_value_get_double (value);
+      src->chorus_update = TRUE;
+      gstbt_fluid_synth_update_chorus (src);
+      break;
+    case PROP_CHORUS_WAVEFORM:
+      src->chorus_waveform = g_value_get_enum (value);
+      src->chorus_update = TRUE;
+      gstbt_fluid_synth_update_chorus (src);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+gstbt_fluid_synth_get_property (GObject * object, guint prop_id,
+    GValue * value, GParamSpec * pspec)
+{
+  GstBtFluidSynth *src = GSTBT_FLUID_SYNTH (object);
+
+  if (src->dispose_has_run)
+    return;
+
+  /* is it one of the dynamically installed properties? */
+  if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id) {
+    gchar *s;
+    gdouble d;
+    gint i;
+    gint retval;
+    gchar *name = dynamic_prop_names[prop_id - FIRST_DYNAMIC_PROP];
+
+    switch (G_PARAM_SPEC_VALUE_TYPE (pspec)) {
+      case G_TYPE_INT:
+        retval = fluid_settings_getint (src->settings, name, &i);
+        if (retval)
+          g_value_set_int (value, i);
+        break;
+      case G_TYPE_DOUBLE:
+        retval = fluid_settings_getnum (src->settings, name, &d);
+        if (retval)
+          g_value_set_double (value, d);
+        break;
+      case G_TYPE_STRING:
+        retval = fluid_settings_getstr (src->settings, name, &s);
+        if (retval)
+          g_value_set_string (value, s);
+        break;
+      default:
+        g_critical ("Unexpected FluidSynth dynamic property type");
+        return;
+    }
+
+    if (!retval)
+      g_critical ("Failed to get FluidSynth property '%s'", name);
+
+    return;
+  }
+
+  switch (prop_id) {
+    case PROP_NOTE_LENGTH:
+      g_value_set_int (value, src->note_length);
+      break;
+    case PROP_NOTE_VELOCITY:
+      g_value_set_int (value, src->velocity);
+      break;
+    case PROP_PROGRAM:
+      g_value_set_int (value, src->program);
+      break;
+      // not yet GST_PARAM_CONTROLLABLE
+    case PROP_INSTRUMENT_PATCH:
+      g_value_set_string (value, src->instrument_patch_path);
+      break;
+    case PROP_INTERPOLATION:
+      g_value_set_enum (value, src->interp);
+      break;
+    case PROP_REVERB_ENABLE:
+      g_value_set_boolean (value, src->reverb_enable);
+      break;
+    case PROP_REVERB_ROOM_SIZE:
+      g_value_set_double (value, src->reverb_room_size);
+      break;
+    case PROP_REVERB_DAMP:
+      g_value_set_double (value, src->reverb_damp);
+      break;
+    case PROP_REVERB_WIDTH:
+      g_value_set_double (value, src->reverb_width);
+      break;
+    case PROP_REVERB_LEVEL:
+      g_value_set_double (value, src->reverb_level);
+      break;
+    case PROP_CHORUS_ENABLE:
+      g_value_set_boolean (value, src->chorus_enable);
+      break;
+    case PROP_CHORUS_COUNT:
+      g_value_set_int (value, src->chorus_count);
+      break;
+    case PROP_CHORUS_LEVEL:
+      g_value_set_double (value, src->chorus_level);
+      break;
+    case PROP_CHORUS_FREQ:
+      g_value_set_double (value, src->chorus_freq);
+      break;
+    case PROP_CHORUS_DEPTH:
+      g_value_set_double (value, src->chorus_depth);
+      break;
+    case PROP_CHORUS_WAVEFORM:
+      g_value_set_enum (value, src->chorus_waveform);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+gstbt_fluid_synth_dispose (GObject * object)
+{
+  GstBtFluidSynth *gstsynth = GSTBT_FLUID_SYNTH (object);
+
+  if (gstsynth->dispose_has_run)
+    return;
+  gstsynth->dispose_has_run = TRUE;
+
+  if (gstsynth->midi)
+    delete_fluid_midi_driver (gstsynth->midi);
+  if (gstsynth->midi_router)
+    delete_fluid_midi_router (gstsynth->midi_router);
+  if (gstsynth->fluid)
+    delete_fluid_synth (gstsynth->fluid);
+
+  gstsynth->midi = NULL;
+  gstsynth->midi_router = NULL;
+  gstsynth->fluid = NULL;
+
+  g_free (gstsynth->instrument_patch_path);
+
+  G_OBJECT_CLASS (gstbt_fluid_synth_parent_class)->dispose (object);
+}
+
+//-- gobject type methods
+
+static void
+gstbt_fluid_synth_init (GstBtFluidSynth * src)
+{
+  /* set base parameters */
+  src->note_length = 4;
+  src->velocity = 100;
+
+  src->settings = new_fluid_settings ();
+  //fluid_settings_setstr(src->settings, "audio.driver", "alsa");
+  if (!(fluid_settings_setnum (src->settings, "synth.sample-rate",
+              ((GstBtAudioSynth *) src)->samplerate))) {
+    GST_WARNING ("Can't set samplerate : %d",
+        ((GstBtAudioSynth *) src)->samplerate);
+  }
+
+  /* create new FluidSynth */
+  src->fluid = new_fluid_synth (src->settings);
+  if (!src->fluid) {            /* FIXME - Element will likely crash if used after new_fluid_synth fails */
+    g_critical ("Failed to create FluidSynth context");
+    return;
+  }
+#if 0
+  /* hook our sfloader */
+  loader = g_malloc0 (sizeof (fluid_sfloader_t));
+  loader->data = wavetbl;
+  loader->free = sfloader_free;
+  loader->load = sfloader_load_sfont;
+  fluid_synth_add_sfloader (wavetbl->fluid, loader);
+#endif
+
+  /* create MIDI router to send MIDI to FluidSynth */
+  src->midi_router =
+      new_fluid_midi_router (src->settings,
+      fluid_synth_handle_midi_event, (void *) src);
+  if (src->midi_router) {
+    fluid_synth_set_midi_router (src->fluid, src->midi_router);
+    src->midi =
+        new_fluid_midi_driver (src->settings,
+        fluid_midi_router_handle_midi_event, (void *) (src->midi_router));
+    if (!src->midi)
+      g_warning ("Failed to create FluidSynth MIDI input driver");
+  } else
+    g_warning ("Failed to create MIDI input router");
+
+  gstbt_fluid_synth_update_reverb (src);        /* update reverb settings */
+  gstbt_fluid_synth_update_chorus (src);        /* update chorus settings */
+
+  /* FIXME(ensonic): temporary for testing, see comment at the top */
+  {
+    gchar **sf2, *sf2s[] = {
+      "/usr/share/sounds/sf2/FluidR3_GM.sf2",
+      "/usr/share/sounds/sf2/FluidR3_GS.sf2",
+      "/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2",
+      "/usr/share/doc/libfluid_synth-dev/examples/example.sf2",
+      NULL
+    };
+    sf2 = sf2s;
+    src->instrument_patch = -1;
+    while ((src->instrument_patch == -1) && *sf2) {
+      GST_INFO ("trying '%s'", *sf2);
+      if (g_file_test (*sf2, G_FILE_TEST_IS_REGULAR)) {
+        src->instrument_patch = fluid_synth_sfload (src->fluid, *sf2, TRUE);
+      }
+      sf2++;
+    }
+  }
+  if (src->instrument_patch == -1) {
+    GST_WARNING ("Couldn't load any soundfont");
+  } else {
+    GST_INFO ("soundfont loaded as %d", src->instrument_patch);
+  }
+}
+
+static void
+gstbt_fluid_synth_class_init (GstBtFluidSynthClass * klass)
 {
   GObjectClass *gobject_class = (GObjectClass *) klass;
+  GstElementClass *element_class = (GstElementClass *) klass;
   GstBtAudioSynthClass *audio_synth_class = (GstBtAudioSynthClass *) klass;
   ForeachBag bag;
   gint count = 0;
 
-  parent_class = (GstBtAudioSynthClass *) g_type_class_peek_parent (klass);
+  audio_synth_class->process = gstbt_fluid_synth_process;
+  audio_synth_class->setup = gstbt_fluid_synth_setup;
 
-  audio_synth_class->process = gst_fluid_synth_process;
-  audio_synth_class->setup = gst_fluid_synth_setup;
-
-  gobject_class->set_property = gst_fluid_synth_set_property;
-  gobject_class->get_property = gst_fluid_synth_get_property;
-  gobject_class->dispose = gst_fluid_synth_dispose;
+  gobject_class->set_property = gstbt_fluid_synth_set_property;
+  gobject_class->get_property = gstbt_fluid_synth_get_property;
+  gobject_class->dispose = gstbt_fluid_synth_dispose;
 
   /* set a log handler */
 #ifndef GST_DISABLE_GST_DEBUG
-  fluid_set_log_function (FLUID_PANIC, gst_fluid_synth_error_log_function,
+  fluid_set_log_function (FLUID_PANIC, gstbt_fluid_synth_error_log_function,
       NULL);
-  fluid_set_log_function (FLUID_ERR, gst_fluid_synth_warning_log_function,
+  fluid_set_log_function (FLUID_ERR, gstbt_fluid_synth_warning_log_function,
       NULL);
-  fluid_set_log_function (FLUID_WARN, gst_fluid_synth_warning_log_function,
+  fluid_set_log_function (FLUID_WARN, gstbt_fluid_synth_warning_log_function,
       NULL);
-  fluid_set_log_function (FLUID_INFO, gst_fluid_synth_info_log_function, NULL);
-  fluid_set_log_function (FLUID_DBG, gst_fluid_synth_debug_log_function, NULL);
+  fluid_set_log_function (FLUID_INFO, gstbt_fluid_synth_info_log_function,
+      NULL);
+  fluid_set_log_function (FLUID_DBG, gstbt_fluid_synth_debug_log_function,
+      NULL);
 #else
   fluid_set_log_function (FLUID_PANIC, NULL, NULL);
   fluid_set_log_function (FLUID_ERR, NULL, NULL);
@@ -410,446 +805,17 @@ gst_fluid_synth_class_init (GstBtFluidSynthClass * klass)
           CHORUS_WAVEFORM_TYPE,
           FLUID_CHORUS_DEFAULT_TYPE,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  gst_element_class_set_static_metadata (element_class,
+      "FluidSynth",
+      "Source/Audio",
+      "FluidSynth wavetable synthesizer", "Josh Green <josh@users.sf.net>");
+  gst_element_class_add_metadata (element_class, GST_ELEMENT_METADATA_DOC_URI,
+      "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
+      G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtFluidSynth.html");
 }
 
-static void
-gst_fluid_synth_set_property (GObject * object, guint prop_id,
-    const GValue * value, GParamSpec * pspec)
-{
-  GstBtFluidSynth *src = GSTBT_FLUID_SYNTH (object);
-
-  if (src->dispose_has_run)
-    return;
-
-  /* is it one of the dynamically installed properties? */
-  if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id) {
-    gint retval;
-    gchar *name = dynamic_prop_names[prop_id - FIRST_DYNAMIC_PROP];
-
-    switch (G_PARAM_SPEC_VALUE_TYPE (pspec)) {
-      case G_TYPE_INT:
-        retval = fluid_settings_setint (src->settings, name,
-            g_value_get_int (value));
-        break;
-      case G_TYPE_DOUBLE:
-        retval = fluid_settings_setnum (src->settings, name,
-            g_value_get_double (value));
-        break;
-      case G_TYPE_STRING:
-        retval = fluid_settings_setstr (src->settings, name,
-            (char *) g_value_get_string (value));
-        break;
-      default:
-        g_critical ("Unexpected FluidSynth dynamic property type");
-        return;
-    }
-
-    if (!retval)
-      g_critical ("FluidSynth failure while setting FluidSynth property '%s'",
-          name);
-
-    return;
-  }
-
-  switch (prop_id) {
-    case PROP_NOTE:
-      src->note = g_value_get_enum (value);
-      if (src->note) {
-        if (src->note == GSTBT_NOTE_OFF) {
-          fluid_synth_noteoff (src->fluid, /*chan */ 0, src->key);
-          src->cur_note_length = 0;
-        } else {
-          // start note-off counter
-          src->cur_note_length = src->note_length;
-          src->key = src->note - GSTBT_NOTE_C_0;
-          fluid_synth_noteon (src->fluid, /*chan */ 0, src->key, src->velocity);
-        }
-      }
-      break;
-    case PROP_NOTE_LENGTH:
-      src->note_length = g_value_get_int (value);
-      break;
-    case PROP_NOTE_VELOCITY:
-      src->velocity = g_value_get_int (value);
-      break;
-    case PROP_PROGRAM:
-      src->program = g_value_get_int (value);
-      GST_INFO ("Switch to program: %d, %d", src->program >> 7,
-          src->program & 0x7F);
-      fluid_synth_program_select (src->fluid, /*chan */ 0,
-          src->instrument_patch, src->program >> 7, src->program & 0x7F);
-      break;
-      // not yet GST_PARAM_CONTROLLABLE
-    case PROP_INSTRUMENT_PATCH:
-      // unload old patch
-      g_free (src->instrument_patch_path);
-      fluid_synth_sfunload (src->fluid, src->instrument_patch, TRUE);
-      // load new patch
-      src->instrument_patch_path = g_value_dup_string (value);
-      GST_INFO ("Trying to load load soundfont: '%s'",
-          src->instrument_patch_path);
-      if ((src->instrument_patch =
-              fluid_synth_sfload (src->fluid, src->instrument_patch_path,
-                  TRUE)) == -1) {
-        GST_WARNING ("Couldn't load soundfont: '%s'",
-            src->instrument_patch_path);
-      } else {
-        GST_INFO ("soundfont loaded as %d", src->instrument_patch);
-        //fluid_synth_program_reset(src->fluid);
-        fluid_synth_program_select (src->fluid, /*chan */ 0,
-            src->instrument_patch, src->program >> 7, src->program & 0x7F);
-      }
-      break;
-    case PROP_INTERPOLATION:
-      src->interp = g_value_get_enum (value);
-      fluid_synth_set_interp_method (src->fluid, -1, src->interp);
-      break;
-    case PROP_REVERB_ENABLE:
-      src->reverb_enable = g_value_get_boolean (value);
-      fluid_synth_set_reverb_on (src->fluid, src->reverb_enable);
-      break;
-    case PROP_REVERB_ROOM_SIZE:
-      src->reverb_room_size = g_value_get_double (value);
-      src->reverb_update = TRUE;
-      gst_fluid_synth_update_reverb (src);
-      break;
-    case PROP_REVERB_DAMP:
-      src->reverb_damp = g_value_get_double (value);
-      src->reverb_update = TRUE;
-      gst_fluid_synth_update_reverb (src);
-      break;
-    case PROP_REVERB_WIDTH:
-      src->reverb_width = g_value_get_double (value);
-      src->reverb_update = TRUE;
-      gst_fluid_synth_update_reverb (src);
-      break;
-    case PROP_REVERB_LEVEL:
-      src->reverb_level = g_value_get_double (value);
-      src->reverb_update = TRUE;
-      gst_fluid_synth_update_reverb (src);
-      break;
-    case PROP_CHORUS_ENABLE:
-      src->chorus_enable = g_value_get_boolean (value);
-      fluid_synth_set_chorus_on (src->fluid, src->chorus_enable);
-      break;
-    case PROP_CHORUS_COUNT:
-      src->chorus_count = g_value_get_int (value);
-      src->chorus_update = TRUE;
-      gst_fluid_synth_update_chorus (src);
-      break;
-    case PROP_CHORUS_LEVEL:
-      src->chorus_level = g_value_get_double (value);
-      src->chorus_update = TRUE;
-      gst_fluid_synth_update_chorus (src);
-      break;
-    case PROP_CHORUS_FREQ:
-      src->chorus_freq = g_value_get_double (value);
-      src->chorus_update = TRUE;
-      gst_fluid_synth_update_chorus (src);
-      break;
-    case PROP_CHORUS_DEPTH:
-      src->chorus_depth = g_value_get_double (value);
-      src->chorus_update = TRUE;
-      gst_fluid_synth_update_chorus (src);
-      break;
-    case PROP_CHORUS_WAVEFORM:
-      src->chorus_waveform = g_value_get_enum (value);
-      src->chorus_update = TRUE;
-      gst_fluid_synth_update_chorus (src);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-}
-
-static void
-gst_fluid_synth_get_property (GObject * object, guint prop_id,
-    GValue * value, GParamSpec * pspec)
-{
-  GstBtFluidSynth *src = GSTBT_FLUID_SYNTH (object);
-
-  if (src->dispose_has_run)
-    return;
-
-  /* is it one of the dynamically installed properties? */
-  if (prop_id >= FIRST_DYNAMIC_PROP && prop_id < last_property_id) {
-    gchar *s;
-    gdouble d;
-    gint i;
-    gint retval;
-    gchar *name = dynamic_prop_names[prop_id - FIRST_DYNAMIC_PROP];
-
-    switch (G_PARAM_SPEC_VALUE_TYPE (pspec)) {
-      case G_TYPE_INT:
-        retval = fluid_settings_getint (src->settings, name, &i);
-        if (retval)
-          g_value_set_int (value, i);
-        break;
-      case G_TYPE_DOUBLE:
-        retval = fluid_settings_getnum (src->settings, name, &d);
-        if (retval)
-          g_value_set_double (value, d);
-        break;
-      case G_TYPE_STRING:
-        retval = fluid_settings_getstr (src->settings, name, &s);
-        if (retval)
-          g_value_set_string (value, s);
-        break;
-      default:
-        g_critical ("Unexpected FluidSynth dynamic property type");
-        return;
-    }
-
-    if (!retval)
-      g_critical ("Failed to get FluidSynth property '%s'", name);
-
-    return;
-  }
-
-  switch (prop_id) {
-    case PROP_NOTE_LENGTH:
-      g_value_set_int (value, src->note_length);
-      break;
-    case PROP_NOTE_VELOCITY:
-      g_value_set_int (value, src->velocity);
-      break;
-    case PROP_PROGRAM:
-      g_value_set_int (value, src->program);
-      break;
-      // not yet GST_PARAM_CONTROLLABLE
-    case PROP_INSTRUMENT_PATCH:
-      g_value_set_string (value, src->instrument_patch_path);
-      break;
-    case PROP_INTERPOLATION:
-      g_value_set_enum (value, src->interp);
-      break;
-    case PROP_REVERB_ENABLE:
-      g_value_set_boolean (value, src->reverb_enable);
-      break;
-    case PROP_REVERB_ROOM_SIZE:
-      g_value_set_double (value, src->reverb_room_size);
-      break;
-    case PROP_REVERB_DAMP:
-      g_value_set_double (value, src->reverb_damp);
-      break;
-    case PROP_REVERB_WIDTH:
-      g_value_set_double (value, src->reverb_width);
-      break;
-    case PROP_REVERB_LEVEL:
-      g_value_set_double (value, src->reverb_level);
-      break;
-    case PROP_CHORUS_ENABLE:
-      g_value_set_boolean (value, src->chorus_enable);
-      break;
-    case PROP_CHORUS_COUNT:
-      g_value_set_int (value, src->chorus_count);
-      break;
-    case PROP_CHORUS_LEVEL:
-      g_value_set_double (value, src->chorus_level);
-      break;
-    case PROP_CHORUS_FREQ:
-      g_value_set_double (value, src->chorus_freq);
-      break;
-    case PROP_CHORUS_DEPTH:
-      g_value_set_double (value, src->chorus_depth);
-      break;
-    case PROP_CHORUS_WAVEFORM:
-      g_value_set_enum (value, src->chorus_waveform);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-}
-
-static void
-gst_fluid_synth_init (GstBtFluidSynth * src, GstBtFluidSynthClass * g_class)
-{
-  /* set base parameters */
-  src->note_length = 4;
-  src->velocity = 100;
-
-  src->settings = new_fluid_settings ();
-  //fluid_settings_setstr(src->settings, "audio.driver", "alsa");
-  if (!(fluid_settings_setnum (src->settings, "synth.sample-rate",
-              ((GstBtAudioSynth *) src)->samplerate))) {
-    GST_WARNING ("Can't set samplerate : %d",
-        ((GstBtAudioSynth *) src)->samplerate);
-  }
-
-  /* create new FluidSynth */
-  src->fluid = new_fluid_synth (src->settings);
-  if (!src->fluid) {            /* FIXME - Element will likely crash if used after new_fluid_synth fails */
-    g_critical ("Failed to create FluidSynth context");
-    return;
-  }
-#if 0
-  /* hook our sfloader */
-  loader = g_malloc0 (sizeof (fluid_sfloader_t));
-  loader->data = wavetbl;
-  loader->free = sfloader_free;
-  loader->load = sfloader_load_sfont;
-  fluid_synth_add_sfloader (wavetbl->fluid, loader);
-#endif
-
-  /* create MIDI router to send MIDI to FluidSynth */
-  src->midi_router =
-      new_fluid_midi_router (src->settings,
-      fluid_synth_handle_midi_event, (void *) src);
-  if (src->midi_router) {
-    fluid_synth_set_midi_router (src->fluid, src->midi_router);
-    src->midi =
-        new_fluid_midi_driver (src->settings,
-        fluid_midi_router_handle_midi_event, (void *) (src->midi_router));
-    if (!src->midi)
-      g_warning ("Failed to create FluidSynth MIDI input driver");
-  } else
-    g_warning ("Failed to create MIDI input router");
-
-  gst_fluid_synth_update_reverb (src);  /* update reverb settings */
-  gst_fluid_synth_update_chorus (src);  /* update chorus settings */
-
-  /* FIXME(ensonic): temporary for testing, see comment at the top */
-  {
-    gchar **sf2, *sf2s[] = {
-      "/usr/share/sounds/sf2/FluidR3_GM.sf2",
-      "/usr/share/sounds/sf2/FluidR3_GS.sf2",
-      "/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2",
-      "/usr/share/doc/libfluid_synth-dev/examples/example.sf2",
-      NULL
-    };
-    sf2 = sf2s;
-    src->instrument_patch = -1;
-    while ((src->instrument_patch == -1) && *sf2) {
-      GST_INFO ("trying '%s'", *sf2);
-      if (g_file_test (*sf2, G_FILE_TEST_IS_REGULAR)) {
-        src->instrument_patch = fluid_synth_sfload (src->fluid, *sf2, TRUE);
-      }
-      sf2++;
-    }
-  }
-  if (src->instrument_patch == -1) {
-    GST_WARNING ("Couldn't load any soundfont");
-  } else {
-    GST_INFO ("soundfont loaded as %d", src->instrument_patch);
-  }
-}
-
-static gboolean
-gst_fluid_synth_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
-{
-  GstStructure *structure = gst_caps_get_structure (caps, 0);
-
-  /* Set channels to 2 */
-  if (!gst_structure_fixate_field_nearest_int (structure, "channels", 2))
-    return FALSE;
-
-  return TRUE;
-}
-
-static void
-gst_fluid_synth_update_reverb (GstBtFluidSynth * gstsynth)
-{
-  if (!gstsynth->reverb_update)
-    return;
-
-  if (gstsynth->reverb_enable)
-    fluid_synth_set_reverb (gstsynth->fluid, gstsynth->reverb_room_size,
-        gstsynth->reverb_damp, gstsynth->reverb_width, gstsynth->reverb_level);
-
-  fluid_synth_set_reverb_on (gstsynth->fluid, gstsynth->reverb_enable);
-  gstsynth->reverb_update = FALSE;
-}
-
-static void
-gst_fluid_synth_update_chorus (GstBtFluidSynth * gstsynth)
-{
-  if (!gstsynth->chorus_update)
-    return;
-
-  if (gstsynth->chorus_enable)
-    fluid_synth_set_chorus (gstsynth->fluid, gstsynth->chorus_count,
-        gstsynth->chorus_level, gstsynth->chorus_freq,
-        gstsynth->chorus_depth, gstsynth->chorus_waveform);
-
-  fluid_synth_set_chorus_on (gstsynth->fluid, TRUE);
-  gstsynth->chorus_update = FALSE;
-}
-
-static void
-gst_fluid_synth_process (GstBtAudioSynth * base, GstBuffer * data)
-{
-  GstBtFluidSynth *src = ((GstBtFluidSynth *) base);
-
-  if (src->cur_note_length) {
-    src->cur_note_length--;
-    if (!src->cur_note_length) {
-      fluid_synth_noteoff (src->fluid, /*chan */ 0, src->key);
-      GST_INFO ("note-off: %d", src->key);
-    }
-  }
-  fluid_synth_write_s16 (src->fluid,
-      ((GstBtAudioSynth *) src)->generate_samples_per_buffer,
-      GST_BUFFER_DATA (data), 0, 2, GST_BUFFER_DATA (data), 1, 2);
-}
-
-static void
-gst_fluid_synth_dispose (GObject * object)
-{
-  GstBtFluidSynth *gstsynth = GSTBT_FLUID_SYNTH (object);
-
-  if (gstsynth->dispose_has_run)
-    return;
-  gstsynth->dispose_has_run = TRUE;
-
-  if (gstsynth->midi)
-    delete_fluid_midi_driver (gstsynth->midi);
-  if (gstsynth->midi_router)
-    delete_fluid_midi_router (gstsynth->midi_router);
-  if (gstsynth->fluid)
-    delete_fluid_synth (gstsynth->fluid);
-
-  gstsynth->midi = NULL;
-  gstsynth->midi_router = NULL;
-  gstsynth->fluid = NULL;
-
-  g_free (gstsynth->instrument_patch_path);
-
-  G_OBJECT_CLASS (parent_class)->dispose (object);
-}
-
-GType
-gstbt_fluid_synth_get_type (void)
-{
-  static GType type = 0;
-
-  if (G_UNLIKELY (!type)) {
-    const GTypeInfo element_type_info = {
-      sizeof (GstBtFluidSynthClass),
-      (GBaseInitFunc) gst_fluid_synth_base_init,
-      NULL,                     /* base_finalize */
-      (GClassInitFunc) gst_fluid_synth_class_init,
-      NULL,                     /* class_finalize */
-      NULL,                     /* class_data */
-      sizeof (GstBtFluidSynth),
-      0,                        /* n_preallocs */
-      (GInstanceInitFunc) gst_fluid_synth_init
-    };
-    const GInterfaceInfo property_meta_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
-
-    type =
-        g_type_register_static (GSTBT_TYPE_AUDIO_SYNTH, "GstBtFluidSynth",
-        &element_type_info, (GTypeFlags) 0);
-    g_type_add_interface_static (type, GSTBT_TYPE_PROPERTY_META,
-        &property_meta_interface_info);
-  }
-  return type;
-}
+//-- plugin
 
 static gboolean
 plugin_init (GstPlugin * plugin)
@@ -857,15 +823,12 @@ plugin_init (GstPlugin * plugin)
   GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "fluidsynth", GST_DEBUG_FG_WHITE
       | GST_DEBUG_BG_BLACK, "FluidSynth wavetable synthesizer");
 
-  /* initialize gst controller library */
-  gst_controller_init (NULL, NULL);
-
   return gst_element_register (plugin, "fluidsynth", GST_RANK_NONE,
       GSTBT_TYPE_FLUID_SYNTH);
 }
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
-    "fluidsynth",
+    fluidsynth,
     "FluidSynth wavetable synthesizer",
     plugin_init, VERSION, "LGPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN);

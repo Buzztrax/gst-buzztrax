@@ -142,9 +142,9 @@ bml (describe_plugin (gchar * pathname, gpointer bmh))
     }
     // create the metadata store
 #ifdef BML_WRAPPED
-    bml_meta = gst_structure_empty_new ("bmlw");
+    bml_meta = gst_structure_new_empty ("bmlw");
 #else
-    bml_meta = gst_structure_empty_new ("bmln");
+    bml_meta = gst_structure_new_empty ("bmln");
 #endif
 
     // use right path for emulated and native machines

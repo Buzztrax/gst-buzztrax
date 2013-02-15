@@ -28,39 +28,39 @@ static GstStaticPadTemplate bml_pad_caps_mono_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("audio/x-raw-float, "
-        "width = (int) 32, "
-        "rate = (int) [ 1, MAX ], "
-        "channels = (int) 1, " "endianness = (int) BYTE_ORDER")
+    GST_STATIC_CAPS ("audio/x-raw, "
+        "format = (string) " GST_AUDIO_NE (F32) ", "
+        "layout = (string) interleaved, "
+        "rate = (int) [ 1, MAX ], " "channels = (int) 1")
     );
 
 static GstStaticPadTemplate bml_pad_caps_stereo_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("audio/x-raw-float, "
-        "width = (int) 32, "
-        "rate = (int) [ 1, MAX ], "
-        "channels = (int) 2, " "endianness = (int) BYTE_ORDER")
+    GST_STATIC_CAPS ("audio/x-raw, "
+        "format = (string) " GST_AUDIO_NE (F32) ", "
+        "layout = (string) interleaved, "
+        "rate = (int) [ 1, MAX ], " "channels = (int) 2")
     );
 
 static GstStaticPadTemplate bml_pad_caps_mono_sink_template =
 GST_STATIC_PAD_TEMPLATE ("sink",
     GST_PAD_SINK,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("audio/x-raw-float, "
-        "width = (int) 32, "
-        "rate = (int) [ 1, MAX ], "
-        "channels = (int) 1, " "endianness = (int) BYTE_ORDER")
+    GST_STATIC_CAPS ("audio/x-raw, "
+        "format = (string) " GST_AUDIO_NE (F32) ", "
+        "layout = (string) interleaved, "
+        "rate = (int) [ 1, MAX ], " "channels = (int) 1")
     );
 static GstStaticPadTemplate bml_pad_caps_stereo_sink_template =
 GST_STATIC_PAD_TEMPLATE ("sink",
     GST_PAD_SINK,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("audio/x-raw-float, "
-        "width = (int) 32, "
-        "rate = (int) [ 1, MAX ], "
-        "channels = (int) 2, " "endianness = (int) BYTE_ORDER")
+    GST_STATIC_CAPS ("audio/x-raw, "
+        "format = (string) " GST_AUDIO_NE (F32) ", "
+        "layout = (string) interleaved, "
+        "rate = (int) [ 1, MAX ], " "channels = (int) 2")
     );
 
 static GstBaseTransformClass *parent_class = NULL;
@@ -70,7 +70,7 @@ static GstBaseTransformClass *parent_class = NULL;
 
 //-- child proxy interface implementations
 
-static GstObject *
+static GObject *
 gst_bml_child_proxy_get_child_by_index (GstChildProxy * child_proxy,
     guint index)
 {
@@ -279,6 +279,7 @@ static GstFlowReturn
 gst_bml_transform_transform_ip_mono (GstBaseTransform * base,
     GstBuffer * outbuf)
 {
+  GstMapInfo info;
   GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
   GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
   GstBML *bml = GST_BML (bml_transform);
@@ -311,8 +312,12 @@ gst_bml_transform_transform_ip_mono (GstBaseTransform * base,
   if (gst_base_transform_is_passthrough (base))
     return GST_FLOW_OK;
 
-  data = (BMLData *) GST_BUFFER_DATA (outbuf);
-  samples_per_buffer = GST_BUFFER_SIZE (outbuf) / sizeof (BMLData);
+  if (!gst_buffer_map (outbuf, &info, GST_MAP_READ | GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map buffer for read & write");
+    return GST_FLOW_ERROR;
+  }
+  data = (BMLData *) info.data;
+  samples_per_buffer = info.size / sizeof (BMLData);
 
   /* if buffer has only silence process with different mode */
   if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_GAP)) {
@@ -335,7 +340,13 @@ gst_bml_transform_transform_ip_mono (GstBaseTransform * base,
     seg_data = &seg_data[seg_size];
     todo -= seg_size;
   }
-  gstbml_fix_data ((GstElement *) bml_transform, outbuf, has_data);
+  if (gstbml_fix_data ((GstElement *) bml_transform, &info, has_data)) {
+    GST_BUFFER_FLAG_SET (outbuf, GST_BUFFER_FLAG_GAP);
+  } else {
+    GST_BUFFER_FLAG_UNSET (outbuf, GST_BUFFER_FLAG_GAP);
+  }
+
+  gst_buffer_unmap (outbuf, &info);
 
   return (GST_FLOW_OK);
 }
@@ -344,6 +355,7 @@ static GstFlowReturn
 gst_bml_transform_transform_ip_stereo (GstBaseTransform * base,
     GstBuffer * outbuf)
 {
+  GstMapInfo info;
   GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
   GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
   GstBML *bml = GST_BML (bml_transform);
@@ -376,8 +388,12 @@ gst_bml_transform_transform_ip_stereo (GstBaseTransform * base,
   if (gst_base_transform_is_passthrough (base))
     return GST_FLOW_OK;
 
-  data = (BMLData *) GST_BUFFER_DATA (outbuf);
-  samples_per_buffer = GST_BUFFER_SIZE (outbuf) / (sizeof (BMLData) * 2);
+  if (!gst_buffer_map (outbuf, &info, GST_MAP_READ | GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map buffer for read & write");
+    return GST_FLOW_ERROR;
+  }
+  data = (BMLData *) info.data;
+  samples_per_buffer = info.size / (sizeof (BMLData) * 2);
 
   /* if buffer has only silence process with different mode */
   if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_GAP)) {
@@ -400,7 +416,13 @@ gst_bml_transform_transform_ip_stereo (GstBaseTransform * base,
     seg_data = &seg_data[seg_size * 2];
     todo -= seg_size;
   }
-  gstbml_fix_data ((GstElement *) bml_transform, outbuf, has_data);
+  if (gstbml_fix_data ((GstElement *) bml_transform, &info, has_data)) {
+    GST_BUFFER_FLAG_SET (outbuf, GST_BUFFER_FLAG_GAP);
+  } else {
+    GST_BUFFER_FLAG_UNSET (outbuf, GST_BUFFER_FLAG_GAP);
+  }
+
+  gst_buffer_unmap (outbuf, &info);
 
   return (GST_FLOW_OK);
 }
@@ -409,6 +431,7 @@ static GstFlowReturn
 gst_bml_transform_transform_mono_to_stereo (GstBaseTransform * base,
     GstBuffer * inbuf, GstBuffer * outbuf)
 {
+  GstMapInfo infoi, infoo;
   GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
   GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
   GstBML *bml = GST_BML (bml_transform);
@@ -444,9 +467,17 @@ gst_bml_transform_transform_mono_to_stereo (GstBaseTransform * base,
     //return GST_FLOW_OK;
   }
 
-  datai = (BMLData *) GST_BUFFER_DATA (inbuf);
-  datao = (BMLData *) GST_BUFFER_DATA (outbuf);
-  samples_per_buffer = GST_BUFFER_SIZE (inbuf) / sizeof (BMLData);
+  if (!gst_buffer_map (inbuf, &infoi, GST_MAP_READ)) {
+    GST_WARNING_OBJECT (base, "unable to map input buffer for read");
+    return GST_FLOW_ERROR;
+  }
+  datai = (BMLData *) infoi.data;
+  samples_per_buffer = infoi.size / sizeof (BMLData);
+  if (!gst_buffer_map (outbuf, &infoo, GST_MAP_READ | GST_MAP_WRITE)) {
+    GST_WARNING_OBJECT (base, "unable to map output buffer for read & write");
+    return GST_FLOW_ERROR;
+  }
+  datao = (BMLData *) infoo.data;
 
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer*2;i++) datao[i]=0.0f;
@@ -474,55 +505,65 @@ gst_bml_transform_transform_mono_to_stereo (GstBaseTransform * base,
     seg_datao = &seg_datao[seg_size * 2];
     todo -= seg_size;
   }
-  gstbml_fix_data ((GstElement *) bml_transform, outbuf, has_data);
+  if (gstbml_fix_data ((GstElement *) bml_transform, &infoo, has_data)) {
+    GST_BUFFER_FLAG_SET (outbuf, GST_BUFFER_FLAG_GAP);
+  } else {
+    GST_BUFFER_FLAG_UNSET (outbuf, GST_BUFFER_FLAG_GAP);
+  }
 
+  gst_buffer_unmap (inbuf, &infoi);
+  gst_buffer_unmap (outbuf, &infoo);
   return (GST_FLOW_OK);
 }
 
 static gboolean
 gst_bml_transform_get_unit_size (GstBaseTransform * base, GstCaps * caps,
-    guint * size)
+    gsize * size)
 {
-  gint width, channels;
-  GstStructure *structure;
-  gboolean ret;
+  GstAudioInfo info;
 
   g_assert (size);
-  GST_INFO ("get_unit_size: for %" GST_PTR_FORMAT, caps);
 
-  /* this works for both float and int */
-  structure = gst_caps_get_structure (caps, 0);
-  ret = gst_structure_get_int (structure, "width", &width);
-  ret &= gst_structure_get_int (structure, "channels", &channels);
+  if (!gst_audio_info_from_caps (&info, caps))
+    return FALSE;
 
-  *size = width * channels / 8;
+  *size = GST_AUDIO_INFO_BPF (&info);
 
-  return ret;
+  return TRUE;
 }
 
 static GstCaps *
 gst_bml_transform_transform_caps (GstBaseTransform * base,
-    GstPadDirection direction, GstCaps * caps)
+    GstPadDirection direction, GstCaps * caps, GstCaps * filter)
 {
   GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (base);
   GstBMLClass *bml_class = GST_BML_CLASS (klass);
-  GstCaps *res;
+  GstCaps *res = gst_caps_copy (caps);
   GstStructure *structure;
+  gint i, n = gst_caps_get_size (res);
 
-  /* transform caps gives one single caps so we can just replace
-   * the channel property with our range. */
-  res = gst_caps_copy (caps);
-  structure = gst_caps_get_structure (res, 0);
-  /* if we should produce this output, what can we accept */
-  if (direction == GST_PAD_SRC) {
-    GST_INFO_OBJECT (base, "allow %d input channel", bml_class->input_channels);
-    gst_structure_set (structure,
-        "channels", G_TYPE_INT, bml_class->input_channels, NULL);
-  } else {
-    GST_INFO_OBJECT (base, "allow %d output channels",
-        bml_class->output_channels);
-    gst_structure_set (structure, "channels", G_TYPE_INT,
-        bml_class->output_channels, NULL);
+  for (i = 0; i < n; i++) {
+    structure = gst_caps_get_structure (res, i);
+    /* if we should produce this output, what can we accept */
+    if (direction == GST_PAD_SRC) {
+      GST_INFO_OBJECT (base, "allow %d input channel",
+          bml_class->input_channels);
+      gst_structure_set (structure, "channels", G_TYPE_INT,
+          bml_class->input_channels, NULL);
+      gst_structure_remove_field (structure, "channel-mask");
+    } else {
+      GST_INFO_OBJECT (base, "allow %d output channels",
+          bml_class->output_channels);
+      gst_structure_set (structure, "channels", G_TYPE_INT,
+          bml_class->output_channels, NULL);
+    }
+  }
+
+  if (filter) {
+    GstCaps *tmp =
+        gst_caps_intersect_full (filter, res, GST_CAPS_INTERSECT_FIRST);
+    gst_caps_unref (res);
+    res = tmp;
   }
 
   return res;

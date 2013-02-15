@@ -78,13 +78,13 @@ gstbt_osc_wave_create_mono (GstBtOscWave * self, guint64 off, guint ct,
     return FALSE;
   }
   const guint ss = sizeof (gint16);
-  guint size = GST_BUFFER_SIZE (self->data);
+  guint size = self->map_info.size;
   if (off * ss >= size) {
     GST_DEBUG ("beyond size");
     return FALSE;
   }
 
-  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
+  gint16 *src = (gint16 *) self->map_info.data;
 
   if ((off + ct) * ss >= size) {
     guint ct2 = (size / ss) - off;
@@ -107,13 +107,13 @@ gstbt_osc_wave_create_stereo (GstBtOscWave * self, guint64 off, guint ct,
     return FALSE;
   }
   const guint ss = 2 * sizeof (gint16);
-  guint size = GST_BUFFER_SIZE (self->data);
+  guint size = self->map_info.size;
   if (off * ss >= size) {
     GST_DEBUG ("beyond size");
     return FALSE;
   }
 
-  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
+  gint16 *src = (gint16 *) self->map_info.data;
 
   if ((off + ct) * ss >= size) {
     guint ct2 = (size / ss) - off;
@@ -136,13 +136,13 @@ gstbt_osc_wave_create_mono_resampled (GstBtOscWave * self, guint64 off,
     return FALSE;
   }
   const guint ss = sizeof (gint16);
-  guint size = GST_BUFFER_SIZE (self->data);
+  guint size = self->map_info.size;
   if (off * ss >= size) {
     GST_DEBUG ("beyond size");
     return FALSE;
   }
 
-  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
+  gint16 *src = (gint16 *) self->map_info.data;
   gdouble rate = self->rate;
   guint64 s, d;
 
@@ -163,13 +163,13 @@ gstbt_osc_wave_create_stereo_resampled (GstBtOscWave * self, guint64 off,
     return FALSE;
   }
   const guint ss = 2 * sizeof (gint16);
-  guint size = GST_BUFFER_SIZE (self->data);
+  guint size = self->map_info.size;
   if (off * ss >= size) {
     GST_DEBUG ("beyond size");
     return FALSE;
   }
 
-  gint16 *src = (gint16 *) GST_BUFFER_DATA (self->data);
+  gint16 *src = (gint16 *) self->map_info.data;
   gdouble rate = self->rate;
   guint64 s, d;
 
@@ -198,8 +198,7 @@ void
 gstbt_osc_wave_setup (GstBtOscWave * self)
 {
   gpointer *cb = self->wave_callbacks;
-  GstBuffer *(*get_wave_buffer) (gpointer, guint, guint);
-  GstCaps *caps;
+  GstStructure *(*get_wave_buffer) (gpointer, guint, guint);
   GstStructure *s;
   GstBtNote root_note;
 
@@ -207,20 +206,27 @@ gstbt_osc_wave_setup (GstBtOscWave * self)
     return;
   }
   if (self->data) {
+    gst_buffer_unmap (self->data, &self->map_info);
     gst_buffer_unref (self->data);
     self->data = NULL;
   }
   get_wave_buffer = cb[1];
-  self->data = get_wave_buffer (cb[0], self->wave, self->wave_level);
+  if (!(s = get_wave_buffer (cb[0], self->wave, self->wave_level)))
+    return;
+
+  gst_structure_get (s,
+      "channels", G_TYPE_INT, &self->channels,
+      "root-note", GSTBT_TYPE_NOTE, &root_note,
+      "buffer", GST_TYPE_BUFFER, &self->data, NULL);
+
   if (!self->data) {
     return;
   }
 
-  caps = GST_BUFFER_CAPS (self->data);
-  s = gst_caps_get_structure (caps, 0);
-  gst_structure_get (s,
-      "channels", G_TYPE_INT, &self->channels,
-      "root-note", GSTBT_TYPE_NOTE, &root_note, NULL);
+  if (!gst_buffer_map (self->data, &self->map_info, GST_MAP_READ)) {
+    GST_WARNING_OBJECT (self, "unable to map buffer for read");
+    return;
+  }
 
   if (self->freq > 0.0) {
     gdouble freq =
@@ -232,8 +238,7 @@ gstbt_osc_wave_setup (GstBtOscWave * self)
 
   GST_WARNING ("got wave with %d channels", self->channels);
 
-  self->duration = GST_BUFFER_SIZE (self->data) /
-      (self->rate * sizeof (gint16));
+  self->duration = self->map_info.size / (self->rate * sizeof (gint16));
 
   switch (self->channels) {
     case 1:
@@ -335,8 +340,10 @@ gstbt_osc_wave_dispose (GObject * object)
 
   if (self->n2f)
     g_object_unref (self->n2f);
-  if (self->data)
+  if (self->data) {
+    gst_buffer_unmap (self->data, &self->map_info);
     gst_buffer_unref (self->data);
+  }
 
   G_OBJECT_CLASS (gstbt_osc_wave_parent_class)->dispose (object);
 }

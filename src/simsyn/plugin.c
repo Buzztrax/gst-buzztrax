@@ -32,15 +32,12 @@ plugin_init (GstPlugin * plugin)
   GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "simsyn",
       GST_DEBUG_FG_WHITE | GST_DEBUG_BG_BLACK, "simple audio synthesizer");
 
-  /* initialize gst controller library */
-  gst_controller_init (NULL, NULL);
-
   return gst_element_register (plugin, "simsyn", GST_RANK_NONE,
       GSTBT_TYPE_SIM_SYN);
 }
 
 GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
     GST_VERSION_MINOR,
-    "simsyn",
+    simsyn,
     "Simple audio synthesizer",
     plugin_init, VERSION, "LGPL", GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN);

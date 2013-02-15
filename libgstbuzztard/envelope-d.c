@@ -30,7 +30,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gst/controller/gstcontroller.h>
 
 #include "envelope-d.h"
 
@@ -78,8 +77,7 @@ gstbt_envelope_d_setup (GstBtEnvelopeD * self, gint samplerate,
     gdouble decay_time, gdouble peak_level)
 {
   GstBtEnvelope *base = (GstBtEnvelope *) self;
-  GValue val = { 0, };
-  GstController *ctrl = base->ctrl;
+  GstTimedValueControlSource *cs = base->cs;
   gdouble attack_time = 0.001;
   guint64 attack, decay;
 
@@ -98,15 +96,10 @@ gstbt_envelope_d_setup (GstBtEnvelopeD * self, gint samplerate,
   base->length = decay;
 
   /* configure envelope */
-  g_value_init (&val, G_TYPE_DOUBLE);
-  gst_controller_unset_all (ctrl, "value");
-  g_value_set_double (&val, 0.0);
-  gst_controller_set (ctrl, "value", G_GUINT64_CONSTANT (0), &val);
-  g_value_set_double (&val, peak_level);
-  gst_controller_set (ctrl, "value", attack, &val);
-  g_value_set_double (&val, 0.0);
-  gst_controller_set (ctrl, "value", decay, &val);
-  g_value_unset (&val);
+  gst_timed_value_control_source_unset_all (cs);
+  gst_timed_value_control_source_set (cs, G_GUINT64_CONSTANT (0), 0.0);
+  gst_timed_value_control_source_set (cs, attack, peak_level);
+  gst_timed_value_control_source_set (cs, decay, 0.0);
 }
 
 //-- virtual methods

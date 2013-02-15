@@ -510,8 +510,10 @@ gstbt_osc_synth_dispose (GObject * const object)
 {
   GstBtOscSynth *self = GSTBT_OSC_SYNTH (object);
 
-  g_object_remove_weak_pointer (G_OBJECT (self->volenv),
-      (gpointer *) & self->volenv);
+  if (self->volenv) {
+    g_object_remove_weak_pointer (G_OBJECT (self->volenv),
+        (gpointer *) & self->volenv);
+  }
 
   G_OBJECT_CLASS (gstbt_osc_synth_parent_class)->dispose (object);
 }

@@ -21,7 +21,6 @@
 #define __GSTBT_SIM_SYN_H__
 
 #include <gst/gst.h>
-#include <gst/controller/gstcontroller.h>
 #include <libgstbuzztard/audiosynth.h>
 #include <libgstbuzztard/envelope-d.h>
 #include <libgstbuzztard/filter-svf.h>

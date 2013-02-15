@@ -33,7 +33,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <gst/controller/gstcontroller.h>
 #include <gst/audio/audio.h>
 
 #include "libgstbuzztard/tempo.h"
@@ -55,39 +54,23 @@ static GstStaticPadTemplate gstbt_audio_synth_src_template =
 GST_STATIC_PAD_TEMPLATE ("src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("audio/x-raw-int, "
-        "endianness = (int) BYTE_ORDER, "
-        "signed = (boolean) true, "
-        "width = (int) 16, " "depth = (int) 16, " "rate = (int) [ 1, MAX ], "
-        "channels = (int) [ 1, 2 ]")
+    GST_STATIC_CAPS ("audio/x-raw, "
+        "format = (string) " GST_AUDIO_NE (S16) ", "
+        "layout = (string) interleaved, "
+        "rate = (int) [ 1, MAX ], " "channels = (int) [1, 2]")
     );
 
-static GstBaseSrcClass *parent_class = NULL;
+//-- the class
 
-static void gstbt_audio_synth_base_init (gpointer klass);
-static void gstbt_audio_synth_class_init (GstBtAudioSynthClass * klass);
-static void gstbt_audio_synth_init (GstBtAudioSynth * object,
-    GstBtAudioSynthClass * klass);
+static void gstbt_audio_synth_tempo_interface_init (gpointer g_iface,
+    gpointer iface_data);
 
-static void gstbt_audio_synth_set_property (GObject * object,
-    guint prop_id, const GValue * value, GParamSpec * pspec);
-static void gstbt_audio_synth_get_property (GObject * object,
-    guint prop_id, GValue * value, GParamSpec * pspec);
-static void gstbt_audio_synth_dispose (GObject * object);
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GstBtAudioSynth, gstbt_audio_synth,
+    GST_TYPE_BASE_SRC, G_IMPLEMENT_INTERFACE (GST_TYPE_PRESET, NULL)
+    G_IMPLEMENT_INTERFACE (GSTBT_TYPE_TEMPO,
+        gstbt_audio_synth_tempo_interface_init));
 
-static gboolean gstbt_audio_synth_setcaps (GstBaseSrc * basesrc,
-    GstCaps * caps);
-static void gstbt_audio_synth_src_fixate (GstPad * pad, GstCaps * caps);
-
-static gboolean gstbt_audio_synth_is_seekable (GstBaseSrc * basesrc);
-static gboolean gstbt_audio_synth_do_seek (GstBaseSrc * basesrc,
-    GstSegment * segment);
-static gboolean gstbt_audio_synth_query (GstBaseSrc * basesrc,
-    GstQuery * query);
-
-static gboolean gstbt_audio_synth_start (GstBaseSrc * basesrc);
-static GstFlowReturn gstbt_audio_synth_create (GstBaseSrc * basesrc,
-    guint64 offset, guint length, GstBuffer ** buffer);
+//--
 
 static void
 gstbt_audio_synth_calculate_buffer_frames (GstBtAudioSynth * self)
@@ -111,190 +94,38 @@ gstbt_audio_synth_calculate_buffer_frames (GstBtAudioSynth * self)
   GST_DEBUG ("ticktime err=%lf", self->ticktime_err);
 }
 
-static void
-gstbt_audio_synth_tempo_change_tempo (GstBtTempo * tempo,
-    glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick)
-{
-  GstBtAudioSynth *self = GSTBT_AUDIO_SYNTH (tempo);
-  gboolean changed = FALSE;
-
-  if (beats_per_minute >= 0) {
-    if (self->beats_per_minute != beats_per_minute) {
-      self->beats_per_minute = (gulong) beats_per_minute;
-      g_object_notify (G_OBJECT (self), "beats-per-minute");
-      changed = TRUE;
-    }
-  }
-  if (ticks_per_beat >= 0) {
-    if (self->ticks_per_beat != ticks_per_beat) {
-      self->ticks_per_beat = (gulong) ticks_per_beat;
-      g_object_notify (G_OBJECT (self), "ticks-per-beat");
-      changed = TRUE;
-    }
-  }
-  if (subticks_per_tick >= 0) {
-    if (self->subticks_per_tick != subticks_per_tick) {
-      self->subticks_per_tick = (gulong) subticks_per_tick;
-      g_object_notify (G_OBJECT (self), "subticks-per-tick");
-      changed = TRUE;
-    }
-  }
-  if (changed) {
-    GST_DEBUG ("changing tempo to %lu BPM  %lu TPB  %lu STPT",
-        self->beats_per_minute, self->ticks_per_beat, self->subticks_per_tick);
-    gstbt_audio_synth_calculate_buffer_frames (self);
-  }
-}
-
-static void
-gstbt_audio_synth_tempo_interface_init (gpointer g_iface, gpointer iface_data)
-{
-  GstBtTempoInterface *iface = g_iface;
-  GST_INFO ("initializing interface");
-
-  iface->change_tempo = gstbt_audio_synth_tempo_change_tempo;
-}
-
 //-- audiosynth implementation
 
-static void
-gstbt_audio_synth_base_init (gpointer g_class)
+static GstCaps *
+gstbt_audio_synth_fixate (GstBaseSrc * basesrc, GstCaps * caps)
 {
-  GstElementClass *element_class = GST_ELEMENT_CLASS (g_class);
-
-  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "audiosynth",
-      GST_DEBUG_FG_BLUE | GST_DEBUG_BG_BLACK, "Base Audio synthesizer");
-
-  gst_element_class_add_pad_template (element_class,
-      gst_static_pad_template_get (&gstbt_audio_synth_src_template));
-  gst_element_class_set_details_simple (element_class,
-      "Audio Synth",
-      "Source/Audio",
-      "Base Audio synthesizer",
-      "Tom Mast <amishmansteve@users.sourceforge.net>");
-}
-
-static void
-gstbt_audio_synth_class_init (GstBtAudioSynthClass * klass)
-{
-  GObjectClass *gobject_class;
-  GstBaseSrcClass *gstbasesrc_class;
-
-  parent_class = (GstBaseSrcClass *) g_type_class_peek_parent (klass);
-
-  gobject_class = (GObjectClass *) klass;
-  gstbasesrc_class = (GstBaseSrcClass *) klass;
-
-  gobject_class->set_property = gstbt_audio_synth_set_property;
-  gobject_class->get_property = gstbt_audio_synth_get_property;
-  gobject_class->dispose = gstbt_audio_synth_dispose;
-
-  gstbasesrc_class->set_caps = GST_DEBUG_FUNCPTR (gstbt_audio_synth_setcaps);
-  gstbasesrc_class->is_seekable =
-      GST_DEBUG_FUNCPTR (gstbt_audio_synth_is_seekable);
-  gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gstbt_audio_synth_do_seek);
-  gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gstbt_audio_synth_query);
-  gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gstbt_audio_synth_start);
-  gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gstbt_audio_synth_create);
-
-  /* make process and setup method pure virtual */
-  klass->process = NULL;
-  klass->setup = NULL;
-
-  /* override interface properties */
-  g_object_class_override_property (gobject_class, PROP_BPM,
-      "beats-per-minute");
-  g_object_class_override_property (gobject_class, PROP_TPB, "ticks-per-beat");
-  g_object_class_override_property (gobject_class, PROP_STPT,
-      "subticks-per-tick");
-}
-
-static void
-gstbt_audio_synth_set_property (GObject * object, guint prop_id,
-    const GValue * value, GParamSpec * pspec)
-{
-  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (object);
-
-  if (src->dispose_has_run)
-    return;
-
-  switch (prop_id) {
-      /* tempo interface */
-    case PROP_BPM:
-    case PROP_TPB:
-    case PROP_STPT:
-      GST_WARNING ("use gstbt_tempo_change_tempo()");
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-}
-
-static void
-gstbt_audio_synth_get_property (GObject * object, guint prop_id,
-    GValue * value, GParamSpec * pspec)
-{
-  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (object);
-
-  if (src->dispose_has_run)
-    return;
-
-  switch (prop_id) {
-      /* tempo interface */
-    case PROP_BPM:
-      g_value_set_ulong (value, src->beats_per_minute);
-      break;
-    case PROP_TPB:
-      g_value_set_ulong (value, src->ticks_per_beat);
-      break;
-    case PROP_STPT:
-      g_value_set_ulong (value, src->subticks_per_tick);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-  }
-}
-
-static void
-gstbt_audio_synth_init (GstBtAudioSynth * src, GstBtAudioSynthClass * g_class)
-{
-  GstPad *pad = GST_BASE_SRC_PAD (src);
-
-  gst_pad_set_fixatecaps_function (pad, gstbt_audio_synth_src_fixate);
-
-  src->samplerate = GST_AUDIO_DEF_RATE;
-  src->beats_per_minute = 120;
-  src->ticks_per_beat = 4;
-  src->subticks_per_tick = 1;
-  gstbt_audio_synth_calculate_buffer_frames (src);
-  src->generate_samples_per_buffer = (guint) (0.5 + src->samples_per_buffer);
-
-  /* we operate in time */
-  gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
-  gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
-
-}
-
-static void
-gstbt_audio_synth_src_fixate (GstPad * pad, GstCaps * caps)
-{
-  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (GST_PAD_PARENT (pad));
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
   GstBtAudioSynthClass *klass = GSTBT_AUDIO_SYNTH_GET_CLASS (src);
-  GstStructure *structure = gst_caps_get_structure (caps, 0);
+  GstCaps *res = gst_caps_copy (caps);
+  GstStructure *structure;
+  gint i;
 
-  gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
+  GST_INFO_OBJECT (src, "fixate");
+
+  for (i = 0; i < gst_caps_get_size (res); i++) {
+    structure = gst_caps_get_structure (res, i);
+    gst_structure_fixate_field_nearest_int (structure, "rate", src->samplerate);
+  }
+  GST_INFO_OBJECT (src, "fixated to %" GST_PTR_FORMAT, res);
 
   if (klass->setup) {
-    klass->setup (src, pad, caps);
+    klass->setup (src, GST_BASE_SRC_PAD (basesrc), res);
   } else {
-    GST_ERROR_OBJECT (pad, "class lacks setup() vmethod implementation");
+    GST_ERROR_OBJECT (src, "class lacks setup() vmethod implementation");
   }
+  GST_INFO_OBJECT (src, "fixated to %" GST_PTR_FORMAT, res);
+
+  return GST_BASE_SRC_CLASS (gstbt_audio_synth_parent_class)->fixate (basesrc,
+      res);
 }
 
 static gboolean
-gstbt_audio_synth_setcaps (GstBaseSrc * basesrc, GstCaps * caps)
+gstbt_audio_synth_set_caps (GstBaseSrc * basesrc, GstCaps * caps)
 {
   GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
   const GstStructure *structure = gst_caps_get_structure (caps, 0);
@@ -355,7 +186,9 @@ gstbt_audio_synth_query (GstBaseSrc * basesrc, GstQuery * query)
       break;
     }
     default:
-      res = GST_BASE_SRC_CLASS (parent_class)->query (basesrc, query);
+      res =
+          GST_BASE_SRC_CLASS (gstbt_audio_synth_parent_class)->query (basesrc,
+          query);
       break;
   }
 
@@ -374,7 +207,7 @@ gstbt_audio_synth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (basesrc);
   GstClockTime time;
 
-  time = segment->last_stop;
+  time = segment->position;
   src->reverse = (segment->rate < 0.0);
   src->running_time = time;
   src->ticktime_err_accum = 0.0;
@@ -415,7 +248,7 @@ gstbt_audio_synth_do_seek (GstBaseSrc * basesrc, GstSegment * segment)
   GST_DEBUG_OBJECT (src,
       "seek from %" GST_TIME_FORMAT " to %" GST_TIME_FORMAT " cur %"
       GST_TIME_FORMAT " rate %lf", GST_TIME_ARGS (segment->start),
-      GST_TIME_ARGS (segment->stop), GST_TIME_ARGS (segment->last_stop),
+      GST_TIME_ARGS (segment->stop), GST_TIME_ARGS (segment->position),
       segment->rate);
 
   return TRUE;
@@ -456,7 +289,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
 
   if (G_UNLIKELY (src->eos_reached)) {
     GST_WARNING_OBJECT (src, "EOS reached");
-    return GST_FLOW_UNEXPECTED;
+    return GST_FLOW_EOS;
   }
   // the amount of samples to produce (handle rounding errors by collecting left over fractions)
   samples_done =
@@ -498,7 +331,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
     if (G_UNLIKELY (!src->generate_samples_per_buffer)) {
       GST_WARNING_OBJECT (src, "0 samples left -> EOS reached");
       src->eos_reached = TRUE;
-      return GST_FLOW_UNEXPECTED;
+      return GST_FLOW_EOS;
     }
     n_samples = src->n_samples_stop;
     src->eos_reached = TRUE;
@@ -515,11 +348,9 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
       src->ticktime_err_accum +
       (src->reverse ? (-src->ticktime_err) : src->ticktime_err);
 
-  /* allocate a new buffer suitable for this pad */
-  res = gst_pad_alloc_buffer_and_set_caps (basesrc->srcpad, src->n_samples,
-      src->channels * src->generate_samples_per_buffer * sizeof (gint16),
-      GST_PAD_CAPS (basesrc->srcpad), &buf);
-  if (res != GST_FLOW_OK) {
+  res = GST_BASE_SRC_GET_CLASS (basesrc)->alloc (basesrc, src->n_samples,
+      src->channels * src->generate_samples_per_buffer * sizeof (gint16), &buf);
+  if (G_UNLIKELY (res != GST_FLOW_OK)) {
     return res;
   }
 
@@ -543,7 +374,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
     src->subtick_count++;
   }
 
-  gst_object_sync_values (G_OBJECT (src), GST_BUFFER_TIMESTAMP (buf));
+  gst_object_sync_values (GST_OBJECT (src), GST_BUFFER_TIMESTAMP (buf));
 
   GST_DEBUG ("n_samples %12" G_GUINT64_FORMAT ", d_samples %6u running_time %"
       GST_TIME_FORMAT ", next_time %" GST_TIME_FORMAT ", duration %"
@@ -555,10 +386,105 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
   src->n_samples = n_samples;
 
   klass->process (src, buf);
-
   *buffer = buf;
 
   return GST_FLOW_OK;
+}
+
+//-- interfaces
+
+static void
+gstbt_audio_synth_tempo_change_tempo (GstBtTempo * tempo,
+    glong beats_per_minute, glong ticks_per_beat, glong subticks_per_tick)
+{
+  GstBtAudioSynth *self = GSTBT_AUDIO_SYNTH (tempo);
+  gboolean changed = FALSE;
+
+  if (beats_per_minute >= 0) {
+    if (self->beats_per_minute != beats_per_minute) {
+      self->beats_per_minute = (gulong) beats_per_minute;
+      g_object_notify (G_OBJECT (self), "beats-per-minute");
+      changed = TRUE;
+    }
+  }
+  if (ticks_per_beat >= 0) {
+    if (self->ticks_per_beat != ticks_per_beat) {
+      self->ticks_per_beat = (gulong) ticks_per_beat;
+      g_object_notify (G_OBJECT (self), "ticks-per-beat");
+      changed = TRUE;
+    }
+  }
+  if (subticks_per_tick >= 0) {
+    if (self->subticks_per_tick != subticks_per_tick) {
+      self->subticks_per_tick = (gulong) subticks_per_tick;
+      g_object_notify (G_OBJECT (self), "subticks-per-tick");
+      changed = TRUE;
+    }
+  }
+  if (changed) {
+    GST_DEBUG ("changing tempo to %lu BPM  %lu TPB  %lu STPT",
+        self->beats_per_minute, self->ticks_per_beat, self->subticks_per_tick);
+    gstbt_audio_synth_calculate_buffer_frames (self);
+  }
+}
+
+static void
+gstbt_audio_synth_tempo_interface_init (gpointer g_iface, gpointer iface_data)
+{
+  GstBtTempoInterface *iface = g_iface;
+  GST_INFO ("initializing interface");
+
+  iface->change_tempo = gstbt_audio_synth_tempo_change_tempo;
+}
+
+//-- gobject vmethods
+
+static void
+gstbt_audio_synth_set_property (GObject * object, guint prop_id,
+    const GValue * value, GParamSpec * pspec)
+{
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (object);
+
+  if (src->dispose_has_run)
+    return;
+
+  switch (prop_id) {
+      /* tempo interface */
+    case PROP_BPM:
+    case PROP_TPB:
+    case PROP_STPT:
+      GST_WARNING ("use gstbt_tempo_change_tempo()");
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
+}
+
+static void
+gstbt_audio_synth_get_property (GObject * object, guint prop_id,
+    GValue * value, GParamSpec * pspec)
+{
+  GstBtAudioSynth *src = GSTBT_AUDIO_SYNTH (object);
+
+  if (src->dispose_has_run)
+    return;
+
+  switch (prop_id) {
+      /* tempo interface */
+    case PROP_BPM:
+      g_value_set_ulong (value, src->beats_per_minute);
+      break;
+    case PROP_TPB:
+      g_value_set_ulong (value, src->ticks_per_beat);
+      break;
+    case PROP_STPT:
+      g_value_set_ulong (value, src->subticks_per_tick);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+  }
 }
 
 static void
@@ -570,42 +496,61 @@ gstbt_audio_synth_dispose (GObject * object)
     return;
   src->dispose_has_run = TRUE;
 
-  G_OBJECT_CLASS (parent_class)->dispose (object);
+  G_OBJECT_CLASS (gstbt_audio_synth_parent_class)->dispose (object);
 }
 
-GType
-gstbt_audio_synth_get_type (void)
+//-- gobject type methods
+
+static void
+gstbt_audio_synth_init (GstBtAudioSynth * src)
 {
-  static GType type = 0;
+  src->samplerate = GST_AUDIO_DEF_RATE;
+  src->beats_per_minute = 120;
+  src->ticks_per_beat = 4;
+  src->subticks_per_tick = 1;
+  gstbt_audio_synth_calculate_buffer_frames (src);
+  src->generate_samples_per_buffer = (guint) (0.5 + src->samples_per_buffer);
 
-  if (G_UNLIKELY (!type)) {
-    const GTypeInfo element_type_info = {
-      sizeof (GstBtAudioSynthClass),
-      (GBaseInitFunc) gstbt_audio_synth_base_init,
-      NULL,                     /* base_finalize */
-      (GClassInitFunc) gstbt_audio_synth_class_init,
-      NULL,                     /* class_finalize */
-      NULL,                     /* class_data */
-      sizeof (GstBtAudioSynth),
-      0,                        /* n_preallocs */
-      (GInstanceInitFunc) gstbt_audio_synth_init
-    };
-    const GInterfaceInfo tempo_interface_info = {
-      (GInterfaceInitFunc) gstbt_audio_synth_tempo_interface_init,      /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
-    const GInterfaceInfo preset_interface_info = {
-      NULL,                     /* interface_init */
-      NULL,                     /* interface_finalize */
-      NULL                      /* interface_data */
-    };
+  /* we operate in time */
+  gst_base_src_set_format (GST_BASE_SRC (src), GST_FORMAT_TIME);
+  gst_base_src_set_live (GST_BASE_SRC (src), FALSE);
+}
 
-    type =
-        g_type_register_static (GST_TYPE_BASE_SRC, "GstBtAudioSynth",
-        &element_type_info, G_TYPE_FLAG_ABSTRACT);
-    g_type_add_interface_static (type, GSTBT_TYPE_TEMPO, &tempo_interface_info);
-    g_type_add_interface_static (type, GST_TYPE_PRESET, &preset_interface_info);
-  }
-  return type;
+static void
+gstbt_audio_synth_class_init (GstBtAudioSynthClass * klass)
+{
+  GObjectClass *gobject_class = (GObjectClass *) klass;
+  GstElementClass *element_class = (GstElementClass *) klass;
+  GstBaseSrcClass *gstbasesrc_class = (GstBaseSrcClass *) klass;
+
+  GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "audiosynth",
+      GST_DEBUG_FG_BLUE | GST_DEBUG_BG_BLACK, "Base Audio synthesizer");
+
+  gobject_class->set_property = gstbt_audio_synth_set_property;
+  gobject_class->get_property = gstbt_audio_synth_get_property;
+  gobject_class->dispose = gstbt_audio_synth_dispose;
+
+  gstbasesrc_class->set_caps = GST_DEBUG_FUNCPTR (gstbt_audio_synth_set_caps);
+  gstbasesrc_class->fixate = GST_DEBUG_FUNCPTR (gstbt_audio_synth_fixate);
+  gstbasesrc_class->is_seekable =
+      GST_DEBUG_FUNCPTR (gstbt_audio_synth_is_seekable);
+  gstbasesrc_class->do_seek = GST_DEBUG_FUNCPTR (gstbt_audio_synth_do_seek);
+  gstbasesrc_class->query = GST_DEBUG_FUNCPTR (gstbt_audio_synth_query);
+  gstbasesrc_class->start = GST_DEBUG_FUNCPTR (gstbt_audio_synth_start);
+  gstbasesrc_class->create = GST_DEBUG_FUNCPTR (gstbt_audio_synth_create);
+
+  /* make process and setup method pure virtual */
+  klass->process = NULL;
+  klass->setup = NULL;
+
+  /* override interface properties */
+  g_object_class_override_property (gobject_class, PROP_BPM,
+      "beats-per-minute");
+  g_object_class_override_property (gobject_class, PROP_TPB, "ticks-per-beat");
+  g_object_class_override_property (gobject_class, PROP_STPT,
+      "subticks-per-tick");
+
+  /* add the pad */
+  gst_element_class_add_pad_template (element_class,
+      gst_static_pad_template_get (&gstbt_audio_synth_src_template));
 }
