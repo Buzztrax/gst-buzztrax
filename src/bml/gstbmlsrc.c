@@ -527,7 +527,7 @@ gst_bml_src_create_mono (GstBaseSrc * base, GstClockTime offset, guint length,
   data = (BMLData *) info.data;
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer;i++) data[i]=0.0f;
-  memset (data, 0, samples_per_buffer * sizeof (BMLData));
+  orc_memset (data, 0, samples_per_buffer * sizeof (BMLData));
 
   todo = samples_per_buffer;
   seg_data = data;
@@ -669,7 +669,7 @@ gst_bml_src_create_stereo (GstBaseSrc * base, GstClockTime offset, guint length,
   data = (BMLData *) info.data;
   // some buzzmachines expect a cleared buffer
   //for(i=0;i<samples_per_buffer*2;i++) data[i]=0.0;
-  memset (data, 0, samples_per_buffer * 2 * sizeof (BMLData));
+  orc_memset (data, 0, samples_per_buffer * 2 * sizeof (BMLData));
 
   todo = samples_per_buffer;
   seg_data = data;

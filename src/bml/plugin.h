@@ -43,6 +43,13 @@
 #include <libgstbuzztard/toneconversion.h>
 #include <libgstbuzztard/propertymeta.h>
 #include <libgstbuzztard/tempo.h>
+//-- orc
+#ifdef HAVE_ORC
+#include <orc/orcfunctions.h>
+#else
+#define orc_memset memset
+#endif
+
 
 //-- libbml
 #include <libbml/bml.h>
