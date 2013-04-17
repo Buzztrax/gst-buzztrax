@@ -243,8 +243,8 @@ gstbt_sid_syn_update_regs (GstBtSidSyn *src)
     }
     // apply effects
     if (v->fx_ticks_remain) {
-      GST_INFO_OBJECT (src, "%1d: fx 0x%02x ticks left %2d", i,
-        v->effect_type, v->fx_ticks_remain);
+      GST_INFO_OBJECT (src, "%1d: fx 0x%02x ticks left %2lu", i,
+        (gint)v->effect_type, v->fx_ticks_remain);
       switch (v->effect_type) {
         case GSTBT_SID_SYN_EFFECT_ARPEGGIO:
           v->freq = v->arp_freq[v->fx_ticks_remain%3];
@@ -390,8 +390,8 @@ gstbt_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
     fx_ticks_remain += v->fx_ticks_remain; 
   }
   
-  GST_DEBUG_OBJECT (src, "generate %d samples (using %d subticks)", base->generate_samples_per_buffer, 
-    base->subticks_per_tick);
+  GST_DEBUG_OBJECT (src, "generate %d samples (using %lu subticks)", 
+    base->generate_samples_per_buffer, base->subticks_per_tick);
   
   if (!fx_ticks_remain) {
     /* no need to subdivide if no effect runs */

@@ -64,7 +64,7 @@ check_log_handler (const gchar * const log_domain,
       level = GST_LEVEL_LOG;
       break;
   }
-  gst_debug_log (GST_CAT_DEFAULT, level, "?", "?", 0, NULL, message);
+  gst_debug_log (GST_CAT_DEFAULT, level, "?", "?", 0, NULL, "%s", message);
 }
 
 /* common setup and teardown code */

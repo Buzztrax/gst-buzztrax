@@ -978,7 +978,7 @@ gstbml_calculate_buffer_frames (GstBML * bml)
 
   bml->samples_per_buffer = ((bml->samplerate * div) / ticks_per_minute);
   bml->ticktime = (GstClockTime) (0.5 + subticktime);
-  GST_DEBUG ("samples_per_buffer=%lf", bml->samples_per_buffer);
+  GST_DEBUG ("samples_per_buffer=%d", bml->samples_per_buffer);
   // the sequence is quantized to ticks and not subticks
   // we need to compensate for the rounding errors :/
   bml->ticktime_err =
@@ -1075,6 +1075,7 @@ gstbml_fix_data (GstElement * elem, GstMapInfo * info, gboolean has_data)
     GST_LOG_OBJECT (elem, "silent buffer");
     return TRUE;
   } else {
+    GST_LOG_OBJECT (elem, "signal buffer");
     // buzz generates relative loud output
     gfloat fc = 1.0 / 32768.0;
     orc_scalarmultiply_f32_ns (data, data, fc, num_samples);
