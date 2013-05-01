@@ -1,5 +1,5 @@
 if BUILD_CHECK_TESTS
-  TESTS_BIN = gst_buzztard
+  TESTS_BIN = gst_buzztrax
 else
   TESTS_BIN =
 endif
@@ -18,15 +18,15 @@ TESTS_ENVIRONMENT = \
 if BUILD_CHECK_TESTS
 noinst_PROGRAMS=$(TESTS_BIN)
 
-gst_buzztard_LDADD = \
-	libgstbuzztard.la \
+gst_buzztrax_LDADD = \
+	libgstbuzztrax.la \
 	$(BASE_DEPS_LIBS) -lcheck
-gst_buzztard_CFLAGS = \
+gst_buzztrax_CFLAGS = \
 	-I$(srcdir) -I$(top_srcdir) \
-	-DG_LOG_DOMAIN=\"gst-buzztard-check\" \
+	-DG_LOG_DOMAIN=\"gst-buzztrax-check\" \
 	$(BASE_DEPS_CFLAGS)
-gst_buzztard_SOURCES = \
-  tests/m-gst-buzztard.c tests/m-gst-buzztard.h \
+gst_buzztrax_SOURCES = \
+  tests/m-gst-buzztrax.c tests/m-gst-buzztrax.h \
 	tests/s-gst-note2frequency.c tests/e-gst-note2frequency.c tests/t-gst-note2frequency.c
 
 endif
@@ -63,7 +63,7 @@ VALPREFIX = \
 VALDEFAULT = @VALGRIND@/bin/valgrind
 VALSUPP = @VALGRIND@/lib/valgrind
 VALSUPPRESSIONDEF = --suppressions=$(VALSUPP)/default.supp
-VALSUPPRESSIONOWN = --suppressions=$(top_builddir)/buzztard.supp \
+VALSUPPRESSIONOWN = --suppressions=$(top_builddir)/buzztrax.supp \
 	--suppressions=$(top_builddir)/gst.supp \
 	--suppressions=$(top_builddir)/gtk.supp
 VALSUPPRESSION = $(VALSUPPRESSIONDEF) $(VALSUPPRESSIONOWN)

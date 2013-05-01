@@ -10,7 +10,7 @@ ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
 EXTRA_DIST = \
-	libgstbuzztard.pc.in \
+	libgstbuzztrax.pc.in \
 	TODO
 
 # BUILT_SOURCES is for generated source
@@ -33,13 +33,13 @@ include $(top_srcdir)/orc.mak
 #-- pkg config
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libgstbuzztard.pc
+pkgconfig_DATA = libgstbuzztrax.pc
 
 #-- fake subdir rules
 
 docs: docs-reference 
 
-docs-reference: libgstbuzztard.la libgstaudiodelay.la libgstsimsyn.la
+docs-reference: libgstbuzztrax.la libgstaudiodelay.la libgstsimsyn.la
 	@$(MAKE) -C docs/reference
 
 all-local: docs

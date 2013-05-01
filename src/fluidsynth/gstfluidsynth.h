@@ -1,7 +1,7 @@
 /* GStreamer
  * Copyright (C) 2007 Josh Green <josh@users.sf.net>
  *
- * Adapted from simsyn synthesizer plugin in gst-buzztard source.
+ * Adapted from simsyn synthesizer plugin in gst-buzztrax source.
  * Copyright (C) 2005 Stefan Kost <ensonic@users.sf.net>
  *
  * gstfluidsynth.h: GStreamer wrapper for FluidSynth
@@ -24,9 +24,9 @@
 #define __GSTBT_FLUID_SYNTH_H__
 
 #include <gst/gst.h>
-#include <libgstbuzztard/audiosynth.h>
-#include <libgstbuzztard/envelope.h>
-#include <libgstbuzztard/toneconversion.h>
+#include <libgstbuzztrax/audiosynth.h>
+#include <libgstbuzztrax/envelope.h>
+#include <libgstbuzztrax/toneconversion.h>
 #include <fluidsynth.h>
 
 G_BEGIN_DECLS

@@ -21,11 +21,11 @@
 #define __GSTBT_SIM_SYN_H__
 
 #include <gst/gst.h>
-#include <libgstbuzztard/audiosynth.h>
-#include <libgstbuzztard/envelope-d.h>
-#include <libgstbuzztard/filter-svf.h>
-#include <libgstbuzztard/osc-synth.h>
-#include <libgstbuzztard/toneconversion.h>
+#include <libgstbuzztrax/audiosynth.h>
+#include <libgstbuzztrax/envelope-d.h>
+#include <libgstbuzztrax/filter-svf.h>
+#include <libgstbuzztrax/osc-synth.h>
+#include <libgstbuzztrax/toneconversion.h>
 
 G_BEGIN_DECLS
 

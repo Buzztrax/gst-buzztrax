@@ -35,7 +35,7 @@
 #include <string.h>
 #include <gst/audio/audio.h>
 
-#include "libgstbuzztard/tempo.h"
+#include "libgstbuzztrax/tempo.h"
 
 #include "audiosynth.h"
 

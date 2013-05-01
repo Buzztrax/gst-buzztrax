@@ -94,7 +94,7 @@ voices = 1 + (12 / 2) = 7
 - have presets for kick, snare, {open,closed}-hihat, claps, cymbal
 
 = synth components =
-The libgstbuzztard already has a couple of components; we'd like to extend this
+The libgstbuzztrax already has a couple of components; we'd like to extend this
 to make it dead easy writing new synths.
 
 == components ideas ==

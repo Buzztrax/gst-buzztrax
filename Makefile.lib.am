@@ -1,44 +1,44 @@
-noinst_HEADERS += libgstbuzztard/compat.h
+noinst_HEADERS += libgstbuzztrax/compat.h
 
-lib_LTLIBRARIES = libgstbuzztard.la
+lib_LTLIBRARIES = libgstbuzztrax.la
 
-libgstbuzztard_la_SOURCES = \
-	libgstbuzztard/audiosynth.c \
-	libgstbuzztard/childbin.c \
-	libgstbuzztard/envelope.c \
-	libgstbuzztard/envelope-adsr.c \
-	libgstbuzztard/envelope-d.c \
-	libgstbuzztard/filter-svf.c \
-	libgstbuzztard/musicenums.c \
-	libgstbuzztard/osc-synth.c \
-	libgstbuzztard/osc-wave.c \
-	libgstbuzztard/toneconversion.c \
-	libgstbuzztard/propertymeta.c \
-	libgstbuzztard/tempo.c
+libgstbuzztrax_la_SOURCES = \
+	libgstbuzztrax/audiosynth.c \
+	libgstbuzztrax/childbin.c \
+	libgstbuzztrax/envelope.c \
+	libgstbuzztrax/envelope-adsr.c \
+	libgstbuzztrax/envelope-d.c \
+	libgstbuzztrax/filter-svf.c \
+	libgstbuzztrax/musicenums.c \
+	libgstbuzztrax/osc-synth.c \
+	libgstbuzztrax/osc-wave.c \
+	libgstbuzztrax/toneconversion.c \
+	libgstbuzztrax/propertymeta.c \
+	libgstbuzztrax/tempo.c
 
-libgstbuzztard_la_CFLAGS = \
+libgstbuzztrax_la_CFLAGS = \
 	-I$(srcdir) \
 	$(GST_LIB_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 
-libgstbuzztardincludedir = $(includedir)/libgstbuzztard
-libgstbuzztardinclude_HEADERS = \
-	libgstbuzztard/audiosynth.h \
-	libgstbuzztard/childbin.h \
-	libgstbuzztard/envelope.h \
-	libgstbuzztard/envelope-adsr.h \
-	libgstbuzztard/envelope-d.h \
-	libgstbuzztard/filter-svf.h \
-	libgstbuzztard/musicenums.h \
-	libgstbuzztard/osc-synth.h \
-	libgstbuzztard/osc-wave.h \
-	libgstbuzztard/toneconversion.h \
-	libgstbuzztard/propertymeta.h \
-	libgstbuzztard/tempo.h
+libgstbuzztraxincludedir = $(includedir)/libgstbuzztrax
+libgstbuzztraxinclude_HEADERS = \
+	libgstbuzztrax/audiosynth.h \
+	libgstbuzztrax/childbin.h \
+	libgstbuzztrax/envelope.h \
+	libgstbuzztrax/envelope-adsr.h \
+	libgstbuzztrax/envelope-d.h \
+	libgstbuzztrax/filter-svf.h \
+	libgstbuzztrax/musicenums.h \
+	libgstbuzztrax/osc-synth.h \
+	libgstbuzztrax/osc-wave.h \
+	libgstbuzztrax/toneconversion.h \
+	libgstbuzztrax/propertymeta.h \
+	libgstbuzztrax/tempo.h
 
-libgstbuzztard_la_LIBADD = $(BASE_DEPS_LIBS)
-libgstbuzztard_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@ \
+libgstbuzztrax_la_LIBADD = $(BASE_DEPS_LIBS)
+libgstbuzztrax_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@ \
   $(GST_LIB_LDFLAGS)
 
 EXTRA_DIST += \
-  libgstbuzztard/compat.h
+  libgstbuzztrax/compat.h

@@ -21,8 +21,8 @@
 #include "config.h"
 #endif
 
-#include "libgstbuzztard/propertymeta.h"
-#include "libgstbuzztard/tempo.h"
+#include "libgstbuzztrax/propertymeta.h"
+#include "libgstbuzztrax/tempo.h"
 
 #include "sidsynv.h"
 

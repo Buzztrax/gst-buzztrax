@@ -2,7 +2,7 @@
 # Run this to generate all the initial makefiles, etc.
 
 DIE=0
-package=gst-buzztard
+package=gst-buzztrax
 
 # a silly hack that generates autoregen.sh but it's handy
 echo "#!/bin/sh" > autoregen.sh

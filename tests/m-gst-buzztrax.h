@@ -1,5 +1,5 @@
-/* Buzztard
- * Copyright (C) 2010 Buzztard team <buzztard-devel@lists.sf.net>
+/* GStreamer
+ * Copyright (C) 2012 Stefan Sauer <ensonic@users.sf.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -14,13 +14,30 @@
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * SECTION:gstbuzztard
- * @title: gst-buzztard
- * @short_description: internal module utilities
- *
- * Internal gst-buzztard module utilities.
- */
+ 
+#include <signal.h>
+#include "check.h"
+#include "glib.h"
+#include "gst/gst.h"
 
-//-- glib compat & helper
+#include "libgstbuzztrax/toneconversion.h"
 
+//-- globals
+
+GST_DEBUG_CATEGORY_EXTERN(gst_buzztrax_debug);
+
+//-- prototypes
+
+extern void gst_buzztrax_setup(void);
+extern void gst_buzztrax_teardown(void);
+
+//-- testing helper methods
+
+#define g_object_checked_unref(obj) \
+{\
+  gpointer __objref;\
+  g_assert(obj);\
+  g_object_add_weak_pointer((gpointer)obj,&__objref);\
+  g_object_unref((gpointer)obj);\
+  fail_unless(__objref == NULL, NULL);\
+}

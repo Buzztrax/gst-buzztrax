@@ -39,5 +39,5 @@ coverage
 *.loT
 .libs
 .deps
-gst_buzztard
+gst_buzztrax
 tmp-orc.c

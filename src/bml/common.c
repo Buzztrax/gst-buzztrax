@@ -1043,7 +1043,7 @@ gstbml_fix_data (GstElement * elem, GstMapInfo * info, gboolean has_data)
         has_data = TRUE;
         break;
       }
-/* FIXME(ensonic): we configure the FPU to DAZ|FZ in libbuzztard-core
+/* FIXME(ensonic): we configure the FPU to DAZ|FZ in libbuzztrax-core
  * this would not apply to other clients
  */
 #if 0

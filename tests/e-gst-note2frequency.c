@@ -15,7 +15,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "m-gst-buzztard.h"
+#include "m-gst-buzztrax.h"
 
 //-- globals
 
@@ -24,7 +24,7 @@
 static void
 test_setup (void)
 {
-  gst_buzztard_setup ();
+  gst_buzztrax_setup ();
   GST_INFO
       ("================================================================================");
 }
@@ -32,7 +32,7 @@ test_setup (void)
 static void
 test_teardown (void)
 {
-  gst_buzztard_teardown ();
+  gst_buzztrax_teardown ();
 }
 
 //-- tests
@@ -171,7 +171,7 @@ START_TEST (test_note_number_offset)
 }
 
 END_TEST TCase *
-gst_buzztard_note2frequency_example_case (void)
+gst_buzztrax_note2frequency_example_case (void)
 {
   TCase *tc = tcase_create ("GstBtToneConversionExamples");
 

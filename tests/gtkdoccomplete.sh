@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ -e docs/reference/gst-buzztard-undocumented.txt ]; then
+if [ -e docs/reference/gst-buzztrax-undocumented.txt ]; then
   for file in ../docs/reference/*-undocumented.txt; do
     name=`basename $file ../docs/reference/`
     echo "$name :" `head -n1 $file | cut -d' ' -f1`

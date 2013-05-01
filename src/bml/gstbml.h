@@ -32,7 +32,7 @@ typedef enum {
   ARG_BPM=1,  // tempo iface
   ARG_TPB,
   ARG_STPT,
-  ARG_HOST_CALLBACKS, // buzztard host callbacks
+  ARG_HOST_CALLBACKS, // buzztrax host callbacks
   //ARG_VOICES,  // child bin iface
   ARG_LAST
 } GstBMLPropertyIDs;

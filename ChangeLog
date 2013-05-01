@@ -19,9 +19,9 @@
 
 2011-12-09  Stefan Sauer  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
-	* libgstbuzztard/toneconversion.c:
-	* libgstbuzztard/toneconversion.h:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* libgstbuzztrax/toneconversion.c:
+	* libgstbuzztrax/toneconversion.h:
 	* src/simsyn/simsyn.c:
 	* tests/e-gst-note2frequency.c:
 	* tests/t-gst-note2frequency.c:
@@ -30,7 +30,7 @@
 
 2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
 
-	* libgstbuzztard/toneconversion.c:
+	* libgstbuzztrax/toneconversion.c:
 	  Fix value mapping. We switched to buzz values.
 
 2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
@@ -40,7 +40,7 @@
 
 2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
 
-	* libgstbuzztard/musicenums.h:
+	* libgstbuzztrax/musicenums.h:
 	  Use a count of 16 per octave to be able to reuse code that deals with
 	  buzz notes.
 
@@ -53,11 +53,11 @@
 
 2011-12-08  Stefan Sauer  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
-	* libgstbuzztard/musicenums.c:
-	* libgstbuzztard/musicenums.h:
-	* libgstbuzztard/toneconversion.c:
-	* libgstbuzztard/toneconversion.h:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* libgstbuzztrax/musicenums.c:
+	* libgstbuzztrax/musicenums.h:
+	* libgstbuzztrax/toneconversion.c:
+	* libgstbuzztrax/toneconversion.h:
 	* src/bml/gstbmlorc-dist.c:
 	* src/simsyn/simsyn.c:
 	* tests/e-gst-note2frequency.c:
@@ -77,7 +77,7 @@
 
 2011-12-02  Stefan Sauer  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	  Make dist check fixes.
 
 2011-12-02  Stefan Sauer  <ensonic@users.sf.net>
@@ -186,9 +186,9 @@
 
 2011-07-06  Stefan Sauer  <ensonic@users.sf.net>
 
-	* libgstbuzztard/musicenums.c:
-	* libgstbuzztard/musicenums.h:
-	* libgstbuzztard/toneconversion.h:
+	* libgstbuzztrax/musicenums.c:
+	* libgstbuzztrax/musicenums.h:
+	* libgstbuzztrax/toneconversion.h:
 	* src/bml/common.c:
 	  Rename some obviously misnamed enums.
 
@@ -211,8 +211,8 @@
 
 2011-04-17  Stefan Kost  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
-	* docs/reference/gst-buzztard.types.in:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* docs/reference/gst-buzztrax.types.in:
 	* src/audiodelay/audiodelay.c:
 	* src/audiodelay/audiodelay.h:
 	* src/fluidsynth/gstfluidsynth.c:
@@ -224,44 +224,44 @@
 
 2011-04-17  Stefan Kost  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
-	* libgstbuzztard/childbin.h:
-	* libgstbuzztard/help.h:
-	* libgstbuzztard/propertymeta.h:
-	* libgstbuzztard/tempo.h:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* libgstbuzztrax/childbin.h:
+	* libgstbuzztrax/help.h:
+	* libgstbuzztrax/propertymeta.h:
+	* libgstbuzztrax/tempo.h:
 	  Add dummy docs for opaque interface structs.
 
 2011-04-17  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
-	* libgstbuzztard/Makefile.am:
+	* libgstbuzztrax/Makefile.am:
 	* src/bml/gstbmlsrc.c:
 	* src/bml/gstbmlsrc.h:
 	* src/simsyn/simsyn.c:
 	* src/simsyn/simsyn.h:
-	* libgstbuzztard/gstpooledbuffer.h (deleted):
-	* libgstbuzztard/gstbufferpool.c (deleted):
-	* libgstbuzztard/gstlfqueue.c (deleted):
-	* libgstbuzztard/gstbufferpool.h (deleted):
-	* libgstbuzztard/gstlfqueue.h (deleted):
-	* libgstbuzztard/gstpooledbuffer.c (deleted):
+	* libgstbuzztrax/gstpooledbuffer.h (deleted):
+	* libgstbuzztrax/gstbufferpool.c (deleted):
+	* libgstbuzztrax/gstlfqueue.c (deleted):
+	* libgstbuzztrax/gstbufferpool.h (deleted):
+	* libgstbuzztrax/gstlfqueue.h (deleted):
+	* libgstbuzztrax/gstpooledbuffer.c (deleted):
 	  Remove bufferpool again. We're going to have it in gst-0.11.
 
 2011-04-17  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard-sections.txt:
-	* docs/reference/gst-buzztard.types.in:
-	* libgstbuzztard/childbin.c:
-	* libgstbuzztard/compat.h:
-	* libgstbuzztard/envelope.c:
-	* libgstbuzztard/envelope.h:
-	* libgstbuzztard/help.c:
-	* libgstbuzztard/musicenums.c:
-	* libgstbuzztard/preset.c:
-	* libgstbuzztard/propertymeta.c:
-	* libgstbuzztard/tempo.c:
-	* libgstbuzztard/toneconversion.c:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* docs/reference/gst-buzztrax.types.in:
+	* libgstbuzztrax/childbin.c:
+	* libgstbuzztrax/compat.h:
+	* libgstbuzztrax/envelope.c:
+	* libgstbuzztrax/envelope.h:
+	* libgstbuzztrax/help.c:
+	* libgstbuzztrax/musicenums.c:
+	* libgstbuzztrax/preset.c:
+	* libgstbuzztrax/propertymeta.c:
+	* libgstbuzztrax/tempo.c:
+	* libgstbuzztrax/toneconversion.c:
 	* src/audiodelay/audiodelay.c:
 	* src/bml/gstbml.c:
 	* src/fluidsynth/gstfluidsynth.c:
@@ -281,7 +281,7 @@
 2011-03-01  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
-	* libgstbuzztard/Makefile.am:
+	* libgstbuzztrax/Makefile.am:
 	  Use linker regexp for the library too and fix the one for the plugins.
 
 2011-02-22  Stefan Kost  <ensonic@users.sf.net>
@@ -328,26 +328,26 @@
 
 2011-01-27  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/Makefile.am:
-	* libgstbuzztard/gstbufferpool.c:
-	* libgstbuzztard/gstlfqueue.c:
-	* libgstbuzztard/gstpooledbuffer.c:
-	* libgstbuzztard/gstpooledbuffer.h:
-	* libgstbuzztard/gstpooledbuffer.h (svn:keywords, svn:eol-style):
-	* libgstbuzztard/gstpooledbuffer.c (svn:keywords, svn:eol-style):
-	* libgstbuzztard/gstpooledbuffer.h (added):
-	* libgstbuzztard/gstpooledbuffer.c (added):
+	* libgstbuzztrax/Makefile.am:
+	* libgstbuzztrax/gstbufferpool.c:
+	* libgstbuzztrax/gstlfqueue.c:
+	* libgstbuzztrax/gstpooledbuffer.c:
+	* libgstbuzztrax/gstpooledbuffer.h:
+	* libgstbuzztrax/gstpooledbuffer.h (svn:keywords, svn:eol-style):
+	* libgstbuzztrax/gstpooledbuffer.c (svn:keywords, svn:eol-style):
+	* libgstbuzztrax/gstpooledbuffer.h (added):
+	* libgstbuzztrax/gstpooledbuffer.c (added):
 	  Add a pooled buffer subclass to implement resurrection of buffers into
 	  the pool.
 
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/gstbufferpool.c:
+	* libgstbuzztrax/gstbufferpool.c:
 	  gst_buffer_pool_acquire_buffer() can be called with params=NULL.
 
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/gstbufferpool.c:
+	* libgstbuzztrax/gstbufferpool.c:
 	  Check for the proper return value.
 
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
@@ -359,15 +359,15 @@
 2011-01-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
-	* libgstbuzztard/Makefile.am:
-	* libgstbuzztard/gstbufferpool.c:
-	* libgstbuzztard/gstbufferpool.h:
-	* libgstbuzztard/gstlfqueue.c:
-	* libgstbuzztard/gstlfqueue.h:
-	* libgstbuzztard/gstbufferpool.c (added):
-	* libgstbuzztard/gstlfqueue.c (added):
-	* libgstbuzztard/gstbufferpool.h (added):
-	* libgstbuzztard/gstlfqueue.h (added):
+	* libgstbuzztrax/Makefile.am:
+	* libgstbuzztrax/gstbufferpool.c:
+	* libgstbuzztrax/gstbufferpool.h:
+	* libgstbuzztrax/gstlfqueue.c:
+	* libgstbuzztrax/gstlfqueue.h:
+	* libgstbuzztrax/gstbufferpool.c (added):
+	* libgstbuzztrax/gstlfqueue.c (added):
+	* libgstbuzztrax/gstbufferpool.h (added):
+	* libgstbuzztrax/gstlfqueue.h (added):
 	  Add a copy of http://cgit.freedesktop.org/~wtay/gstreamer/?h=bufferpool.
 
 2011-01-10  Stefan Kost  <ensonic@users.sf.net>
@@ -432,7 +432,7 @@
 	* docs/reference/Makefile.am:
 	  srcdir!=builddir update.
 
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	  Fix duplicate entry.
 
 2010-09-21  Stefan Kost  <ensonic@users.sf.net>
@@ -446,7 +446,7 @@
 2010-09-21  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
-	* libgstbuzztard/toneconversion.c:
+	* libgstbuzztrax/toneconversion.c:
 	  Fix the tests.
 
 2010-09-21  Stefan Kost  <ensonic@users.sf.net>
@@ -463,11 +463,11 @@
 2010-09-20  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard-docs.sgml:
-	* docs/reference/gst-buzztard-sections.txt:
-	* libgstbuzztard/compat.h:
-	* libgstbuzztard/envelope.h:
-	* libgstbuzztard/toneconversion.h:
+	* docs/reference/gst-buzztrax-docs.sgml:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* libgstbuzztrax/compat.h:
+	* libgstbuzztrax/envelope.h:
+	* libgstbuzztrax/toneconversion.h:
 	* src/audiodelay/audiodelay.h:
 	* src/bml/common.c:
 	* src/bml/common.h:
@@ -539,7 +539,7 @@
 2010-09-06  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
-	* docs/reference/gst-buzztard.types.in:
+	* docs/reference/gst-buzztrax.types.in:
 	* src/audiodelay/audiodelay.c:
 	* src/bml/Makefile.am:
 	* src/bml/common.c:
@@ -554,17 +554,17 @@
 
 2010-09-05  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/Makefile.am:
-	* libgstbuzztard/childbin.c:
-	* libgstbuzztard/compat.h:
-	* libgstbuzztard/envelope.c:
-	* libgstbuzztard/help.c:
-	* libgstbuzztard/preset.c:
-	* libgstbuzztard/propertymeta.c:
-	* libgstbuzztard/tempo.c:
-	* libgstbuzztard/toneconversion.c:
-	* libgstbuzztard/compat.h (svn:keywords, svn:eol-style):
-	* libgstbuzztard/compat.h (added):
+	* libgstbuzztrax/Makefile.am:
+	* libgstbuzztrax/childbin.c:
+	* libgstbuzztrax/compat.h:
+	* libgstbuzztrax/envelope.c:
+	* libgstbuzztrax/help.c:
+	* libgstbuzztrax/preset.c:
+	* libgstbuzztrax/propertymeta.c:
+	* libgstbuzztrax/tempo.c:
+	* libgstbuzztrax/toneconversion.c:
+	* libgstbuzztrax/compat.h (svn:keywords, svn:eol-style):
+	* libgstbuzztrax/compat.h (added):
 	  Use G_DEFINE_TYPE and co. Add compat header for the G_DEFINE_INTERACE
 	  macros. Clean up gobject usage.
 
@@ -576,7 +576,7 @@
 
 2010-08-08  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/toneconversion.c:
+	* libgstbuzztrax/toneconversion.c:
 	  Add missing return type to function.
 
 2010-08-07  Stefan Kost  <ensonic@users.sf.net>
@@ -602,7 +602,7 @@
 
 2010-04-27  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/toneconversion.c:
+	* libgstbuzztrax/toneconversion.c:
 	  Fix include style and add missing include.
 
 2010-04-26  Stefan Kost  <ensonic@users.sf.net>
@@ -802,7 +802,7 @@
 2009-06-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
-	  Sync required versions with buzztard module.
+	  Sync required versions with buzztrax module.
 
 2009-06-21  Stefan Kost  <ensonic@users.sf.net>
 
@@ -811,7 +811,7 @@
 
 2009-06-20  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/toneconversion.c:
+	* libgstbuzztrax/toneconversion.c:
 	  Save rellocs.
 
 2009-06-17  Stefan Kost  <ensonic@users.sf.net>
@@ -986,7 +986,7 @@
 
 2009-04-22  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/toneconversion.c:
+	* libgstbuzztrax/toneconversion.c:
 	* src/bml/common.c:
 	  Clang checker fixes.
 
@@ -1007,7 +1007,7 @@
 
 2009-04-17  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/propertymeta.h:
+	* libgstbuzztrax/propertymeta.h:
 	  Comments.
 
 	* src/bml/common.c:
@@ -1021,8 +1021,8 @@
 	* TODO:
 	  Testing info.
 
-	* libgstbuzztard/toneconversion.c:
-	* libgstbuzztard/toneconversion.h:
+	* libgstbuzztrax/toneconversion.c:
+	* libgstbuzztrax/toneconversion.h:
 	* src/fluidsynth/gstfluidsynth.c:
 	* src/simsyn/simsyn.c:
 	  Implement note-off.
@@ -1111,12 +1111,12 @@
 	  Bump to be able to test make distcheck.
 
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard-docs.sgml:
-	* docs/reference/gst-buzztard-sections.txt:
-	* libgstbuzztard/envelope.h:
-	* libgstbuzztard/musicenums.c:
-	* libgstbuzztard/musicenums.h:
-	* libgstbuzztard/propertymeta.h:
+	* docs/reference/gst-buzztrax-docs.sgml:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* libgstbuzztrax/envelope.h:
+	* libgstbuzztrax/musicenums.c:
+	* libgstbuzztrax/musicenums.h:
+	* libgstbuzztrax/propertymeta.h:
 	* src/audiodelay/audiodelay.h:
 	* src/fluidsynth/gstfluidsynth.h:
 	* src/simsyn/simsyn.h:
@@ -1126,13 +1126,13 @@
 
 2009-02-15  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/childbin.c:
-	* libgstbuzztard/envelope.c:
-	* libgstbuzztard/help.c:
-	* libgstbuzztard/musicenums.c:
-	* libgstbuzztard/preset.c:
-	* libgstbuzztard/propertymeta.c:
-	* libgstbuzztard/tempo.c:
+	* libgstbuzztrax/childbin.c:
+	* libgstbuzztrax/envelope.c:
+	* libgstbuzztrax/help.c:
+	* libgstbuzztrax/musicenums.c:
+	* libgstbuzztrax/preset.c:
+	* libgstbuzztrax/propertymeta.c:
+	* libgstbuzztrax/tempo.c:
 	  Micro optimisations and cleanup of gobject usage.
 
 2009-02-14  Stefan Kost  <ensonic@users.sf.net>
@@ -1151,7 +1151,7 @@
 	* src/bml/plugin.c:
 	* src/bml/utils.c:
 	  Implement more of it, but don't yet enable as it causes quite some
-	  issues in buzztard menu code.
+	  issues in buzztrax menu code.
 
 2009-02-03  Stefan Kost  <ensonic@users.sf.net>
 
@@ -1190,7 +1190,7 @@
 
 2009-01-07  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/childbin.c:
+	* libgstbuzztrax/childbin.c:
 	  Allow 0 voices.
 
 2008-12-30  Stefan Kost  <ensonic@users.sf.net>
@@ -1203,7 +1203,7 @@
 
 2008-12-28  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/Makefile.am:
+	* libgstbuzztrax/Makefile.am:
 	* src/audiodelay/Makefile.am:
 	* src/bml/Makefile.am:
 	* src/bml/native/Makefile.am:
@@ -1395,7 +1395,7 @@
 2008-09-24  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
-	* libgstbuzztard/Makefile.am:
+	* libgstbuzztrax/Makefile.am:
 	* tests/Makefile.am:
 	  Get rid of INCLUDES variable (automake deprecates it). Use namespace
 	  feature for docs.
@@ -1408,7 +1408,7 @@
 2008-09-14  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	  Doc fixes.
 
 	* src/simsyn/simsyn.c:
@@ -1435,9 +1435,9 @@
 
 2008-09-10  Stefan Kost  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-docs.sgml:
-	* docs/reference/gst-buzztard-sections.txt:
-	* docs/reference/gst-buzztard.types.in:
+	* docs/reference/gst-buzztrax-docs.sgml:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* docs/reference/gst-buzztrax.types.in:
 	  Also update docs.
 
 	* tests/Makefile.am:
@@ -1445,7 +1445,7 @@
 
 2008-09-09  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/Makefile.am:
+	* libgstbuzztrax/Makefile.am:
 	* src/bml/common.c:
 	* src/bml/gstbmlsrc.c:
 	* src/bml/gstbmltransform.c:
@@ -1453,26 +1453,26 @@
 	* src/bml/plugin.h:
 	* src/fluidsynth/gstfluidsynth.h:
 	* src/simsyn/simsyn.h:
-	* tests/m-gst-buzztard.h:
+	* tests/m-gst-buzztrax.h:
 	  Rename note2frequency -> toneconversion
 
 2008-09-09  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/childbin.c:
-	* libgstbuzztard/childbin.h:
-	* libgstbuzztard/envelope.c:
-	* libgstbuzztard/envelope.h:
-	* libgstbuzztard/help.c:
-	* libgstbuzztard/help.h:
-	* libgstbuzztard/musicenums.c:
-	* libgstbuzztard/musicenums.h:
-	* libgstbuzztard/note2frequency.c:
-	* libgstbuzztard/note2frequency.h:
-	* libgstbuzztard/preset.c:
-	* libgstbuzztard/propertymeta.c:
-	* libgstbuzztard/propertymeta.h:
-	* libgstbuzztard/tempo.c:
-	* libgstbuzztard/tempo.h:
+	* libgstbuzztrax/childbin.c:
+	* libgstbuzztrax/childbin.h:
+	* libgstbuzztrax/envelope.c:
+	* libgstbuzztrax/envelope.h:
+	* libgstbuzztrax/help.c:
+	* libgstbuzztrax/help.h:
+	* libgstbuzztrax/musicenums.c:
+	* libgstbuzztrax/musicenums.h:
+	* libgstbuzztrax/note2frequency.c:
+	* libgstbuzztrax/note2frequency.h:
+	* libgstbuzztrax/preset.c:
+	* libgstbuzztrax/propertymeta.c:
+	* libgstbuzztrax/propertymeta.h:
+	* libgstbuzztrax/tempo.c:
+	* libgstbuzztrax/tempo.h:
 	* src/audiodelay/audiodelay.c:
 	* src/fluidsynth/gstfluidsynth.c:
 	* src/simsyn/simsyn.c:
@@ -1528,12 +1528,12 @@
 
 2008-07-25  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/note2frequency.c:
+	* libgstbuzztrax/note2frequency.c:
 	  Add missing return.
 
 2008-07-08  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/note2frequency.c:
+	* libgstbuzztrax/note2frequency.c:
 	  Don't assert on note==0.
 
 2008-07-08  Stefan Kost  <ensonic@users.sf.net>
@@ -1541,8 +1541,8 @@
 	* TODO:
 	  note2frequency should be renamed.
 
-	* libgstbuzztard/note2frequency.c:
-	* libgstbuzztard/note2frequency.h:
+	* libgstbuzztrax/note2frequency.c:
+	* libgstbuzztrax/note2frequency.h:
 	  Add buzz note conversions.
 
 2008-06-03  Stefan Kost  <ensonic@users.sf.net>
@@ -1555,32 +1555,32 @@
 
 2008-05-30  Stefan Kost  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard.types.in:
+	* docs/reference/gst-buzztrax.types.in:
 	  Fix the build. Spotted by Marc Broekhuis.
 
 2008-05-14  Stefan Kost  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	  Removed removed method.
 
-	* libgstbuzztard/Makefile.am:
+	* libgstbuzztrax/Makefile.am:
 	  Remove iface, we use a property now.
 
 2008-05-02  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/preset.c:
-	* libgstbuzztard/preset.h:
+	* libgstbuzztrax/preset.c:
+	* libgstbuzztrax/preset.h:
 	  Sync with latest of my patch.
 
 2008-04-25  Stefan Kost  <ensonic@users.sf.net>
 
 	* TODO:
-	* libgstbuzztard/sampler.c:
+	* libgstbuzztrax/sampler.c:
 	  Fix paramspec type.
 
 2008-04-24  Stefan Kost  <ensonic@users.sf.net>
 
-	* libgstbuzztard/Makefile.am:
+	* libgstbuzztrax/Makefile.am:
 	  And add missing file.
 
 2008-04-24  Stefan Kost  <ensonic@users.sf.net>
@@ -1597,12 +1597,12 @@
 	* TODO:
 	* configure.ac:
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard-sections.txt:
-	* docs/reference/gst-buzztard.types.in:
-	* libgstbuzztard.pc.in:
-	* libgstbuzztard/preset.c:
-	* libgstbuzztard/sampler.c:
-	* libgstbuzztard/sampler.h:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* docs/reference/gst-buzztrax.types.in:
+	* libgstbuzztrax.pc.in:
+	* libgstbuzztrax/preset.c:
+	* libgstbuzztrax/sampler.c:
+	* libgstbuzztrax/sampler.h:
 	* src/Makefile.am:
 	* src/audiodelay/Makefile.am:
 	* src/audiodelay/audiodelay.c:
@@ -1642,7 +1642,7 @@
 	* src/tempo/tempo.c:
 	* src/tempo/tempo.h:
 	* tests/Makefile.am:
-	* tests/m-gst-buzztard.h:
+	* tests/m-gst-buzztrax.h:
 	  Restructure the files and stop poluting the gst namespace. Add sampler
 	  iface.
 
@@ -1663,12 +1663,12 @@
 	* TODO:
 	* autogen.sh:
 	* configure.ac:
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	* src/preset/preset.c:
 	* tests/Makefile.am:
 	* tests/e-gst-note2frequency.c:
-	* tests/m-gst-buzztard.c:
-	* tests/m-gst-buzztard.h:
+	* tests/m-gst-buzztrax.c:
+	* tests/m-gst-buzztrax.h:
 	* tests/s-gst-note2frequency.c:
 	* tests/t-gst-note2frequency.c:
 	  Svn property tuning.
@@ -1678,8 +1678,8 @@
 
 	* configure.ac:
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard.types:
-	* docs/reference/gst-buzztard.types.in:
+	* docs/reference/gst-buzztrax.types:
+	* docs/reference/gst-buzztrax.types.in:
 	  Add some autofoo magic to programmaticaly comment outfluidsynth from
 	  gobject introspection, if its not build.
 
@@ -1747,7 +1747,7 @@
 
 	* autogen.sh:
 	* configure.ac:
-	* docs/reference/gst-buzztard.types:
+	* docs/reference/gst-buzztrax.types:
 	* src/Makefile.am:
 	  Build the preset iface conditionally.
 
@@ -1806,7 +1806,7 @@
 	* docs/reference/Makefile.am:
 	  Fix build.
 
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	* src/propertymeta/propertymeta.c: (gst_property_meta_base_init),
 	(gst_property_meta_get_type):
 	* src/propertymeta/propertymeta.h:
@@ -1883,9 +1883,9 @@
 2007-05-04  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard-docs.sgml:
-	* docs/reference/gst-buzztard-sections.txt:
-	* docs/reference/gst-buzztard.types:
+	* docs/reference/gst-buzztrax-docs.sgml:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* docs/reference/gst-buzztrax.types:
 	* src/fluidsynth/gstfluidsynth.c:
 	  Add docs and add it to the docs.
 
@@ -2118,7 +2118,7 @@
 
 2007-01-20  Stefan Kost  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	* src/childbin/childbin.c: (gst_child_bin_get_type):
 	* src/help/help.c: (gst_help_get_type):
 	* src/preset/preset.c: (gst_preset_default_get_preset_names),
@@ -2164,7 +2164,7 @@
 
 2006-11-12  Stefan Kost  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	* src/audiodelay/audiodelay.h:
 	* src/simsyn/simsyn.h:
 	  more doc fixes
@@ -2172,8 +2172,8 @@
 2006-11-12  Stefan Kost  <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard.types:
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax.types:
+	* docs/reference/gst-buzztrax-sections.txt:
 	  doc fixes
 
 2006-11-12  Stefan Kost  <ensonic@users.sf.net>
@@ -2190,7 +2190,7 @@
 
 2006-11-12  Stefan Kost  <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	* src/audiodelay/Makefile.am:
 	* src/audiodelay/audiodelay.c:
 	(gst_audio_delay_calculate_tick_time),
@@ -2216,8 +2216,8 @@
 	* configure.ac:
 	  APP_DEBUG -> USE_DEBUG
 
-	* docs/reference/gst-buzztard-docs.sgml:
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-docs.sgml:
+	* docs/reference/gst-buzztrax-sections.txt:
 	* src/Makefile.am:
 	* src/help/.cvsignore:
 	* src/help/Makefile.am:
@@ -2283,8 +2283,8 @@
 	* NEWS:
 	* configure.ac:
 	* docs/reference/Makefile.am:
-	* docs/reference/gst-buzztard-sections.txt:
-	* docs/reference/gst-buzztard.types:
+	* docs/reference/gst-buzztrax-sections.txt:
+	* docs/reference/gst-buzztrax.types:
 	  prepare release 0.1.0, fix docs
 
 2006-08-24  Stefan Kost  <ensonic@users.sf.net>
@@ -2351,8 +2351,8 @@
 2006-04-26  Stefan Kost  <ensonic@users.sf.net>
 
 	* configure.ac:
-	* docs/reference/gst-buzztard-docs.sgml:
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-docs.sgml:
+	* docs/reference/gst-buzztrax-sections.txt:
 	* src/Makefile.am:
 	* src/audiodelay/.cvsignore:
 	* src/audiodelay/Makefile.am:
@@ -2502,14 +2502,14 @@
 
 2006-01-10 18:23  Stefan Kost <ensonic@users.sf.net>
 
-	* docs/reference/: gst-buzztard-sections.txt, gst-buzztard.types:
+	* docs/reference/: gst-buzztrax-sections.txt, gst-buzztrax.types:
 	doc fixes
 
 2006-01-09 21:13  Stefan Kost <ensonic@users.sf.net>
 
 	* docs/reference/Makefile.am,
-	docs/reference/gst-buzztard-docs.sgml,
-	docs/reference/gst-buzztard-sections.txt, src/childbin/childbin.c,
+	docs/reference/gst-buzztrax-docs.sgml,
+	docs/reference/gst-buzztrax-sections.txt, src/childbin/childbin.c,
 	src/note2frequency/note2frequency.c,
 	src/note2frequency/note2frequency.h,
 	src/propertymeta/propertymeta.c, src/simsyn/Makefile.am,
@@ -2523,8 +2523,8 @@
 
 	* src/note2frequency/note2frequency.c,
 	src/note2frequency/note2frequency.h, tests/Makefile.am,
-	tests/e-gst-note2frequency.c, tests/m-gst-buzztard.c,
-	tests/m-gst-buzztard.h, tests/s-gst-note2frequency.c,
+	tests/e-gst-note2frequency.c, tests/m-gst-buzztrax.c,
+	tests/m-gst-buzztrax.h, tests/s-gst-note2frequency.c,
 	tests/t-gst-note2frequency.c:
 	more tests adn fixes
 
@@ -2533,8 +2533,8 @@
 	* Makefile.am, configure.ac, src/note2frequency/note2frequency.c,
 	src/note2frequency/note2frequency.h, tests/.cvsignore,
 	tests/Makefile.am, tests/e-gst-note2frequency.c,
-	tests/gtkdoccomplete.sh, tests/m-gst-buzztard.c,
-	tests/m-gst-buzztard.h, tests/s-gst-note2frequency.c:
+	tests/gtkdoccomplete.sh, tests/m-gst-buzztrax.c,
+	tests/m-gst-buzztrax.h, tests/s-gst-note2frequency.c:
 	created testsuite
 	added implementation for note2frequency
 
@@ -2564,15 +2564,15 @@
 
 2005-12-23 09:07  Stefan Kost <ensonic@users.sf.net>
 
-	* docs/reference/gst-buzztard-sections.txt:
+	* docs/reference/gst-buzztrax-sections.txt:
 	documentation cleanup
 
 2005-12-12 23:22  Stefan Kost <ensonic@users.sf.net>
 
 	* Makefile.am, autogen.sh, configure.ac, docs/Makefile.am,
-	docs/reference/Makefile.am, docs/reference/gst-buzztard-docs.sgml,
-	docs/reference/gst-buzztard-sections.txt,
-	docs/reference/gst-buzztard.types:
+	docs/reference/Makefile.am, docs/reference/gst-buzztrax-docs.sgml,
+	docs/reference/gst-buzztrax-sections.txt,
+	docs/reference/gst-buzztrax.types:
 	added docs ;)
 
 2005-12-06 11:39  Stefan Kost <ensonic@users.sf.net>
@@ -2582,12 +2582,12 @@
 
 2005-12-03 17:28  Stefan Kost <ensonic@users.sf.net>
 
-	* configure.ac, libgstbuzztard.pc.in:
+	* configure.ac, libgstbuzztrax.pc.in:
 	switched to 0.10 pre
 
 2005-08-22 23:05  Stefan Kost <ensonic@users.sf.net>
 
-	* .cvsignore, configure.ac, libgstbuzztard.pc.in:
+	* .cvsignore, configure.ac, libgstbuzztrax.pc.in:
 	now building against gstreamer 0.9
 
 2005-07-22 11:45  Stefan Kost <ensonic@users.sf.net>
@@ -2635,7 +2635,7 @@
 
 2005-05-09 18:50  Stefan Kost <ensonic@users.sf.net>
 
-	* libgstbuzztard.pc.in:
+	* libgstbuzztrax.pc.in:
 	fixed include path in package config file
 
 2005-05-04 00:32  Stefan Kost <ensonic@users.sf.net>
@@ -2645,7 +2645,7 @@
 
 2005-05-04 00:12  Stefan Kost <ensonic@users.sf.net>
 
-	* Makefile.am, configure.ac, libgstbuzztard.pc.in:
+	* Makefile.am, configure.ac, libgstbuzztrax.pc.in:
 	added pkg-config file, so that we can detect the module
 
 2005-04-30 15:51  Stefan Kost <ensonic@users.sf.net>

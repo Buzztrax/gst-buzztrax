@@ -46,7 +46,7 @@
 #include <gst/base/gstbasetransform.h>
 #include <gst/audio/audio.h>
 
-#include <libgstbuzztard/tempo.h>
+#include <libgstbuzztrax/tempo.h>
 
 #include "audiodelay.h"
 

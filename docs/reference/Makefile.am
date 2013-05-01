@@ -4,7 +4,7 @@
 AUTOMAKE_OPTIONS = 1.6
 
 # The name of the module, e.g. 'glib'.
-DOC_MODULE=gst-buzztard
+DOC_MODULE=gst-buzztrax
 
 BUILT_SOURCES=$(DOC_MODULE).types
 
@@ -57,17 +57,17 @@ FIXXREF_OPTIONS=--extra-dir=$(glib_prefix)/share/gtk-doc/html/ \
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
 HFILE_GLOB= \
-  $(top_srcdir)/libgstbuzztard/*.h \
+  $(top_srcdir)/libgstbuzztrax/*.h \
   $(top_srcdir)/src/*/*.h
 CFILE_GLOB= \
-  $(top_srcdir)/libgstbuzztard/*.c \
+  $(top_srcdir)/libgstbuzztrax/*.c \
   $(top_srcdir)/src/*/*.c $(top_srcdir)/src/sidsyn/sidsyn*.cc
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
 # FIXME: this does not support path and thus is ambigous
 IGNORE_HFILES=config.h \
-	m-gst-buzztard.h \
+	m-gst-buzztrax.h \
 	$(BML_IGNORE_H) gstbmlorc.h gstbmlorc-dist.h \
 	$(top_srcdir)/src/sidsyn/envelope.h extfilt.h filter.h pot.h siddefs.h sidemu.h spline.h voice.h wave.h \
 	$(FLUIDSYNTH_IGNORE_H)
@@ -93,7 +93,7 @@ GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/src \
   $(BASE_DEPS_CFLAGS) \
   -D__GTK_DOC_IGNORE__
 GTKDOC_LIBS=$(BASE_DEPS_LIBS) \
-	$(top_builddir)/libgstbuzztard.la \
+	$(top_builddir)/libgstbuzztrax.la \
 	$(top_builddir)/libgstaudiodelay.la \
 	$(BML_LA) \
 	$(FLUIDSYNTH_LA) \

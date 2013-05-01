@@ -21,8 +21,8 @@
 #define __GSTBT_SID_SYN_H__
 
 #include <gst/gst.h>
-#include <libgstbuzztard/audiosynth.h>
-#include <libgstbuzztard/toneconversion.h>
+#include <libgstbuzztrax/audiosynth.h>
+#include <libgstbuzztrax/toneconversion.h>
 
 #include "sidsynv.h"
 #ifndef __GTK_DOC_IGNORE__

@@ -43,7 +43,7 @@
 
 #include <string.h>
 
-#include "libgstbuzztard/propertymeta.h"
+#include "libgstbuzztrax/propertymeta.h"
 #include "simsyn.h"
 
 #define GST_CAT_DEFAULT sim_syn_debug

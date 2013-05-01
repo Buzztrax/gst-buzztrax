@@ -21,7 +21,7 @@
 #define __GSTBT_SID_SYNV_V_H__
 
 #include <gst/gst.h>
-#include <libgstbuzztard/musicenums.h>
+#include <libgstbuzztrax/musicenums.h>
 
 G_BEGIN_DECLS
 #define GSTBT_TYPE_SID_SYNV            (gstbt_sid_synv_get_type())

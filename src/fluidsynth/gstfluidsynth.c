@@ -1,7 +1,7 @@
 /* GStreamer
  * Copyright (C) 2007 Josh Green <josh@users.sf.net>
  *
- * Adapted from simsyn synthesizer plugin in gst-buzztard source.
+ * Adapted from simsyn synthesizer plugin in gst-buzztrax source.
  * Copyright (C) 2005 Stefan Kost <ensonic@users.sf.net>
  *
  * gstfluidsynth.c: GStreamer wrapper for FluidSynth
@@ -74,7 +74,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libgstbuzztard/propertymeta.h"
+#include "libgstbuzztrax/propertymeta.h"
 
 #include "gstfluidsynth.h"
 

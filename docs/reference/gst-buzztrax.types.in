@@ -17,10 +17,10 @@ gstbt_wave_tab_syn_get_type
 
 % stuff that we want for gstreamer
 
-#include <libgstbuzztard/audiosynth.h>
-#include <libgstbuzztard/childbin.h>
-#include <libgstbuzztard/propertymeta.h>
-#include <libgstbuzztard/tempo.h>
+#include <libgstbuzztrax/audiosynth.h>
+#include <libgstbuzztrax/childbin.h>
+#include <libgstbuzztrax/propertymeta.h>
+#include <libgstbuzztrax/tempo.h>
 
 gstbt_audio_synth_get_type
 gstbt_child_bin_get_type
@@ -31,13 +31,13 @@ gstbt_tempo_get_type
 
 % own stuff
 
-#include <libgstbuzztard/envelope.h>
-#include <libgstbuzztard/envelope-adsr.h>
-#include <libgstbuzztard/envelope-d.h>
-#include <libgstbuzztard/filter-svf.h>
-#include <libgstbuzztard/osc-synth.h>
-#include <libgstbuzztard/osc-wave.h>
-#include <libgstbuzztard/toneconversion.h>
+#include <libgstbuzztrax/envelope.h>
+#include <libgstbuzztrax/envelope-adsr.h>
+#include <libgstbuzztrax/envelope-d.h>
+#include <libgstbuzztrax/filter-svf.h>
+#include <libgstbuzztrax/osc-synth.h>
+#include <libgstbuzztrax/osc-wave.h>
+#include <libgstbuzztrax/toneconversion.h>
 
 gstbt_envelope_get_type
 gstbt_envelope_adsr_get_type

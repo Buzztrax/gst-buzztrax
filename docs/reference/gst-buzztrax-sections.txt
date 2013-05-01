@@ -368,7 +368,7 @@ gstbt_tone_conversion_tuning_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbuzztard</FILE>
+<FILE>gstbuzztrax</FILE>
 <SUBSECTION Private>
 G_DEFINE_INTERFACE
 G_DEFINE_INTERFACE_WITH_CODE

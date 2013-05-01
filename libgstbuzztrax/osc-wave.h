@@ -21,7 +21,7 @@
 #define __GSTBT_OSC_WAVE_H__
 
 #include <gst/gst.h>
-#include <libgstbuzztard/toneconversion.h>
+#include <libgstbuzztrax/toneconversion.h>
 
 G_BEGIN_DECLS
 

@@ -21,7 +21,7 @@
 #define __GSTBT_OSC_SYNTH_H__
 
 #include <gst/gst.h>
-#include <libgstbuzztard/envelope.h>
+#include <libgstbuzztrax/envelope.h>
 
 G_BEGIN_DECLS
 

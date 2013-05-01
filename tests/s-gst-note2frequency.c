@@ -15,17 +15,17 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "m-gst-buzztard.h"
+#include "m-gst-buzztrax.h"
 
-extern TCase *gst_buzztard_note2frequency_test_case (void);
-extern TCase *gst_buzztard_note2frequency_example_case (void);
+extern TCase *gst_buzztrax_note2frequency_test_case (void);
+extern TCase *gst_buzztrax_note2frequency_example_case (void);
 
 Suite *
-gst_buzztard_note2frequency_suite (void)
+gst_buzztrax_note2frequency_suite (void)
 {
   Suite *s = suite_create ("GstBtToneConversion");
 
-  suite_add_tcase (s, gst_buzztard_note2frequency_test_case ());
-  suite_add_tcase (s, gst_buzztard_note2frequency_example_case ());
+  suite_add_tcase (s, gst_buzztrax_note2frequency_test_case ());
+  suite_add_tcase (s, gst_buzztrax_note2frequency_example_case ());
   return (s);
 }

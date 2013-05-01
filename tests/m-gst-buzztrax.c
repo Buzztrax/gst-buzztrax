@@ -23,10 +23,10 @@
 #include "glib.h"
 #include "gst/gst.h"
 
-#define GST_CAT_DEFAULT gst_buzztard_debug
+#define GST_CAT_DEFAULT gst_buzztrax_debug
 GST_DEBUG_CATEGORY (GST_CAT_DEFAULT);
 
-extern Suite *gst_buzztard_note2frequency_suite (void);
+extern Suite *gst_buzztrax_note2frequency_suite (void);
 
 gint test_argc = 1;
 gchar test_arg0[] = "check_gst_buzzard";
@@ -69,20 +69,20 @@ check_log_handler (const gchar * const log_domain,
 
 /* common setup and teardown code */
 void
-gst_buzztard_setup (void)
+gst_buzztrax_setup (void)
 {
   gst_init (&test_argc, &test_argvptr);
   GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "bt-check", 0,
       "music production environment / unit tests");
   // set this to e.g. DEBUG to see more from gst in the log
   gst_debug_set_threshold_for_name ("GST_*", GST_LEVEL_WARNING);
-  gst_debug_category_set_threshold (gst_buzztard_debug, GST_LEVEL_DEBUG);
+  gst_debug_category_set_threshold (gst_buzztrax_debug, GST_LEVEL_DEBUG);
   // no ansi color codes in logfiles please
   gst_debug_set_colored (FALSE);
 }
 
 void
-gst_buzztard_teardown (void)
+gst_buzztrax_teardown (void)
 {
 }
 
@@ -104,7 +104,7 @@ main (int argc, char **argv)
       G_LOG_LEVEL_CRITICAL);
   (void) g_log_set_default_handler (check_log_handler, NULL);
 
-  sr = srunner_create (gst_buzztard_note2frequency_suite ());
+  sr = srunner_create (gst_buzztrax_note2frequency_suite ());
   // this make tracing errors with gdb easier
   //srunner_set_fork_status(sr,CK_NOFORK);
   srunner_run_all (sr, CK_NORMAL);

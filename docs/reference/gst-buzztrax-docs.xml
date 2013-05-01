@@ -22,14 +22,14 @@
 ]>
 <book id="index" xmlns:xi="http://www.w3.org/2003/XInclude">
   <bookinfo>
-    <title>GStreamer Buzztard Reference Manual</title>
+    <title>GStreamer Buzztrax Reference Manual</title>
   </bookinfo>
 
   <preface>
     <title>Introduction</title>
     <para>
       This module contains experimental code that extends gstreamer.
-      The extensions are required to build a git version of buzztard.
+      The extensions are required to build a git version of buzztrax.
     </para>
     <para>
       It also contains some nice audio elements. These could be easily moved to
@@ -39,7 +39,7 @@
   </preface>
 
   <chapter>
-    <title>GStreamer Buzztard classes</title>
+    <title>GStreamer Buzztrax classes</title>
     <xi:include href="xml/gstbtaudiosynth.xml"/>
     <xi:include href="xml/gstbtenvelope.xml"/>
     <xi:include href="xml/gstbtenvelopeadsr.xml"/>
@@ -52,14 +52,14 @@
   </chapter>
 
   <chapter>
-    <title>GStreamer Buzztard interfaces</title>
+    <title>GStreamer Buzztrax interfaces</title>
     <xi:include href="xml/gstbtchildbin.xml"/>
     <xi:include href="xml/gstbtpropertymeta.xml"/>
     <xi:include href="xml/gstbttempo.xml"/>
   </chapter>
 
   <chapter>
-    <title>GStreamer Buzztard elements</title>
+    <title>GStreamer Buzztrax elements</title>
     <xi:include href="xml/gstaudiodelay.xml"/>
     <xi:include href="xml/gstbml.xml"/>
     <xi:include href="xml/gstfluidsynth.xml"/>
@@ -70,8 +70,8 @@
   </chapter>
   
   <chapter>
-    <title>GStreamer Buzztard module</title>
-    <xi:include href="xml/gstbuzztard.xml"/>
+    <title>GStreamer Buzztrax module</title>
+    <xi:include href="xml/gstbuzztrax.xml"/>
   </chapter>
 
   <chapter id="hierarchy">

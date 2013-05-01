@@ -353,7 +353,7 @@ dir_scan (const gchar * dir_name)
     "ROUT VST PLUGIN LOADER.DLL",
     "SHAMAN CHORUS.DLL",
     "STATIC DUAFILT II.DLL",
-    // *** glibc detected *** /home/ensonic/projects/buzztard/bml/src/.libs/lt-bmltest_info: free(): invalid next size (normal): 0x0805cc18 ***
+    // *** glibc detected *** /home/ensonic/projects/buzztrax/bml/src/.libs/lt-bmltest_info: free(): invalid next size (normal): 0x0805cc18 ***
     "SYNTHROM SINUS 2.DLL",
     "TRACK ORGANIZER.DLL",
     "VGRAPHITY.DLL",

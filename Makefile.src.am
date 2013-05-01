@@ -32,7 +32,7 @@ libgstaudiodelay_la_CFLAGS = \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstaudiodelay_la_LIBADD = \
-	libgstbuzztard.la \
+	libgstbuzztrax.la \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)  -lgstaudio-1.0 
 libgstaudiodelay_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstaudiodelay_la_LIBTOOLFLAGS = --tag=disable-static
@@ -86,7 +86,7 @@ libgstbml_la_CFLAGS = \
   $(ORC_CFLAGS) \
   $(BML_CFLAGS)
 libgstbml_la_LIBADD = \
-	libgstbuzztard.la \
+	libgstbuzztrax.la \
 	libgstbmln.la $(BMLW_LA) \
 	$(BASE_DEPS_LIBS) $(ORC_LIBS) $(BML_LIBS) \
 	$(GST_PLUGIN_LIBS) -lgstaudio-1.0 $(LIBM) 
@@ -108,7 +108,7 @@ libgstfluidsynth_la_CFLAGS = \
 	$(BASE_DEPS_CFLAGS) \
 	$(FLUIDSYNTH_CFLAGS)
 libgstfluidsynth_la_LIBADD = \
-	libgstbuzztard.la  \
+	libgstbuzztrax.la  \
 	$(BASE_DEPS_LIBS) $(FLUIDSYNTH_LIBS) $(GST_PLUGIN_LIBS)
 libgstfluidsynth_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstfluidsynth_la_LIBTOOLFLAGS = --tag=disable-static
@@ -139,7 +139,7 @@ libgstsidsyn_la_CXXFLAGS = \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstsidsyn_la_LIBADD = \
-	libgstbuzztard.la \
+	libgstbuzztrax.la \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
 libgstsidsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstsidsyn_la_LIBTOOLFLAGS = --tag=disable-static
@@ -152,7 +152,7 @@ libgstsimsyn_la_CFLAGS = \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstsimsyn_la_LIBADD = \
-	libgstbuzztard.la \
+	libgstbuzztrax.la \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
 libgstsimsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstsimsyn_la_LIBTOOLFLAGS = --tag=disable-static
@@ -165,7 +165,7 @@ libgstwavereplay_la_CFLAGS = \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstwavereplay_la_LIBADD = \
-	libgstbuzztard.la \
+	libgstbuzztrax.la \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
 libgstwavereplay_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstwavereplay_la_LIBTOOLFLAGS = --tag=disable-static
@@ -178,7 +178,7 @@ libgstwavetabsyn_la_CFLAGS = \
 	$(GST_PLUGIN_CFLAGS) \
 	$(BASE_DEPS_CFLAGS)
 libgstwavetabsyn_la_LIBADD = \
-	libgstbuzztard.la \
+	libgstbuzztrax.la \
 	$(BASE_DEPS_LIBS) $(GST_PLUGIN_LIBS)
 libgstwavetabsyn_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstwavetabsyn_la_LIBTOOLFLAGS = --tag=disable-static

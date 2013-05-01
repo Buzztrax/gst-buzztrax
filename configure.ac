@@ -1,6 +1,6 @@
 dnl Initialise autoconf/automake/libtool
 AC_PREREQ(2.61)
-AC_INIT([gst-buzztard],[0.8.0],[buzztard-devel@lists.sourceforge.net])
+AC_INIT([gst-buzztrax],[0.8.0],[buzztrax-devel@lists.sourceforge.net])
 AM_INIT_AUTOMAKE([-Wall check-news std-options])
 AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS(config.h)
@@ -56,7 +56,7 @@ PKG_PROG_PKG_CONFIG
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
-dnl common switches for all buzztard modules
+dnl common switches for all buzztrax modules
 
 dnl enable runtime debugging code
 AC_MSG_CHECKING(whether to enable runtime debugging code)
@@ -233,9 +233,9 @@ AC_SUBST(FLUIDSYNTH_DOC_TYPES)
 
 
 dnl set license and copyright notice
-AC_DEFINE(GST_PACKAGE_ORIGIN, "http://www.buzztard.org", [Plugin package origin])
+AC_DEFINE(GST_PACKAGE_ORIGIN, "http://www.buzztrax.org", [Plugin package origin])
 AC_SUBST(GST_PACKAGE_ORIGIN)
-AC_DEFINE(GST_PACKAGE_NAME, "gst-buzztard", [Plugin package name])
+AC_DEFINE(GST_PACKAGE_NAME, "gst-buzztrax", [Plugin package name])
 AC_SUBST(GST_PACKAGE_NAME)
 
 
@@ -277,9 +277,9 @@ AC_SUBST(BASE_DEPS_CFLAGS)
 
 
 AC_CONFIG_FILES(Makefile \
-	libgstbuzztard.pc \
+	libgstbuzztrax.pc \
 	docs/reference/Makefile \
-	docs/reference/gst-buzztard.types
+	docs/reference/gst-buzztrax.types
 )
 AC_OUTPUT
 
@@ -311,8 +311,8 @@ fi
 
 if test ! `echo "$PKG_CONFIG_PATH:/usr" | tr \: \\n | grep $prefix` ; then
 echo "
-You are installing buzztard libraries into a location that is not yet known to
-system. In order for other buzztard modules to find them and the application to
+You are installing buzztrax libraries into a location that is not yet known to
+system. In order for other buzztrax modules to find them and the application to
 work with all features please register the location (see README for details):
 export LD_LIBRARY_PATH=$prefix/lib:\$LD_LIBRARY_PATH
 export DEVHELP_SEARCH_PATH="\$DEVHELP_SEARCH_PATH:$prefix/share/gtk-doc/html"

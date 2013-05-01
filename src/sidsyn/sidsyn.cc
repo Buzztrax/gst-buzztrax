@@ -45,8 +45,8 @@
 #include <math.h>
 #include <stdio.h>
 
-#include <libgstbuzztard/childbin.h>
-#include "libgstbuzztard/propertymeta.h"
+#include <libgstbuzztrax/childbin.h>
+#include "libgstbuzztrax/propertymeta.h"
 
 #include "sidsyn.h"
 

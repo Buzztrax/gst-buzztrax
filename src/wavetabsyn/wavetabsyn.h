@@ -21,11 +21,11 @@
 #define __GSTBT_WAVE_TAB_SYN_H__
 
 #include <gst/gst.h>
-#include <libgstbuzztard/audiosynth.h>
-#include <libgstbuzztard/envelope-adsr.h>
-#include <libgstbuzztard/osc-wave.h>
-#include <libgstbuzztard/propertymeta.h>
-#include <libgstbuzztard/toneconversion.h>
+#include <libgstbuzztrax/audiosynth.h>
+#include <libgstbuzztrax/envelope-adsr.h>
+#include <libgstbuzztrax/osc-wave.h>
+#include <libgstbuzztrax/propertymeta.h>
+#include <libgstbuzztrax/toneconversion.h>
 
 G_BEGIN_DECLS
 
