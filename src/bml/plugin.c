@@ -588,7 +588,6 @@ plugin_init (GstPlugin * plugin)
     for (i = 0; i < n; i++) {
       name = gst_structure_nth_field_name (bml_meta_all, i);
       value = gst_structure_get_value (bml_meta_all, name);
-      //printf("%3d: %20s\n",i,name);
       if (G_VALUE_TYPE (value) == GST_TYPE_STRUCTURE) {
         GstStructure *bml_meta = g_value_get_boxed (value);
         GQuark bml_type = gst_structure_get_name_id (bml_meta);

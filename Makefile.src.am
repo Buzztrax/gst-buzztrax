@@ -44,12 +44,12 @@ plugin_LTLIBRARIES += libgstbml.la
 noinst_HEADERS += \
   src/bml/gstbmlsrc.h src/bml/gstbmltransform.h \
   src/bml/gstbml.h src/bml/gstbmlv.h \
-  src/bml/plugin.h src/bml/common.h src/bml/utils.h
+  src/bml/plugin.h src/bml/common.h
 
 # native
 libgstbmln_la_SOURCES = \
   src/bml/gstbml.c src/bml/gstbmlsrc.c src/bml/gstbmltransform.c \
-  src/bml/gstbmlv.c src/bml/utils.c
+  src/bml/gstbmlv.c
 libgstbmln_la_CFLAGS = -DBML_NATIVE \
   -I$(srcdir) -I$(builddir) -I$(builddir)/src/bml \
   $(GST_PLUGIN_CFLAGS) \
@@ -60,7 +60,7 @@ libgstbmln_la_CFLAGS = -DBML_NATIVE \
 # wrapped
 libgstbmlw_la_SOURCES = \
   src/bml/gstbml.c src/bml/gstbmlsrc.c src/bml/gstbmltransform.c \
-  src/bml/gstbmlv.c src/bml/utils.c
+  src/bml/gstbmlv.c
 libgstbmlw_la_CFLAGS = -DBML_WRAPPED \
   -I$(srcdir) -I$(builddir) -I$(builddir)/src/bml \
   $(GST_PLUGIN_CFLAGS) \

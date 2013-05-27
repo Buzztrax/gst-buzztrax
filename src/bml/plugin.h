@@ -72,7 +72,6 @@
 #include "gstbmltransform.h"
 #include "gstbmlv.h"
 #include "common.h"          /* gstbml sdk utility functions */
-#include "utils.h"           /* gstbml sdk utility functions */
 
 #ifndef BML_VERSION
 #define BML_VERSION "1.0"
