@@ -239,7 +239,7 @@ static gboolean
 dir_scan (const gchar * dir_name)
 {
   GDir *dir;
-  gchar *file_name, *ext, *conv_entry_name, *cur_entry_name;
+  gchar *file_name, *ext, *conv_entry_name = NULL, *cur_entry_name;
   const gchar *entry_name;
   gboolean res = FALSE;
 
