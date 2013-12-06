@@ -92,8 +92,8 @@ AC_ARG_ENABLE([deprecated],
 	]
 )
 AC_MSG_RESULT($enable_deprecated)
-if test "x$enable_deprecated" == "xyes"; then
-	BT_DISABLE_DEPRECATED="-DG_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGTK_DISABLE_DEPRECATED -DGST_DISABLE_DEPRECATED"
+if test "x$enable_deprecated" == "xno"; then
+	BT_DISABLE_DEPRECATED="-DG_DISABLE_DEPRECATED -DGST_DISABLE_DEPRECATED"
 else
 	BT_DISABLE_DEPRECATED=""
 fi
