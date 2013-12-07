@@ -205,9 +205,11 @@ CFLAGS="$CFLAGS $BML_CFLAGS"
 LDFLAGS="$LDFLAGS $BML_LIBS"
 AC_CHECK_LIB( bml, bmlw_init, [
     have_bmlw=yes
-    AC_DEFINE(HAVE_BMLW, [1], [Define to 1 if bml has been build with wrapper]) \
+    AC_DEFINE(HAVE_BMLW, [1], [Define to 1 if bml has been build with wrapper])
+    bml_types="native"
   ],[
     have_bmlw=no
+    bml_types="native and wrapped"
   ]
 )
 AM_CONDITIONAL(BUILD_BMLW, test "x$have_bmlw" = "xyes")
@@ -291,7 +293,7 @@ Configuration
 	Compiler                   : ${CC}
 
 	Documentation (API)        : ${enable_gtk_doc}
-	Buzzmachine support        : ${have_bml}
+	Buzzmachine support        : ${have_bml} (${bml_types})
 	FluidSynth support         : ${have_fluidsynth}
 
 	Debug                      : ${enable_debug}
