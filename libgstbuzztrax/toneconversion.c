@@ -180,6 +180,8 @@ gstbt_tone_conversion_translate_equal_temperament (GstBtToneConversion * self,
   g_assert (octave < 10);
 
   /* calculated base frequency A-0=55 Hz */
+  // TODO(ensonic): this should be called A-1 'contra'
+  // http://en.wikipedia.org/wiki/Note#Note_designation_in_accordance_with_octave_name
   frequency = (gdouble) (55 << octave);
   /* do tone stepping */
   step = pow (2.0, (1.0 / 12.0));
