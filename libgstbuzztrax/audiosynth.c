@@ -26,7 +26,6 @@
  * The pure virtual process and setup methods must be implemented by the child
  * class.
  */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -72,6 +71,12 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GstBtAudioSynth, gstbt_audio_synth,
 
 //--
 
+static guint
+gstbt_audio_synth_calculate_buffer_size (GstBtAudioSynth * self)
+{
+  return self->channels * self->generate_samples_per_buffer * sizeof (gint16);
+}
+
 static void
 gstbt_audio_synth_calculate_buffer_frames (GstBtAudioSynth * self)
 {
@@ -85,6 +90,8 @@ gstbt_audio_synth_calculate_buffer_frames (GstBtAudioSynth * self)
   self->samples_per_buffer = ((self->samplerate * div) / ticks_per_minute);
   self->ticktime = (GstClockTime) (0.5 + subticktime);
   GST_DEBUG ("samples_per_buffer=%lf", self->samples_per_buffer);
+  gst_base_src_set_blocksize (GST_BASE_SRC (self),
+      gstbt_audio_synth_calculate_buffer_size (self));
   // the sequence is quantized to ticks and not subticks
   // we need to compensate for the rounding errors :/
   self->ticktime_err =
@@ -133,6 +140,10 @@ gstbt_audio_synth_set_caps (GstBaseSrc * basesrc, GstCaps * caps)
 
   ret = gst_structure_get_int (structure, "rate", &src->samplerate);
   ret &= gst_structure_get_int (structure, "channels", &src->channels);
+  if (ret) {
+    gst_base_src_set_blocksize (basesrc,
+        gstbt_audio_synth_calculate_buffer_size (src));
+  }
   return ret;
 }
 
@@ -349,7 +360,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
       (src->reverse ? (-src->ticktime_err) : src->ticktime_err);
 
   res = GST_BASE_SRC_GET_CLASS (basesrc)->alloc (basesrc, src->n_samples,
-      src->channels * src->generate_samples_per_buffer * sizeof (gint16), &buf);
+      gstbt_audio_synth_calculate_buffer_size (src), &buf);
   if (G_UNLIKELY (res != GST_FLOW_OK)) {
     return res;
   }
