@@ -225,13 +225,6 @@ PKG_CHECK_MODULES(FLUIDSYNTH, fluidsynth >= 1.0,
 AC_SUBST(FLUIDSYNTH_CFLAGS)
 AC_SUBST(FLUIDSYNTH_LIBS)
 AM_CONDITIONAL(FLUIDSYNTH_SUPPORT, test "x$have_fluidsynth" = "xyes")
-if test "x$have_fluidsynth" = "xyes"
-then
-  FLUIDSYNTH_DOC_TYPES=
-else
-  FLUIDSYNTH_DOC_TYPES="%"
-fi
-AC_SUBST(FLUIDSYNTH_DOC_TYPES)
 
 
 dnl set license and copyright notice
@@ -280,8 +273,7 @@ AC_SUBST(BASE_DEPS_CFLAGS)
 
 AC_CONFIG_FILES(Makefile \
 	libgstbuzztrax.pc \
-	docs/reference/Makefile \
-	docs/reference/gst-buzztrax.types
+	docs/reference/Makefile
 )
 AC_OUTPUT
 
