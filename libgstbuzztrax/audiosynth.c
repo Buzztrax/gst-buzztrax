@@ -19,6 +19,7 @@
 /**
  * SECTION:gstbtaudiosynth
  * @title: GstBtAudioSynth
+ * @include: libgstbuzztrax/audiosynth.h
  * @short_description: base audio synthesizer
  *
  * Base audio synthesizer to use as a foundation for new synthesizers. Handles

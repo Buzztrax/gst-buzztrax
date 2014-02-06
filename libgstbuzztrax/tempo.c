@@ -19,6 +19,7 @@
 /**
  * SECTION:gstbttempo
  * @title: GstBtTempo
+ * @include: libgstbuzztrax/tempo.h
  * @short_description: helper interface for tempo synced gstreamer elements
  *
  * This interface offers three #GObject properties to specify a rythmic tempo of

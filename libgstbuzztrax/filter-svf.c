@@ -18,6 +18,8 @@
  */
 /**
  * SECTION:gstbtfiltersvf
+ * @title: GstBtFilterSVF
+ * @include: libgstbuzztrax/filter-svf.h
  * @short_description: state variable filter
  *
  * An audio filter that can work in 4 modes (#GstBtFilterSVF:type).

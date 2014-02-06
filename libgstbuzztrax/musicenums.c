@@ -19,6 +19,7 @@
 /**
  * SECTION:gstbtmusicenums
  * @title: GstBtMusicEnums
+ * @include: libgstbuzztrax/musicenums.h
  * @short_description: various enum types
  *
  * Music/Audio related enumerations.

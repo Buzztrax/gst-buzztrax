@@ -18,6 +18,8 @@
  */
 /**
  * SECTION:gstbtenveloped
+ * @title: GstBtEnvelopeD
+ * @include: libgstbuzztrax/envelope-d.h
  * @short_description: decay envelope generator
  *
  * Simple decay envelope.

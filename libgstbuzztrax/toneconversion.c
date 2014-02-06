@@ -19,6 +19,7 @@
 /**
  * SECTION:gstbttoneconversion
  * @title: GstBtToneConversion
+ * @include: libgstbuzztrax/toneconversion.h
  * @short_description: helper class for tone unit conversion
  *
  * An instance of this class can translate a musical note to a frequency, while

@@ -18,6 +18,8 @@
  */
 /**
  * SECTION:gstbtenvelope
+ * @title: GstBtEnvelope
+ * @include: libgstbuzztrax/envelope.h
  * @short_description: envelope base class
  *
  * Base class for envelopes. 

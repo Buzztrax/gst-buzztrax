@@ -18,6 +18,8 @@
  */
 /**
  * SECTION:gstbtoscwave
+ * @title: GstBtOscWave
+ * @include: libgstbuzztrax/osc-wave.h
  * @short_description: wavetable oscillator
  *
  * An audio waveform generator that read from the applications wave-table.

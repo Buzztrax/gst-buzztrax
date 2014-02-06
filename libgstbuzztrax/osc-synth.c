@@ -18,6 +18,8 @@
  */
 /**
  * SECTION:gstbtoscsynth
+ * @title: GstBtOscSynth
+ * @include: libgstbuzztrax/osc-synth.h
  * @short_description: synthetic waveform oscillator
  *
  * An audio generator producing classic oscillator waveforms.

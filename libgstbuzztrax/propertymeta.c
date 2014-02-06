@@ -19,6 +19,7 @@
 /**
  * SECTION:gstbtpropertymeta
  * @title: GstBtPropertyMeta
+ * @include: libgstbuzztrax/propertymeta.h
  * @short_description: helper interface for extended gstreamer element meta data
  *
  * This interface standardises some additional meta-data that is attached to

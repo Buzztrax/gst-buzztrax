@@ -19,6 +19,7 @@
 /**
  * SECTION:gstbtchildbin
  * @title: GstBtChildBin
+ * @include: libgstbuzztrax/childbin.h
  * @short_description: helper interface for multi child gstreamer elements
  *
  * This interface provides an extension to the #GstChildProxy interface, which

@@ -18,6 +18,8 @@
  */
 /**
  * SECTION:gstbtenvelopeadsr
+ * @title: GstBtEnvelopeASDR
+ * @include: libgstbuzztrax/envelope-adsr.h
  * @short_description: attack-decay-sustain-release envelope generator
  *
  * Classic attack-decay-sustain-release envelope.
