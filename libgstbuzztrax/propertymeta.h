@@ -34,7 +34,7 @@ typedef struct _GstBtPropertyMeta GstBtPropertyMeta; /* dummy object */
 typedef struct _GstBtPropertyMetaInterface GstBtPropertyMetaInterface;
 
 /**
- * GstBtPropertyMeta:
+ * GstBtPropertyMetaInterface:
  *
  * Opaque interface structure.
  */

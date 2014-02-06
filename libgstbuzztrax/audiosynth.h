@@ -34,9 +34,8 @@ typedef struct _GstBtAudioSynthClass GstBtAudioSynthClass;
 /**
  * GstBtAudioSynth:
  *
- * Class instance data.
+ * Instance data.
  */
-
 struct _GstBtAudioSynth
 {
   GstBaseSrc parent;
