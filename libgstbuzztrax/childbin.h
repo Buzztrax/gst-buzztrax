@@ -36,7 +36,7 @@ typedef struct _GstBtChildBin GstBtChildBin; /* dummy object */
 typedef struct _GstBtChildBinInterface GstBtChildBinInterface;
 
 /**
- * GstBtChildBin:
+ * GstBtChildBinInterface:
  *
  * Opaque interface structure.
  */

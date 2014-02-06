@@ -35,7 +35,7 @@ typedef struct _GstBtTempo GstBtTempo; /* dummy object */
 typedef struct _GstBtTempoInterface GstBtTempoInterface;
 
 /**
- * GstBtTempo:
+ * GstBtTempoInterface:
  *
  * Opaque interface structure.
  */
