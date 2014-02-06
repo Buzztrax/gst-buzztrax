@@ -241,15 +241,11 @@ gstbt_osc_synth_create_white_noise (GstBtOscSynth * self, guint ct,
 static void
 gstbt_osc_synth_init_pink_noise (GstBtOscSynth * self)
 {
-  guint num_rows = 12;          /* arbitrary: 1 .. PINK_MAX_RANDOM_ROWS */
-  glong pmax;
+  guint num_rows = 12;          /* arbitrary: 1 .. _PINK_MAX_RANDOM_ROWS */
 
   self->pink.index = 0;
   self->pink.index_mask = (1 << num_rows) - 1;
-  /* calculate maximum possible signed random value.
-   * Extra 1 for white noise always added. */
-  pmax = (num_rows + 1) * (1 << (PINK_RANDOM_BITS - 1));
-  self->pink.scalar = 1.0f / pmax;
+  self->pink.scalar = 1.0f / (RAND_MAX + 1.0);
   /* Initialize rows. */
   memset (self->pink.rows, 0, sizeof (self->pink.rows));
   self->pink.running_sum = 0;
@@ -282,7 +278,6 @@ gstbt_osc_synth_generate_pink_noise_value (GstBtPinkNoise * pink)
      * values together. Only one changes each time.
      */
     pink->running_sum -= pink->rows[num_zeros];
-    //new_random = ((glong)GenerateRandomNumber()) >> PINK_RANDOM_SHIFT;
     new_random = 32768.0 - (65536.0 * (gulong) rand () / (RAND_MAX + 1.0));
     pink->running_sum += new_random;
     pink->rows[num_zeros] = new_random;

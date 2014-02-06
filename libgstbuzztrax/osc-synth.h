@@ -64,13 +64,11 @@ typedef enum
 
 GType gstbt_osc_synth_wave_get_type(void);
 
-#define PINK_MAX_RANDOM_ROWS   (30)
-#define PINK_RANDOM_BITS       (16)
-#define PINK_RANDOM_SHIFT      ((sizeof(long)*8)-PINK_RANDOM_BITS)
+#define _PINK_MAX_RANDOM_ROWS   (30)
 
 typedef struct
 {
-  glong rows[PINK_MAX_RANDOM_ROWS];
+  glong rows[_PINK_MAX_RANDOM_ROWS];
   glong running_sum;            /* Used to optimize summing of generators. */
   gint index;                   /* Incremented each sample. */
   gint index_mask;              /* Index wrapped by ANDing with this mask. */
