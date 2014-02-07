@@ -27,6 +27,8 @@
 #include "sidsynv.h"
 #ifndef __GTK_DOC_IGNORE__
 #include "sidemu.h"
+#define NUM_VOICES 3
+#define NUM_REGS 29
 #else
 typedef struct {
 } SID;
@@ -34,9 +36,6 @@ typedef enum chip_model {
   MOS
 } chip_model;
 #endif
-
-#define NUM_VOICES 3
-#define NUM_REGS 29
 
 G_BEGIN_DECLS
 #define GSTBT_TYPE_SID_SYN            (gstbt_sid_syn_get_type())
