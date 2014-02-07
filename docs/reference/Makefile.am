@@ -15,7 +15,7 @@ FLUIDSYNTH_LA = $(top_builddir)/libgstfluidsynth.la
 FLUIDSYNTH_IGNORE_H =
 else
 FLUIDSYNTH_LA =
-FLUIDSYNTH_IGNORE_H = gstfluidsynth.h
+FLUIDSYNTH_IGNORE_H = fluidsynth.h
 endif
 if BML_SUPPORT
 BML_CF = -DBML_NATIVE $(BML_CFLAGS)
@@ -59,7 +59,8 @@ HFILE_GLOB= \
   $(top_srcdir)/src/*/*.h
 CFILE_GLOB= \
   $(top_srcdir)/libgstbuzztrax/*.c \
-  $(top_srcdir)/src/*/*.c $(top_srcdir)/src/sidsyn/sidsyn*.cc
+  $(top_srcdir)/src/*/*.c \
+  $(top_srcdir)/src/sidsyn/sidsyn*.cc
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
