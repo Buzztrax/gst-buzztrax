@@ -36,8 +36,10 @@ typedef struct _GstBtTempoInterface GstBtTempoInterface;
 
 /**
  * GstBtTempoInterface:
+ * @parent: parent type
+ * @change_tempo: vmethod for changing the song tempo
  *
- * Opaque interface structure.
+ * Interface structure.
  */
 struct _GstBtTempoInterface
 {

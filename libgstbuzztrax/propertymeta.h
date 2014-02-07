@@ -35,8 +35,11 @@ typedef struct _GstBtPropertyMetaInterface GstBtPropertyMetaInterface;
 
 /**
  * GstBtPropertyMetaInterface:
+ * @parent: parent type
+ * @describe_property: vmethod for returning a human readable property value
+ *                     description
  *
- * Opaque interface structure.
+ * Interface structure.
  */
 struct _GstBtPropertyMetaInterface
 {

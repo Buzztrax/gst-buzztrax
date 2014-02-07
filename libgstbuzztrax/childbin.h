@@ -37,8 +37,11 @@ typedef struct _GstBtChildBinInterface GstBtChildBinInterface;
 
 /**
  * GstBtChildBinInterface:
+ * @parent: parent type
+ * @add_child: vmethod for adding a child to the bin
+ * @remove_child: vmethod for removing a child from the bin
  *
- * Opaque interface structure.
+ * Interface structure.
  */
 struct _GstBtChildBinInterface
 {
