@@ -20,7 +20,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstfluidsynth
+ * SECTION:fluidsynth
  * @title: GstBtFluidSynth
  * @short_description: FluidSynth GStreamer wrapper
  *
@@ -76,7 +76,7 @@
 
 #include "libgstbuzztrax/propertymeta.h"
 
-#include "gstfluidsynth.h"
+#include "fluidsynth.h"
 
 #define GST_CAT_DEFAULT fluid_synth_debug
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);

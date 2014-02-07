@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstbtoscsynth
+ * SECTION:osc-synth
  * @title: GstBtOscSynth
  * @include: libgstbuzztrax/osc-synth.h
  * @short_description: synthetic waveform oscillator

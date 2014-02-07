@@ -15,7 +15,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstbml
+ * SECTION:bml
  * @title: GstBml
  * @short_description: buzzmachine wrapper
  *

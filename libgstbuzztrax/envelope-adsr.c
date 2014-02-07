@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstbtenvelopeadsr
+ * SECTION:envelope-adsr
  * @title: GstBtEnvelopeASDR
  * @include: libgstbuzztrax/envelope-adsr.h
  * @short_description: attack-decay-sustain-release envelope generator

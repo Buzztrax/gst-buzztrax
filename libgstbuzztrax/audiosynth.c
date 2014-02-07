@@ -17,7 +17,7 @@
  */
 
 /**
- * SECTION:gstbtaudiosynth
+ * SECTION:audiosynth
  * @title: GstBtAudioSynth
  * @include: libgstbuzztrax/audiosynth.h
  * @short_description: base audio synthesizer

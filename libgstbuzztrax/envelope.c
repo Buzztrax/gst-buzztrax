@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstbtenvelope
+ * SECTION:envelope
  * @title: GstBtEnvelope
  * @include: libgstbuzztrax/envelope.h
  * @short_description: envelope base class

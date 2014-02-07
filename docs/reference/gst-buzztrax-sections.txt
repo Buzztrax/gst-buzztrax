@@ -1,13 +1,6 @@
-# :mode=html:
-# please add section in the alpahbetical order using the following template
-# <SECTION>
-# <FILE>gstxxx</FILE>
-# <SUBSECTION Private>
-# <SUBSECTION Standard>
-# </SECTION>
-
 <SECTION>
-<FILE>gstaudiodelay</FILE>
+<FILE>audiodelay</FILE>
+<TITLE>GstBtAudioDelay</TITLE>
 GstBtAudioDelay
 <SUBSECTION Standard>
 GSTBT_AUDIO_DELAY
@@ -21,7 +14,8 @@ gstbt_audio_delay_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtaudiosynth</FILE>
+<FILE>audiosynth</FILE>
+<TITLE>GstBtAudioSynth</TITLE>
 GstBtAudioSynth
 <SUBSECTION Standard>
 GSTBT_AUDIO_SYNTH
@@ -35,7 +29,7 @@ gstbt_audio_synth_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbml</FILE>
+<FILE>bml</FILE>
 <SUBSECTION Standard>
 bml
 BML
@@ -80,7 +74,8 @@ gstbml_preset_set_meta
 </SECTION>
 
 <SECTION>
-<FILE>gstbtchildbin</FILE>
+<FILE>childbin</FILE>
+<TITLE>GstBtChildBin</TITLE>
 GstBtChildBinInterface
 gstbt_child_bin_add_child
 gstbt_child_bin_remove_child
@@ -94,7 +89,8 @@ gstbt_child_bin_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtenvelope</FILE>
+<FILE>envelope</FILE>
+<TITLE>GstBtEnvelope</TITLE>
 GstBtEnvelope
 gstbt_envelope_get
 gstbt_envelope_is_running
@@ -110,7 +106,8 @@ gstbt_envelope_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtenvelopeadsr</FILE>
+<FILE>envelope-adsr</FILE>
+<TITLE>GstBtEnvelopeADSR</TITLE>
 GstBtEnvelopeADSR
 gstbt_envelope_adsr_new
 gstbt_envelope_adsr_setup
@@ -126,7 +123,8 @@ gstbt_envelope_adsr_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtenveloped</FILE>
+<FILE>envelope-d</FILE>
+<TITLE>GstBtEnvelopeD</TITLE>
 GstBtEnvelopeD
 gstbt_envelope_d_new
 gstbt_envelope_d_setup
@@ -142,7 +140,8 @@ gstbt_envelope_d_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtfiltersvf</FILE>
+<FILE>filter-svf</FILE>
+<TITLE>GstBtFilterSVF</TITLE>
 GstBtFilterSVFType
 GstBtFilterSVF
 gstbt_filter_svf_new
@@ -160,7 +159,7 @@ gstbt_filter_svf_type_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstfluidsynth</FILE>
+<FILE>fluidsynth</FILE>
 GstBtFluidSynthInterpolationMode
 GstBtFluidSynthChorusWaveform
 GstBtFluidSynth
@@ -176,7 +175,7 @@ gstbt_fluid_synth_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtmusicenums</FILE>
+<FILE>musicenums</FILE>
 GstBtTriggerSwitch
 GstBtNote
 <SUBSECTION Standard>
@@ -187,7 +186,8 @@ gstbt_trigger_switch_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtoscsynth</FILE>
+<FILE>osc-synth</FILE>
+<TITLE>GstBtOscSynth</TITLE>
 GstBtOscSynthWave
 GstBtOscSynth
 gstbt_osc_synth_new
@@ -205,7 +205,8 @@ gstbt_osc_synth_wave_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtoscwave</FILE>
+<FILE>osc-wave</FILE>
+<TITLE>GstBtOscWave</TITLE>
 GstBtOscWave
 gstbt_osc_wave_setup
 gstbt_osc_wave_new
@@ -221,7 +222,9 @@ gstbt_osc_wave_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbtpropertymeta</FILE>
+<FILE>propertymeta</FILE>
+<TITLE>GstBtPropertyMeta</TITLE>
+GstBtPropertyMetaInterface
 gstbt_property_meta_describe_property
 gstbt_property_meta_quark
 gstbt_property_meta_quark_min_val
@@ -230,7 +233,6 @@ gstbt_property_meta_quark_def_val
 gstbt_property_meta_quark_no_val
 gstbt_property_meta_quark_flags
 GstBtPropertyMetaFlags
-GstBtPropertyMetaInterface
 <SUBSECTION Standard>
 GSTBT_IS_PROPERTY_META
 GSTBT_PROPERTY_META
@@ -241,7 +243,8 @@ gstbt_property_meta_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstsidsyn</FILE>
+<FILE>sidsyn</FILE>
+<TITLE>GstBtSidSyn</TITLE>
 GstBtSidSyn
 GstBtSidSynV
 GstBtSidSynEffect
@@ -250,8 +253,6 @@ GstBtSidSynWave
 NUM_VOICES
 NUM_REGS
 <SUBSECTION Standard>
-GstBtSidSynClass
-GstBtSidSynVClass
 GSTBT_IS_SID_SYN
 GSTBT_IS_SID_SYNV
 GSTBT_IS_SID_SYNV_CLASS
@@ -264,12 +265,15 @@ GSTBT_SID_SYN_CLASS
 GSTBT_SID_SYN_GET_CLASS
 GSTBT_TYPE_SID_SYN
 GSTBT_TYPE_SID_SYNV
+GstBtSidSynClass
+GstBtSidSynVClass
 gstbt_sid_syn_get_type
 gstbt_sid_synv_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstsimsyn</FILE>
+<FILE>simsyn</FILE>
+<TITLE>GstBtSimSyn</TITLE>
 GstBtSimSyn
 <SUBSECTION Standard>
 GSTBT_IS_SIM_SYN
@@ -283,7 +287,8 @@ gstbt_sim_syn_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbttempo</FILE>
+<FILE>tempo</FILE>
+<TITLE>GstBtTempo</TITLE>
 GstBtTempoInterface
 gstbt_tempo_change_tempo
 <SUBSECTION Standard>
@@ -296,7 +301,8 @@ gstbt_tempo_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstbttoneconversion</FILE>
+<FILE>toneconversion</FILE>
+<TITLE>GstBtToneConversion</TITLE>
 GstBtToneConversionTuning
 GstBtToneConversion
 gstbt_tone_conversion_new
@@ -319,7 +325,8 @@ gstbt_tone_conversion_tuning_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstwavereplay</FILE>
+<FILE>wavereplay</FILE>
+<TITLE>GstBtWaveReplay</TITLE>
 GstBtWaveReplay
 <SUBSECTION Standard>
 GSTBT_IS_WAVE_REPLAY
@@ -333,7 +340,8 @@ gstbt_wave_replay_get_type
 </SECTION>
 
 <SECTION>
-<FILE>gstwavetabsyn</FILE>
+<FILE>wavetabsyn</FILE>
+<TITLE>GstBtWaveTabSyn</TITLE>
 GstBtWaveTabSyn
 <SUBSECTION Standard>
 GSTBT_IS_WAVE_TAB_SYN

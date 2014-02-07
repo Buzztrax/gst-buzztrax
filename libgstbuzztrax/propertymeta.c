@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstbtpropertymeta
+ * SECTION:propertymeta
  * @title: GstBtPropertyMeta
  * @include: libgstbuzztrax/propertymeta.h
  * @short_description: helper interface for extended gstreamer element meta data

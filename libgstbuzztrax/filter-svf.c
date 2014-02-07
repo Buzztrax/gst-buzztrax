@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstbtfiltersvf
+ * SECTION:filter-svf
  * @title: GstBtFilterSVF
  * @include: libgstbuzztrax/filter-svf.h
  * @short_description: state variable filter

@@ -98,9 +98,9 @@ endif
 
 if FLUIDSYNTH_SUPPORT
 plugin_LTLIBRARIES += libgstfluidsynth.la
-noinst_HEADERS += src/fluidsynth/gstfluidsynth.h
+noinst_HEADERS += src/fluidsynth/fluidsynth.h
 
-libgstfluidsynth_la_SOURCES = src/fluidsynth/gstfluidsynth.c
+libgstfluidsynth_la_SOURCES = src/fluidsynth/fluidsynth.c
 libgstfluidsynth_la_CFLAGS = \
   -I$(srcdir) -I$(top_srcdir) \
   -DDATADIR=\"$(datadir)\" \

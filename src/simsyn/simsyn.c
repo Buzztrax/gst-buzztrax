@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstsimsyn
+ * SECTION:simsyn
  * @title: GstBtSimSyn
  * @short_description: simple monophonic audio synthesizer
  *

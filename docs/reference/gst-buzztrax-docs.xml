@@ -40,33 +40,33 @@
 
   <chapter>
     <title>GStreamer Buzztrax classes</title>
-    <xi:include href="xml/gstbtaudiosynth.xml"/>
-    <xi:include href="xml/gstbtenvelope.xml"/>
-    <xi:include href="xml/gstbtenvelopeadsr.xml"/>
-    <xi:include href="xml/gstbtenveloped.xml"/>
-    <xi:include href="xml/gstbtfiltersvf.xml"/>
-    <xi:include href="xml/gstbtmusicenums.xml"/>
-    <xi:include href="xml/gstbtoscsynth.xml"/>
-    <xi:include href="xml/gstbtoscwave.xml"/>
-    <xi:include href="xml/gstbttoneconversion.xml"/>
+    <xi:include href="xml/audiosynth.xml"/>
+    <xi:include href="xml/envelope.xml"/>
+    <xi:include href="xml/envelope-adsr.xml"/>
+    <xi:include href="xml/envelope-d.xml"/>
+    <xi:include href="xml/filter-svf.xml"/>
+    <xi:include href="xml/musicenums.xml"/>
+    <xi:include href="xml/osc-synth.xml"/>
+    <xi:include href="xml/osc-wave.xml"/>
+    <xi:include href="xml/toneconversion.xml"/>
   </chapter>
 
   <chapter>
     <title>GStreamer Buzztrax interfaces</title>
-    <xi:include href="xml/gstbtchildbin.xml"/>
-    <xi:include href="xml/gstbtpropertymeta.xml"/>
-    <xi:include href="xml/gstbttempo.xml"/>
+    <xi:include href="xml/childbin.xml"/>
+    <xi:include href="xml/propertymeta.xml"/>
+    <xi:include href="xml/tempo.xml"/>
   </chapter>
 
   <chapter>
     <title>GStreamer Buzztrax elements</title>
-    <xi:include href="xml/gstaudiodelay.xml"/>
-    <xi:include href="xml/gstbml.xml"/>
-    <xi:include href="xml/gstfluidsynth.xml"/>
-    <xi:include href="xml/gstsidsyn.xml"/>
-    <xi:include href="xml/gstsimsyn.xml"/>
-    <xi:include href="xml/gstwavereplay.xml"/>
-    <xi:include href="xml/gstwavetabsyn.xml"/>
+    <xi:include href="xml/audiodelay.xml"/>
+    <xi:include href="xml/bml.xml"/>
+    <xi:include href="xml/fluidsynth.xml"/>
+    <xi:include href="xml/sidsyn.xml"/>
+    <xi:include href="xml/simsyn.xml"/>
+    <xi:include href="xml/wavereplay.xml"/>
+    <xi:include href="xml/wavetabsyn.xml"/>
   </chapter>
   
   <chapter>

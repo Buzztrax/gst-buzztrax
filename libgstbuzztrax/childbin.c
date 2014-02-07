@@ -17,7 +17,7 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * SECTION:gstbtchildbin
+ * SECTION:childbin
  * @title: GstBtChildBin
  * @include: libgstbuzztrax/childbin.h
  * @short_description: helper interface for multi child gstreamer elements

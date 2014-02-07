@@ -17,7 +17,7 @@
  */
 
 /**
- * SECTION:gstaudiodelay
+ * SECTION:audiodelay
  * @title: GstBtAudioDelay
  * @short_description: audio echo effect
  *
