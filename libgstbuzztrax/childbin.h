@@ -36,6 +36,11 @@ typedef struct _GstBtChildBin GstBtChildBin; /* dummy object */
 typedef struct _GstBtChildBinInterface GstBtChildBinInterface;
 
 /**
+ * GstBtChildBin:
+ *
+ * Opaque interface handle.
+ */
+/**
  * GstBtChildBinInterface:
  * @parent: parent type
  * @add_child: vmethod for adding a child to the bin

@@ -34,6 +34,11 @@ typedef struct _GstBtPropertyMeta GstBtPropertyMeta; /* dummy object */
 typedef struct _GstBtPropertyMetaInterface GstBtPropertyMetaInterface;
 
 /**
+ * GstBtPropertyMeta:
+ *
+ * Opaque interface handle.
+ */
+/**
  * GstBtPropertyMetaInterface:
  * @parent: parent type
  * @describe_property: vmethod for returning a human readable property value

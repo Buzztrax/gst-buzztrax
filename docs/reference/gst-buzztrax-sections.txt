@@ -76,6 +76,7 @@ gstbml_preset_set_meta
 <SECTION>
 <FILE>childbin</FILE>
 <TITLE>GstBtChildBin</TITLE>
+GstBtChildBin
 GstBtChildBinInterface
 gstbt_child_bin_add_child
 gstbt_child_bin_remove_child
@@ -84,7 +85,6 @@ GSTBT_CHILD_BIN
 GSTBT_CHILD_BIN_GET_INTERFACE
 GSTBT_IS_CHILD_BIN
 GSTBT_TYPE_CHILD_BIN
-GstBtChildBin
 gstbt_child_bin_get_type
 </SECTION>
 
@@ -224,6 +224,7 @@ gstbt_osc_wave_get_type
 <SECTION>
 <FILE>propertymeta</FILE>
 <TITLE>GstBtPropertyMeta</TITLE>
+GstBtPropertyMeta
 GstBtPropertyMetaInterface
 gstbt_property_meta_describe_property
 gstbt_property_meta_quark
@@ -238,7 +239,6 @@ GSTBT_IS_PROPERTY_META
 GSTBT_PROPERTY_META
 GSTBT_PROPERTY_META_GET_INTERFACE
 GSTBT_TYPE_PROPERTY_META
-GstBtPropertyMeta
 gstbt_property_meta_get_type
 </SECTION>
 
@@ -289,6 +289,7 @@ gstbt_sim_syn_get_type
 <SECTION>
 <FILE>tempo</FILE>
 <TITLE>GstBtTempo</TITLE>
+GstBtTempo
 GstBtTempoInterface
 gstbt_tempo_change_tempo
 <SUBSECTION Standard>
@@ -296,7 +297,6 @@ GSTBT_IS_TEMPO
 GSTBT_TEMPO
 GSTBT_TEMPO_GET_INTERFACE
 GSTBT_TYPE_TEMPO
-GstBtTempo
 gstbt_tempo_get_type
 </SECTION>
 
