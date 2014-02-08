@@ -68,11 +68,6 @@
     <xi:include href="xml/wavereplay.xml"/>
     <xi:include href="xml/wavetabsyn.xml"/>
   </chapter>
-  
-  <chapter>
-    <title>GStreamer Buzztrax module</title>
-    <xi:include href="xml/gstbuzztrax.xml"/>
-  </chapter>
 
   <chapter id="hierarchy">
     <title>Object Hierarchy</title>

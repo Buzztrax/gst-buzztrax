@@ -42,7 +42,6 @@
  */
 
 #include "tempo.h"
-#include "compat.h"
 
 //-- the iface
 

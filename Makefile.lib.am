@@ -1,5 +1,3 @@
-noinst_HEADERS += libgstbuzztrax/compat.h
-
 lib_LTLIBRARIES = libgstbuzztrax.la
 
 libgstbuzztrax_la_SOURCES = \
@@ -40,5 +38,3 @@ libgstbuzztrax_la_LIBADD = $(BASE_DEPS_LIBS)
 libgstbuzztrax_la_LDFLAGS = -version-info @GSTBT_VERSION_INFO@ \
   $(GST_LIB_LDFLAGS)
 
-EXTRA_DIST += \
-  libgstbuzztrax/compat.h

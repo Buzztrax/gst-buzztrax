@@ -30,7 +30,6 @@
  */
 
 #include "childbin.h"
-#include "compat.h"
 
 //-- the iface
 

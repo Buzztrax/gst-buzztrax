@@ -30,7 +30,6 @@
  */
 
 #include "propertymeta.h"
-#include "compat.h"
 
 //-- the iface
 

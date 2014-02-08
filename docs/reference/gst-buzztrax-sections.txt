@@ -352,11 +352,3 @@ GstBtWaveTabSynClass
 gstbt_wave_tab_syn_get_type
 </SECTION>
 
-<SECTION>
-<FILE>gstbuzztrax</FILE>
-<SUBSECTION Private>
-G_DEFINE_INTERFACE
-G_DEFINE_INTERFACE_WITH_CODE
-g_object_checked_unref
-orc_memset
-</SECTION>
