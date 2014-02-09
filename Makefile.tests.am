@@ -31,9 +31,6 @@ gst_buzztrax_SOURCES = \
 
 endif
 
-EXTRA_DIST += \
-  tests/gtkdoccomplete.sh
-
 # make check           -- run all checks
 # make (test).check    -- run the given check once
 #	make (test).check BT_CHECKS="test5*" -- run the given testcase(s) only
