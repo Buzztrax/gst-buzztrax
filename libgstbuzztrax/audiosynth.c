@@ -25,7 +25,8 @@
  * Base audio synthesizer to use as a foundation for new synthesizers. Handles
  * tempo, seeking, trick mode playback and format negotiation.
  * The pure virtual process and setup methods must be implemented by the child
- * class.
+ * class. The setup vmethod provides the caps to negotiate. Form them the elemnt
+ * can take parameters such as sampling rate or data format.
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"

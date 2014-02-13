@@ -65,6 +65,14 @@ struct _GstBtAudioSynth
   gdouble ticktime_err, ticktime_err_accum;
 };
 
+/**
+ * GstBtAudioSynthClass:
+ * @parent_class: parent type
+ * @process: vmethod for generating a block of audio
+ * @setup: vmethod for initial processign setup
+ *
+ * Class structure.
+ */
 struct _GstBtAudioSynthClass
 {
   GstBaseSrcClass parent_class;

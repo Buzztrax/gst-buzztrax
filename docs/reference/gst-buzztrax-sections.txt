@@ -17,6 +17,7 @@ gstbt_audio_delay_get_type
 <FILE>audiosynth</FILE>
 <TITLE>GstBtAudioSynth</TITLE>
 GstBtAudioSynth
+GstBtAudioSynthClass
 <SUBSECTION Standard>
 GSTBT_AUDIO_SYNTH
 GSTBT_AUDIO_SYNTH_CLASS
@@ -24,7 +25,6 @@ GSTBT_AUDIO_SYNTH_GET_CLASS
 GSTBT_IS_AUDIO_SYNTH
 GSTBT_IS_AUDIO_SYNTH_CLASS
 GSTBT_TYPE_AUDIO_SYNTH
-GstBtAudioSynthClass
 gstbt_audio_synth_get_type
 </SECTION>
 
