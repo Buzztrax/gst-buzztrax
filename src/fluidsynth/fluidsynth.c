@@ -27,15 +27,18 @@
  * FluidSynth is a SoundFont 2 capable wavetable synthesizer. Soundpatches are
  * available on <ulink url="http://sounds.resonance.org">sounds.resonance.org</ulink>.
  * Distributions also have a few soundfonts packaged. The internet offers free
- * pacthes for download.
+ * patches for download.
+ *
+ * When specifying a patch as a relative path, the element looks in common
+ * places for the files.
  *
  * <refsect2>
  * <title>Example launch line</title>
  * |[
- * gst-launch fluidsynth num-buffers=100 note="c-3" ! alsasink
+ * gst-launch fluidsynth num-buffers=10 note="c-3" ! autoaudiosink
  * ]| Plays one c-3 tone using the first instrument.
  * |[
- * gst-launch fluidsynth num-buffers=20 instrument-patch="/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2" program=2 note="c-3" ! alsasink
+ * gst-launch fluidsynth num-buffers=20 instrument-patch="Vintage_Dreams_Waves_v2.sf2" program=2 note="c-3" ! alsasink
  * ]| Load a specific patch and plays one c-3 tone using the second program.
  * </refsect2>
  */
@@ -50,7 +53,6 @@
  *       - http://help.lockergnome.com/linux/Bug-348290-asfxload-handle-soundfont-search-path--ftopict218300.html
  *         SFBANKDIR
  *       - ask tracker or locate for installed *.sf2 files
- *       - include a tiny beep.sf2 file with the plugin
  *     - internet
  *       - http://sounds.resonance.org/patches.py
  *   - preset iface?
@@ -64,7 +66,12 @@
  *       - not good as it won't map between installations
  *
  * - we would need a way to store the sf2 files with the song
- *
+ *   - if we introduce a asset-library section in songs, we could load the sf2
+ *     there and just select one of the loaded assets here
+ *   - we'd need to tag the property with a 'needs-asset' tag and specify the
+ *     mime-type
+ *   - we could also have a temporary prperty meta, that the string is a path,
+ *     plus setting the initial dir / filter
  */
 
 #ifdef HAVE_CONFIG_H
@@ -283,6 +290,87 @@ gstbt_fluid_synth_update_chorus (GstBtFluidSynth * gstsynth)
   gstsynth->chorus_update = FALSE;
 }
 
+static GList *sf2_path = NULL;
+
+static void
+gstbt_fluid_synth_init_sf2_path ()
+{
+  gint i, j;
+  const gchar *const *sharedirs = g_get_system_data_dirs ();
+  static const gchar *paths[] = {
+    /* ubuntu/debian/suse */
+    "sounds/sf2/",
+    "doc/libfluid_synth-dev/examples/",
+    /* fedora */
+    "soundfonts/",
+    NULL
+  };
+
+  for (i = 0; sharedirs[i]; i++) {
+    for (j = 0; paths[j]; j++) {
+      gchar *path = g_build_path (G_DIR_SEPARATOR_S, sharedirs[i], paths[j],
+          NULL);
+
+      GST_DEBUG ("Checking if '%s' is a directory", path);
+      if (!g_file_test (path, G_FILE_TEST_IS_DIR)) {
+        g_free (path);
+        continue;
+      }
+      GST_INFO ("Adding potential soundfont directory %s", path);
+      sf2_path = g_list_prepend (sf2_path, path);
+    }
+  }
+  // TODO(ensonic) also try a few environment variables
+  // LIB_INSTPATCH_PATH/SF2_PATH/SFBANKDIR
+  GST_INFO ("Built sf2 search path with %d entries", g_list_length (sf2_path));
+}
+
+static gboolean
+gstbt_fluid_synth_load_patch_from_path (GstBtFluidSynth * src,
+    const gchar * path)
+{
+  GST_DEBUG ("trying '%s'", path);
+  if (g_file_test (path, G_FILE_TEST_IS_REGULAR)) {
+    if ((src->instrument_patch = fluid_synth_sfload (src->fluid, path, TRUE))
+        != -1) {
+      GST_INFO ("soundfont loaded as %d", src->instrument_patch);
+      //fluid_synth_program_reset(src->fluid);
+      fluid_synth_program_select (src->fluid, /*chan */ 0,
+          src->instrument_patch, src->program >> 7, src->program & 0x7F);
+    } else {
+      GST_DEBUG ("file '%s' cannot be loaded as a soundfont", path);
+    }
+  } else {
+    GST_DEBUG ("file '%s' does not exists or is not a regular file", path);
+  }
+  return src->instrument_patch != -1;
+}
+
+static gboolean
+gstbt_fluid_synth_load_patch (GstBtFluidSynth * src, const gchar * path)
+{
+  src->instrument_patch = -1;
+
+  if (g_path_is_absolute (path)) {
+    return gstbt_fluid_synth_load_patch_from_path (src, path);
+  } else {
+    GList *node;
+
+    for (node = sf2_path; node; node = g_list_next (node)) {
+      gchar *abs_path = g_build_path (G_DIR_SEPARATOR_S, node->data, path,
+          NULL);
+      if (gstbt_fluid_synth_load_patch_from_path (src, abs_path)) {
+        g_free (src->instrument_patch_path);
+        src->instrument_patch_path = abs_path;
+        return TRUE;
+      } else {
+        g_free (abs_path);
+      }
+    }
+  }
+  return FALSE;
+}
+
 //-- audiosynth vmethods
 
 static gboolean
@@ -400,18 +488,9 @@ gstbt_fluid_synth_set_property (GObject * object, guint prop_id,
       fluid_synth_sfunload (src->fluid, src->instrument_patch, TRUE);
       // load new patch
       src->instrument_patch_path = g_value_dup_string (value);
-      GST_INFO ("Trying to load load soundfont: '%s'",
-          src->instrument_patch_path);
-      if ((src->instrument_patch =
-              fluid_synth_sfload (src->fluid, src->instrument_patch_path,
-                  TRUE)) == -1) {
+      if (!gstbt_fluid_synth_load_patch (src, src->instrument_patch_path)) {
         GST_WARNING ("Couldn't load soundfont: '%s'",
             src->instrument_patch_path);
-      } else {
-        GST_INFO ("soundfont loaded as %d", src->instrument_patch);
-        //fluid_synth_program_reset(src->fluid);
-        fluid_synth_program_select (src->fluid, /*chan */ 0,
-            src->instrument_patch, src->program >> 7, src->program & 0x7F);
       }
       break;
     case PROP_INTERPOLATION:
@@ -621,7 +700,8 @@ gstbt_fluid_synth_init (GstBtFluidSynth * src)
 
   /* create new FluidSynth */
   src->fluid = new_fluid_synth (src->settings);
-  if (!src->fluid) {            /* FIXME - Element will likely crash if used after new_fluid_synth fails */
+  if (!src->fluid) {
+    /* FIXME - Element will likely crash if used after new_fluid_synth fails */
     g_critical ("Failed to create FluidSynth context");
     return;
   }
@@ -651,29 +731,23 @@ gstbt_fluid_synth_init (GstBtFluidSynth * src)
   gstbt_fluid_synth_update_reverb (src);        /* update reverb settings */
   gstbt_fluid_synth_update_chorus (src);        /* update chorus settings */
 
-  /* FIXME(ensonic): temporary for testing, see comment at the top */
+  /* make sure we load a default soundfont (especially for testing */
   {
     gchar **sf2, *sf2s[] = {
-      "/usr/share/sounds/sf2/FluidR3_GM.sf2",
-      "/usr/share/sounds/sf2/FluidR3_GS.sf2",
-      "/usr/share/sounds/sf2/Vintage_Dreams_Waves_v2.sf2",
-      "/usr/share/doc/libfluid_synth-dev/examples/example.sf2",
+      "FluidR3_GM.sf2",
+      "FluidR3_GS.sf2",
+      "example.sf2",
       NULL
     };
     sf2 = sf2s;
-    src->instrument_patch = -1;
-    while ((src->instrument_patch == -1) && *sf2) {
-      GST_INFO ("trying '%s'", *sf2);
-      if (g_file_test (*sf2, G_FILE_TEST_IS_REGULAR)) {
-        src->instrument_patch = fluid_synth_sfload (src->fluid, *sf2, TRUE);
-      }
+    while (*sf2) {
+      if (gstbt_fluid_synth_load_patch (src, *sf2))
+        break;
       sf2++;
     }
   }
   if (src->instrument_patch == -1) {
     GST_WARNING ("Couldn't load any soundfont");
-  } else {
-    GST_INFO ("soundfont loaded as %d", src->instrument_patch);
   }
 }
 
@@ -813,6 +887,8 @@ gstbt_fluid_synth_class_init (GstBtFluidSynthClass * klass)
   gst_element_class_add_metadata (element_class, GST_ELEMENT_METADATA_DOC_URI,
       "file://" DATADIR "" G_DIR_SEPARATOR_S "gtk-doc" G_DIR_SEPARATOR_S "html"
       G_DIR_SEPARATOR_S "" PACKAGE "" G_DIR_SEPARATOR_S "GstBtFluidSynth.html");
+
+  gstbt_fluid_synth_init_sf2_path ();
 }
 
 //-- plugin
