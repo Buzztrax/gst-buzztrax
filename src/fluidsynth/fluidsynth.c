@@ -298,11 +298,8 @@ gstbt_fluid_synth_init_sf2_path ()
   gint i, j;
   const gchar *const *sharedirs = g_get_system_data_dirs ();
   static const gchar *paths[] = {
-    /* ubuntu/debian/suse */
-    "sounds/sf2/",
-    "doc/libfluid_synth-dev/examples/",
-    /* fedora */
-    "soundfonts/",
+    "sounds/sf2/",              /* ubuntu/debian/suse */
+    "soundfonts/",              /* fedora */
     NULL
   };
 
