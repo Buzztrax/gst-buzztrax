@@ -48,10 +48,10 @@
  * - make it easier to load sounds fonts
  *   - where to get them from:
  *     - local files
- *       - ubuntu/suse use /usr/share/sounds/sf2
  *       - what about LIB_INSTPATCH_PATH/SF2_PATH to look for soundfonts
  *       - http://help.lockergnome.com/linux/Bug-348290-asfxload-handle-soundfont-search-path--ftopict218300.html
  *         SFBANKDIR
+ *       - add a string property with extra sf2 dirs
  *       - ask tracker or locate for installed *.sf2 files
  *     - internet
  *       - http://sounds.resonance.org/patches.py
@@ -68,10 +68,16 @@
  * - we would need a way to store the sf2 files with the song
  *   - if we introduce a asset-library section in songs, we could load the sf2
  *     there and just select one of the loaded assets here
- *   - we'd need to tag the property with a 'needs-asset' tag and specify the
- *     mime-type
- *   - we could also have a temporary prperty meta, that the string is a path,
- *     plus setting the initial dir / filter
+ *     - the asset page would have:
+ *       - a slot-list like the wave-table on the left
+ *         - the slot list would be a tree-view grouping files by file-type
+ *       - a file-browser on the right
+ *   - we'd need to tag the property with a PropertypMetaFlag:'asset-file-type'
+ *     - the UI can then present this as a combo-box to select a preloaded asset
+ *       and add a 'new asset' at the bottom, which would open a file-chooser
+ *       where the user can load another entry
+ *   - we still rely on having the preferences (the string param is not
+ *     controllable) stored with the song.
  */
 
 #ifdef HAVE_CONFIG_H
