@@ -70,30 +70,21 @@ gstbt_wave_replay_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
   return TRUE;
 }
 
-static void
-gstbt_wave_replay_process (GstBtAudioSynth * base, GstBuffer * data)
+static gboolean
+gstbt_wave_replay_process (GstBtAudioSynth * base, GstBuffer * data,
+    GstMapInfo * info)
 {
   GstBtWaveReplay *src = ((GstBtWaveReplay *) base);
-  GstMapInfo info;
-  gint16 *d;
-  guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
-  guint64 off = gst_util_uint64_scale_round (GST_BUFFER_TIMESTAMP (data),
-      base->samplerate, GST_SECOND);
 
-  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
-    GST_WARNING_OBJECT (base, "unable to map buffer for write");
-    return;
+  if (src->osc->process) {
+    gint16 *d = (gint16 *) info->data;
+    guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
+    guint64 off = gst_util_uint64_scale_round (GST_BUFFER_TIMESTAMP (data),
+        base->samplerate, GST_SECOND);
+
+    return src->osc->process (src->osc, off, ct, d);
   }
-  d = (gint16 *) info.data;
-
-  if (!src->osc->process || !src->osc->process (src->osc, off, ct, d)) {
-    gint ch = ((GstBtAudioSynth *) src)->channels;
-
-    memset (d, 0, ct * ch * sizeof (gint16));
-    GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
-  }
-
-  gst_buffer_unmap (data, &info);
+  return FALSE;
 }
 
 //-- interfaces

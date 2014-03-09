@@ -366,23 +366,17 @@ gstbt_sid_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
 }
 
 // TODO(ensonic): silence detection (gate off + release time is over)
-static void
-gstbt_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
+static gboolean
+gstbt_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data, 
+    GstMapInfo *info)
 {
   GstBtSidSyn *src = ((GstBtSidSyn *) base);
-  GstMapInfo info;
-  gint16 *out;
+  gint16 *out = (gint16 *)info->data;
   gint i, n, m, samples;
   gdouble scale = (gdouble)src->clockrate / (gdouble)base->samplerate;
   gint step = NUM_STEPS * (base->subtick_count - 1);
   gint step_mod = base->subticks_per_tick;
   gint fx_ticks_remain = 0;
-
-  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
-    GST_WARNING_OBJECT (base, "unable to map buffer for write");
-    return;
-  }
-  out = (gint16 *)info.data;
 
   for (i = 0; i < NUM_VOICES; i++) {
     GstBtSidSynV *v = src->voices[i];
@@ -431,8 +425,7 @@ gstbt_sid_syn_process (GstBtAudioSynth * base, GstBuffer * data)
       samples = n;
     }
   }
-
-  gst_buffer_unmap (data, &info);
+  return TRUE;
 }
 
 //-- child proxy interface

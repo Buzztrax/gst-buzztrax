@@ -80,31 +80,23 @@ gstbt_sim_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
   return TRUE;
 }
 
-static void
-gstbt_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
+static gboolean
+gstbt_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data,
+    GstMapInfo * info)
 {
   GstBtSimSyn *src = ((GstBtSimSyn *) base);
-  GstMapInfo info;
-  gint16 *d;
-  guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
-
-  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
-    GST_WARNING_OBJECT (base, "unable to map buffer for write");
-    return;
-  }
-  d = (gint16 *) info.data;
 
   if ((src->note != GSTBT_NOTE_OFF)
       && gstbt_envelope_is_running ((GstBtEnvelope *) src->volenv)) {
+    gint16 *d = (gint16 *) info->data;
+    guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
+
     src->osc->process (src->osc, ct, d);
     if (src->filter->process)
       src->filter->process (src->filter, ct, d);
-  } else {
-    memset (d, 0, ct * sizeof (gint16));
-    GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
+    return TRUE;
   }
-
-  gst_buffer_unmap (data, &info);
+  return FALSE;
 }
 
 //-- gobject vmethods

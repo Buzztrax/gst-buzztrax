@@ -31,7 +31,7 @@
 #endif
 
 #include <string.h>
-
+#include <libgstbuzztrax/propertymeta.h>
 #include "wavetabsyn.h"
 
 #define GST_CAT_DEFAULT wave_tab_syn_debug
@@ -80,26 +80,21 @@ gstbt_wave_tab_syn_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
   return TRUE;
 }
 
-static void
-gstbt_wave_tab_syn_process (GstBtAudioSynth * base, GstBuffer * data)
+static gboolean
+gstbt_wave_tab_syn_process (GstBtAudioSynth * base, GstBuffer * data,
+    GstMapInfo * info)
 {
   GstBtWaveTabSyn *src = ((GstBtWaveTabSyn *) base);
-  GstMapInfo info;
-  gint16 *d;
-  guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
-  gint ch = ((GstBtAudioSynth *) src)->channels;
-  guint sz = src->cycle_size;
-  guint pos = src->cycle_pos;
-  guint p = 0;
-  guint64 off = src->offset * (src->duration - src->cycle_size) / 0xFFFF;
-
-  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
-    GST_WARNING_OBJECT (base, "unable to map buffer for write");
-    return;
-  }
-  d = (gint16 *) info.data;
 
   if (src->osc->process) {
+    gint16 *d = (gint16 *) info->data;
+    guint ct = ((GstBtAudioSynth *) src)->generate_samples_per_buffer;
+    gint ch = ((GstBtAudioSynth *) src)->channels;
+    guint sz = src->cycle_size;
+    guint pos = src->cycle_pos;
+    guint p = 0;
+    guint64 off = src->offset * (src->duration - src->cycle_size) / 0xFFFF;
+
     // do we have a unfinished cycle?
     if (pos > 0) {
       guint new_pos;
@@ -152,12 +147,9 @@ gstbt_wave_tab_syn_process (GstBtAudioSynth * base, GstBuffer * data)
         }
       }
     }
-  } else {
-    memset (d, 0, ct * ch * sizeof (gint16));
-    GST_BUFFER_FLAG_SET (data, GST_BUFFER_FLAG_GAP);
+    return TRUE;
   }
-
-  gst_buffer_unmap (data, &info);
+  return FALSE;
 }
 
 //-- interfaces

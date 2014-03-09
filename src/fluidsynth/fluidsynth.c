@@ -383,28 +383,26 @@ gstbt_fluid_synth_setup (GstBtAudioSynth * base, GstPad * pad, GstCaps * caps)
   return TRUE;
 }
 
-static void
-gstbt_fluid_synth_process (GstBtAudioSynth * base, GstBuffer * data)
+static gboolean
+gstbt_fluid_synth_process (GstBtAudioSynth * base, GstBuffer * data,
+    GstMapInfo * info)
 {
   GstBtFluidSynth *src = ((GstBtFluidSynth *) base);
-  GstMapInfo info;
 
   if (src->cur_note_length) {
     src->cur_note_length--;
     if (!src->cur_note_length) {
       fluid_synth_noteoff (src->fluid, /*chan */ 0, src->key);
       GST_INFO ("note-off: %d", src->key);
+      // TODO(ensonic): check for silence after note-off?
     }
   }
 
-  if (!gst_buffer_map (data, &info, GST_MAP_WRITE)) {
-    GST_WARNING_OBJECT (base, "unable to map buffer fro write");
-    return;
-  }
   fluid_synth_write_s16 (src->fluid,
       ((GstBtAudioSynth *) src)->generate_samples_per_buffer,
-      info.data, 0, 2, info.data, 1, 2);
-  gst_buffer_unmap (data, &info);
+      info->data, 0, 2, info->data, 1, 2);
+
+  return TRUE;
 }
 
 //-- interfaces

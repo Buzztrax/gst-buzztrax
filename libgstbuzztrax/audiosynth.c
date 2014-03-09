@@ -294,6 +294,7 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
   GstBtAudioSynthClass *klass = GSTBT_AUDIO_SYNTH_GET_CLASS (src);
   GstFlowReturn res;
   GstBuffer *buf;
+  GstMapInfo info;
   GstClockTime next_running_time;
   gint64 n_samples;
   gdouble samples_done;
@@ -398,7 +399,15 @@ gstbt_audio_synth_create (GstBaseSrc * basesrc, guint64 offset,
   src->running_time = next_running_time;
   src->n_samples = n_samples;
 
-  klass->process (src, buf);
+  if (gst_buffer_map (buf, &info, GST_MAP_WRITE)) {
+    if (!klass->process (src, buf, &info)) {
+      memset (info.data, 0, info.size);
+      GST_BUFFER_FLAG_SET (buf, GST_BUFFER_FLAG_GAP);
+    }
+    gst_buffer_unmap (buf, &info);
+  } else {
+    GST_WARNING_OBJECT (src, "unable to map buffer for write");
+  }
   *buffer = buf;
 
   return GST_FLOW_OK;

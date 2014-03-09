@@ -68,7 +68,8 @@ struct _GstBtAudioSynth
 /**
  * GstBtAudioSynthClass:
  * @parent_class: parent type
- * @process: vmethod for generating a block of audio
+ * @process: vmethod for generating a block of audio, return false to indicate
+ * that a GAP buffer should be sent
  * @setup: vmethod for initial processign setup
  *
  * Class structure.
@@ -78,7 +79,7 @@ struct _GstBtAudioSynthClass
   GstBaseSrcClass parent_class;
 
   /* virtual functions */
-  void (*process) (GstBtAudioSynth * src, GstBuffer * data);
+  gboolean (*process) (GstBtAudioSynth * src, GstBuffer * data, GstMapInfo *info);
   gboolean (*setup) (GstBtAudioSynth * src,GstPad * pad, GstCaps * caps);
 };
 
