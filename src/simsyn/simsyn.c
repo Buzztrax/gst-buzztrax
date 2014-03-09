@@ -42,8 +42,6 @@
 #endif
 
 #include <string.h>
-
-#include "libgstbuzztrax/propertymeta.h"
 #include "simsyn.h"
 
 #define GST_CAT_DEFAULT sim_syn_debug
@@ -65,9 +63,7 @@ enum
 
 //-- the class
 
-G_DEFINE_TYPE_WITH_CODE (GstBtSimSyn, gstbt_sim_syn,
-    GSTBT_TYPE_AUDIO_SYNTH, G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
-        NULL));
+G_DEFINE_TYPE (GstBtSimSyn, gstbt_sim_syn, GSTBT_TYPE_AUDIO_SYNTH);
 
 //-- audiosynth vmethods
 
@@ -110,8 +106,6 @@ gstbt_sim_syn_process (GstBtAudioSynth * base, GstBuffer * data)
 
   gst_buffer_unmap (data, &info);
 }
-
-//-- interfaces
 
 //-- gobject vmethods
 

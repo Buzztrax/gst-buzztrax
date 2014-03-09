@@ -86,9 +86,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-
-#include "libgstbuzztrax/propertymeta.h"
-
 #include "fluidsynth.h"
 
 #define GST_CAT_DEFAULT fluid_synth_debug
@@ -130,10 +127,7 @@ static char **dynamic_prop_names;
 
 //-- the class
 
-G_DEFINE_TYPE_WITH_CODE (GstBtFluidSynth, gstbt_fluid_synth,
-    GSTBT_TYPE_AUDIO_SYNTH, G_IMPLEMENT_INTERFACE (GSTBT_TYPE_PROPERTY_META,
-        NULL));
-
+G_DEFINE_TYPE (GstBtFluidSynth, gstbt_fluid_synth, GSTBT_TYPE_AUDIO_SYNTH);
 
 //-- fluid_synth log handler
 

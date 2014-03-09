@@ -24,7 +24,6 @@
 #include <libgstbuzztrax/audiosynth.h>
 #include <libgstbuzztrax/envelope-adsr.h>
 #include <libgstbuzztrax/osc-wave.h>
-#include <libgstbuzztrax/propertymeta.h>
 #include <libgstbuzztrax/toneconversion.h>
 
 G_BEGIN_DECLS

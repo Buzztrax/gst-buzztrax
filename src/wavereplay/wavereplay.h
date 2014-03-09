@@ -23,7 +23,6 @@
 #include <gst/gst.h>
 #include <libgstbuzztrax/audiosynth.h>
 #include <libgstbuzztrax/osc-wave.h>
-#include <libgstbuzztrax/propertymeta.h>
 
 G_BEGIN_DECLS
 

@@ -31,7 +31,7 @@
 #endif
 
 #include <string.h>
-
+#include <libgstbuzztrax/propertymeta.h>
 #include "wavereplay.h"
 
 #define GST_CAT_DEFAULT wave_replay_debug

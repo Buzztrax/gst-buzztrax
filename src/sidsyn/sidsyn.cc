@@ -48,7 +48,6 @@
 
 #include <libgstbuzztrax/childbin.h>
 #include "libgstbuzztrax/propertymeta.h"
-
 #include "sidsyn.h"
 
 //#define PALFRAMERATE 50
