@@ -34,7 +34,6 @@
 /* TODO(ensonic): improvements
  * - implement property-meta iface (see gstbml) - why actually?
  *   - we could pretty print filter cut-off
- * - cut-off is now relative to samplerate, needs change
  */
 
 #ifdef HAVE_CONFIG_H
@@ -134,13 +133,9 @@ gstbt_sim_syn_set_property (GObject * object, guint prop_id,
       src->decay = g_value_get_double (value);
       break;
     case PROP_FILTER:
-      g_object_set_property ((GObject *) (src->filter), "type", value);
-      break;
     case PROP_CUTOFF:
-      g_object_set_property ((GObject *) (src->filter), "cut-off", value);
-      break;
     case PROP_RESONANCE:
-      g_object_set_property ((GObject *) (src->filter), "resonance", value);
+      g_object_set_property ((GObject *) (src->filter), pspec->name, value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -171,13 +166,9 @@ gstbt_sim_syn_get_property (GObject * object, guint prop_id,
       g_value_set_double (value, src->decay);
       break;
     case PROP_FILTER:
-      g_object_get_property ((GObject *) (src->filter), "type", value);
-      break;
     case PROP_CUTOFF:
-      g_object_get_property ((GObject *) (src->filter), "cut-off", value);
-      break;
     case PROP_RESONANCE:
-      g_object_get_property ((GObject *) (src->filter), "resonance", value);
+      g_object_get_property ((GObject *) (src->filter), pspec->name, value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -293,6 +284,13 @@ gstbt_sim_syn_class_init (GstBtSimSynClass * klass)
      GObjectClass * filter_klass = g_type_class_ref (GSTBT_TYPE_FILTER_SVF);
      g_object_class_install_property (gobject_class, PROP_RESONANCE,
      g_param_spec_override ("resonance", 
+     g_object_class_find_property (filter_klass, "resonance")));
+     g_type_class_unref (filter_klass);
+   */
+  /* the paramspec is not reusable, we need a g_param_spec_clone()
+     GObjectClass * filter_klass = g_type_class_ref (GSTBT_TYPE_FILTER_SVF);
+     g_object_class_install_property (gobject_class, PROP_RESONANCE, 
+     g_param_spec_ref (
      g_object_class_find_property (filter_klass, "resonance")));
      g_type_class_unref (filter_klass);
    */

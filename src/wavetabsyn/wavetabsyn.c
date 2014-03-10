@@ -167,7 +167,8 @@ gstbt_wave_tab_syn_set_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_WAVE_CALLBACKS:
-      g_object_set_property ((GObject *) (src->osc), "wave-callbacks", value);
+    case PROP_WAVE:
+      g_object_set_property ((GObject *) (src->osc), pspec->name, value);
       break;
     case PROP_TUNING:
       g_object_set_property ((GObject *) (src->n2f), "tuning", value);
@@ -195,9 +196,6 @@ gstbt_wave_tab_syn_set_property (GObject * object, guint prop_id,
       break;
     case PROP_NOTE_LENGTH:
       src->note_length = g_value_get_uint (value);
-      break;
-    case PROP_WAVE:
-      g_object_set_property ((GObject *) (src->osc), "wave", value);
       break;
     case PROP_OFFSET:
       src->offset = g_value_get_uint (value);
@@ -234,16 +232,14 @@ gstbt_wave_tab_syn_get_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_WAVE_CALLBACKS:
-      g_object_get_property ((GObject *) (src->osc), "wave-callbacks", value);
+    case PROP_WAVE:
+      g_object_get_property ((GObject *) (src->osc), pspec->name, value);
       break;
     case PROP_TUNING:
       g_object_get_property ((GObject *) (src->n2f), "tuning", value);
       break;
     case PROP_NOTE_LENGTH:
       g_value_set_uint (value, src->note_length);
-      break;
-    case PROP_WAVE:
-      g_object_get_property ((GObject *) (src->osc), "wave", value);
       break;
     case PROP_OFFSET:
       g_value_set_uint (value, src->offset);

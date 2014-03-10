@@ -102,13 +102,9 @@ gstbt_wave_replay_set_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_WAVE_CALLBACKS:
-      g_object_set_property ((GObject *) (src->osc), "wave-callbacks", value);
-      break;
     case PROP_WAVE:
-      g_object_set_property ((GObject *) (src->osc), "wave", value);
-      break;
     case PROP_WAVE_LEVEL:
-      g_object_set_property ((GObject *) (src->osc), "wave-level", value);
+      g_object_set_property ((GObject *) (src->osc), pspec->name, value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -127,13 +123,9 @@ gstbt_wave_replay_get_property (GObject * object, guint prop_id,
 
   switch (prop_id) {
     case PROP_WAVE_CALLBACKS:
-      g_object_get_property ((GObject *) (src->osc), "wave-callbacks", value);
-      break;
     case PROP_WAVE:
-      g_object_get_property ((GObject *) (src->osc), "wave", value);
-      break;
     case PROP_WAVE_LEVEL:
-      g_object_get_property ((GObject *) (src->osc), "wave-level", value);
+      g_object_get_property ((GObject *) (src->osc), pspec->name, value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
