@@ -54,10 +54,7 @@ G_DEFINE_TYPE (GstBtEnvelopeD, gstbt_envelope_d, GSTBT_TYPE_ENVELOPE);
 GstBtEnvelopeD *
 gstbt_envelope_d_new (void)
 {
-  GstBtEnvelopeD *self;
-
-  self = GSTBT_ENVELOPE_D (g_object_new (GSTBT_TYPE_ENVELOPE_D, NULL));
-  return (self);
+  return GSTBT_ENVELOPE_D (g_object_new (GSTBT_TYPE_ENVELOPE_D, NULL));
 }
 
 //-- private methods

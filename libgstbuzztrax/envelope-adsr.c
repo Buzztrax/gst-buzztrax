@@ -54,10 +54,7 @@ G_DEFINE_TYPE (GstBtEnvelopeADSR, gstbt_envelope_adsr, GSTBT_TYPE_ENVELOPE);
 GstBtEnvelopeADSR *
 gstbt_envelope_adsr_new (void)
 {
-  GstBtEnvelopeADSR *self;
-
-  self = GSTBT_ENVELOPE_ADSR (g_object_new (GSTBT_TYPE_ENVELOPE_ADSR, NULL));
-  return (self);
+  return GSTBT_ENVELOPE_ADSR (g_object_new (GSTBT_TYPE_ENVELOPE_ADSR, NULL));
 }
 
 //-- private methods

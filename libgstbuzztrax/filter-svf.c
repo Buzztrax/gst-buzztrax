@@ -83,10 +83,7 @@ gstbt_filter_svf_type_get_type (void)
 GstBtFilterSVF *
 gstbt_filter_svf_new (void)
 {
-  GstBtFilterSVF *self;
-
-  self = GSTBT_FILTER_SVF (g_object_new (GSTBT_TYPE_FILTER_SVF, NULL));
-  return (self);
+  return GSTBT_FILTER_SVF (g_object_new (GSTBT_TYPE_FILTER_SVF, NULL));
 }
 
 //-- private methods
