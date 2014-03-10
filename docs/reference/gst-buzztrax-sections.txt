@@ -76,16 +76,40 @@ gstbml_preset_set_meta
 <SECTION>
 <FILE>childbin</FILE>
 <TITLE>GstBtChildBin</TITLE>
-GstBtChildBin
 GstBtChildBinInterface
 gstbt_child_bin_add_child
 gstbt_child_bin_remove_child
+GstBtChildBin
 <SUBSECTION Standard>
 GSTBT_CHILD_BIN
 GSTBT_CHILD_BIN_GET_INTERFACE
 GSTBT_IS_CHILD_BIN
 GSTBT_TYPE_CHILD_BIN
 gstbt_child_bin_get_type
+</SECTION>
+
+<SECTION>
+<FILE>delay</FILE>
+<TITLE>GstBtDelay</TITLE>
+GstBtDelay
+gstbt_delay_new
+gstbt_delay_start
+gstbt_delay_flush
+gstbt_delay_stop
+GSTBT_DELAY_DELAYTIME_MAX
+GSTBT_DELAY_BEFORE
+GSTBT_DELAY_AFTER
+GSTBT_DELAY_READ
+GSTBT_DELAY_WRITE
+<SUBSECTION Standard>
+GSTBT_DELAY
+GSTBT_DELAY_CLASS
+GSTBT_DELAY_GET_CLASS
+GSTBT_IS_DELAY
+GSTBT_IS_DELAY_CLASS
+GSTBT_TYPE_DELAY
+GstBtDelayClass
+gstbt_delay_get_type
 </SECTION>
 
 <SECTION>
@@ -160,6 +184,7 @@ gstbt_filter_svf_type_get_type
 
 <SECTION>
 <FILE>fluidsynth</FILE>
+<TITLE>GstBtFluidSynth</TITLE>
 GstBtFluidSynthInterpolationMode
 GstBtFluidSynthChorusWaveform
 GstBtFluidSynth
@@ -224,7 +249,6 @@ gstbt_osc_wave_get_type
 <SECTION>
 <FILE>propertymeta</FILE>
 <TITLE>GstBtPropertyMeta</TITLE>
-GstBtPropertyMeta
 GstBtPropertyMetaInterface
 gstbt_property_meta_describe_property
 gstbt_property_meta_quark
@@ -234,6 +258,7 @@ gstbt_property_meta_quark_def_val
 gstbt_property_meta_quark_no_val
 gstbt_property_meta_quark_flags
 GstBtPropertyMetaFlags
+GstBtPropertyMeta
 <SUBSECTION Standard>
 GSTBT_IS_PROPERTY_META
 GSTBT_PROPERTY_META
@@ -287,9 +312,9 @@ gstbt_sim_syn_get_type
 <SECTION>
 <FILE>tempo</FILE>
 <TITLE>GstBtTempo</TITLE>
-GstBtTempo
 GstBtTempoInterface
 gstbt_tempo_change_tempo
+GstBtTempo
 <SUBSECTION Standard>
 GSTBT_IS_TEMPO
 GSTBT_TEMPO

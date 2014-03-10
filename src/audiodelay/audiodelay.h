@@ -21,6 +21,7 @@
 
 #include <gst/gst.h>
 #include <gst/base/gstbasetransform.h>
+#include <libgstbuzztrax/delay.h>
 
 G_BEGIN_DECLS
 
@@ -43,17 +44,12 @@ struct _GstBtAudioDelay {
   GstBaseTransform parent;
 
   /* < private > */
-
   /* properties */
   guint drywet;
-  guint delaytime;
   guint feedback;
 
-  /* ringbuffer */
   gint samplerate;
-  gint16 *ring_buffer;
-  guint max_delaytime;
-  guint rb_ptr;
+  GstBtDelay *delay;
 
   /* tempo handling */
   gulong beats_per_minute;

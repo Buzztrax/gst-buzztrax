@@ -3,6 +3,7 @@ lib_LTLIBRARIES = libgstbuzztrax.la
 libgstbuzztrax_la_SOURCES = \
 	libgstbuzztrax/audiosynth.c \
 	libgstbuzztrax/childbin.c \
+	libgstbuzztrax/delay.c \
 	libgstbuzztrax/envelope.c \
 	libgstbuzztrax/envelope-adsr.c \
 	libgstbuzztrax/envelope-d.c \
@@ -23,6 +24,7 @@ libgstbuzztraxincludedir = $(includedir)/libgstbuzztrax
 libgstbuzztraxinclude_HEADERS = \
 	libgstbuzztrax/audiosynth.h \
 	libgstbuzztrax/childbin.h \
+	libgstbuzztrax/delay.h \
 	libgstbuzztrax/envelope.h \
 	libgstbuzztrax/envelope-adsr.h \
 	libgstbuzztrax/envelope-d.h \

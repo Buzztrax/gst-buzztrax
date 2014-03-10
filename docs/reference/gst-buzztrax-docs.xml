@@ -41,6 +41,7 @@
   <chapter>
     <title>GStreamer Buzztrax classes</title>
     <xi:include href="xml/audiosynth.xml"/>
+    <xi:include href="xml/delay.xml"/>
     <xi:include href="xml/envelope.xml"/>
     <xi:include href="xml/envelope-adsr.xml"/>
     <xi:include href="xml/envelope-d.xml"/>

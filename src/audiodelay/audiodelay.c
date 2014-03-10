@@ -26,8 +26,8 @@
  * <title>Example launch line</title>
  * <para>
  * <programlisting>
- * gst-launch filesrc location="melo1.ogg" ! oggdemux ! vorbisdec ! audioconvert ! audiodelay drywet=50 delaytime=25 feedback=75 ! osssink
- * gst-launch osssrc ! audiodelay delaytime=25 feedback=75 ! osssink
+ * gst-launch filesrc location="melo1.ogg" ! decodebin ! audioconvert ! audiodelay drywet=50 delaytime=25 feedback=75 ! autoaudiosink
+ * gst-launch osssrc ! audiodelay delaytime=25 feedback=75 ! autoaudiosink
  * </programlisting>
  * In the latter example the echo is applied to the input signal of the
  * soundcard (like a microphone).
@@ -58,15 +58,13 @@ enum
   // static class properties
   // dynamic class properties
   PROP_DRYWET = 1,
-  PROP_DELAYTIME,
   PROP_FEEDBACK,
+  PROP_DELAYTIME,
   // tempo iface
   PROP_BPM,
   PROP_TPB,
   PROP_STPT
 };
-
-#define DELAYTIME_MAX 1000
 
 static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE ("sink",
     GST_PAD_SINK,
@@ -101,46 +99,33 @@ static gboolean
 gstbt_audio_delay_set_caps (GstBaseTransform * base, GstCaps * incaps,
     GstCaps * outcaps)
 {
-  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (base);
-  const GstStructure *structure;
-  gboolean ret;
+  GstBtAudioDelay *self = GSTBT_AUDIO_DELAY (base);
+  const GstStructure *structure = gst_caps_get_structure (incaps, 0);
 
-  structure = gst_caps_get_structure (incaps, 0);
-  ret = gst_structure_get_int (structure, "rate", &filter->samplerate);
-
-  return ret;
+  return gst_structure_get_int (structure, "rate", &self->samplerate);
 }
 
 static gboolean
 gstbt_audio_delay_start (GstBaseTransform * base)
 {
-  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (base);
+  GstBtAudioDelay *self = GSTBT_AUDIO_DELAY (base);
 
-  filter->max_delaytime = (2 + (DELAYTIME_MAX * filter->samplerate) / 100);
-  filter->ring_buffer = (gint16 *) g_new0 (gint16, filter->max_delaytime);
-  filter->rb_ptr = 0;
-
-  GST_INFO ("max_delaytime %d at %d Hz sampling rate", filter->max_delaytime,
-      filter->samplerate);
-  GST_INFO ("delaytime %d, feedback %d, drywet %d", filter->delaytime,
-      filter->feedback, filter->drywet);
-
+  gstbt_delay_start (self->delay, self->samplerate);
   return TRUE;
 }
 
 static GstFlowReturn
 gstbt_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 {
-  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (base);
+  GstBtAudioDelay *self = GSTBT_AUDIO_DELAY (base);
+  GstBtDelay *delay = self->delay;
   GstMapInfo info;
   GstClockTime timestamp;
-  guint delaytime;
   gdouble feedback, dry, wet;
   gint16 *data;
   gdouble val_dry, val_fx;
-  glong val;
+  glong val, sum_fx = 0;
   guint i, num_samples, rb_in, rb_out;
-  gint32 sum_fx = 0;
 
   if (!gst_buffer_map (outbuf, &info, GST_MAP_READ | GST_MAP_WRITE)) {
     GST_WARNING_OBJECT (base, "unable to map buffer for read & write");
@@ -151,59 +136,42 @@ gstbt_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 
   /* flush ring_buffer on DISCONT */
   if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_DISCONT)) {
-    memset (filter->ring_buffer, 0, sizeof (gint16) * filter->max_delaytime);
-    filter->rb_ptr = 0;
+    gstbt_delay_flush (delay);
   }
 
   timestamp = gst_segment_to_stream_time (&base->segment, GST_FORMAT_TIME,
       GST_BUFFER_TIMESTAMP (outbuf));
   if (GST_CLOCK_TIME_IS_VALID (timestamp))
-    gst_object_sync_values (GST_OBJECT (filter), timestamp);
+    gst_object_sync_values (GST_OBJECT (self), timestamp);
 
-  delaytime = (filter->delaytime * filter->samplerate) / 100;
-  feedback = (gdouble) filter->feedback / 100.0;
-  wet = (gdouble) filter->drywet / 100.0;
+  feedback = (gdouble) self->feedback / 100.0;
+  wet = (gdouble) self->drywet / 100.0;
   dry = 1.0 - wet;
-  rb_in = filter->rb_ptr;
-  rb_out = (rb_in >= delaytime) ?
-      rb_in - delaytime : (rb_in + filter->max_delaytime) - delaytime;
+  GSTBT_DELAY_BEFORE (delay, rb_in, rb_out);
 
   if (G_UNLIKELY (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_GAP) ||
           gst_base_transform_is_passthrough (base))) {
     /* input is silence */
-
     for (i = 0; i < num_samples; i++) {
-      val_fx = (gdouble) filter->ring_buffer[rb_out];
-      sum_fx += abs (filter->ring_buffer[rb_out]);
+      GSTBT_DELAY_READ (delay, rb_out, val_fx);
       val = (glong) (val_fx * feedback);
-      filter->ring_buffer[rb_in] = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
+      GSTBT_DELAY_WRITE (delay, rb_in, CLAMP (val, G_MININT16, G_MAXINT16));
       val = (glong) (wet * val_fx);
+      sum_fx += abs (val);
       *data++ = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
-      rb_in++;
-      if (rb_in == filter->max_delaytime)
-        rb_in = 0;
-      rb_out++;
-      if (rb_out == filter->max_delaytime)
-        rb_out = 0;
     }
   } else {
     for (i = 0; i < num_samples; i++) {
-      val_fx = (gdouble) filter->ring_buffer[rb_out];
-      sum_fx += abs (filter->ring_buffer[rb_out]);
+      GSTBT_DELAY_READ (delay, rb_out, val_fx);
       val_dry = (gdouble) * data;
       val = (glong) (val_fx * feedback + val_dry);
-      filter->ring_buffer[rb_in] = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
+      GSTBT_DELAY_WRITE (delay, rb_in, CLAMP (val, G_MININT16, G_MAXINT16));
       val = (glong) (wet * val_fx + dry * val_dry);
+      sum_fx += abs (val);
       *data++ = (gint16) CLAMP (val, G_MININT16, G_MAXINT16);
-      rb_in++;
-      if (rb_in == filter->max_delaytime)
-        rb_in = 0;
-      rb_out++;
-      if (rb_out == filter->max_delaytime)
-        rb_out = 0;
     }
   }
-  filter->rb_ptr = rb_in;
+  GSTBT_DELAY_AFTER (delay, rb_in, rb_out);
 
   if (GST_BUFFER_FLAG_IS_SET (outbuf, GST_BUFFER_FLAG_GAP) && sum_fx) {
     GST_BUFFER_FLAG_UNSET (outbuf, GST_BUFFER_FLAG_GAP);
@@ -217,12 +185,10 @@ gstbt_audio_delay_transform_ip (GstBaseTransform * base, GstBuffer * outbuf)
 static gboolean
 gstbt_audio_delay_stop (GstBaseTransform * base)
 {
-  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (base);
+  GstBtAudioDelay *self = GSTBT_AUDIO_DELAY (base);
 
-  if (filter->ring_buffer) {
-    g_free (filter->ring_buffer);
-    filter->ring_buffer = NULL;
-  }
+  if (self->delay)
+    gstbt_delay_stop (self->delay);
 
   return TRUE;
 }
@@ -287,17 +253,17 @@ static void
 gstbt_audio_delay_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (object);
+  GstBtAudioDelay *self = GSTBT_AUDIO_DELAY (object);
 
   switch (prop_id) {
     case PROP_DRYWET:
-      filter->drywet = g_value_get_uint (value);
-      break;
-    case PROP_DELAYTIME:
-      filter->delaytime = g_value_get_uint (value);
+      self->drywet = g_value_get_uint (value);
       break;
     case PROP_FEEDBACK:
-      filter->feedback = g_value_get_uint (value);
+      self->feedback = g_value_get_uint (value);
+      break;
+    case PROP_DELAYTIME:
+      g_object_set_property ((GObject *) (self->delay), pspec->name, value);
       break;
       // tempo iface
     case PROP_BPM:
@@ -315,27 +281,27 @@ static void
 gstbt_audio_delay_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
-  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (object);
+  GstBtAudioDelay *self = GSTBT_AUDIO_DELAY (object);
 
   switch (prop_id) {
     case PROP_DRYWET:
-      g_value_set_uint (value, filter->drywet);
-      break;
-    case PROP_DELAYTIME:
-      g_value_set_uint (value, filter->delaytime);
+      g_value_set_uint (value, self->drywet);
       break;
     case PROP_FEEDBACK:
-      g_value_set_uint (value, filter->feedback);
+      g_value_set_uint (value, self->feedback);
+      break;
+    case PROP_DELAYTIME:
+      g_object_get_property ((GObject *) (self->delay), pspec->name, value);
       break;
       // tempo iface
     case PROP_BPM:
-      g_value_set_ulong (value, filter->beats_per_minute);
+      g_value_set_ulong (value, self->beats_per_minute);
       break;
     case PROP_TPB:
-      g_value_set_ulong (value, filter->ticks_per_beat);
+      g_value_set_ulong (value, self->ticks_per_beat);
       break;
     case PROP_STPT:
-      g_value_set_ulong (value, filter->subticks_per_tick);
+      g_value_set_ulong (value, self->subticks_per_tick);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -346,12 +312,10 @@ gstbt_audio_delay_get_property (GObject * object, guint prop_id,
 static void
 gstbt_audio_delay_finalize (GObject * object)
 {
-  GstBtAudioDelay *filter = GSTBT_AUDIO_DELAY (object);
+  GstBtAudioDelay *self = GSTBT_AUDIO_DELAY (object);
 
-  if (filter->ring_buffer) {
-    g_free (filter->ring_buffer);
-    filter->ring_buffer = NULL;
-  }
+  if (self->delay)
+    g_object_unref (self->delay);
 
   G_OBJECT_CLASS (gstbt_audio_delay_parent_class)->finalize (object);
 }
@@ -359,21 +323,21 @@ gstbt_audio_delay_finalize (GObject * object)
 //-- gobject type methods
 
 static void
-gstbt_audio_delay_init (GstBtAudioDelay * filter)
+gstbt_audio_delay_init (GstBtAudioDelay * self)
 {
-  filter->drywet = 50;
-  filter->delaytime = 100;
-  filter->feedback = 50;
+  self->drywet = 50;
+  self->feedback = 50;
 
-  filter->samplerate = GST_AUDIO_DEF_RATE;
-  filter->beats_per_minute = 120;
-  filter->ticks_per_beat = 4;
-  filter->subticks_per_tick = 1;
-  gstbt_audio_delay_calculate_tick_time (filter);
+  self->samplerate = GST_AUDIO_DEF_RATE;
+  self->beats_per_minute = 120;
+  self->ticks_per_beat = 4;
+  self->subticks_per_tick = 1;
+  gstbt_audio_delay_calculate_tick_time (self);
 
-  filter->ring_buffer = NULL;
+  /* effect components */
+  self->delay = gstbt_delay_new ();
 
-  gst_base_transform_set_gap_aware (GST_BASE_TRANSFORM (filter), TRUE);
+  gst_base_transform_set_gap_aware (GST_BASE_TRANSFORM (self), TRUE);
 }
 
 static void
@@ -402,14 +366,15 @@ gstbt_audio_delay_class_init (GstBtAudioDelayClass * klass)
           "Intensity of effect (0 none -> 100 full)", 0, 100, 50,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
-  g_object_class_install_property (gobject_class, PROP_DELAYTIME,
-      g_param_spec_uint ("delaytime", "Delay time",
-          "Time difference between two echos as milliseconds", 1, DELAYTIME_MAX,
-          100, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
-
   g_object_class_install_property (gobject_class, PROP_FEEDBACK,
       g_param_spec_uint ("feedback", "Fedback", "Echo feedback in percent",
           0, 99, 50, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+
+  g_object_class_install_property (gobject_class, PROP_DELAYTIME,
+      g_param_spec_uint ("delaytime", "Delay time",
+          "Time difference between two echos as milliseconds", 1,
+          GSTBT_DELAY_DELAYTIME_MAX, 100,
+          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   gstbasetransform_class->set_caps =
       GST_DEBUG_FUNCPTR (gstbt_audio_delay_set_caps);
