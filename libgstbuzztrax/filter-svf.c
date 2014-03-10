@@ -41,7 +41,7 @@ GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
 enum
 {
   // dynamic class properties
-  PROP_TYPE = 1,
+  PROP_FILTER = 1,
   PROP_CUTOFF,
   PROP_RESONANCE
 };
@@ -217,7 +217,7 @@ gstbt_filter_svf_set_property (GObject * object, guint prop_id,
   GstBtFilterSVF *self = GSTBT_FILTER_SVF (object);
 
   switch (prop_id) {
-    case PROP_TYPE:
+    case PROP_FILTER:
       //GST_INFO("change filter %d -> %d",g_value_get_enum (value),self->filter);
       self->type = g_value_get_enum (value);
       gstbt_filter_svf_change_filter (self);
@@ -244,7 +244,7 @@ gstbt_filter_svf_get_property (GObject * object, guint prop_id,
   GstBtFilterSVF *self = GSTBT_FILTER_SVF (object);
 
   switch (prop_id) {
-    case PROP_TYPE:
+    case PROP_FILTER:
       g_value_set_enum (value, self->type);
       break;
     case PROP_CUTOFF:
@@ -282,8 +282,8 @@ gstbt_filter_svf_class_init (GstBtFilterSVFClass * klass)
 
   // register own properties
 
-  g_object_class_install_property (gobject_class, PROP_TYPE,
-      g_param_spec_enum ("type", "Filtertype", "Type of audio filter",
+  g_object_class_install_property (gobject_class, PROP_FILTER,
+      g_param_spec_enum ("filter", "Filtertype", "Type of audio filter",
           GSTBT_TYPE_FILTER_SVF_TYPE, GSTBT_FILTER_SVF_LOWPASS,
           G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE | G_PARAM_STATIC_STRINGS));
 
