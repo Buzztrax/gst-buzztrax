@@ -11,7 +11,7 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 
 EXTRA_DIST = \
 	libgstbuzztrax.pc.in \
-	TODO
+	README.md TODO
 
 # BUILT_SOURCES is for generated source
 BUILT_SOURCES = builddirs
