@@ -28,8 +28,8 @@
  *
  * For technical details see:
  *
- * * <http://en.wikipedia.org/wiki/MOS_Technology_SID#Technical_details>
- * * <http://www.waitingforfriday.com/index.php/Commodore_SID_6581_Datasheet>
+ * * [SID at wikipedia](http://en.wikipedia.org/wiki/MOS_Technology_SID#Technical_details)
+ * * [SID datasheet](http://www.waitingforfriday.com/index.php/Commodore_SID_6581_Datasheet)
  *
  * <refsect2>
  * <title>Example launch line</title>
