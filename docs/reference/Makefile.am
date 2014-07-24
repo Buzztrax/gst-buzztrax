@@ -34,7 +34,7 @@ endif
 DOC_SOURCE_DIR=$(top_srcdir)
 
 # Extra options to pass to gtkdoc-scangobj. Not normally needed.
-SCANGOBJ_OPTIONS=--type-init-func="g_type_init();gst_init(&argc,&argv)"
+SCANGOBJ_OPTIONS=--type-init-func="gst_init(&argc,&argv)"
 
 # Extra options to supply to gtkdoc-scan.
 # e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED"
