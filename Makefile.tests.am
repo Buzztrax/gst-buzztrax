@@ -20,11 +20,11 @@ noinst_PROGRAMS=$(TESTS_BIN)
 
 gst_buzztrax_LDADD = \
 	libgstbuzztrax.la \
-	$(BASE_DEPS_LIBS) -lcheck
+	$(BASE_DEPS_LIBS) $(CHECK_LIBS)
 gst_buzztrax_CFLAGS = \
 	-I$(srcdir) -I$(top_srcdir) \
 	-DG_LOG_DOMAIN=\"gst-buzztrax-check\" \
-	$(BASE_DEPS_CFLAGS)
+	$(BASE_DEPS_CFLAGS) $(CHECK_CFLAGS)
 gst_buzztrax_SOURCES = \
   tests/m-gst-buzztrax.c tests/m-gst-buzztrax.h \
 	tests/s-gst-note2frequency.c tests/e-gst-note2frequency.c tests/t-gst-note2frequency.c
