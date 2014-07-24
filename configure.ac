@@ -1,7 +1,7 @@
 dnl Initialise autoconf/automake/libtool
 AC_PREREQ(2.61)
 AC_INIT([gst-buzztrax],[0.8.0],[buzztrax-devel@lists.sourceforge.net])
-AM_INIT_AUTOMAKE([-Wall check-news std-options foreign])
+AM_INIT_AUTOMAKE([-Wall check-news std-options foreign subdir-objects])
 AC_CONFIG_SRCDIR([README.md])
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_MACRO_DIR(m4)
