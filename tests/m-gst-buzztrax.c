@@ -93,7 +93,6 @@ main (int argc, char **argv)
   int nf;
   SRunner *sr;
 
-  g_type_init ();
   //setup_log(argc,argv);
   //setup_log_capture();
   test_argv[0] = test_arg0;
