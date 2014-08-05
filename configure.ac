@@ -5,6 +5,7 @@ AM_INIT_AUTOMAKE([-Wall check-news std-options foreign subdir-objects])
 AC_CONFIG_SRCDIR([README.md])
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_MACRO_DIR(m4)
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_PREREQ([2.2])
 LT_INIT
 
@@ -53,8 +54,6 @@ AC_PROG_MKDIR_P
 AC_PROG_SED
 AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
-
-m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 dnl common switches for all buzztrax modules
 
