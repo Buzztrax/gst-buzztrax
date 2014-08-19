@@ -41,3 +41,4 @@ coverage
 .deps
 gst_buzztrax
 tmp-orc.c
+.dirstamp
