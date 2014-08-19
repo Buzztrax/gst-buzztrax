@@ -960,10 +960,26 @@ gstbml_get_param (GstBMLParameterTypes type, gpointer addr, GValue * value)
 }
 
 /**
+ * gstbml_calculate_buffer_size:
+ * @bml: bml instance
+ *
+ * Calculate the buffer size in bytes.
+ *
+ * Returns: the buffer size in bytes
+ */
+guint
+gstbml_calculate_buffer_size (GstBML * bml)
+{
+  // TODO(ensonic): need channels
+  // bml_class->output_channels
+  return 2 * bml->samples_per_buffer * sizeof (BMLData);
+}
+
+/**
  * gstbml_calculate_buffer_frames:
  * @bml: bml instance
  *
- * update the buffersize for calculation (in samples)
+ * Update the buffersize for calculation (in samples)
  * buffer_frames = samples_per_minute/ticks_per_minute
  */
 void

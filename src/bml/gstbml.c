@@ -440,6 +440,10 @@ bml (gstbml_tempo_change_tempo (GObject * gstbml, GstBML * bml,
     GST_INFO ("changing tempo to %lu BPM  %lu TPB  %lu STPT",
         bml->beats_per_minute, bml->ticks_per_beat, bml->subticks_per_tick);
     gstbml_calculate_buffer_frames (bml);
+    if (GST_IS_BASE_SRC (gstbml)) {
+      gst_base_src_set_blocksize (GST_BASE_SRC (gstbml),
+          gstbml_calculate_buffer_size (bml));
+    }
     // update timevalues in buzzmachine
     bml (set_master_info (bml->beats_per_minute, bml->ticks_per_beat,
             bml->samplerate));
@@ -1067,6 +1071,10 @@ bml (gstbml_init (GstBML * bml, GstBMLClass * klass, GstElement * element))
   bml->ticks_per_beat = 4;
   bml->subticks_per_tick = 1;
   gstbml_calculate_buffer_frames (bml);
+  if (GST_IS_BASE_SRC (element)) {
+    gst_base_src_set_blocksize (GST_BASE_SRC (element),
+        gstbml_calculate_buffer_size (bml));
+  }
   bml (set_master_info (bml->beats_per_minute, bml->ticks_per_beat,
           bml->samplerate));
   GST_DEBUG_OBJECT (element, "activating %lu voice(s)", bml->num_voices);
@@ -1432,8 +1440,8 @@ bml (gstbml_reset_triggers (GstBML * bml, GstBMLClass * bml_class))
     }
   }
   for (i = 0; i < bml_class->numtrackparams; i++) {
-    if (g_atomic_int_compare_and_exchange (&bml->triggers_changed[bml_class->
-                numglobalparams + i], 2, 0)) {
+    if (g_atomic_int_compare_and_exchange (&bml->
+            triggers_changed[bml_class->numglobalparams + i], 2, 0)) {
       pspec = bml_class->track_property[i];
       addr = bml (get_track_parameter_location (bm, 0, i));
       reset_triggers (pspec, addr);
