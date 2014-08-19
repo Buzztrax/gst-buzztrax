@@ -569,58 +569,6 @@ gst_bml_transform_transform_caps (GstBaseTransform * base,
   return res;
 }
 
-#if 0
-static gboolean
-gst_bml_transform_start (GstBaseTransform * base)
-{
-  GstBMLTransform *bml_transform = GST_BML_TRANSFORM (base);
-  GstBML *bml = GST_BML (bml_transform);
-  GstBMLTransformClass *klass = GST_BML_TRANSFORM_GET_CLASS (bml_transform);
-  GstBMLClass *bml_class = GST_BML_CLASS (klass);
-  gpointer bm = bml->bm;
-  gint i;
-  gpointer addr;
-  gint type;
-  gchar *pname;
-
-  GST_WARNING_OBJECT (base, "dump params");
-  // dump global parameters
-  for (i = 0; i < bml_class->numglobalparams; i++) {
-    bml (get_track_parameter_info (bm, i, BM_PARA_TYPE, (void *) &type));
-    bml (get_global_parameter_info (bm, i, BM_PARA_NAME, (void *) &pname));
-    addr = bml (get_global_parameter_location (bm, i));
-    switch (type) {
-      case PT_NOTE:
-        GST_WARNING ("global note   param %2d:%p:%s = %s",
-            i, addr, pname,
-            gstbt_tone_conversion_note_number_2_string ((guint) (*(guint8 *)
-                    addr)));
-        break;
-      case PT_SWITCH:
-        GST_WARNING ("global switch param %2d:%p:%s = %u",
-            i, addr, pname, (guint) (*(guint8 *) addr));
-        break;
-      case PT_BYTE:
-        GST_WARNING ("global byte   param %2d:%p:%s = %u",
-            i, addr, pname, (guint) (*(guint8 *) addr));
-        break;
-      case PT_WORD:
-        GST_WARNING ("global word   param %2d:%p:%s = %u",
-            i, addr, pname, (guint) (*(guint16 *) addr));
-        break;
-      case PT_ENUM:
-        GST_WARNING ("global enum   param %2d:%p:%s = %u",
-            i, addr, pname, (guint) (*(guint8 *) addr));
-        break;
-      default:
-        GST_WARNING ("unhandled type : %d", type);
-    }
-  }
-
-  return TRUE;
-}
-#endif
-
 static gboolean
 gst_bml_transform_stop (GstBaseTransform * base)
 {
@@ -742,8 +690,6 @@ gst_bml_transform_class_init (GstBMLTransformClass * klass)
   gobject_class->finalize = GST_DEBUG_FUNCPTR (gst_bml_transform_finalize);
   gstbasetransform_class->set_caps =
       GST_DEBUG_FUNCPTR (gst_bml_transform_set_caps);
-  // only used here for debugging
-  //gstbasetransform_class->start        = GST_DEBUG_FUNCPTR(gst_bml_transform_start);
   gstbasetransform_class->stop = GST_DEBUG_FUNCPTR (gst_bml_transform_stop);
   if (bml_class->output_channels == 1) {
     gstbasetransform_class->transform_ip =
