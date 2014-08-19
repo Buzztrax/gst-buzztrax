@@ -43,8 +43,8 @@ extern GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBM
 
 //-- common element functions
 
-extern void gstbml_set_param(GstBMLParameterTypes type,gpointer addr,const GValue *value);
-extern void gstbml_get_param(GstBMLParameterTypes type,gpointer addr,GValue *value);
+extern void gstbml_set_param(GstBMLParameterTypes type,gint val,GValue *value);
+extern gint gstbml_get_param(GstBMLParameterTypes type,const GValue *value);
 extern guint gstbml_calculate_buffer_size(GstBML * bml);
 extern void gstbml_calculate_buffer_frames(GstBML *bml);
 

@@ -113,17 +113,14 @@ gst_bmlv_set_property (GObject * object, guint prop_id, const GValue * value,
 {
   GstBMLV *bmlv = GST_BMLV (object);
   gpointer bm = bmlv->bm;
-  gint *addr;
+  gint val;
   gint type;
   guint flags;
 
   // property ids have an offset of 1
   prop_id--;
-  GST_DEBUG ("id: %d", prop_id);
-  GST_INFO ("  bm=0x%p", bm);
+  GST_DEBUG ("id: %d, bm=0x%p", prop_id, bm);
 
-  // TODO(ensonic): cache this info
-  addr = (gint *) bml (get_track_parameter_location (bm, bmlv->voice, prop_id));
   type =
       GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
           gst_bml_property_meta_quark_type));
@@ -136,8 +133,8 @@ gst_bmlv_set_property (GObject * object, guint prop_id, const GValue * value,
     // flag triggered triggers
     g_atomic_int_set (&bmlv->triggers_changed[prop_id], 1);
   }
-  gstbml_set_param (type, addr, value);
-
+  val = gstbml_get_param (type, value);
+  bml (set_track_parameter_value (bm, bmlv->voice, prop_id, val));
   /*{ DEBUG
      gchar *valstr=g_strdup_value_contents(value);
      GST_DEBUG("set track param %d:%d to %s", prop_id, bmlv->voice, valstr);
@@ -151,21 +148,18 @@ gst_bmlv_get_property (GObject * object, guint prop_id, GValue * value,
 {
   GstBMLV *bmlv = GST_BMLV (object);
   gpointer bm = bmlv->bm;
-  gint *addr;
+  gint val;
   gint type;
 
   // property ids have an offset of 1
   prop_id--;
-  GST_DEBUG ("id: %d", prop_id);
-  GST_INFO ("  bm=0x%p", bm);
+  GST_DEBUG ("id: %d, bm=0x%p", prop_id, bm);
 
-  addr = (gint *) bml (get_track_parameter_location (bm, bmlv->voice, prop_id));
   type =
       GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
           gst_bml_property_meta_quark_type));
-  // TODO(ensonic): cache this info
-  //bml(get_track_parameter_info(bm,prop_id,BM_PARA_TYPE,(void *)&type));
-  gstbml_get_param (type, addr, value);
+  val = bml (get_track_parameter_value (bm, bmlv->voice, prop_id));
+  gstbml_set_param (type, val, value);
   /*{ DEBUG
      gchar *valstr=g_strdup_value_contents(value);
      GST_DEBUG("got track param %d:%d as %s", prop_id, bmlv->voice, valstr);

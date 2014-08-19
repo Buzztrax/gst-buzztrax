@@ -1192,7 +1192,7 @@ bml (gstbml_set_property (GstBML * bml, GstBMLClass * bml_class, guint prop_id,
 
   // pass remaining props to wrapped plugin
   if (!handled) {
-    gpointer addr;
+    gint val;
     gint type;
     // DEBUG
     //gchar *valstr;
@@ -1224,9 +1224,8 @@ bml (gstbml_set_property (GstBML * bml, GstBMLClass * bml_class, guint prop_id,
       }
       // is it a global param
       if (prop_id < bml_class->numglobalparams) {
-        // TODO(ensonic): cache this info
-        addr = bml (get_global_parameter_location (bm, prop_id));
-        gstbml_set_param (type, addr, value);
+        val = gstbml_get_param (type, value);
+        bml (set_global_parameter_value (bm, prop_id, val));
         // DEBUG
         //valstr=g_strdup_value_contents(value);
         //GST_DEBUG("set global param %d to %s (%p)", prop_id, valstr,addr);
@@ -1236,9 +1235,8 @@ bml (gstbml_set_property (GstBML * bml, GstBMLClass * bml_class, guint prop_id,
         prop_id -= bml_class->numglobalparams;
         // is it a voice00 param
         if (prop_id < bml_class->numtrackparams) {
-          // TODO(ensonic): cache this info
-          addr = bml (get_track_parameter_location (bm, 0, prop_id));
-          gstbml_set_param (type, addr, value);
+          val = gstbml_get_param (type, value);
+          bml (set_track_parameter_value (bm, 0, prop_id, val));
           // DEBUG
           //valstr=g_strdup_value_contents(value);
           //GST_DEBUG("set track param %d:0 to %s (%p)", prop_id, valstr,addr);
@@ -1298,7 +1296,7 @@ bml (gstbml_get_property (GstBML * bml, GstBMLClass * bml_class, guint prop_id,
 
   // pass remaining props to wrapped plugin
   if (!handled) {
-    gpointer addr;
+    gint val;
     gint type;
     // DEBUG
     //gchar *valstr;
@@ -1321,9 +1319,8 @@ bml (gstbml_get_property (GstBML * bml, GstBMLClass * bml_class, guint prop_id,
       prop_id -= bml_class->numattributes;
       // is it a global param
       if (prop_id < bml_class->numglobalparams) {
-        // TODO(ensonic): cache this info
-        addr = bml (get_global_parameter_location (bm, prop_id));
-        gstbml_get_param (type, addr, value);
+        val = bml (get_global_parameter_value (bm, prop_id));
+        gstbml_set_param (type, val, value);
         // DEBUG
         //valstr=g_strdup_value_contents(value);
         //GST_DEBUG ("got global param as %s (%p)", valstr,addr);
@@ -1333,9 +1330,8 @@ bml (gstbml_get_property (GstBML * bml, GstBMLClass * bml_class, guint prop_id,
         prop_id -= bml_class->numglobalparams;
         // is it a voice00 param
         if (prop_id < bml_class->numtrackparams) {
-          // TODO(ensonic): cache this info
-          addr = bml (get_track_parameter_location (bm, 0, prop_id));
-          gstbml_get_param (type, addr, value);
+          val = bml (get_track_parameter_value (bm, 0, prop_id));
+          gstbml_set_param (type, val, value);
           // DEBUG
           //valstr=g_strdup_value_contents(value);
           //GST_DEBUG ("got track param as %s (%p)", valstr,addr);
@@ -1388,34 +1384,6 @@ bml (gstbml_sync_values (GstBML * bml, GstBMLClass * bml_class,
   }
 }
 
-static void
-reset_triggers (GParamSpec * pspec, gpointer addr)
-{
-  gint no_val, type;
-
-  type =
-      GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
-          gst_bml_property_meta_quark_type));
-  no_val =
-      GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
-          gstbt_property_meta_quark_no_val));
-  switch (type) {
-    case PT_NOTE:
-    case PT_SWITCH:
-    case PT_BYTE:
-    case PT_ENUM:
-      *(guint8 *) addr = (guint8) no_val;
-      break;
-      break;
-    case PT_WORD:
-      *(guint16 *) addr = (guint16) no_val;
-      break;
-      break;
-    default:
-      GST_WARNING ("unhandled type : %d", type);
-  }
-}
-
 /*
  * gstbml_reset_triggers:
  *
@@ -1430,21 +1398,25 @@ bml (gstbml_reset_triggers (GstBML * bml, GstBMLClass * bml_class))
   GstBMLVClass *bmlv_class;
   GParamSpec *pspec;
   gulong i, v;
-  gpointer addr;
+  gint val;
 
   for (i = 0; i < bml_class->numglobalparams; i++) {
     if (g_atomic_int_compare_and_exchange (&bml->triggers_changed[i], 2, 0)) {
       pspec = bml_class->global_property[i];
-      addr = bml (get_global_parameter_location (bm, i));
-      reset_triggers (pspec, addr);
+      val =
+          GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
+              gstbt_property_meta_quark_no_val));
+      bml (set_global_parameter_value (bm, i, val));
     }
   }
   for (i = 0; i < bml_class->numtrackparams; i++) {
-    if (g_atomic_int_compare_and_exchange (&bml->
-            triggers_changed[bml_class->numglobalparams + i], 2, 0)) {
+    if (g_atomic_int_compare_and_exchange (&bml->triggers_changed[bml_class->
+                numglobalparams + i], 2, 0)) {
       pspec = bml_class->track_property[i];
-      addr = bml (get_track_parameter_location (bm, 0, i));
-      reset_triggers (pspec, addr);
+      val =
+          GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
+              gstbt_property_meta_quark_no_val));
+      bml (set_track_parameter_value (bm, 0, i, val));
     }
   }
   for (v = 0, node = bml->voices; node; node = g_list_next (node), v++) {
@@ -1453,8 +1425,10 @@ bml (gstbml_reset_triggers (GstBML * bml, GstBMLClass * bml_class))
     for (i = 0; i < bmlv_class->numtrackparams; i++) {
       if (g_atomic_int_compare_and_exchange (&bmlv->triggers_changed[i], 2, 0)) {
         pspec = bmlv_class->track_property[i];
-        addr = bml (get_track_parameter_location (bm, v, i));
-        reset_triggers (pspec, addr);
+        val =
+            GPOINTER_TO_INT (g_param_spec_get_qdata (pspec,
+                gstbt_property_meta_quark_no_val));
+        bml (set_track_parameter_value (bm, v, i, val));
       }
     }
   }

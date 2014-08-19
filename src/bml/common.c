@@ -893,66 +893,67 @@ gstbml_register_param (GObjectClass * klass, gint prop_id,
 //-- common element functions
 
 /**
- * gstbml_set_param:
+ * gstbml_get_param:
  * @type: parameter type
- * @addr: the address pointing to the value
  * @value: the source
  *
- * Write a parameter according to @type to @addr from the @value.
+ * Get a parameter according to @type from the @value.
+ *
+ * Return: the content value.
  */
-void
-gstbml_set_param (GstBMLParameterTypes type, gpointer addr,
-    const GValue * value)
+gint
+gstbml_get_param (GstBMLParameterTypes type, const GValue * value)
 {
+  gint ret = 0;
+
   switch (type) {
     case PT_NOTE:
-      *(guint8 *) addr = (guint8) g_value_get_enum (value);
+      ret = (gint) g_value_get_enum (value);
       break;
     case PT_SWITCH:
-      *(guint8 *) addr = (guint8) g_value_get_boolean (value);
-      //*(guint8 *)addr=(guint8)g_value_get_uint(value);
+      ret = (gint) g_value_get_boolean (value);
       break;
     case PT_BYTE:
-      *(guint8 *) addr = (guint8) g_value_get_uint (value);
+      ret = (gint) g_value_get_uint (value);
       break;
     case PT_WORD:
-      *(guint16 *) addr = (guint16) g_value_get_uint (value);
+      ret = (gint) g_value_get_uint (value);
       break;
     case PT_ENUM:
-      *(guint8 *) addr = (guint8) g_value_get_enum (value);
+      ret = g_value_get_enum (value);
       break;
     default:
       GST_WARNING ("unhandled type : %d", type);
   }
+  return ret;
 }
 
 /**
- * gstbml_get_param:
+ * gstbml_set_param:
  * @type: parameter type
- * @addr: the address pointing to the value
+ * @val: the new content
  * @value: the target
  *
- * Read a parameter according to @type from @addr into the @value.
+ * Store a parameter according to @type from @val into the @value.
  */
 void
-gstbml_get_param (GstBMLParameterTypes type, gpointer addr, GValue * value)
+gstbml_set_param (GstBMLParameterTypes type, gint val, GValue * value)
 {
   switch (type) {
     case PT_NOTE:
-      //g_value_set_string(value, gstbt_tone_conversion_note_number_2_string ((guint)(*(guint8 *)addr)));
+      //g_value_set_string(value, gstbt_tone_conversion_note_number_2_string (val));
       break;
     case PT_SWITCH:
-      g_value_set_boolean (value, (guint) (*(guint8 *) addr));
-      //g_value_set_uint(value,(guint)(*(guint8 *)addr));
+      g_value_set_boolean (value, val);
       break;
     case PT_BYTE:
-      g_value_set_uint (value, (guint) (*(guint8 *) addr));
+      g_value_set_uint (value, (guint) val);
       break;
     case PT_WORD:
-      g_value_set_uint (value, (guint) (*(guint16 *) addr));
+      g_value_set_uint (value, (guint) val);
       break;
     case PT_ENUM:
-      g_value_set_enum (value, (guint) (*(guint8 *) addr));
+      g_value_set_enum (value, val);
       break;
     default:
       GST_WARNING ("unhandled type : %d", type);
