@@ -294,4 +294,13 @@ gstbt_sim_syn_class_init (GstBtSimSynClass * klass)
      g_object_class_find_property (filter_klass, "resonance")));
      g_type_class_unref (filter_klass);
    */
+  /* we could define an interface for each component and have the component
+   * implement the iface, here we also implement the iface and thus inherit the
+   * properties. This unfortunately won't allow us to rename properties. If
+   * e.g. we use two Osc components, we want to prefix them with e.g. 'Osc1-'
+   * and 'Osc2-'. What we'd like to have is:
+   *
+   * g_object_class_proxy_property (gobject_class, "resonance", filter_klass,
+   *   "resonance"); 
+   */
 }
