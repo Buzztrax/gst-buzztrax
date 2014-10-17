@@ -22,14 +22,14 @@
 //-- fixtures
 
 static void
-test_setup (void)
+suite_setup (void)
 {
   gst_buzztrax_setup ();
   gst_debug_remove_log_function (gst_debug_log_default);
 }
 
 static void
-test_teardown (void)
+suite_teardown (void)
 {
   gst_buzztrax_teardown ();
 }
@@ -132,6 +132,6 @@ gst_buzztrax_note2frequency_test_case (void)
   tcase_add_test (tc, test_translate_str_length);
   tcase_add_test (tc, test_translate_str_delim);
   tcase_add_test (tc, test_translate_enum_range);
-  tcase_add_unchecked_fixture (tc, test_setup, test_teardown);
+  tcase_add_unchecked_fixture (tc, suite_setup, suite_teardown);
   return (tc);
 }

@@ -27,6 +27,7 @@
 GST_DEBUG_CATEGORY (GST_CAT_DEFAULT);
 
 extern Suite *gst_buzztrax_note2frequency_suite (void);
+extern Suite *gst_buzztrax_elements_suite (void);
 
 gint test_argc = 1;
 gchar test_arg0[] = "check_gst_buzzard";
@@ -74,9 +75,6 @@ gst_buzztrax_setup (void)
   gst_init (&test_argc, &test_argvptr);
   GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, "bt-check", 0,
       "music production environment / unit tests");
-  // set this to e.g. DEBUG to see more from gst in the log
-  gst_debug_set_threshold_for_name ("GST_*", GST_LEVEL_WARNING);
-  gst_debug_category_set_threshold (gst_buzztrax_debug, GST_LEVEL_DEBUG);
   // no ansi color codes in logfiles please
   gst_debug_set_colored (FALSE);
 }
@@ -104,9 +102,10 @@ main (int argc, char **argv)
   (void) g_log_set_default_handler (check_log_handler, NULL);
 
   sr = srunner_create (gst_buzztrax_note2frequency_suite ());
+  srunner_add_suite (sr, gst_buzztrax_elements_suite ());
   // this make tracing errors with gdb easier
   //srunner_set_fork_status(sr,CK_NOFORK);
-  srunner_run_all (sr, CK_NORMAL);
+  srunner_run_all (sr, CK_VERBOSE);
   nf = srunner_ntests_failed (sr);
   srunner_free (sr);
 
