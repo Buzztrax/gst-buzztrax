@@ -42,3 +42,5 @@ coverage
 gst_buzztrax
 tmp-orc.c
 .dirstamp
+*.trs
+test-driver
