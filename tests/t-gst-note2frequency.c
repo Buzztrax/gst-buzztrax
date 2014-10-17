@@ -25,7 +25,7 @@ static void
 test_setup (void)
 {
   gst_buzztrax_setup ();
-  //GST_INFO("================================================================================");
+  gst_debug_remove_log_function (gst_debug_log_default);
 }
 
 static void
@@ -121,7 +121,9 @@ START_TEST (test_translate_enum_range)
   g_object_checked_unref (n2f);
 }
 
-END_TEST TCase *
+END_TEST
+
+TCase *
 gst_buzztrax_note2frequency_test_case (void)
 {
   TCase *tc = tcase_create ("GstBtToneConversionTests");
