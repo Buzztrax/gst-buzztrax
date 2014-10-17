@@ -96,7 +96,6 @@ gstbt_delay_new
 gstbt_delay_start
 gstbt_delay_flush
 gstbt_delay_stop
-GSTBT_DELAY_DELAYTIME_MAX
 GSTBT_DELAY_BEFORE
 GSTBT_DELAY_AFTER
 GSTBT_DELAY_READ

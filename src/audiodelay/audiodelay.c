@@ -373,8 +373,7 @@ gstbt_audio_delay_class_init (GstBtAudioDelayClass * klass)
   g_object_class_install_property (gobject_class, PROP_DELAYTIME,
       g_param_spec_uint ("delaytime", "Delay time",
           "Time difference between two echos as milliseconds", 1,
-          GSTBT_DELAY_DELAYTIME_MAX, 100,
-          G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
+          1000, 100, G_PARAM_READWRITE | GST_PARAM_CONTROLLABLE));
 
   gstbasetransform_class->set_caps =
       GST_DEBUG_FUNCPTR (gstbt_audio_delay_set_caps);

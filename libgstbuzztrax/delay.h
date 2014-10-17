@@ -64,9 +64,6 @@ void gstbt_delay_start (GstBtDelay *self, gint samplerate);
 void gstbt_delay_flush (GstBtDelay *self);
 void gstbt_delay_stop (GstBtDelay *self);
 
-// 1000 ms
-#define GSTBT_DELAY_DELAYTIME_MAX 1000
-
 #define GSTBT_DELAY_BEFORE(self,rb_in,rb_out) G_STMT_START {    \
   guint delaytime = (self->delaytime * self->samplerate) / 100; \
   rb_in = self->rb_ptr;                                         \
