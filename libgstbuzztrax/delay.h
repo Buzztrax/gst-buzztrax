@@ -64,6 +64,14 @@ void gstbt_delay_start (GstBtDelay *self, gint samplerate);
 void gstbt_delay_flush (GstBtDelay *self);
 void gstbt_delay_stop (GstBtDelay *self);
 
+/**
+ * GSTBT_DELAY_BEFORE:
+ * @self: the delay
+ * @rb_in: the write position of the ring-buffer
+ * @rb_out: the read position of the ring-buffer
+ *
+ * Initialize read/write pointers.
+ */
 #define GSTBT_DELAY_BEFORE(self,rb_in,rb_out) G_STMT_START {    \
   guint delaytime = (self->delaytime * self->samplerate) / 100; \
   rb_in = self->rb_ptr;                                         \
@@ -72,15 +80,39 @@ void gstbt_delay_stop (GstBtDelay *self);
       : (rb_in + self->max_delaytime) - delaytime;              \
 } G_STMT_END
 
+/**
+ * GSTBT_DELAY_AFTER:
+ * @self: the delay
+ * @rb_in: the write position of the ring-buffer
+ * @rb_out: the read position of the ring-buffer
+ *
+ * Store read/write pointers.
+ */
 #define GSTBT_DELAY_AFTER(self,rb_in,rb_out) G_STMT_START { \
   self->rb_ptr = rb_in;                                     \
 } G_STMT_END
 
+/**
+ * GSTBT_DELAY_READ:
+ * @self: the delay
+ * @rb_out: the read position of the ring-buffer
+ * @v: the value from the ring-buffer
+ *
+ * Read from ring-buffer and advance the position.
+ */
 #define GSTBT_DELAY_READ(self,rb_out,v) G_STMT_START { \
   v = self->ring_buffer[rb_out++];                     \
   if (rb_out == self->max_delaytime) rb_out = 0;       \
 } G_STMT_END
 
+/**
+ * GSTBT_DELAY_WRITE:
+ * @self: the delay
+ * @rb_in: the write position of the ring-buffer
+ * @v: the value to write to the ring-buffer
+ *
+ * Write to @v the ring-buffer and advance the position.
+ */
 #define GSTBT_DELAY_WRITE(self,rb_in,v) G_STMT_START { \
   self->ring_buffer[rb_in++] = (gint16) v;             \
   if (rb_in == self->max_delaytime) rb_in = 0;         \

@@ -70,6 +70,8 @@ gstbt_delay_new (void)
 
 /**
  * gstbt_delay_start:
+ * @self: the delay
+ * @samplerate: the new sampling rate
  *
  * Initialize the delay line.
  */
@@ -86,6 +88,7 @@ gstbt_delay_start (GstBtDelay * self, gint samplerate)
 
 /**
  * gstbt_delay_flush:
+ * @self: the delay
  *
  * Zero pending data in the delay.
  */
@@ -97,7 +100,8 @@ gstbt_delay_flush (GstBtDelay * self)
 }
 
 /**
- * gstbt_delay_start:
+ * gstbt_delay_stop:
+ * @self: the delay
  *
  * Stop and release the delay line.
  */
