@@ -1,4 +1,8 @@
-0.7.0 victory, not venegance (19.Jan.2013)
+0.8.0 bladerunner (24.Oct.2014)
+================================================================================
+Port to gstreamer-1.0. Various code cleanups and api-doc updates.
+
+0.7.0 victory, not vengeance (19.Jan.2013)
 ================================================================================
 Compatibility improvements for buzzmachines. Modularization of synth components
 (audiosynth base class, filters, oscillators and envelope generators). New
