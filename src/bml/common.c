@@ -194,81 +194,92 @@ skip_property (GParamSpec * prop, GObjectClass * voice_class)
   return FALSE;
 }
 
+static GObjectClass *
+get_voice_class (GType voice_type)
+{
+  return voice_type ? G_OBJECT_CLASS (g_type_class_ref (voice_type)) : NULL;
+}
+
+static GList *
+get_preset_key_node (GstBMLClass * klass, const gchar * name)
+{
+  return g_list_find_custom (klass->presets, name, (GCompareFunc) strcmp);
+}
+
+static gpointer
+get_preset_key (GstBMLClass * klass, const gchar * name)
+{
+  GList *node = get_preset_key_node (klass, name);
+  return node ? node->data : NULL;
+}
+
 gboolean
 gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
     const gchar * name)
 {
-  GList *node;
+  gpointer key;
   guint32 *data;
 
   if (!klass->presets) {
     if (!(gstbml_preset_get_preset_names (bml, klass))) {
       GST_INFO ("no presets for machine");
-      return (FALSE);
+      return FALSE;
     }
   }
+  if (!(key = get_preset_key (klass, name))) {
+    GST_WARNING ("no preset for '%s'", name);
+    return FALSE;
+  }
+  // get preset data record
+  if ((data = g_hash_table_lookup (klass->preset_data, key))) {
+    guint32 i, tracks, params;
+    GObjectClass *global_class = G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS (self));
+    GObjectClass *voice_class = get_voice_class (klass->voice_type);
+    GParamSpec **props;
+    guint num_props;
 
-  if ((node = g_list_find_custom (klass->presets, name, (GCompareFunc) strcmp))) {
-    // get preset data record
-    if ((data = g_hash_table_lookup (klass->preset_data, node->data))) {
-      guint32 i, tracks, params;
-      GObjectClass *voice_class = NULL;
-      GParamSpec **props;
-      guint num_props;
+    tracks = *data++;
+    params = *data++;
 
-      tracks = *data++;
-      params = *data++;
+    GST_INFO ("about to load preset '%s' with %d tracks and %d total params",
+        name, tracks, params);
+    GST_INFO ("machine has %d global and %d voice params",
+        klass->numglobalparams, klass->numtrackparams);
 
-      if (klass->voice_type) {
-        voice_class = G_OBJECT_CLASS (g_type_class_ref (klass->voice_type));
-      }
-
-      GST_INFO ("about to load preset '%s' with %d tracks and %d total params",
-          name, tracks, params);
-      GST_INFO ("machine has %d global and %d voice params",
-          klass->numglobalparams, klass->numtrackparams);
-
-      // set global parameters
-      if ((props =
-              g_object_class_list_properties (G_OBJECT_CLASS
-                  (GST_ELEMENT_GET_CLASS (self)), &num_props))) {
-        for (i = 0; i < num_props; i++) {
-          if (skip_property (props[i], voice_class))
-            continue;
+    // set global parameters
+    if ((props = g_object_class_list_properties (global_class, &num_props))) {
+      for (i = 0; i < num_props; i++) {
+        if (!skip_property (props[i], voice_class))
           g_object_set (self, props[i]->name, *data++, NULL);
+      }
+      g_free (props);
+    }
+    // set track times voice parameters
+    if (voice_class && bml->num_voices) {
+      if ((props = g_object_class_list_properties (voice_class, &num_props))) {
+        GstBMLV *voice;
+        GList *node;
+        guint32 j;
+
+        for (j = 0, node = bml->voices; (j < tracks && node);
+            j++, node = g_list_next (node)) {
+          voice = node->data;
+          for (i = 0; i < num_props; i++) {
+            if (!skip_property (props[i], NULL))
+              g_object_set (voice, props[i]->name, *data++, NULL);
+          }
         }
         g_free (props);
       }
-      // set track times voice parameters
-      if (voice_class && bml->num_voices) {
-        if ((props = g_object_class_list_properties (voice_class, &num_props))) {
-          GstBMLV *voice;
-          GList *node;
-          guint32 j;
-
-          for (j = 0, node = bml->voices; (j < tracks && node);
-              j++, node = g_list_next (node)) {
-            voice = node->data;
-            for (i = 0; i < num_props; i++) {
-              if (skip_property (props[i], NULL))
-                continue;
-              g_object_set (voice, props[i]->name, *data++, NULL);
-            }
-          }
-          g_free (props);
-        }
-      }
-
-      if (voice_class)
-        g_type_class_unref (voice_class);
-      return (TRUE);
-    } else {
-      GST_WARNING ("no preset data for '%s'", name);
     }
+
+    if (voice_class)
+      g_type_class_unref (voice_class);
+    return TRUE;
   } else {
-    GST_WARNING ("no preset for '%s'", name);
+    GST_WARNING ("no preset data for '%s'", name);
   }
-  return (FALSE);
+  return FALSE;
 }
 
 static gboolean
@@ -376,21 +387,18 @@ gboolean
 gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
     const gchar * name)
 {
-  GObjectClass *voice_class =
-      G_OBJECT_CLASS (g_type_class_ref (klass->voice_type));
+  GObjectClass *global_class = G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS (self));
+  GObjectClass *voice_class = get_voice_class (klass->voice_type);
   GParamSpec **props;
   guint num_props;
   guint32 *data, *ptr;
   guint32 i, params, numglobalparams = 0, numtrackparams = 0;
 
   // count global preset params
-  if ((props =
-          g_object_class_list_properties (G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS
-                  (self)), &num_props))) {
+  if ((props = g_object_class_list_properties (global_class, &num_props))) {
     for (i = 0; i < num_props; i++) {
-      if (skip_property (props[i], voice_class))
-        continue;
-      numglobalparams++;
+      if (!skip_property (props[i], voice_class))
+        numglobalparams++;
     }
     g_free (props);
   }
@@ -398,9 +406,8 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
   if (voice_class && bml->num_voices) {
     if ((props = g_object_class_list_properties (voice_class, &num_props))) {
       for (i = 0; i < num_props; i++) {
-        if (skip_property (props[i], NULL))
-          continue;
-        numtrackparams++;
+        if (!skip_property (props[i], NULL))
+          numtrackparams++;
       }
       g_free (props);
     }
@@ -416,17 +423,15 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
   GST_INFO ("about to add new preset '%s' with %lu tracks and %u total params",
       name, bml->num_voices, params);
 
-  // take copies of current gobject properties from self
-  if ((props =
-          g_object_class_list_properties (G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS
-                  (self)), &num_props))) {
+  // get global parameters
+  if ((props = g_object_class_list_properties (global_class, &num_props))) {
     for (i = 0; i < num_props; i++) {
-      if (skip_property (props[i], voice_class))
-        continue;
-      g_object_get (self, props[i]->name, ptr++, NULL);
+      if (!skip_property (props[i], voice_class))
+        g_object_get (self, props[i]->name, ptr++, NULL);
     }
     g_free (props);
   }
+  // get track times voice parameters
   if (voice_class && bml->num_voices) {
     if ((props = g_object_class_list_properties (voice_class, &num_props))) {
       GstBMLV *voice;
@@ -437,9 +442,8 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
           j++, node = g_list_next (node)) {
         voice = node->data;
         for (i = 0; i < num_props; i++) {
-          if (skip_property (props[i], NULL))
-            continue;
-          g_object_get (voice, props[i]->name, ptr++, NULL);
+          if (!skip_property (props[i], NULL))
+            g_object_get (voice, props[i]->name, ptr++, NULL);
         }
       }
       g_free (props);
@@ -454,7 +458,7 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
   if (voice_class)
     g_type_class_unref (voice_class);
 
-  return (gstbml_preset_save_presets_file (klass));
+  return gstbml_preset_save_presets_file (klass);
 }
 
 gboolean
@@ -463,9 +467,7 @@ gstbml_preset_rename_preset (GstBMLClass * klass, const gchar * old_name,
 {
   GList *node;
 
-  if ((node =
-          g_list_find_custom (klass->presets, old_name,
-              (GCompareFunc) strcmp))) {
+  if ((node = get_preset_key_node (klass, old_name))) {
     gpointer data;
 
     // move preset data record
@@ -486,17 +488,16 @@ gstbml_preset_rename_preset (GstBMLClass * klass, const gchar * old_name,
         g_list_insert_sorted (klass->presets, (gpointer) new_name,
         (GCompareFunc) strcmp);
     GST_INFO ("preset moved '%s' -> '%s'", old_name, new_name);
-    return (gstbml_preset_save_presets_file (klass));
+    return gstbml_preset_save_presets_file (klass);
   }
-  return (FALSE);
+  return FALSE;
 }
 
 gboolean
 gstbml_preset_delete_preset (GstBMLClass * klass, const gchar * name)
 {
   GList *node;
-
-  if ((node = g_list_find_custom (klass->presets, name, (GCompareFunc) strcmp))) {
+  if ((node = get_preset_key_node (klass, name))) {
     gpointer data;
 
     // remove preset data record
@@ -513,66 +514,52 @@ gstbml_preset_delete_preset (GstBMLClass * klass, const gchar * name)
     klass->presets = g_list_delete_link (klass->presets, node);
     GST_INFO ("preset '%s' removed", name);
     g_free ((gpointer) name);
-
-    return (gstbml_preset_save_presets_file (klass));
+    return gstbml_preset_save_presets_file (klass);
   }
-  return (FALSE);
+  return FALSE;
 }
 
 gboolean
 gstbml_preset_set_meta (GstBMLClass * klass, const gchar * name,
     const gchar * tag, const gchar * value)
 {
-  gboolean res = FALSE;
-
   if (!strncmp (tag, "comment\0", 9)) {
-    GList *node;
-
-    if ((node =
-            g_list_find_custom (klass->presets, name, (GCompareFunc) strcmp))) {
+    gpointer key;
+    if ((key = get_preset_key (klass, name))) {
       gchar *old_value;
       gboolean changed = FALSE;
-
-      if ((old_value =
-              g_hash_table_lookup (klass->preset_comments, node->data))) {
+      if ((old_value = g_hash_table_lookup (klass->preset_comments, key))) {
         g_free (old_value);
         changed = TRUE;
       }
       if (value) {
-        g_hash_table_insert (klass->preset_comments, node->data,
-            g_strdup (value));
+        g_hash_table_insert (klass->preset_comments, key, g_strdup (value));
         changed = TRUE;
       }
       if (changed) {
-        res = gstbml_preset_save_presets_file (klass);
+        return gstbml_preset_save_presets_file (klass);
       }
     }
   }
-  return (res);
+  return FALSE;
 }
 
 gboolean
 gstbml_preset_get_meta (GstBMLClass * klass, const gchar * name,
     const gchar * tag, gchar ** value)
 {
-  gboolean res = FALSE;
-
   if (!strncmp (tag, "comment\0", 9)) {
-    GList *node;
-
-    if ((node =
-            g_list_find_custom (klass->presets, name, (GCompareFunc) strcmp))) {
+    gpointer key;
+    if ((key = get_preset_key (klass, name))) {
       gchar *new_value;
-      if ((new_value =
-              g_hash_table_lookup (klass->preset_comments, node->data))) {
+      if ((new_value = g_hash_table_lookup (klass->preset_comments, key))) {
         *value = g_strdup (new_value);
-        res = TRUE;
+        return TRUE;
       }
     }
   }
-  if (!res)
-    *value = NULL;
-  return (res);
+  *value = NULL;
+  return FALSE;
 }
 
 void
