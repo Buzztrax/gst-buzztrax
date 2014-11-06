@@ -212,10 +212,9 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
     // get preset data record
     if ((data = g_hash_table_lookup (klass->preset_data, node->data))) {
       guint32 i, tracks, params;
-      //GType param_type,base_type;
       GObjectClass *voice_class = NULL;
-      GParamSpec **properties, *property;
-      guint number_of_properties;
+      GParamSpec **props;
+      guint num_props;
 
       tracks = *data++;
       params = *data++;
@@ -230,22 +229,18 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
           klass->numglobalparams, klass->numtrackparams);
 
       // set global parameters
-      if ((properties =
+      if ((props =
               g_object_class_list_properties (G_OBJECT_CLASS
-                  (GST_ELEMENT_GET_CLASS (self)), &number_of_properties))) {
-        for (i = 0; i < number_of_properties; i++) {
-          property = properties[i];
-          if (skip_property (property, voice_class))
+                  (GST_ELEMENT_GET_CLASS (self)), &num_props))) {
+        for (i = 0; i < num_props; i++) {
+          if (skip_property (props[i], voice_class))
             continue;
-          // set parameters
-          g_object_set (self, property->name, *data++, NULL);
+          g_object_set (self, props[i]->name, *data++, NULL);
         }
       }
       // set track times voice parameters
       if (voice_class && bml->num_voices) {
-        if ((properties =
-                g_object_class_list_properties (voice_class,
-                    &number_of_properties))) {
+        if ((props = g_object_class_list_properties (voice_class, &num_props))) {
           GstBMLV *voice;
           GList *node;
           guint32 j;
@@ -253,12 +248,10 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
           for (j = 0, node = bml->voices; (j < tracks && node);
               j++, node = g_list_next (node)) {
             voice = node->data;
-            for (i = 0; i < number_of_properties; i++) {
-              property = properties[i];
-              if (skip_property (property, NULL))
+            for (i = 0; i < num_props; i++) {
+              if (skip_property (props[i], NULL))
                 continue;
-              // set parameters
-              g_object_set (voice, property->name, *data++, NULL);
+              g_object_set (voice, props[i]->name, *data++, NULL);
             }
           }
         }
@@ -383,30 +376,26 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
 {
   GObjectClass *voice_class =
       G_OBJECT_CLASS (g_type_class_ref (klass->voice_type));
-  GParamSpec **properties, *property;
-  guint number_of_properties;
+  GParamSpec **props;
+  guint num_props;
   guint32 *data, *ptr;
   guint32 i, params, numglobalparams = 0, numtrackparams = 0;
 
   // count global preset params
-  if ((properties =
+  if ((props =
           g_object_class_list_properties (G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS
-                  (self)), &number_of_properties))) {
-    for (i = 0; i < number_of_properties; i++) {
-      property = properties[i];
-      if (skip_property (property, voice_class))
+                  (self)), &num_props))) {
+    for (i = 0; i < num_props; i++) {
+      if (skip_property (props[i], voice_class))
         continue;
       numglobalparams++;
     }
   }
   // count voice preset params
   if (voice_class && bml->num_voices) {
-    if ((properties =
-            g_object_class_list_properties (voice_class,
-                &number_of_properties))) {
-      for (i = 0; i < number_of_properties; i++) {
-        property = properties[i];
-        if (skip_property (property, NULL))
+    if ((props = g_object_class_list_properties (voice_class, &num_props))) {
+      for (i = 0; i < num_props; i++) {
+        if (skip_property (props[i], NULL))
           continue;
         numtrackparams++;
       }
@@ -424,21 +413,17 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
       name, bml->num_voices, params);
 
   // take copies of current gobject properties from self
-  if ((properties =
+  if ((props =
           g_object_class_list_properties (G_OBJECT_CLASS (GST_ELEMENT_GET_CLASS
-                  (self)), &number_of_properties))) {
-    for (i = 0; i < number_of_properties; i++) {
-      property = properties[i];
-      if (skip_property (property, voice_class))
+                  (self)), &num_props))) {
+    for (i = 0; i < num_props; i++) {
+      if (skip_property (props[i], voice_class))
         continue;
-      // get parameters
-      g_object_get (self, property->name, ptr++, NULL);
+      g_object_get (self, props[i]->name, ptr++, NULL);
     }
   }
   if (voice_class && bml->num_voices) {
-    if ((properties =
-            g_object_class_list_properties (voice_class,
-                &number_of_properties))) {
+    if ((props = g_object_class_list_properties (voice_class, &num_props))) {
       GstBMLV *voice;
       GList *node;
       guint32 j;
@@ -446,12 +431,10 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
       for (j = 0, node = bml->voices; (j < bml->num_voices && node);
           j++, node = g_list_next (node)) {
         voice = node->data;
-        for (i = 0; i < number_of_properties; i++) {
-          property = properties[i];
-          if (skip_property (property, NULL))
+        for (i = 0; i < num_props; i++) {
+          if (skip_property (props[i], NULL))
             continue;
-          // get parameters
-          g_object_get (voice, property->name, ptr++, NULL);
+          g_object_get (voice, props[i]->name, ptr++, NULL);
         }
       }
     }
