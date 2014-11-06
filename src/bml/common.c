@@ -179,6 +179,21 @@ gstbml_preset_get_preset_names (GstBML * bml, GstBMLClass * klass)
   return (NULL);
 }
 
+// skip non-controlable, trigger params & voice params
+static gboolean
+skip_property (GParamSpec * prop, GObjectClass * voice_class)
+{
+  if (!(prop->flags & GST_PARAM_CONTROLLABLE))
+    return TRUE;
+  if (!(GPOINTER_TO_INT (g_param_spec_get_qdata (prop,
+                  gstbt_property_meta_quark_flags)) &
+          GSTBT_PROPERTY_META_STATE))
+    return TRUE;
+  if (voice_class && g_object_class_find_property (voice_class, prop->name))
+    return TRUE;
+  return FALSE;
+}
+
 gboolean
 gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
     const gchar * name)
@@ -201,7 +216,6 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
       GObjectClass *voice_class = NULL;
       GParamSpec **properties, *property;
       guint number_of_properties;
-      guint flags;
 
       tracks = *data++;
       params = *data++;
@@ -221,17 +235,7 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
                   (GST_ELEMENT_GET_CLASS (self)), &number_of_properties))) {
         for (i = 0; i < number_of_properties; i++) {
           property = properties[i];
-          flags =
-              GPOINTER_TO_INT (g_param_spec_get_qdata (property,
-                  gstbt_property_meta_quark_flags));
-
-          // skip non-controlable, trigger params & voice params
-          if (!(property->flags & GST_PARAM_CONTROLLABLE))
-            continue;
-          else if (!(flags & GSTBT_PROPERTY_META_STATE))
-            continue;
-          else if (voice_class
-              && g_object_class_find_property (voice_class, property->name))
+          if (skip_property (property, voice_class))
             continue;
           // set parameters
           g_object_set (self, property->name, *data++, NULL);
@@ -251,14 +255,8 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
             voice = node->data;
             for (i = 0; i < number_of_properties; i++) {
               property = properties[i];
-              flags =
-                  GPOINTER_TO_INT (g_param_spec_get_qdata (property,
-                      gstbt_property_meta_quark_flags));
-
-              // skip trigger params
-              if (!(flags & GSTBT_PROPERTY_META_STATE))
+              if (skip_property (property, NULL))
                 continue;
-
               // set parameters
               g_object_set (voice, property->name, *data++, NULL);
             }
@@ -387,7 +385,6 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
       G_OBJECT_CLASS (g_type_class_ref (klass->voice_type));
   GParamSpec **properties, *property;
   guint number_of_properties;
-  guint flags;
   guint32 *data, *ptr;
   guint32 i, params, numglobalparams = 0, numtrackparams = 0;
 
@@ -397,17 +394,7 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
                   (self)), &number_of_properties))) {
     for (i = 0; i < number_of_properties; i++) {
       property = properties[i];
-      flags =
-          GPOINTER_TO_INT (g_param_spec_get_qdata (property,
-              gstbt_property_meta_quark_flags));
-
-      // skip non-controlable, trigger params & voice params
-      if (!(property->flags & GST_PARAM_CONTROLLABLE))
-        continue;
-      else if (!(flags & GSTBT_PROPERTY_META_STATE))
-        continue;
-      else if (voice_class
-          && g_object_class_find_property (voice_class, property->name))
+      if (skip_property (property, voice_class))
         continue;
       numglobalparams++;
     }
@@ -419,12 +406,7 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
                 &number_of_properties))) {
       for (i = 0; i < number_of_properties; i++) {
         property = properties[i];
-        flags =
-            GPOINTER_TO_INT (g_param_spec_get_qdata (property,
-                gstbt_property_meta_quark_flags));
-
-        // skip trigger params
-        if (!(flags & GSTBT_PROPERTY_META_STATE))
+        if (skip_property (property, NULL))
           continue;
         numtrackparams++;
       }
@@ -447,17 +429,7 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
                   (self)), &number_of_properties))) {
     for (i = 0; i < number_of_properties; i++) {
       property = properties[i];
-      flags =
-          GPOINTER_TO_INT (g_param_spec_get_qdata (property,
-              gstbt_property_meta_quark_flags));
-
-      // skip non-controlable, trigger params & voice params
-      if (!(property->flags & GST_PARAM_CONTROLLABLE))
-        continue;
-      else if (!(flags & GSTBT_PROPERTY_META_STATE))
-        continue;
-      else if (voice_class
-          && g_object_class_find_property (voice_class, property->name))
+      if (skip_property (property, voice_class))
         continue;
       // get parameters
       g_object_get (self, property->name, ptr++, NULL);
@@ -476,14 +448,8 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
         voice = node->data;
         for (i = 0; i < number_of_properties; i++) {
           property = properties[i];
-          flags =
-              GPOINTER_TO_INT (g_param_spec_get_qdata (property,
-                  gstbt_property_meta_quark_flags));
-
-          // skip trigger params
-          if (!(flags & GSTBT_PROPERTY_META_STATE))
+          if (skip_property (property, NULL))
             continue;
-
           // get parameters
           g_object_get (voice, property->name, ptr++, NULL);
         }
