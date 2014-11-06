@@ -237,6 +237,7 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
             continue;
           g_object_set (self, props[i]->name, *data++, NULL);
         }
+        g_free (props);
       }
       // set track times voice parameters
       if (voice_class && bml->num_voices) {
@@ -254,6 +255,7 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
               g_object_set (voice, props[i]->name, *data++, NULL);
             }
           }
+          g_free (props);
         }
       }
 
@@ -390,6 +392,7 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
         continue;
       numglobalparams++;
     }
+    g_free (props);
   }
   // count voice preset params
   if (voice_class && bml->num_voices) {
@@ -399,6 +402,7 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
           continue;
         numtrackparams++;
       }
+      g_free (props);
     }
   }
   // create new preset
@@ -421,6 +425,7 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
         continue;
       g_object_get (self, props[i]->name, ptr++, NULL);
     }
+    g_free (props);
   }
   if (voice_class && bml->num_voices) {
     if ((props = g_object_class_list_properties (voice_class, &num_props))) {
@@ -437,6 +442,7 @@ gstbml_preset_save_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
           g_object_get (voice, props[i]->name, ptr++, NULL);
         }
       }
+      g_free (props);
     }
   }
   // add new entry
