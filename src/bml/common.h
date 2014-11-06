@@ -27,30 +27,30 @@ G_BEGIN_DECLS
 
 //-- preset iface
 
-extern gchar** gstbml_preset_get_preset_names(GstBML *bml, GstBMLClass *klass);
-extern gboolean gstbml_preset_load_preset(GstObject *self, GstBML *bml, GstBMLClass *klass, const gchar *name);
-extern gboolean gstbml_preset_save_preset(GstObject *self, GstBML *bml, GstBMLClass *klass, const gchar *name);
-extern gboolean gstbml_preset_rename_preset(GstBMLClass *klass, const gchar *old_name, const gchar *new_name);
-extern gboolean gstbml_preset_delete_preset(GstBMLClass *klass, const gchar *name);
-extern gboolean gstbml_preset_set_meta(GstBMLClass *klass, const gchar *name ,const gchar *tag, const gchar *value);
-extern gboolean gstbml_preset_get_meta(GstBMLClass *klass, const gchar *name, const gchar *tag, gchar **value);
-extern void gstbml_preset_finalize(GstBMLClass *klass);
+gchar** gstbml_preset_get_preset_names(GstBML *bml, GstBMLClass *klass);
+gboolean gstbml_preset_load_preset(GstObject *self, GstBML *bml, GstBMLClass *klass, const gchar *name);
+gboolean gstbml_preset_save_preset(GstObject *self, GstBML *bml, GstBMLClass *klass, const gchar *name);
+gboolean gstbml_preset_rename_preset(GstBMLClass *klass, const gchar *old_name, const gchar *new_name);
+gboolean gstbml_preset_delete_preset(GstBMLClass *klass, const gchar *name);
+gboolean gstbml_preset_set_meta(GstBMLClass *klass, const gchar *name ,const gchar *tag, const gchar *value);
+gboolean gstbml_preset_get_meta(GstBMLClass *klass, const gchar *name, const gchar *tag, gchar **value);
+void gstbml_preset_finalize(GstBMLClass *klass);
 
 //-- common class functions
 
-extern void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc, gchar **name, gchar **nick, gchar **desc);
-extern GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParameterTypes type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val);
+void gstbml_convert_names(GObjectClass *klass, gchar *tmp_name, gchar *tmp_desc, gchar **name, gchar **nick, gchar **desc);
+GParamSpec *gstbml_register_param(GObjectClass *klass,gint prop_id, GstBMLParameterTypes type, GType enum_type, gchar *name, gchar *nick, gchar *desc, gint flags, gint min_val, gint max_val, gint no_val, gint def_val);
 
 //-- common element functions
 
-extern void gstbml_set_param(GstBMLParameterTypes type,gint val,GValue *value);
-extern gint gstbml_get_param(GstBMLParameterTypes type,const GValue *value);
-extern guint gstbml_calculate_buffer_size(GstBML * bml);
-extern void gstbml_calculate_buffer_frames(GstBML *bml);
+void gstbml_set_param(GstBMLParameterTypes type,gint val,GValue *value);
+gint gstbml_get_param(GstBMLParameterTypes type,const GValue *value);
+guint gstbml_calculate_buffer_size(GstBML * bml);
+void gstbml_calculate_buffer_frames(GstBML *bml);
 
-extern void gstbml_dispose(GstBML *bml);
+void gstbml_dispose(GstBML *bml);
 
-extern gboolean gstbml_fix_data(GstElement *elem,GstMapInfo *info,gboolean has_data);
+gboolean gstbml_fix_data(GstElement *elem,GstMapInfo *info,gboolean has_data);
 
 G_END_DECLS
 
