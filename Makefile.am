@@ -63,6 +63,21 @@ uninstall-local:
 builddirs:
 	$(AM_V_at)$(MKDIR_P) src/bml/
 
+AUTHORS::
+	$(AM_V_GEN)if test -d "$(srcdir)/.git"; \
+	then \
+		( cd "$(top_srcdir)" && \
+		  git log --no-merges --pretty=format:"%an <%ae>" . | \
+		  sed -e 's/sourceforge.net/sf.net/' \
+		      -e 's/\(Joseph Orbegoso Pea <joseph.pea@climate.com>\|trusktr <trusktr@gmail.com>\)/Joe Pea <trusktr@gmail.com>/' | \
+		  sort | uniq -c | sed -e 's/^\ *//' | sort -rn | cut -d' ' -f2- \
+		  ) > $@.tmp \
+		&& mv -f $@.tmp $@ \
+		|| ( rm -f $@.tmp ; \
+		     echo Failed to generate $@ >&2 ); \
+	fi
+
+
 .PHONY: \
   builddirs \
   docs docs-reference \
