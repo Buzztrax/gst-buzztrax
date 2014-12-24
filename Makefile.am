@@ -71,8 +71,9 @@ AUTHORS::
 		  sed -e 's/sourceforge.net/sf.net/' \
 		      -e 's/\(Joseph Orbegoso Pea <joseph.pea@climate.com>\|trusktr <trusktr@gmail.com>\)/Joe Pea <trusktr@gmail.com>/' | \
 		  sort | uniq -c | sed -e 's/^\ *//' | sort -rn | cut -d' ' -f2- \
-		  ) > $@.tmp \
-		&& mv -f $@.tmp $@ \
+		  ) > $@.tmp && \
+		cmp -s $@ $@.tmp; \
+		if test "$(?)" = "0"; then rm -f $@.tmp; touch $@; else mv -f $@.tmp $@; fi \
 		|| ( rm -f $@.tmp ; \
 		     echo Failed to generate $@ >&2 ); \
 	fi
