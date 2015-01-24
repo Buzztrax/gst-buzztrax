@@ -25,6 +25,23 @@ GST_DEBUG_CATEGORY_EXTERN (GST_CAT_DEFAULT);
 
 //-- preset iface
 
+/* buzzmacine preset format
+ * header:
+ * 4 bytes: version
+ * 4 bytes: machine name size
+ * n bytes: machine name
+ * 4 bytes: number of presets
+ *
+ * preset:
+ * 4 bytes: preset name size
+ * n bytes: preset name
+ * 4 bytes: number of tracks
+ * 4 bytes: number of parameters
+ * n * 4 bytes for each parameter
+ * 4 bytes: comment size
+ * n bytes: comment
+ *
+ */
 static void
 gstbml_preset_parse_preset_file (GstBMLClass * klass, const gchar * preset_path)
 {
@@ -42,10 +59,10 @@ gstbml_preset_parse_preset_file (GstBMLClass * klass, const gchar * preset_path)
     if (!(fread (&size, sizeof (size), 1, in)))
       goto eof_error;
 
-    machine_name = g_malloc0 (size + 1);
+    machine_name = g_malloc (size + 1);
     if (!(fread (machine_name, size, 1, in)))
       goto eof_error;
-
+    machine_name[size] = '\0';
     // need to cut off path and '.dll'
     if (!strstr (klass->dll_name, machine_name)) {
       GST_WARNING ("Preset for wrong machine? '%s' <> '%s'",
@@ -66,9 +83,10 @@ gstbml_preset_parse_preset_file (GstBMLClass * klass, const gchar * preset_path)
       if (!(fread (&size, sizeof (size), 1, in)))
         goto eof_error;
 
-      preset_name = g_malloc0 (size + 1);
+      preset_name = g_malloc (size + 1);
       if (!(fread (preset_name, size, 1, in)))
         goto eof_error;
+      preset_name[size] = '\0';
       GST_INFO ("  reading preset %d: %p '%s'", i, preset_name, preset_name);
       if (!(fread (&tracks, sizeof (tracks), 1, in)))
         goto eof_error;
@@ -251,6 +269,10 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
       for (i = 0; i < num_props; i++) {
         if (!skip_property (props[i], voice_class))
           g_object_set (self, props[i]->name, *data++, NULL);
+        else {
+          GST_DEBUG ("skipping preset loading for global param %s",
+              props[i]->name);
+        }
       }
       g_free (props);
     }
@@ -267,6 +289,10 @@ gstbml_preset_load_preset (GstObject * self, GstBML * bml, GstBMLClass * klass,
           for (i = 0; i < num_props; i++) {
             if (!skip_property (props[i], NULL))
               g_object_set (voice, props[i]->name, *data++, NULL);
+            else {
+              GST_DEBUG ("skipping preset loading for voide param %s",
+                  props[i]->name);
+            }
           }
         }
         g_free (props);
