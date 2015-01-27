@@ -1,5 +1,11 @@
 ## Process this file with automake to produce Makefile.in
 
+all:
+	@echo "*"
+	@echo "* This module has been discontinued and merged into buzztrax!"
+	@echo "*"
+	@exit 1
+
 SUBDIRS = 
 # see fake subdir rules
 FAKE_SUBDIRS = \

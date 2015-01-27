@@ -1,5 +1,7 @@
 # gst-buzztrax
 
+**This module has been discontinued and merged into buzztrax!**
+
 ## quick info
 Please turn you browser to http://www.buzztrax.org to learn what this project
 is about. Buzztrax is free software and distributed under the LGPL.
